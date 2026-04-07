@@ -65,6 +65,16 @@ export enum QueryKeys {
   activeJobs = 'activeJobs',
   /* Agent API Keys */
   agentApiKeys = 'agentApiKeys',
+  /* Admin */
+  adminUsers = 'adminUsers',
+  adminGroups = 'adminGroups',
+  adminGroupMembers = 'adminGroupMembers',
+  adminRoleMembers = 'adminRoleMembers',
+  adminGrants = 'adminGrants',
+  adminConfigs = 'adminConfigs',
+  adminBaseConfig = 'adminBaseConfig',
+  adminUserUsage = 'adminUserUsage',
+  adminEffectiveBalance = 'adminEffectiveBalance',
 }
 
 // Dynamic query keys that require parameters
@@ -97,4 +107,23 @@ export enum MutationKeys {
   enableTwoFactor = 'enableTwoFactor',
   verifyTwoFactor = 'verifyTwoFactor',
   updateMemoryPreferences = 'updateMemoryPreferences',
+  /* Admin */
+  createAdminRole = 'createAdminRole',
+  updateAdminRole = 'updateAdminRole',
+  deleteAdminRole = 'deleteAdminRole',
+  updateAdminRolePermissions = 'updateAdminRolePermissions',
+  addAdminRoleMember = 'addAdminRoleMember',
+  removeAdminRoleMember = 'removeAdminRoleMember',
+  createAdminGroup = 'createAdminGroup',
+  updateAdminGroup = 'updateAdminGroup',
+  deleteAdminGroup = 'deleteAdminGroup',
+  addAdminGroupMember = 'addAdminGroupMember',
+  removeAdminGroupMember = 'removeAdminGroupMember',
+  assignAdminGrant = 'assignAdminGrant',
+  revokeAdminGrant = 'revokeAdminGrant',
+  upsertAdminConfig = 'upsertAdminConfig',
+  patchAdminConfigFields = 'patchAdminConfigFields',
+  deleteAdminConfig = 'deleteAdminConfig',
+  toggleAdminConfig = 'toggleAdminConfig',
+  adjustAdminUserBalance = 'adjustAdminUserBalance',
 }

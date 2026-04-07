@@ -362,6 +362,30 @@ export const getAllPromptGroups = () => `${prompts()}/all`;
 /* Roles */
 export const roles = () => `${BASE_URL}/api/roles`;
 export const adminRoles = () => `${BASE_URL}/api/admin/roles`;
+
+/* Admin */
+export const adminUsers = () => `${BASE_URL}/api/admin/users`;
+export const adminUsersSearch = () => `${BASE_URL}/api/admin/users/search`;
+export const adminUserUsage = (id: string) =>
+  `${adminUsers()}/${encodeURIComponent(id)}/usage`;
+export const adminUserBalance = (id: string) =>
+  `${adminUsers()}/${encodeURIComponent(id)}/balance`;
+export const adminGroups = () => `${BASE_URL}/api/admin/groups`;
+export const adminGrants = () => `${BASE_URL}/api/admin/grants`;
+export const adminConfigs = () => `${BASE_URL}/api/admin/config`;
+export const adminRoleMembers = (name: string) =>
+  `${adminRoles()}/${encodeURIComponent(name)}/members`;
+export const adminRolePermissions = (name: string) =>
+  `${adminRoles()}/${encodeURIComponent(name)}/permissions`;
+export const adminGroupById = (id: string) => `${adminGroups()}/${encodeURIComponent(id)}`;
+export const adminGroupMembers = (id: string) =>
+  `${adminGroups()}/${encodeURIComponent(id)}/members`;
+export const adminGrantsByPrincipal = (principalType: string, principalId: string) =>
+  `${adminGrants()}/${encodeURIComponent(principalType)}/${encodeURIComponent(principalId)}`;
+export const adminConfigByPrincipal = (principalType: string, principalId: string) =>
+  `${adminConfigs()}/${encodeURIComponent(principalType)}/${encodeURIComponent(principalId)}`;
+export const adminEffectiveBalanceConfig = (userId: string) =>
+  `${adminConfigs()}/effective/${encodeURIComponent(userId)}/balance`;
 export const getRole = (roleName: string) => `${roles()}/${encodeURIComponent(roleName)}`;
 export const updatePromptPermissions = (roleName: string) => `${getRole(roleName)}/prompts`;
 export const updateMemoryPermissions = (roleName: string) => `${getRole(roleName)}/memories`;

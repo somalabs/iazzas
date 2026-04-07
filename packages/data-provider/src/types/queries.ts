@@ -179,6 +179,192 @@ export type ListRolesResponse = {
   offset?: number;
 };
 
+/* Admin Types */
+
+export type AdminUserListItem = {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  avatar: string;
+  role: string;
+  provider: string;
+  createdAt?: string;
+  updatedAt?: string;
+  balance?: number;
+  recentSpend?: number;
+};
+
+export type AdminUserSearchResult = {
+  id: string;
+  name: string;
+  email: string;
+  username?: string;
+  avatarUrl?: string;
+};
+
+export type AdminMember = {
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  joinedAt?: string;
+};
+
+export type AdminGroup = {
+  _id: string;
+  name: string;
+  description?: string;
+  email?: string;
+  avatar?: string;
+  source: string;
+  memberIds: string[];
+  idOnTheSource?: string;
+};
+
+export type AdminSystemGrant = {
+  id: string;
+  principalType: string;
+  principalId: string;
+  capability: string;
+  grantedBy?: string;
+  grantedAt: string;
+  expiresAt?: string;
+};
+
+export type AdminConfig = {
+  _id: string;
+  principalType: string;
+  principalId: string;
+  principalModel: string;
+  priority: number;
+  overrides: Record<string, unknown>;
+  isActive: boolean;
+  configVersion: number;
+  tenantId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AdminRole = {
+  _id?: string;
+  name: string;
+  description?: string;
+  permissions: Record<string, Record<string, boolean>>;
+};
+
+export type AdminUsersListResponse = {
+  users: AdminUserListItem[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export type AdminUsersSearchResponse = {
+  users: AdminUserSearchResult[];
+  total: number;
+  capped: boolean;
+};
+
+export type AdminRoleResponse = {
+  role: AdminRole;
+};
+
+export type AdminMembersListResponse = {
+  members: AdminMember[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export type AdminGroupsListResponse = {
+  groups: AdminGroup[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export type AdminGroupResponse = {
+  group: AdminGroup;
+};
+
+export type AdminGrantsListResponse = {
+  grants: AdminSystemGrant[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export type AdminPrincipalGrantsResponse = {
+  grants: AdminSystemGrant[];
+};
+
+export type AdminGrantResponse = {
+  grant: AdminSystemGrant;
+};
+
+export type AdminConfigsListResponse = {
+  configs: AdminConfig[];
+};
+
+export type AdminBaseConfigResponse = {
+  config: Record<string, unknown>;
+};
+
+export type AdminConfigResponse = {
+  config: AdminConfig;
+};
+
+export type AdminUserBalance = {
+  tokenCredits: number;
+  autoRefillEnabled?: boolean;
+  refillAmount?: number;
+  refillIntervalValue?: number;
+  refillIntervalUnit?: string;
+  lastRefill?: string;
+};
+
+export type AdminUserUsageSummary = {
+  totalTokens: number;
+  totalCreditsSpent: number;
+  transactionCount: number;
+};
+
+export type AdminUserModelUsage = {
+  model: string;
+  tokens: number;
+  credits: number;
+};
+
+export type AdminTransactionItem = {
+  _id: string;
+  createdAt: string;
+  model?: string;
+  tokenType: string;
+  rawAmount?: number;
+  tokenValue?: number;
+  context?: string;
+  note?: string;
+};
+
+export type AdminUserUsageResponse = {
+  userId: string;
+  balance: AdminUserBalance | null;
+  summary: AdminUserUsageSummary;
+  byModel: AdminUserModelUsage[];
+  transactions: {
+    items: AdminTransactionItem[];
+    total: number;
+    limit: number;
+    offset: number;
+  };
+};
+
+export type AdminAdjustBalanceResponse = {
+  newBalance: number;
+  transaction: AdminTransactionItem;
+};
+
 export interface MCPServerStatus {
   requiresOAuth: boolean;
   connectionState: 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -201,6 +387,28 @@ export interface MCPAuthValuesResponse {
   serverName: string;
   authValueFlags: Record<string, boolean>;
 }
+
+export type AdminEffectiveBalanceSource =
+  | {
+      principalType: string;
+      principalId: string;
+      priority: number;
+    }
+  | {
+      source: string;
+    };
+
+export type AdminEffectiveBalanceResponse = {
+  effective: {
+    enabled?: boolean;
+    startBalance?: number;
+    autoRefillEnabled?: boolean;
+    refillAmount?: number;
+    refillIntervalValue?: number;
+    refillIntervalUnit?: string;
+  };
+  sources: Record<string, AdminEffectiveBalanceSource>;
+};
 
 /* SharePoint Graph API Token */
 export type GraphTokenParams = {

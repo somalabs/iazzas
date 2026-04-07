@@ -865,6 +865,271 @@ export function getRandomPrompts(
   return request.get(endpoints.getRandomPrompts(variables.limit, variables.skip));
 }
 
+/* Admin – Users */
+export function listAdminUsers(params?: {
+  limit?: number;
+  offset?: number;
+}): Promise<q.AdminUsersListResponse> {
+  const query = params
+    ? `?${Object.entries(params)
+        .filter(([, v]) => v != null)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('&')}`
+    : '';
+  return request.get(`${endpoints.adminUsers()}${query}`);
+}
+
+export function searchAdminUsers(
+  query: string,
+  limit?: number,
+): Promise<q.AdminUsersSearchResponse> {
+  const params = `?q=${encodeURIComponent(query)}${limit ? `&limit=${limit}` : ''}`;
+  return request.get(`${endpoints.adminUsersSearch()}${params}`);
+}
+
+export function getAdminUserUsage(
+  id: string,
+  params: { startDate: string; endDate: string; limit?: number; offset?: number },
+): Promise<q.AdminUserUsageResponse> {
+  const queryStr = new URLSearchParams({
+    startDate: params.startDate,
+    endDate: params.endDate,
+    ...(params.limit != null ? { limit: String(params.limit) } : {}),
+    ...(params.offset != null ? { offset: String(params.offset) } : {}),
+  }).toString();
+  return request.get(`${endpoints.adminUserUsage(id)}?${queryStr}`);
+}
+
+export function adjustAdminUserBalance(
+  id: string,
+  body: { amount: number; reason: string },
+): Promise<q.AdminAdjustBalanceResponse> {
+  return request.post(endpoints.adminUserBalance(id), body);
+}
+
+export function getAdminEffectiveBalance(
+  userId: string,
+): Promise<q.AdminEffectiveBalanceResponse> {
+  return request.get(endpoints.adminEffectiveBalanceConfig(userId));
+}
+
+/* Admin – Roles (extended) */
+export function createAdminRole(body: {
+  name: string;
+  description?: string;
+}): Promise<q.AdminRoleResponse> {
+  return request.post(endpoints.adminRoles(), body);
+}
+
+export function updateAdminRole(
+  name: string,
+  body: { name?: string; description?: string },
+): Promise<q.AdminRoleResponse> {
+  return request.patch(`${endpoints.adminRoles()}/${encodeURIComponent(name)}`, body);
+}
+
+export function deleteAdminRole(name: string): Promise<{ success: boolean }> {
+  return request.delete(`${endpoints.adminRoles()}/${encodeURIComponent(name)}`);
+}
+
+export function updateAdminRolePermissions(
+  name: string,
+  permissions: Record<string, Record<string, boolean>>,
+): Promise<q.AdminRoleResponse> {
+  return request.put(endpoints.adminRolePermissions(name), { permissions });
+}
+
+export function listAdminRoleMembers(
+  name: string,
+  params?: { limit?: number; offset?: number },
+): Promise<q.AdminMembersListResponse> {
+  const query = params
+    ? `?${Object.entries(params)
+        .filter(([, v]) => v != null)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('&')}`
+    : '';
+  return request.get(`${endpoints.adminRoleMembers(name)}${query}`);
+}
+
+export function addAdminRoleMember(
+  name: string,
+  userId: string,
+): Promise<{ success: boolean }> {
+  return request.post(endpoints.adminRoleMembers(name), { userId });
+}
+
+export function removeAdminRoleMember(
+  name: string,
+  userId: string,
+): Promise<{ success: boolean }> {
+  return request.delete(`${endpoints.adminRoleMembers(name)}/${encodeURIComponent(userId)}`);
+}
+
+/* Admin – Groups */
+export function listAdminGroups(params?: {
+  source?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<q.AdminGroupsListResponse> {
+  const query = params
+    ? `?${Object.entries(params)
+        .filter(([, v]) => v != null && v !== '')
+        .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+        .join('&')}`
+    : '';
+  return request.get(`${endpoints.adminGroups()}${query}`);
+}
+
+export function createAdminGroup(body: {
+  name: string;
+  description?: string;
+  email?: string;
+  avatar?: string;
+  memberIds?: string[];
+}): Promise<q.AdminGroupResponse> {
+  return request.post(endpoints.adminGroups(), body);
+}
+
+export function getAdminGroup(id: string): Promise<q.AdminGroupResponse> {
+  return request.get(endpoints.adminGroupById(id));
+}
+
+export function updateAdminGroup(
+  id: string,
+  body: { name?: string; description?: string; email?: string; avatar?: string },
+): Promise<q.AdminGroupResponse> {
+  return request.patch(endpoints.adminGroupById(id), body);
+}
+
+export function deleteAdminGroup(id: string): Promise<{ success: boolean; id: string }> {
+  return request.delete(endpoints.adminGroupById(id));
+}
+
+export function listAdminGroupMembers(
+  id: string,
+  params?: { limit?: number; offset?: number },
+): Promise<q.AdminMembersListResponse> {
+  const query = params
+    ? `?${Object.entries(params)
+        .filter(([, v]) => v != null)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('&')}`
+    : '';
+  return request.get(`${endpoints.adminGroupMembers(id)}${query}`);
+}
+
+export function addAdminGroupMember(
+  id: string,
+  userId: string,
+): Promise<q.AdminGroupResponse> {
+  return request.post(endpoints.adminGroupMembers(id), { userId });
+}
+
+export function removeAdminGroupMember(
+  id: string,
+  userId: string,
+): Promise<{ success: boolean }> {
+  return request.delete(`${endpoints.adminGroupMembers(id)}/${encodeURIComponent(userId)}`);
+}
+
+/* Admin – Grants */
+export function listAdminGrants(params?: {
+  limit?: number;
+  offset?: number;
+}): Promise<q.AdminGrantsListResponse> {
+  const query = params
+    ? `?${Object.entries(params)
+        .filter(([, v]) => v != null)
+        .map(([k, v]) => `${k}=${v}`)
+        .join('&')}`
+    : '';
+  return request.get(`${endpoints.adminGrants()}${query}`);
+}
+
+export function getAdminEffectiveGrants(): Promise<{ capabilities: string[] }> {
+  return request.get(`${endpoints.adminGrants()}/effective`);
+}
+
+export function getAdminPrincipalGrants(
+  principalType: string,
+  principalId: string,
+): Promise<q.AdminPrincipalGrantsResponse> {
+  return request.get(endpoints.adminGrantsByPrincipal(principalType, principalId));
+}
+
+export function assignAdminGrant(body: {
+  principalType: string;
+  principalId: string;
+  capability: string;
+}): Promise<q.AdminGrantResponse> {
+  return request.post(endpoints.adminGrants(), body);
+}
+
+export function revokeAdminGrant(
+  principalType: string,
+  principalId: string,
+  capability: string,
+): Promise<{ success: boolean }> {
+  return request.delete(
+    `${endpoints.adminGrantsByPrincipal(principalType, principalId)}/${encodeURIComponent(capability)}`,
+  );
+}
+
+/* Admin – Config */
+export function listAdminConfigs(): Promise<q.AdminConfigsListResponse> {
+  return request.get(endpoints.adminConfigs());
+}
+
+export function getAdminBaseConfig(): Promise<q.AdminBaseConfigResponse> {
+  return request.get(`${endpoints.adminConfigs()}/base`);
+}
+
+export function getAdminPrincipalConfig(
+  principalType: string,
+  principalId: string,
+): Promise<q.AdminConfigResponse> {
+  return request.get(endpoints.adminConfigByPrincipal(principalType, principalId));
+}
+
+export function upsertAdminPrincipalConfig(
+  principalType: string,
+  principalId: string,
+  body: { overrides: Record<string, unknown>; priority?: number },
+): Promise<q.AdminConfigResponse> {
+  return request.put(endpoints.adminConfigByPrincipal(principalType, principalId), body);
+}
+
+export function patchAdminPrincipalConfigFields(
+  principalType: string,
+  principalId: string,
+  body: { entries: Array<{ fieldPath: string; value: unknown }>; priority?: number },
+): Promise<q.AdminConfigResponse> {
+  return request.patch(
+    `${endpoints.adminConfigByPrincipal(principalType, principalId)}/fields`,
+    body,
+  );
+}
+
+export function deleteAdminPrincipalConfig(
+  principalType: string,
+  principalId: string,
+): Promise<{ success: boolean }> {
+  return request.delete(endpoints.adminConfigByPrincipal(principalType, principalId));
+}
+
+export function toggleAdminPrincipalConfig(
+  principalType: string,
+  principalId: string,
+  isActive: boolean,
+): Promise<q.AdminConfigResponse> {
+  return request.patch(
+    `${endpoints.adminConfigByPrincipal(principalType, principalId)}/active`,
+    { isActive },
+  );
+}
+
 /* Roles */
 export function listRoles(): Promise<q.ListRolesResponse> {
   return request.get(`${endpoints.adminRoles()}?limit=200`);
