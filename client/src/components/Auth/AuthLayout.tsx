@@ -60,15 +60,10 @@ function AuthLayout({
     <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
       <Banner />
       <BlinkAnimation active={isFetching}>
-        <div className="mt-6 h-40 w-full bg-cover">
-          <img
-            src="assets/azzas-logo-light.png"
-            className="h-full w-full object-contain dark:hidden"
-            alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'Azzas 2154' })}
-          />
+        <div className="mt-6 flex h-24 w-full items-center justify-center">
           <img
             src="assets/azzas-logo-dark.svg"
-            className="hidden h-full w-full object-contain dark:block"
+            className="max-h-full max-w-[280px] object-contain invert dark:invert-0"
             alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'Azzas 2154' })}
           />
         </div>
