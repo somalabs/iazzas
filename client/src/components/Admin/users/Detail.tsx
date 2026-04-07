@@ -73,7 +73,7 @@ export default function Detail({ user, onClose }: DetailProps) {
               />
 
               <a
-                href={`/admin/analytics?userId=${encodeURIComponent(user.id)}`}
+                href={`/d/admin/analytics?userId=${encodeURIComponent(user.id)}`}
                 className="block text-center text-xs text-surface-submit hover:underline"
               >
                 {localize('com_admin_users_view_analytics')}

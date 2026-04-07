@@ -59,6 +59,8 @@
   "com_admin_users_adjust_amount": "Amount",
   "com_admin_users_adjust_credits": "Adjust Credits",
   "com_admin_users_adjust_reason": "Reason",
+  "com_admin_users_adjust_invalid_amount": "Enter a valid non-zero number",
+  "com_admin_users_adjust_reason_required": "Reason is required",
   "com_admin_users_balance": "Balance",
   "com_admin_users_detail": "User Detail",
   "com_admin_users_search_placeholder": "Search by name or email...",

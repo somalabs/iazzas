@@ -1,6 +1,6 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useMediaQuery } from '@librechat/client';
-import { Users, Shield, UsersRound, KeyRound, Settings, BarChart3 } from 'lucide-react';
+import { Users, Shield, UsersRound, KeyRound, Settings, BarChart3, ArrowLeft } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -15,6 +15,7 @@ const navItems = [
 
 export default function AdminSidebar() {
   const localize = useLocalize();
+  const navigate = useNavigate();
   const isSmall = useMediaQuery('(max-width: 768px)');
 
   return (
@@ -47,6 +48,18 @@ export default function AdminSidebar() {
           {!isSmall && <span>{localize(labelKey)}</span>}
         </NavLink>
       ))}
+      <div className="mt-auto border-t border-border-medium pt-2">
+        <button
+          onClick={() => navigate('/c/new')}
+          className={cn(
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary',
+            isSmall && 'justify-center px-2',
+          )}
+        >
+          <ArrowLeft size={18} />
+          {!isSmall && <span>{localize('com_ui_back_to_chat')}</span>}
+        </button>
+      </div>
     </nav>
   );
 }

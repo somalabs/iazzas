@@ -55,6 +55,8 @@
   "com_admin_users_adjust_amount": "Valor",
   "com_admin_users_adjust_credits": "Ajustar Créditos",
   "com_admin_users_adjust_reason": "Motivo",
+  "com_admin_users_adjust_invalid_amount": "Informe um valor numérico diferente de zero",
+  "com_admin_users_adjust_reason_required": "O motivo é obrigatório",
   "com_admin_users_balance": "Saldo",
   "com_admin_users_detail": "Detalhe do Usuário",
   "com_admin_users_search_placeholder": "Buscar por nome ou email...",

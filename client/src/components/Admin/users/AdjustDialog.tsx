@@ -31,11 +31,15 @@ export default function AdjustDialog({ userId, open, onOpenChange }: AdjustDialo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = parseFloat(amount);
-    if (isNaN(parsed)) {
-      setError('Informe um valor numérico válido');
+    if (isNaN(parsed) || parsed === 0) {
+      setError(localize('com_admin_users_adjust_invalid_amount'));
       return;
     }
-    mutation.mutate({ userId, amount: parsed, reason });
+    if (!reason.trim()) {
+      setError(localize('com_admin_users_adjust_reason_required'));
+      return;
+    }
+    mutation.mutate({ userId, amount: parsed, reason: reason.trim() });
   };
 
   return (
