@@ -1,5 +1,11 @@
 const express = require('express');
-const { createAdminConfigHandlers } = require('@librechat/api');
+const { balanceSchema } = require('librechat-data-provider');
+const {
+  createAdminConfigHandlers,
+  createEffectiveBalanceService,
+  createEffectiveBalanceHandler,
+  getBalanceConfig,
+} = require('@librechat/api');
 const { SystemCapabilities } = require('@librechat/data-schemas');
 const {
   hasConfigCapability,
@@ -13,6 +19,15 @@ const router = express.Router();
 
 const requireAdminAccess = requireCapability(SystemCapabilities.ACCESS_ADMIN);
 
+const effectiveBalanceService = createEffectiveBalanceService({
+  getUserPrincipals: db.getUserPrincipals,
+  getApplicableConfigs: db.getApplicableConfigs,
+  getGlobalBalanceConfig: () => {
+    const config = getBalanceConfig();
+    return config ?? {};
+  },
+});
+
 const handlers = createAdminConfigHandlers({
   listAllConfigs: db.listAllConfigs,
   findConfigByPrincipal: db.findConfigByPrincipal,
@@ -24,12 +39,26 @@ const handlers = createAdminConfigHandlers({
   hasConfigCapability,
   getAppConfig,
   invalidateConfigCaches,
+  validateBalanceOverride: (overrides) => {
+    if (!overrides.balance) return null;
+    const result = balanceSchema.safeParse(overrides.balance);
+    if (!result.success) {
+      return `Invalid balance override: ${result.error.issues.map((i) => i.message).join(', ')}`;
+    }
+    return null;
+  },
+  invalidateEffectiveBalanceCache: () => effectiveBalanceService.invalidateCache(),
+});
+
+const effectiveBalanceHandler = createEffectiveBalanceHandler({
+  getEffectiveBalanceConfig: effectiveBalanceService.getEffectiveBalanceConfig,
 });
 
 router.use(requireJwtAuth, requireAdminAccess);
 
 router.get('/', handlers.listConfigs);
 router.get('/base', handlers.getBaseConfig);
+router.get('/effective/:userId/balance', effectiveBalanceHandler);
 router.get('/:principalType/:principalId', handlers.getConfig);
 router.put('/:principalType/:principalId', handlers.upsertConfigOverrides);
 router.patch('/:principalType/:principalId/fields', handlers.patchConfigField);

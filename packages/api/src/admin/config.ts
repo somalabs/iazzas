@@ -111,6 +111,8 @@ export interface AdminConfigDeps {
   }) => Promise<AppConfig>;
   /** Invalidate all config-related caches after a mutation. */
   invalidateConfigCaches?: (tenantId?: string) => Promise<void>;
+  validateBalanceOverride?: (overrides: Record<string, unknown>) => string | null;
+  invalidateEffectiveBalanceCache?: () => void;
 }
 
 // ── Validation helpers ───────────────────────────────────────────────
@@ -168,6 +170,8 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps) {
     hasConfigCapability,
     getAppConfig,
     invalidateConfigCaches,
+    validateBalanceOverride,
+    invalidateEffectiveBalanceCache,
   } = deps;
 
   /**
@@ -349,6 +353,13 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps) {
         }
       }
 
+      if (validateBalanceOverride) {
+        const balanceError = validateBalanceOverride(overrides as Record<string, unknown>);
+        if (balanceError) {
+          return res.status(400).json({ error: balanceError });
+        }
+      }
+
       const config = await upsertConfig(
         principalType,
         principalId,
@@ -360,6 +371,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps) {
       invalidateConfigCaches?.(user.tenantId)?.catch((err) =>
         logger.error('[adminConfig] Cache invalidation failed after upsert:', err),
       );
+      invalidateEffectiveBalanceCache?.();
       return res.status(config?.configVersion === 1 ? 201 : 200).json({ config });
     } catch (error) {
       logger.error('[adminConfig] upsertConfigOverrides error:', error);
@@ -469,6 +481,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps) {
       invalidateConfigCaches?.(user.tenantId)?.catch((err) =>
         logger.error('[adminConfig] Cache invalidation failed after patch:', err),
       );
+      invalidateEffectiveBalanceCache?.();
       return res.status(200).json({ config });
     } catch (error) {
       logger.error('[adminConfig] patchConfigField error:', error);
@@ -527,6 +540,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps) {
       invalidateConfigCaches?.(user.tenantId)?.catch((err) =>
         logger.error('[adminConfig] Cache invalidation failed after field delete:', err),
       );
+      invalidateEffectiveBalanceCache?.();
       return res.status(200).json({ config });
     } catch (error) {
       logger.error('[adminConfig] deleteConfigField error:', error);
@@ -565,6 +579,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps) {
       invalidateConfigCaches?.(user.tenantId)?.catch((err) =>
         logger.error('[adminConfig] Cache invalidation failed after config delete:', err),
       );
+      invalidateEffectiveBalanceCache?.();
       return res.status(200).json({ success: true });
     } catch (error) {
       logger.error('[adminConfig] deleteConfigOverrides error:', error);
@@ -608,6 +623,7 @@ export function createAdminConfigHandlers(deps: AdminConfigDeps) {
       invalidateConfigCaches?.(user.tenantId)?.catch((err) =>
         logger.error('[adminConfig] Cache invalidation failed after toggle:', err),
       );
+      invalidateEffectiveBalanceCache?.();
       return res.status(200).json({ config });
     } catch (error) {
       logger.error('[adminConfig] toggleConfig error:', error);
