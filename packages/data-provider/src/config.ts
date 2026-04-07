@@ -748,7 +748,7 @@ export const interfaceSchema = z
   .default({
     modelSelect: true,
     parameters: true,
-    presets: true,
+    presets: false,
     multiConvo: true,
     bookmarks: true,
     memories: true,
