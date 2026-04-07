@@ -28,7 +28,7 @@ export default function ModelChart({ data }: Props) {
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 48, bottom: 4, left: 8 }}>
           <XAxis type="number" tick={{ fontSize: 11 }} />
           <YAxis type="category" dataKey="model" width={140} tick={{ fontSize: 11 }} />
-          <Tooltip formatter={(value: number, name: string) => [`${value.toLocaleString()}`, name]} />
+          <Tooltip formatter={(value, name) => [`${Number(value).toLocaleString()}`, name]} />
           <Bar dataKey="credits" name={localize('com_admin_analytics_credits_spent')} radius={[0, 4, 4, 0]}>
             {data.map((_entry, index) => (
               <Cell key={index} fill={BAR_COLORS[index % BAR_COLORS.length]} />

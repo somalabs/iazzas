@@ -32,7 +32,7 @@ export default function TrendChart({ data }: Props) {
         <LineChart data={data} margin={{ top: 4, right: 16, bottom: 4, left: 16 }}>
           <XAxis dataKey="date" tick={{ fontSize: 11 }} />
           <YAxis tickFormatter={formatYAxis} tick={{ fontSize: 11 }} />
-          <Tooltip formatter={(value: number) => value.toLocaleString()} />
+          <Tooltip formatter={(value) => Number(value).toLocaleString()} />
           <Legend />
           <Line type="monotone" dataKey="tokens" stroke="#3b82f6" dot={false} strokeWidth={2} name={localize('com_admin_analytics_total_tokens')} />
           <Line type="monotone" dataKey="credits" stroke="#a855f7" dot={false} strokeWidth={2} name={localize('com_admin_analytics_credits_spent')} />

@@ -1,7 +1,7 @@
 import { Switch } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 
-interface BalanceOverride {
+export interface BalanceOverride {
   startBalance?: number;
   autoRefillEnabled?: boolean;
   refillAmount?: number;

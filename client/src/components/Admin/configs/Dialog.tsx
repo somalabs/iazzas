@@ -3,6 +3,7 @@ import { OGDialog, OGDialogContent, OGDialogTitle } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { useUpsertAdminConfigMutation } from '~/data-provider';
 import BalanceForm from './BalanceForm';
+import type { BalanceOverride } from './BalanceForm';
 import type { AdminConfig } from 'librechat-data-provider';
 
 interface ConfigDialogProps {
@@ -61,7 +62,7 @@ export default function ConfigDialog({ open, onOpenChange, editConfig }: ConfigD
     }
   }, [overridesJson]);
 
-  const handleBalanceChange = (balance: Record<string, unknown>) => {
+  const handleBalanceChange = (balance: BalanceOverride) => {
     try {
       const parsed = JSON.parse(overridesJson) as Record<string, unknown>;
       parsed.balance = balance;
