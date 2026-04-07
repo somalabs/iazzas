@@ -386,6 +386,8 @@ export const adminConfigByPrincipal = (principalType: string, principalId: strin
   `${adminConfigs()}/${encodeURIComponent(principalType)}/${encodeURIComponent(principalId)}`;
 export const adminEffectiveBalanceConfig = (userId: string) =>
   `${adminConfigs()}/effective/${encodeURIComponent(userId)}/balance`;
+export const adminAnalytics = () => `${BASE_URL}/api/admin/analytics`;
+export const adminAnalyticsModels = () => `${BASE_URL}/api/admin/analytics/models`;
 export const getRole = (roleName: string) => `${roles()}/${encodeURIComponent(roleName)}`;
 export const updatePromptPermissions = (roleName: string) => `${getRole(roleName)}/prompts`;
 export const updateMemoryPermissions = (roleName: string) => `${getRole(roleName)}/memories`;

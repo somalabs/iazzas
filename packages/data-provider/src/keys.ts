@@ -75,6 +75,8 @@ export enum QueryKeys {
   adminBaseConfig = 'adminBaseConfig',
   adminUserUsage = 'adminUserUsage',
   adminEffectiveBalance = 'adminEffectiveBalance',
+  adminAnalytics = 'adminAnalytics',
+  adminAnalyticsModels = 'adminAnalyticsModels',
 }
 
 // Dynamic query keys that require parameters

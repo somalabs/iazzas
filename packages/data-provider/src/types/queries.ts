@@ -410,6 +410,59 @@ export type AdminEffectiveBalanceResponse = {
   sources: Record<string, AdminEffectiveBalanceSource>;
 };
 
+export type AdminAnalyticsKPIs = {
+  totalTokens: number;
+  totalCreditsSpent: number;
+  activeUsers: number;
+  avgCreditsPerUser: number;
+};
+
+export type AdminAnalyticsTimePoint = {
+  date: string;
+  tokens: number;
+  credits: number;
+  activeUsers: number;
+};
+
+export type AdminAnalyticsModelRow = {
+  model: string;
+  tokens: number;
+  credits: number;
+  percentage: number;
+};
+
+export type AdminAnalyticsTopUser = {
+  userId: string;
+  name: string;
+  email: string;
+  tokens: number;
+  credits: number;
+};
+
+export type AdminAnalyticsResponse = {
+  kpis: AdminAnalyticsKPIs;
+  timeSeries: AdminAnalyticsTimePoint[];
+  byModel: AdminAnalyticsModelRow[];
+  topUsers: AdminAnalyticsTopUser[];
+  period: {
+    startDate: string;
+    endDate: string;
+    groupBy: 'day' | 'week' | 'month';
+  };
+};
+
+export type AdminAnalyticsModelsResponse = {
+  models: string[];
+};
+
+export type AdminAnalyticsParams = {
+  startDate: string;
+  endDate: string;
+  userId?: string;
+  model?: string;
+  groupBy?: 'day' | 'week' | 'month';
+};
+
 /* SharePoint Graph API Token */
 export type GraphTokenParams = {
   scopes: string;

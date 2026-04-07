@@ -913,6 +913,19 @@ export function getAdminEffectiveBalance(
   return request.get(endpoints.adminEffectiveBalanceConfig(userId));
 }
 
+export function getAdminAnalytics(
+  params: q.AdminAnalyticsParams,
+): Promise<q.AdminAnalyticsResponse> {
+  const queryStr = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null) as [string, string][],
+  ).toString();
+  return request.get(`${endpoints.adminAnalytics()}?${queryStr}`);
+}
+
+export function getAdminAnalyticsModels(): Promise<q.AdminAnalyticsModelsResponse> {
+  return request.get(endpoints.adminAnalyticsModels());
+}
+
 /* Admin – Roles (extended) */
 export function createAdminRole(body: {
   name: string;

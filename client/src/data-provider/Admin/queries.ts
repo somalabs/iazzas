@@ -14,6 +14,9 @@ import type {
   AdminRoleResponse,
   AdminUserUsageResponse,
   AdminEffectiveBalanceResponse,
+  AdminAnalyticsResponse,
+  AdminAnalyticsModelsResponse,
+  AdminAnalyticsParams,
 } from 'librechat-data-provider';
 
 const queryDefaults = {
@@ -170,5 +173,31 @@ export const useGetEffectiveBalanceConfigQuery = (
     [QueryKeys.adminEffectiveBalance, userId],
     () => dataService.getAdminEffectiveBalance(userId),
     { ...queryDefaults, enabled: !!userId, ...config },
+  );
+};
+
+export const useGetAdminAnalyticsQuery = (
+  params: AdminAnalyticsParams,
+  config?: UseQueryOptions<AdminAnalyticsResponse>,
+): QueryObserverResult<AdminAnalyticsResponse> => {
+  return useQuery<AdminAnalyticsResponse>(
+    [QueryKeys.adminAnalytics, params.startDate, params.endDate, params.userId, params.model, params.groupBy],
+    () => dataService.getAdminAnalytics(params),
+    {
+      ...queryDefaults,
+      staleTime: 5 * 60 * 1000,
+      enabled: !!params.startDate && !!params.endDate,
+      ...config,
+    },
+  );
+};
+
+export const useGetAdminAnalyticsModelsQuery = (
+  config?: UseQueryOptions<AdminAnalyticsModelsResponse>,
+): QueryObserverResult<AdminAnalyticsModelsResponse> => {
+  return useQuery<AdminAnalyticsModelsResponse>(
+    [QueryKeys.adminAnalyticsModels],
+    () => dataService.getAdminAnalyticsModels(),
+    { ...queryDefaults, staleTime: 5 * 60 * 1000, ...config },
   );
 };
