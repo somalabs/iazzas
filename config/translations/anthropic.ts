@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type * as a from '@anthropic-ai/sdk';
+// @ts-expect-error - local project alias not resolvable by tsc in this config directory
 import { parseParamFromPrompt, genTranslationPrompt } from '~/app/clients/prompts/titlePrompts';
 
 /**
@@ -70,7 +71,7 @@ export async function translateKeyPhrase({ key, baselineTranslation, translation
     try {
       const client = getClient();
       const response = await client.messages.create(requestOptions);
-      const text = response.content[0].text;
+      const text = (response.content[0] as { type: 'text'; text: string }).text;
       translation = parseParamFromPrompt(text, 'translation');
     } catch (e) {
       console.error('[AnthropicClient] There was an issue generating the translation', e);

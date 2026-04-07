@@ -42,7 +42,7 @@ function DashGroupItemComponent({ group }: { group: TPromptGroup }) {
   const canEdit = hasPermission(PermissionBits.EDIT);
   const canDelete = hasPermission(PermissionBits.DELETE);
 
-  const isGlobalGroup = group.isPublic === true;
+  const isGlobalGroup = (group as TPromptGroup & { isPublic?: boolean }).isPublic === true;
 
   const updateGroup = useUpdatePromptGroup({
     onSuccess: () => {

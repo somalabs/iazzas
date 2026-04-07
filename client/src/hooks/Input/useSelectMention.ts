@@ -47,7 +47,7 @@ export default function useSelectMention({
       }
 
       const conversation = getConversation();
-      const { preset } = spec;
+      const preset = spec.preset as TPreset;
       preset.iconURL = getModelSpecIconURL(spec);
       preset.spec = spec.name;
       const { endpoint } = preset;

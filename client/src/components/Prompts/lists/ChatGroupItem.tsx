@@ -22,7 +22,7 @@ function ChatGroupItem({ group }: { group: TPromptGroup }) {
   const [isPreviewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [isVariableDialogOpen, setVariableDialogOpen] = useState(false);
 
-  const groupIsGlobal = group.isPublic === true;
+  const groupIsGlobal = (group as TPromptGroup & { isPublic?: boolean }).isPublic === true;
 
   // Check permissions for the promptGroup
   const { hasPermission } = useResourcePermissions(ResourceType.PROMPTGROUP, group._id || '');

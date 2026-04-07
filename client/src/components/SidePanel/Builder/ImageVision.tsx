@@ -12,15 +12,15 @@ export default function ImageVision() {
   return (
     <div className="flex items-center">
       <Controller
-        name={Capabilities.image_vision}
+        name={Capabilities.image_vision as keyof AssistantForm}
         control={control}
         render={({ field }) => (
           <Checkbox
             {...field}
-            checked={field.value}
+            checked={field.value as boolean}
             onCheckedChange={field.onChange}
             className="relative float-left mr-2 inline-flex h-4 w-4 cursor-pointer"
-            value={field.value.toString()}
+            value={String(field.value)}
             aria-labelledby={Capabilities.image_vision}
           />
         )}
@@ -30,9 +30,11 @@ export default function ImageVision() {
         className="form-check-label text-token-text-primary w-full cursor-pointer"
         htmlFor={Capabilities.image_vision}
         onClick={() =>
-          setValue(Capabilities.image_vision, !getValues(Capabilities.image_vision), {
-            shouldDirty: true,
-          })
+          setValue(
+            Capabilities.image_vision as keyof AssistantForm,
+            !getValues(Capabilities.image_vision as keyof AssistantForm),
+            { shouldDirty: true },
+          )
         }
       >
         <div className="flex items-center">{localize('com_assistants_image_vision')}</div>

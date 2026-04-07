@@ -41,7 +41,7 @@ export default function Retrieval({
 
   useEffect(() => {
     if (model && isDisabled) {
-      setValue(Capabilities.retrieval, false);
+      setValue(Capabilities.retrieval as keyof AssistantForm, false);
     }
   }, [model, setValue, isDisabled]);
 
@@ -50,16 +50,16 @@ export default function Retrieval({
       <HoverCard openDelay={50}>
         <div className="flex items-center">
           <Controller
-            name={Capabilities.retrieval}
+            name={Capabilities.retrieval as keyof AssistantForm}
             control={control}
             render={({ field }) => (
               <Checkbox
                 {...field}
-                checked={field.value}
+                checked={field.value as boolean}
                 disabled={isDisabled}
                 onCheckedChange={field.onChange}
                 className="relative float-left mr-2 inline-flex h-4 w-4 cursor-pointer"
-                value={field.value.toString()}
+                value={String(field.value)}
                 aria-labelledby={Capabilities.retrieval}
               />
             )}
@@ -74,9 +74,11 @@ export default function Retrieval({
               htmlFor={Capabilities.retrieval}
               onClick={() =>
                 retrievalModels.has(model) &&
-                setValue(Capabilities.retrieval, !getValues(Capabilities.retrieval), {
-                  shouldDirty: true,
-                })
+                setValue(
+                  Capabilities.retrieval as keyof AssistantForm,
+                  !getValues(Capabilities.retrieval as keyof AssistantForm),
+                  { shouldDirty: true },
+                )
               }
             >
               {version == 1

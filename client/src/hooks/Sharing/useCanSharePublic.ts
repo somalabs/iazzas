@@ -16,8 +16,11 @@ const resourceToPermissionMap: Partial<Record<ResourceType, PermissionTypes>> = 
 export const useCanSharePublic = (resourceType: ResourceType): boolean => {
   const permissionType = resourceToPermissionMap[resourceType];
   const hasAccess = useHasAccess({
-    permissionType,
+    permissionType: permissionType ?? PermissionTypes.AGENTS,
     permission: Permissions.SHARE_PUBLIC,
   });
+  if (!permissionType) {
+    return false;
+  }
   return hasAccess;
 };

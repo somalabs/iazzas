@@ -14,7 +14,7 @@ const config: PlaywrightTestConfig = {
     ...mainConfig.webServer,
     command: `node ${absolutePath}`,
     env: {
-      ...process.env,
+      ...(process.env as Record<string, string>),
       SEARCH: 'false',
       NODE_ENV: 'CI',
       EMAIL_HOST: '',

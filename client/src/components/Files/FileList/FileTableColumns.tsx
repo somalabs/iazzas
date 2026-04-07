@@ -3,10 +3,13 @@ import { PlusIcon } from 'lucide-react';
 import { Button, Checkbox, DotsIcon, FileIcon } from '@librechat/client';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { TFile } from 'librechat-data-provider';
+import type { TVectorStore } from '~/common';
 import { formatDate, getFileType } from '~/utils';
 import { useLocalize } from '~/hooks';
 
-export const fileTableColumns: ColumnDef<TFile>[] = [
+type TFileWithVectors = TFile & { vectorsAttached: TVectorStore[] };
+
+export const fileTableColumns: ColumnDef<TFileWithVectors>[] = [
   {
     id: 'select',
     header: ({ table }) => {
@@ -103,7 +106,7 @@ export const fileTableColumns: ColumnDef<TFile>[] = [
       const localize = useLocalize();
       return 'Modified';
     },
-    cell: ({ row }) => formatDate(row.original.updatedAt),
+    cell: ({ row }) => formatDate(row.original.updatedAt ? String(row.original.updatedAt) : ''),
   },
   {
     accessorKey: 'actions',

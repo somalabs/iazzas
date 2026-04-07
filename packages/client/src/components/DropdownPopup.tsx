@@ -20,6 +20,7 @@ interface DropdownProps {
   portal?: boolean;
   preserveTabOrder?: boolean;
   focusLoop?: boolean;
+  placement?: 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'left' | 'left-start' | 'left-end' | 'right' | 'right-start' | 'right-end';
   menuId: string;
   mountByState?: boolean;
   unmountOnHide?: boolean;
@@ -28,7 +29,7 @@ interface DropdownProps {
 
 type MenuProps = Omit<
   DropdownProps,
-  'trigger' | 'isOpen' | 'setIsOpen' | 'focusLoop' | 'mountByState'
+  'trigger' | 'isOpen' | 'setIsOpen' | 'focusLoop' | 'placement' | 'mountByState'
 > &
   Ariakit.MenuProps;
 
@@ -37,10 +38,11 @@ const DropdownPopup: React.FC<DropdownProps> = ({
   isOpen,
   setIsOpen,
   focusLoop,
+  placement,
   mountByState,
   ...props
 }) => {
-  const menu = Ariakit.useMenuStore({ open: isOpen, setOpen: setIsOpen, focusLoop });
+  const menu = Ariakit.useMenuStore({ open: isOpen, setOpen: setIsOpen, focusLoop, placement });
   if (mountByState) {
     return (
       <Ariakit.MenuProvider store={menu}>

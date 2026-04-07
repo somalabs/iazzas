@@ -1,3 +1,4 @@
+// @ts-expect-error - config.local.ts must be created from config.local.example.ts
 import localUser from '../config.local';
 import cleanupUser from './cleanupUser';
 

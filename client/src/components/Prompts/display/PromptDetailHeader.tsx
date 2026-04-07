@@ -15,7 +15,7 @@ const PromptDetailHeader = ({ group }: PromptDetailHeaderProps) => {
   const formattedDate = group.createdAt ? format(new Date(group.createdAt), 'MMM d, yyyy') : null;
   const isSharedPrompt = group.author !== user?.id && Boolean(group.authorName);
 
-  const isGlobalGroup = group.isPublic === true;
+  const isGlobalGroup = (group as TPromptGroup & { isPublic?: boolean }).isPublic === true;
 
   return (
     <div className="flex flex-col gap-3 py-2 sm:flex-row sm:items-center sm:gap-4">

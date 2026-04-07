@@ -631,7 +631,7 @@ export function getEndpointFileConfig(params: {
   return defaultConfig;
 }
 
-export function mergeFileConfig(dynamic: z.infer<typeof fileConfigSchema> | undefined): FileConfig {
+export function mergeFileConfig(dynamic: z.infer<typeof fileConfigSchema> | FileConfig | undefined): FileConfig {
   const mergedConfig: FileConfig = {
     ...fileConfig,
     endpoints: {
@@ -681,7 +681,7 @@ export function mergeFileConfig(dynamic: z.infer<typeof fileConfigSchema> | unde
       ...ocrRest,
     };
     if (ocrMimeTypes) {
-      mergedConfig.ocr.supportedMimeTypes = convertStringsToRegex(ocrMimeTypes);
+      mergedConfig.ocr.supportedMimeTypes = convertStringsToRegex(ocrMimeTypes as string[]);
     }
   }
 
@@ -692,7 +692,7 @@ export function mergeFileConfig(dynamic: z.infer<typeof fileConfigSchema> | unde
       ...textRest,
     };
     if (textMimeTypes) {
-      mergedConfig.text.supportedMimeTypes = convertStringsToRegex(textMimeTypes);
+      mergedConfig.text.supportedMimeTypes = convertStringsToRegex(textMimeTypes as string[]);
     }
   }
 

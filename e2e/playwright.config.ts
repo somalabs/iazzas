@@ -61,7 +61,7 @@ export default defineConfig({
     timeout: 30_000,
     reuseExistingServer: true,
     env: {
-      ...process.env,
+      ...(process.env as Record<string, string>),
       NODE_ENV: 'CI',
       EMAIL_HOST: '',
       SEARCH: 'false',

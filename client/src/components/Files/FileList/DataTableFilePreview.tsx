@@ -67,14 +67,15 @@ const vectorStoresAttached: TVectorStore[] = [
   },
 ];
 
-files.forEach((file) => {
-  file['vectorsAttached'] = vectorStoresAttached;
-});
+const filesWithVectors = files.map((file) => ({
+  ...file,
+  vectorsAttached: vectorStoresAttached,
+}));
 
 export default function DataTableFilePreview() {
   return (
     <div>
-      <DataTableFile columns={fileTableColumns} data={files} />
+      <DataTableFile columns={fileTableColumns} data={filesWithVectors} />
       <div className="mt-5 sm:mt-4" />
     </div>
   );

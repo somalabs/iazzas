@@ -11,7 +11,6 @@ export const data: TModelSpec[] = [
     // iconURL: EModelEndpoint.openAI,
     preset: {
       endpoint: 'Ollama',
-      greeting: 'My fellow Americans,',
       // 'endpointType': EModelEndpoint.custom,
       frequency_penalty: 0,
       // 'imageDetail': 'auto',
@@ -32,8 +31,6 @@ export const data: TModelSpec[] = [
     // iconURL: 'https://i.ytimg.com/vi/SaneSRqePVY/maxresdefault.jpg',
     iconURL: EModelEndpoint.openAI, // Allow using project-included icons
     preset: {
-      chatGptLabel: 'Vision Helper',
-      greeting: "What's up!!",
       endpoint: EModelEndpoint.openAI,
       model: 'gpt-4-turbo',
       promptPrefix:

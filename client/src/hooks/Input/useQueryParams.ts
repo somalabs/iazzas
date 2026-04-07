@@ -91,9 +91,10 @@ export default function useQueryParams({
           return;
         }
         const { preset } = spec;
-        preset.iconURL = getModelSpecIconURL(spec);
-        preset.spec = spec.name;
-        newPreset = preset;
+        const specPreset = preset as TPreset;
+        specPreset.iconURL = getModelSpecIconURL(spec);
+        specPreset.spec = spec.name;
+        newPreset = specPreset;
       }
 
       let newEndpoint = newPreset.endpoint ?? '';

@@ -3,6 +3,7 @@ dotenv.config({
   path: './',
 });
 import { OpenAIEmbeddings } from '@langchain/openai';
+// @ts-expect-error - @langchain/community may not be installed in all environments
 import { HNSWLib } from '@langchain/community/vectorstores/hnswlib';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import * as fs from 'fs';
