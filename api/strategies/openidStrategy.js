@@ -14,11 +14,12 @@ const {
   safeStringify,
   findOpenIDUser,
   getBalanceConfig,
+  evaluateSSORules,
   isEmailDomainAllowed,
   resolveAppConfigForUser,
 } = require('@librechat/api');
 const { getStrategyFunctions } = require('~/server/services/Files/strategies');
-const { findUser, createUser, updateUser } = require('~/models');
+const { findUser, createUser, updateUser, createGroup, addUserToGroup } = require('~/models');
 const { getAppConfig } = require('~/server/services/Config');
 const getLogStores = require('~/cache/getLogStores');
 
@@ -592,6 +593,34 @@ async function processOpenIDAuth(tokenset, existingUsersOnly = false) {
 
     const balanceConfig = getBalanceConfig(appConfig);
     user = await createUser(user, balanceConfig, true, true);
+
+    const ssoRules = appConfig?.ssoRules;
+    if (ssoRules && ssoRules.length > 0 && user?._id) {
+      const tokenClaims = { ...userinfo };
+      const groupNames = evaluateSSORules(tokenClaims, ssoRules);
+      if (groupNames.length > 0) {
+        logger.info(`[openidStrategy] SSO rules matched ${groupNames.length} groups for user ${email}`, {
+          groups: groupNames,
+        });
+        for (const groupName of groupNames) {
+          try {
+            const Group = require('mongoose').models.Group;
+            let group = await Group.findOne({ name: groupName });
+            if (!group) {
+              group = await createGroup({
+                name: groupName,
+                source: 'sso',
+                description: 'Auto-created by SSO rule',
+              });
+              logger.info(`[openidStrategy] Created SSO group: ${groupName}`);
+            }
+            await addUserToGroup(user._id, group._id);
+          } catch (groupErr) {
+            logger.error(`[openidStrategy] Failed to assign group "${groupName}" to user ${email}`, groupErr);
+          }
+        }
+      }
+    }
   } else {
     user.provider = 'openid';
     user.openidId = userinfo.sub;
