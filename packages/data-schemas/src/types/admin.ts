@@ -122,6 +122,8 @@ export type AdminUserListItem = {
   provider: string;
   createdAt?: string;
   updatedAt?: string;
+  balance?: number;
+  recentSpend?: number;
 };
 
 /** Minimal user info returned by user search endpoints. */

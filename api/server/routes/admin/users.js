@@ -1,8 +1,9 @@
 const express = require('express');
-const { createAdminUsersHandlers } = require('@librechat/api');
+const { createAdminUsersHandlers, createAdminUsageHandlers } = require('@librechat/api');
 const { SystemCapabilities } = require('@librechat/data-schemas');
 const { requireCapability } = require('~/server/middleware/roles/capabilities');
 const { requireJwtAuth } = require('~/server/middleware');
+const mongoose = require('mongoose');
 const db = require('~/models');
 
 const router = express.Router();
@@ -17,12 +18,40 @@ const handlers = createAdminUsersHandlers({
   deleteUserById: db.deleteUserById,
   deleteConfig: db.deleteConfig,
   deleteAclEntries: db.deleteAclEntries,
+  findBalances: async (userIds) => {
+    const Balance = mongoose.models.Balance || mongoose.model('Balance');
+    const balances = await Balance.find(
+      { user: { $in: userIds } },
+      'user tokenCredits',
+    ).lean();
+    return balances.map((b) => ({ user: b.user.toString(), tokenCredits: b.tokenCredits }));
+  },
+  getRecentSpend: async (userIds, since) => {
+    const Transaction = mongoose.models.Transaction || mongoose.model('Transaction');
+    const results = await Transaction.aggregate([
+      {
+        $match: {
+          user: { $in: userIds.map((id) => new mongoose.Types.ObjectId(id)) },
+          createdAt: { $gte: since },
+        },
+      },
+      { $group: { _id: '$user', spend: { $sum: { $abs: '$tokenValue' } } } },
+    ]);
+    return results.map((r) => ({ user: r._id.toString(), spend: r.spend }));
+  },
+});
+
+const usageHandlers = createAdminUsageHandlers({
+  TransactionModel: mongoose.models.Transaction || mongoose.model('Transaction'),
+  BalanceModel: mongoose.models.Balance || mongoose.model('Balance'),
 });
 
 router.use(requireJwtAuth, requireAdminAccess);
 
 router.get('/', requireReadUsers, handlers.listUsers);
 router.get('/search', requireReadUsers, handlers.searchUsers);
+router.get('/:id/usage', requireReadUsers, usageHandlers.getUserUsage);
+router.post('/:id/balance', requireReadUsers, usageHandlers.adjustBalance);
 // router.delete('/:id', requireManageUsers, handlers.deleteUser);
 
 module.exports = router;

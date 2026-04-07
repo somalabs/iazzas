@@ -40,10 +40,23 @@ export interface AdminUsersDeps {
     principalType: PrincipalType;
     principalId: string | Types.ObjectId;
   }) => Promise<void>;
+  findBalances: (userIds: string[]) => Promise<Array<{ user: string; tokenCredits: number }>>;
+  getRecentSpend: (
+    userIds: string[],
+    since: Date,
+  ) => Promise<Array<{ user: string; spend: number }>>;
 }
 
 export function createAdminUsersHandlers(deps: AdminUsersDeps) {
-  const { findUsers, countUsers, deleteUserById, deleteConfig, deleteAclEntries } = deps;
+  const {
+    findUsers,
+    countUsers,
+    deleteUserById,
+    deleteConfig,
+    deleteAclEntries,
+    findBalances,
+    getRecentSpend,
+  } = deps;
 
   async function listUsersHandler(req: ServerRequest, res: Response) {
     try {
@@ -52,6 +65,18 @@ export function createAdminUsersHandlers(deps: AdminUsersDeps) {
         findUsers({}, USER_LIST_FIELDS, { limit, offset, sort: { createdAt: -1 } }),
         countUsers(),
       ]);
+
+      const userIds = users.map((u) => u._id?.toString() ?? '');
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const [balances, spends] = await Promise.all([
+        findBalances(userIds),
+        getRecentSpend(userIds, thirtyDaysAgo),
+      ]);
+
+      const balanceMap = new Map(balances.map((b) => [b.user, b.tokenCredits]));
+      const spendMap = new Map(spends.map((s) => [s.user, s.spend]));
 
       const mapped: AdminUserListItem[] = users.map((u) => ({
         id: u._id?.toString() ?? '',
@@ -63,6 +88,8 @@ export function createAdminUsersHandlers(deps: AdminUsersDeps) {
         provider: u.provider ?? 'local',
         createdAt: u.createdAt?.toISOString(),
         updatedAt: u.updatedAt?.toISOString(),
+        balance: balanceMap.get(u._id?.toString() ?? ''),
+        recentSpend: spendMap.get(u._id?.toString() ?? ''),
       }));
 
       return res.status(200).json({ users: mapped, total, limit, offset });
