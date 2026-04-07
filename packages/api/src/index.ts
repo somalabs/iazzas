@@ -22,6 +22,8 @@ export * from './utils';
 export { default as Tokenizer, countTokens } from './utils/tokenizer';
 export type { EncodingName } from './utils/tokenizer';
 export * from './db/utils';
+/* SSO */
+export { evaluateSSORules } from './sso';
 /* OAuth */
 export * from './oauth';
 export * from './mcp/oauth/OAuthReconnectionManager';

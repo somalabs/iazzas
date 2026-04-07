@@ -1,0 +1,1 @@
+export { evaluateSSORules } from './rules';
