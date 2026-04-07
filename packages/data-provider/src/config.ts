@@ -1049,6 +1049,21 @@ export type SummarizationConfig = z.infer<typeof summarizationConfigSchema>;
 
 const customEndpointsSchema = z.array(endpointSchema.partial()).optional();
 
+const ssoRuleMatchSchema = z.object({
+  claim: z.string(),
+  value: z.string().optional(),
+  pattern: z.string().optional(),
+  contains: z.string().optional(),
+}).refine(
+  (m) => [m.value, m.pattern, m.contains].filter(Boolean).length === 1,
+  { message: 'Exactly one of value, pattern, or contains is required' },
+);
+
+const ssoRuleSchema = z.object({
+  match: ssoRuleMatchSchema,
+  addToGroups: z.array(z.string()).min(1),
+});
+
 export const configSchema = z.object({
   version: z.string(),
   cache: z.boolean().default(true),
@@ -1081,6 +1096,7 @@ export const configSchema = z.object({
       allowedDomains: z.array(z.string()).optional(),
     })
     .default({ socialLogins: defaultSocialLogins }),
+  ssoRules: z.array(ssoRuleSchema).optional(),
   balance: balanceSchema.optional(),
   transactions: transactionsSchema.optional(),
   speech: z
@@ -1134,6 +1150,8 @@ export type DeepPartial<T> = T extends (infer U)[]
 
 export const getConfigDefaults = () => getSchemaDefaults(configSchema);
 export type TCustomConfig = DeepPartial<z.infer<typeof configSchema>>;
+export type TSSORule = z.infer<typeof ssoRuleSchema>;
+export type TSSOConfig = z.infer<typeof ssoRuleSchema>[];
 export type TCustomEndpoints = z.infer<typeof customEndpointsSchema>;
 
 export type TProviderSchema =
