@@ -11,7 +11,8 @@ module.exports = {
   darkMode: ['class'],
   theme: {
     fontFamily: {
-      sans: ['Inter', 'sans-serif'],
+      sans: ['Red Hat Display', 'Arial', 'sans-serif'],
+      editorial: ['Playfair Display', 'Georgia', 'serif'],
       mono: ['Roboto Mono', 'monospace'],
     },
     // fontFamily: {
