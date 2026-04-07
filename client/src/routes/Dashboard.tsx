@@ -5,6 +5,15 @@ import {
   CreatePromptForm,
   EmptyPromptPreview,
 } from '~/components/Prompts';
+import {
+  AdminLayout,
+  UsersView,
+  RolesView,
+  GroupsView,
+  GrantsView,
+  ConfigsView,
+  AnalyticsView,
+} from '~/components/Admin';
 import DashboardRoute from './Layouts/Dashboard';
 
 const dashboardRoutes = {
@@ -70,6 +79,21 @@ const dashboardRoutes = {
           path: ':promptId',
           element: <PromptForm />,
         },
+      ],
+    },
+    {
+      path: 'admin',
+      element: <AdminLayout />,
+      children: [
+        { index: true, element: <Navigate to="users" replace /> },
+        { path: 'users', element: <UsersView /> },
+        { path: 'roles', element: <RolesView /> },
+        { path: 'roles/:name', element: <RolesView /> },
+        { path: 'groups', element: <GroupsView /> },
+        { path: 'groups/:id', element: <GroupsView /> },
+        { path: 'grants', element: <GrantsView /> },
+        { path: 'configs', element: <ConfigsView /> },
+        { path: 'analytics', element: <AnalyticsView /> },
       ],
     },
     {
