@@ -86,6 +86,7 @@ const createSocialUser = async ({
   name,
   appConfig,
   emailVerified,
+  claims,
 }) => {
   const update = {
     email,
@@ -114,6 +115,36 @@ const createSocialUser = async ({
       manual: 'false',
     });
     await updateUser(newUserId, { avatar });
+  }
+
+  const ssoRules = appConfig?.ssoRules;
+  if (ssoRules && ssoRules.length > 0 && claims) {
+    const { evaluateSSORules } = require('@librechat/api');
+    const { logger } = require('@librechat/data-schemas');
+    const mongoose = require('mongoose');
+    const groupNames = evaluateSSORules(claims, ssoRules);
+    if (groupNames.length > 0) {
+      logger.info(`[${provider}] SSO rules matched ${groupNames.length} groups for user ${email}`, {
+        groups: groupNames,
+      });
+      const { createGroup, addUserToGroup } = require('~/models');
+      for (const groupName of groupNames) {
+        try {
+          const Group = mongoose.models.Group;
+          let group = await Group.findOne({ name: groupName });
+          if (!group) {
+            group = await createGroup({
+              name: groupName,
+              source: 'sso',
+              description: 'Auto-created by SSO rule',
+            });
+          }
+          await addUserToGroup(newUserId, group._id);
+        } catch (groupErr) {
+          logger.error(`[${provider}] Failed to assign group "${groupName}"`, groupErr);
+        }
+      }
+    }
   }
 
   return await getUserById(newUserId);

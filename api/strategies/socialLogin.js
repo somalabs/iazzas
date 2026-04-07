@@ -96,6 +96,7 @@ const socialLogin =
         name,
         emailVerified,
         appConfig,
+        claims: { email, name, username },
       });
       return cb(null, newUser);
     } catch (err) {
