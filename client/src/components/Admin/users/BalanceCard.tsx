@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocalize } from '~/hooks';
 import { useGetEffectiveBalanceConfigQuery } from '~/data-provider';
+import { formatDisplayCredits, formatUSD } from '~/utils/credits';
 import AdjustDialog from './AdjustDialog';
 import type { AdminUserBalance, AdminEffectiveBalanceSource } from 'librechat-data-provider';
 
@@ -19,10 +20,11 @@ export default function BalanceCard({ userId, balance }: BalanceCardProps) {
   const [adjustOpen, setAdjustOpen] = useState(false);
   const effectiveQuery = useGetEffectiveBalanceConfigQuery(userId);
 
-  const credits = balance?.tokenCredits?.toLocaleString() ?? '—';
+  const raw = balance?.tokenCredits ?? 0;
+  const credits = balance?.tokenCredits != null ? formatDisplayCredits(raw) : '—';
 
   const refillInfo = balance?.autoRefillEnabled
-    ? `${balance.refillAmount?.toLocaleString() ?? '—'} / ${balance.refillIntervalValue ?? '—'} ${balance.refillIntervalUnit ?? ''}`
+    ? `${balance.refillAmount != null ? formatDisplayCredits(balance.refillAmount) : '—'} / ${balance.refillIntervalValue ?? '—'} ${balance.refillIntervalUnit ?? ''}`
     : 'Desativado';
 
   return (
@@ -39,6 +41,7 @@ export default function BalanceCard({ userId, balance }: BalanceCardProps) {
         </button>
       </div>
       <p className="text-2xl font-bold text-text-primary">{credits}</p>
+      <p className="mt-0.5 text-sm text-text-secondary">{formatUSD(raw)}</p>
       <p className="mt-1 text-xs text-text-tertiary">Auto-refill: {refillInfo}</p>
       {effectiveQuery.data?.sources && (
         <div className="mt-3 space-y-1 border-t border-border-light pt-2">
@@ -48,7 +51,8 @@ export default function BalanceCard({ userId, balance }: BalanceCardProps) {
           {effectiveQuery.data.effective.startBalance != null && (
             <p className="text-xs text-text-tertiary">
               {localize('com_admin_configs_balance_start')}:{' '}
-              {effectiveQuery.data.effective.startBalance.toLocaleString()}{' '}
+              {formatDisplayCredits(effectiveQuery.data.effective.startBalance)}{' '}
+              ({formatUSD(effectiveQuery.data.effective.startBalance)}){' '}
               {formatSource(effectiveQuery.data.sources.startBalance)}
             </p>
           )}
@@ -56,7 +60,7 @@ export default function BalanceCard({ userId, balance }: BalanceCardProps) {
             effectiveQuery.data.effective.refillAmount != null && (
               <p className="text-xs text-text-tertiary">
                 {localize('com_admin_configs_balance_refill')}:{' '}
-                {effectiveQuery.data.effective.refillAmount.toLocaleString()} /{' '}
+                {formatDisplayCredits(effectiveQuery.data.effective.refillAmount)} /{' '}
                 {effectiveQuery.data.effective.refillIntervalValue}{' '}
                 {effectiveQuery.data.effective.refillIntervalUnit}{' '}
                 {formatSource(effectiveQuery.data.sources.refillAmount)}

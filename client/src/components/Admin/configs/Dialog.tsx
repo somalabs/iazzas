@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { OGDialog, OGDialogContent, OGDialogTitle } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { useUpsertAdminConfigMutation } from '~/data-provider';
+import { toDisplayCredits, toRawCredits } from '~/utils/credits';
 import BalanceForm from './BalanceForm';
 import type { BalanceOverride } from './BalanceForm';
 import type { AdminConfig } from 'librechat-data-provider';
@@ -56,13 +57,23 @@ export default function ConfigDialog({ open, onOpenChange, editConfig }: ConfigD
   const balanceValue = useMemo(() => {
     try {
       const parsed = JSON.parse(overridesJson) as Record<string, unknown>;
-      return (parsed?.balance as Record<string, unknown>) ?? {};
+      const raw = (parsed?.balance as BalanceOverride) ?? {};
+      return {
+        ...raw,
+        startBalance: raw.startBalance != null ? toDisplayCredits(raw.startBalance) : undefined,
+        refillAmount: raw.refillAmount != null ? toDisplayCredits(raw.refillAmount) : undefined,
+      };
     } catch {
       return {};
     }
   }, [overridesJson]);
 
-  const handleBalanceChange = (balance: BalanceOverride) => {
+  const handleBalanceChange = (display: BalanceOverride) => {
+    const balance: BalanceOverride = {
+      ...display,
+      startBalance: display.startBalance != null ? toRawCredits(display.startBalance) : undefined,
+      refillAmount: display.refillAmount != null ? toRawCredits(display.refillAmount) : undefined,
+    };
     try {
       const parsed = JSON.parse(overridesJson) as Record<string, unknown>;
       parsed.balance = balance;

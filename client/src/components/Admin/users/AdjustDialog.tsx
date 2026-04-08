@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { OGDialog, OGDialogContent, OGDialogTitle } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { useAdjustAdminUserBalanceMutation } from '~/data-provider';
+import { toRawCredits } from '~/utils/credits';
 
 interface AdjustDialogProps {
   userId: string;
@@ -39,7 +40,7 @@ export default function AdjustDialog({ userId, open, onOpenChange }: AdjustDialo
       setError(localize('com_admin_users_adjust_reason_required'));
       return;
     }
-    mutation.mutate({ userId, amount: parsed, reason: reason.trim() });
+    mutation.mutate({ userId, amount: toRawCredits(parsed), reason: reason.trim() });
   };
 
   return (
@@ -56,7 +57,7 @@ export default function AdjustDialog({ userId, open, onOpenChange }: AdjustDialo
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full rounded-lg border border-border-medium bg-surface-primary px-3 py-2 text-sm text-text-primary focus:border-surface-submit focus:outline-none"
-              placeholder="Ex: 1000 ou -500"
+              placeholder="Ex: 100 ou -50 (em créditos)"
             />
           </div>
           <div>

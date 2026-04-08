@@ -1,10 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { useLocalize } from '~/hooks';
+import { formatDisplayCredits, formatUSD } from '~/utils/credits';
 import type { AdminAnalyticsTopUser } from 'librechat-data-provider';
 
-function formatNumber(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+function formatTokens(value: number): string {
+  if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(1)}M`;
+  }
+  if (value >= 1_000) {
+    return `${(value / 1_000).toFixed(1)}K`;
+  }
   return value.toLocaleString();
 }
 
@@ -36,6 +41,7 @@ export default function TopUsers({ users }: Props) {
             <th className="pb-2 font-medium">User</th>
             <th className="pb-2 text-right font-medium">{localize('com_admin_analytics_total_tokens')}</th>
             <th className="pb-2 text-right font-medium">{localize('com_admin_analytics_credits_spent')}</th>
+            <th className="pb-2 text-right font-medium">Custo Est.</th>
           </tr>
         </thead>
         <tbody>
@@ -52,8 +58,9 @@ export default function TopUsers({ users }: Props) {
                 <p className="font-medium text-text-primary">{user.name}</p>
                 <p className="text-xs text-text-secondary">{user.email}</p>
               </td>
-              <td className="py-2 text-right text-text-primary">{formatNumber(user.tokens)}</td>
-              <td className="py-2 text-right text-text-primary">{formatNumber(user.credits)}</td>
+              <td className="py-2 text-right text-text-primary">{formatTokens(user.tokens)}</td>
+              <td className="py-2 text-right text-text-primary">{formatDisplayCredits(user.credits)}</td>
+              <td className="py-2 text-right text-text-secondary">{formatUSD(user.credits)}</td>
             </tr>
           ))}
         </tbody>

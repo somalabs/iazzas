@@ -1,3 +1,4 @@
+import { formatDisplayCredits, formatUSD } from '~/utils/credits';
 import type { AdminTransactionItem } from 'librechat-data-provider';
 
 interface TransactionsProps {
@@ -45,7 +46,7 @@ export default function Transactions({
                   {tx.rawAmount?.toLocaleString() ?? '—'}
                 </td>
                 <td className="px-3 py-2 text-right text-text-secondary">
-                  {tx.tokenValue?.toLocaleString() ?? '—'}
+                  {tx.tokenValue != null ? `${formatDisplayCredits(tx.tokenValue)} (${formatUSD(tx.tokenValue)})` : '—'}
                 </td>
                 <td className="max-w-[100px] truncate px-3 py-2 text-text-tertiary">
                   {tx.note ?? tx.context ?? '—'}

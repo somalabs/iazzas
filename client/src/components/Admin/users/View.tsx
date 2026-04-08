@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Spinner } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { useListAdminUsersQuery, useSearchAdminUsersQuery } from '~/data-provider';
+import { formatDisplayCredits } from '~/utils/credits';
 import { cn } from '~/utils';
 import Detail from './Detail';
 import type { AdminUserListItem, AdminUserSearchResult } from 'librechat-data-provider';
@@ -12,7 +13,7 @@ const formatCredits = (value: number | null | undefined): string => {
   if (value == null) {
     return '—';
   }
-  return value.toLocaleString();
+  return formatDisplayCredits(value);
 };
 
 export default function UsersView() {

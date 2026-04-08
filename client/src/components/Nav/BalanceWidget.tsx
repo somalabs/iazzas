@@ -3,17 +3,8 @@ import { Coins } from 'lucide-react';
 import { TooltipAnchor } from '@librechat/client';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
+import { formatDisplayCredits, toDisplayCredits } from '~/utils/credits';
 import { useLocalize } from '~/hooks';
-
-function formatBalance(credits: number): string {
-  if (credits >= 1_000_000) {
-    return `${(credits / 1_000_000).toFixed(1)}M`;
-  }
-  if (credits >= 1_000) {
-    return `${(credits / 1_000).toFixed(1)}K`;
-  }
-  return new Intl.NumberFormat().format(Math.round(credits));
-}
 
 function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
   const localize = useLocalize();
@@ -27,15 +18,15 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
     return null;
   }
 
-  const credits = balanceQuery.data.tokenCredits;
-  const isLow = credits < 10_000;
-  const formatted = formatBalance(credits);
+  const raw = balanceQuery.data.tokenCredits;
+  const isLow = toDisplayCredits(raw) < 1;
+  const formatted = formatDisplayCredits(raw);
 
   if (collapsed) {
     return (
       <TooltipAnchor
         side="right"
-        description={`${localize('com_nav_balance')}: ${new Intl.NumberFormat().format(Math.round(credits))}`}
+        description={`${localize('com_nav_balance')}: ${formatted}`}
         render={
           <div
             className={`flex h-9 w-9 items-center justify-center rounded-lg ${isLow ? 'text-red-500' : 'text-text-secondary'}`}

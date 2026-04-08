@@ -32,7 +32,7 @@ export default function BalanceForm({ value, onChange, disabled }: BalanceFormPr
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-text-secondary">
-            {localize('com_admin_configs_balance_start')}
+            {localize('com_admin_configs_balance_start')} (créditos)
           </label>
           <input
             type="number"
@@ -47,7 +47,7 @@ export default function BalanceForm({ value, onChange, disabled }: BalanceFormPr
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-text-secondary">
-            {localize('com_admin_configs_balance_refill_amount')}
+            {localize('com_admin_configs_balance_refill_amount')} (créditos)
           </label>
           <input
             type="number"

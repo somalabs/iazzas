@@ -1,4 +1,5 @@
 import { useLocalize } from '~/hooks';
+import { formatDisplayCredits, formatUSD } from '~/utils/credits';
 import type { AdminUserModelUsage } from 'librechat-data-provider';
 
 interface UsageByModelProps {
@@ -24,6 +25,7 @@ export default function UsageByModel({ data }: UsageByModelProps) {
               <th className="px-3 py-2 font-medium text-text-secondary">Modelo</th>
               <th className="px-3 py-2 text-right font-medium text-text-secondary">Tokens</th>
               <th className="px-3 py-2 text-right font-medium text-text-secondary">Credits</th>
+              <th className="px-3 py-2 text-right font-medium text-text-secondary">Custo Est.</th>
             </tr>
           </thead>
           <tbody>
@@ -37,7 +39,10 @@ export default function UsageByModel({ data }: UsageByModelProps) {
                   {row.tokens.toLocaleString()}
                 </td>
                 <td className="px-3 py-2 text-right text-text-secondary">
-                  {row.credits.toLocaleString()}
+                  {formatDisplayCredits(row.credits)}
+                </td>
+                <td className="px-3 py-2 text-right text-text-tertiary">
+                  {formatUSD(row.credits)}
                 </td>
               </tr>
             ))}
