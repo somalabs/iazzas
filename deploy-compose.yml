@@ -11,6 +11,7 @@ services:
     depends_on:
       - mongodb
       - rag_api
+      - code-gateway
     restart: always
     extra_hosts:
     - "host.docker.internal:host-gateway"
@@ -23,6 +24,7 @@ services:
       - MEILI_HOST=http://meilisearch:7700
       - RAG_PORT=${RAG_PORT:-8000}
       - RAG_API_URL=http://rag_api:${RAG_PORT:-8000}
+      - LIBRECHAT_CODE_BASEURL=http://code-gateway:8080/v1
     volumes:
       - type: bind
         source: ./librechat.yaml
@@ -30,6 +32,16 @@ services:
       - ./images:/app/client/public/images
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
+
+  code-gateway:
+    container_name: code-gateway
+    build: ./code-interpreter-gateway
+    environment:
+      - USE_LOCAL_EXEC=true
+      - GATEWAY_API_KEY=${LIBRECHAT_CODE_API_KEY}
+      - PORT=8080
+      - EXEC_TIMEOUT_MS=30000
+    restart: always
 
   client:
     image: nginx:1.27.0-alpine
