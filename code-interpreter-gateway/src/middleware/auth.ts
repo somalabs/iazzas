@@ -3,6 +3,8 @@ import { Request, Response, NextFunction } from 'express';
 const GATEWAY_API_KEY = process.env.GATEWAY_API_KEY;
 
 export function auth(req: Request, res: Response, next: NextFunction): void {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+
   if (!GATEWAY_API_KEY) {
     next();
     return;

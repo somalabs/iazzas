@@ -1,8 +1,8 @@
 import { execSync } from 'child_process';
-import { writeFileSync, mkdirSync, rmSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { mapLanguage } from '../utils/languages';
-import { getOrCreateSession, getSessionFiles, addFile } from './session';
+import { getOrCreateSession, getSessionFiles, getFile, addFile } from './session';
 
 const PISTON_URL = process.env.PISTON_URL ?? 'http://localhost:2000';
 const EXEC_TIMEOUT_MS = parseInt(process.env.EXEC_TIMEOUT_MS ?? '30000', 10);
@@ -50,7 +50,7 @@ interface ExecResponse {
 
 function executeLocal(req: ExecRequest): ExecResponse {
   const session = getOrCreateSession(req.session_id);
-  const tmpDir = join('/tmp', `code-exec-${session.id}`);
+  const tmpDir = '/mnt/data';
   mkdirSync(tmpDir, { recursive: true });
 
   const ext = getFileExtension(req.lang);
@@ -60,6 +60,15 @@ function executeLocal(req: ExecRequest): ExecResponse {
   const existingFiles = getSessionFiles(session.id);
   for (const f of existingFiles) {
     writeFileSync(join(tmpDir, f.name), f.content);
+  }
+
+  if (Array.isArray(req.files)) {
+    for (const injected of req.files) {
+      const file = getFile(injected.session_id, injected.id);
+      if (file) {
+        writeFileSync(join(tmpDir, injected.name), file.content);
+      }
+    }
   }
 
   const commands: Record<string, string> = {
@@ -92,8 +101,6 @@ function executeLocal(req: ExecRequest): ExecResponse {
     stdout = execErr.stdout ?? '';
     stderr = execErr.stderr ?? execErr.message ?? 'Execution failed';
   }
-
-  try { rmSync(tmpDir, { recursive: true }); } catch { /* ignore */ }
 
   const outputFiles = parseFileOutputs(stdout, session.id);
   return { session_id: session.id, stdout, stderr, files: outputFiles };
@@ -138,7 +145,7 @@ async function executePiston(req: ExecRequest): Promise<ExecResponse> {
       throw new Error(`Piston error (${response.status}): ${error}`);
     }
 
-    const result: PistonResponse = await response.json();
+    const result = (await response.json()) as PistonResponse;
 
     let stdout = '';
     let stderr = '';

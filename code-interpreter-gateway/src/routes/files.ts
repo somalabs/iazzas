@@ -11,7 +11,7 @@ router.get('/files/:sessionId', (req: Request, res: Response) => {
   if (detail === 'full') {
     res.json(
       files.map((f) => ({
-        name: f.name,
+        name: `${sessionId}/${f.id}`,
         metadata: { 'original-filename': f.name },
         lastModified: new Date(f.createdAt).toISOString(),
         size: f.content.length,
@@ -22,7 +22,7 @@ router.get('/files/:sessionId', (req: Request, res: Response) => {
 
   res.json(
     files.map((f) => ({
-      name: f.name,
+      name: `${sessionId}/${f.id}`,
       metadata: { 'original-filename': f.name },
       lastModified: new Date(f.createdAt).toISOString(),
     })),
