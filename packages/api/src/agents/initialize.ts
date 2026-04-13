@@ -383,7 +383,8 @@ export async function initializeAgent(
     options.tools?.length &&
     hasAgentTools
   ) {
-    throw new Error(`{ "type": "${ErrorTypes.GOOGLE_TOOL_CONFLICT}"}`);
+    options.tools = [];
+    tools = structuredTools ?? [];
   } else if (
     (agent.provider === Providers.OPENAI ||
       agent.provider === Providers.AZURE ||

@@ -11,6 +11,7 @@ import {
   isAssistantsEndpoint,
   getEndpointFileConfig,
   defaultAssistantsVersion,
+  isCodeInterpreterOnlyType,
 } from 'librechat-data-provider';
 import debounce from 'lodash/debounce';
 import type { EModelEndpoint, TEndpointsConfig, TError } from 'librechat-data-provider';
@@ -275,6 +276,19 @@ const useFileHandlingCore = (params: UseFileHandling | undefined, fileState: Fil
   const handleFiles = async (_files: FileList | File[], _toolResource?: string) => {
     abortControllerRef.current = new AbortController();
     const fileList = Array.from(_files);
+
+    let effectiveToolResource = _toolResource;
+    if (
+      effectiveToolResource == null &&
+      fileList.some((file) => isCodeInterpreterOnlyType(file.type))
+    ) {
+      effectiveToolResource = EToolResources.execute_code;
+      setEphemeralAgent((prev) => ({
+        ...prev,
+        [EToolResources.execute_code]: true,
+      }));
+    }
+
     /* Validate files */
     let filesAreValid: boolean;
     try {
@@ -290,7 +304,7 @@ const useFileHandlingCore = (params: UseFileHandling | undefined, fileState: Fil
         setError,
         fileConfig,
         endpointFileConfig,
-        toolResource: _toolResource,
+        toolResource: effectiveToolResource,
       });
     } catch (error) {
       console.error('file validation error', error);
@@ -320,8 +334,8 @@ const useFileHandlingCore = (params: UseFileHandling | undefined, fileState: Fil
           size: originalFile.size,
         };
 
-        if (_toolResource != null && _toolResource !== '') {
-          initialExtendedFile.tool_resource = _toolResource;
+        if (effectiveToolResource != null && effectiveToolResource !== '') {
+          initialExtendedFile.tool_resource = effectiveToolResource;
         }
 
         // Add file immediately to show in UI

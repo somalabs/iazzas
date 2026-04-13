@@ -124,7 +124,7 @@ const AttachFileMenu = ({
     } else if (fileType === 'image_document_extended') {
       inputRef.current.accept = `image/*,.heif,.heic,${bedrockDocumentExtensions}`;
     } else if (fileType === 'image_document_video_audio') {
-      inputRef.current.accept = 'image/*,.heif,.heic,.pdf,application/pdf,video/*,audio/*';
+      inputRef.current.accept = `image/*,.heif,.heic,.pdf,application/pdf,video/*,audio/*,${bedrockDocumentExtensions}`;
     } else {
       inputRef.current.accept = '';
     }

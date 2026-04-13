@@ -4,6 +4,7 @@ import {
   isBedrockDocumentType,
   bedrockDocumentFormats,
   isDocumentSupportedProvider,
+  isCodeInterpreterOnlyType,
 } from 'librechat-data-provider';
 import type { IMongoFile } from '@librechat/data-schemas';
 import type {
@@ -117,9 +118,13 @@ export async function encodeAndFormatDocuments(
     return result;
   }
 
+  const isGoogleProvider = provider === Providers.GOOGLE || provider === Providers.VERTEXAI;
+
   const processableFiles = isBedrock
     ? files.filter((file) => isBedrockDocumentType(file.type))
-    : files;
+    : isGoogleProvider
+      ? files.filter((file) => !isCodeInterpreterOnlyType(file.type))
+      : files;
 
   if (!processableFiles.length) {
     return result;

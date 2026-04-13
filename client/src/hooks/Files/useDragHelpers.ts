@@ -16,6 +16,7 @@ import {
   resolveEndpointType,
   isAssistantsEndpoint,
   getEndpointFileConfig,
+  isCodeInterpreterOnlyType,
   defaultAgentCapabilities,
 } from 'librechat-data-provider';
 import type { DropTargetMonitor } from 'react-dnd';
@@ -123,6 +124,22 @@ export default function useDragHelpers() {
           fileSearchAllowedByAgent = false;
           codeAllowedByAgent = false;
         }
+      }
+
+      /**
+       * Auto-route code-interpreter-only file types (xlsx/csv/docx/zip/etc.) straight to
+       * execute_code without showing the upload-type picker. useFileHandling.handleFiles
+       * detects these mimes and both tags the upload with tool_resource=execute_code and
+       * flips the ephemeral agent toggle (which surfaces the existing CI toast).
+       */
+      const allCodeInterpreterOnly =
+        codeEnabled &&
+        codeAllowedByAgent &&
+        item.files.every((f) => isCodeInterpreterOnlyType(inferMimeType(f.name, f.type)));
+
+      if (allCodeInterpreterOnly) {
+        handleFilesRef.current(item.files);
+        return;
       }
 
       /** Determine if dragged files are all images (enables the base image option) */

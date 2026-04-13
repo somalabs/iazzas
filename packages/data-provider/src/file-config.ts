@@ -233,6 +233,35 @@ export const codeInterpreterMimeTypes = [
   imageMimeTypes,
 ];
 
+/**
+ * Mimetypes that should never be sent to the model as inline/media parts
+ * and must be routed exclusively to the local Code Interpreter tool.
+ * When any of these is attached, the Code Interpreter tool resource is
+ * auto-activated and the file is stripped from provider document encoding.
+ */
+export const codeInterpreterOnlyMimeTypes: readonly string[] = [
+  ...excelFileTypes,
+  'text/csv',
+  'application/csv',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.ms-powerpoint',
+  'application/zip',
+  'application/x-tar',
+  'application/x-parquet',
+  'application/vnd.apache.parquet',
+  'application/vnd.oasis.opendocument.spreadsheet',
+  'application/vnd.oasis.opendocument.text',
+  'application/vnd.oasis.opendocument.presentation',
+  'application/vnd.oasis.opendocument.graphics',
+];
+
+const codeInterpreterOnlyMimeTypesSet = new Set<string>(codeInterpreterOnlyMimeTypes);
+
+export const isCodeInterpreterOnlyType = (mimeType?: string | null): boolean =>
+  mimeType != null && codeInterpreterOnlyMimeTypesSet.has(mimeType);
+
 export const codeTypeMapping: { [key: string]: string } = {
   c: 'text/x-c', // .c - C source
   cs: 'text/x-csharp', // .cs - C# source

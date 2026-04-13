@@ -1,0 +1,13 @@
+{
+  "name": "code-interpreter-user-deps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Runtime libraries available to user code executed in the gateway",
+  "dependencies": {
+    "xlsx": "^0.18.5",
+    "papaparse": "^5.4.1",
+    "mathjs": "^13.2.2",
+    "date-fns": "^4.1.0",
+    "lodash": "^4.17.21"
+  }
+}
