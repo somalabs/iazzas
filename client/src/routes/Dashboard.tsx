@@ -13,6 +13,7 @@ import {
   GrantsView,
   ConfigsView,
   AnalyticsView,
+  FeedbacksView,
 } from '~/components/Admin';
 import DashboardRoute from './Layouts/Dashboard';
 
@@ -94,6 +95,7 @@ const dashboardRoutes = {
         { path: 'grants', element: <GrantsView /> },
         { path: 'configs', element: <ConfigsView /> },
         { path: 'analytics', element: <AnalyticsView /> },
+        { path: 'feedbacks', element: <FeedbacksView /> },
       ],
     },
     {

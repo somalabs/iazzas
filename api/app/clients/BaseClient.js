@@ -29,6 +29,7 @@ const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { logViolation } = require('~/cache');
 const TextStream = require('./TextStream');
 const db = require('~/models');
+const { logCannotAnswerFeedback } = require('~/server/utils/cannotAnswerParser');
 
 class BaseClient {
   constructor(apiKey, options = {}) {
@@ -751,6 +752,8 @@ class BaseClient {
     if (this.user && user !== this.user) {
       throw new Error('User mismatch.');
     }
+
+    await logCannotAnswerFeedback({ responseMessage: message, options, user });
 
     const hasAddedConvo = options?.req?.body?.addedConvo != null;
     const reqCtx = {

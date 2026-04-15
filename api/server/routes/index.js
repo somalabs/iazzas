@@ -18,6 +18,7 @@ const balance = require('./balance');
 const actions = require('./actions');
 const apiKeys = require('./apiKeys');
 const banner = require('./banner');
+const feedbacks = require('./feedbacks');
 const search = require('./search');
 const models = require('./models');
 const convos = require('./convos');
@@ -52,6 +53,7 @@ module.exports = {
   files,
   share,
   banner,
+  feedbacks,
   agents,
   convos,
   search,

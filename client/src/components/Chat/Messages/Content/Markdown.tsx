@@ -35,7 +35,14 @@ const Markdown = memo(function Markdown({ content = '', isLatestMessage }: TCont
     if (isInitializing) {
       return '';
     }
-    return LaTeXParsing ? preprocessLaTeX(content) : content;
+    let stripped = content
+      .replace(/<cannot_answer(?:\s+[^>]*)?>[\s\S]*?<\/cannot_answer>\s*/gi, '')
+      .replace(/<cannot_answer(?:\s+[^>]*)?>[\s\S]*$/i, '');
+    const leadingPartial = stripped.match(/^\s*<(?:c(?:a(?:n(?:n(?:o(?:t(?:_(?:a(?:n(?:s(?:w(?:e(?:r)?)?)?)?)?)?)?)?)?)?)?)?)?$/);
+    if (leadingPartial) {
+      stripped = '';
+    }
+    return LaTeXParsing ? preprocessLaTeX(stripped.replace(/^\s+/, '')) : stripped.replace(/^\s+/, '');
   }, [content, LaTeXParsing, isInitializing]);
 
   const rehypePlugins = useMemo(
