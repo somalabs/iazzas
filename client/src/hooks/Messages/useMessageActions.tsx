@@ -127,6 +127,8 @@ export default function useMessageActions(props: TMessageActions) {
   const messageLabel = useMemo(() => {
     if (message?.isCreatedByUser === true) {
       return UsernameDisplay ? (user?.name ?? '') || user?.username : localize('com_user_message');
+    } else if (conversation?.modelLabel) {
+      return conversation.modelLabel;
     } else if (agent) {
       return agent.name ?? 'Assistant';
     } else if (assistant) {
@@ -134,7 +136,7 @@ export default function useMessageActions(props: TMessageActions) {
     } else {
       return message?.sender;
     }
-  }, [message, agent, assistant, UsernameDisplay, user, localize]);
+  }, [message, agent, assistant, conversation?.modelLabel, UsernameDisplay, user, localize]);
 
   const feedbackMutation = useUpdateFeedbackMutation(
     conversation?.conversationId || '',

@@ -173,6 +173,7 @@ export async function loadEphemeralAgent(
 
   const result: Partial<Agent> = {
     id: ephemeralId,
+    name: sender as string,
     instructions,
     provider: resolvedProvider,
     model_parameters,

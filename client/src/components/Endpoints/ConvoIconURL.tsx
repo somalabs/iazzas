@@ -25,8 +25,8 @@ const styleMap = {
   default: { width: '100%', height: '100%' },
 };
 
-const styleImageMap = {
-  default: { width: '100%', height: '100%' },
+const styleImageMap: Record<string, React.CSSProperties> = {
+  default: { width: '100%', height: '100%', objectFit: 'contain' },
 };
 
 const ConvoIconURL: React.FC<ConvoIconURLProps> = ({
@@ -41,7 +41,7 @@ const ConvoIconURL: React.FC<ConvoIconURLProps> = ({
 }) => {
   const Icon = useMemo(() => icons[iconURL] ?? icons.unknown, [iconURL]);
   const isURL = useMemo(
-    () => !!(iconURL && (iconURL.includes('http') || iconURL.startsWith('/images/'))),
+    () => !!(iconURL && (iconURL.includes('http') || iconURL.startsWith('/'))),
     [iconURL],
   );
   if (isURL) {

@@ -6,11 +6,12 @@ Visão equilibrada do que foi construído no fork LibreChat para entregar o IAzz
 
 ## 1. Visão geral
 
-O IAzzas é um fork customizado da LibreChat, com integrações próprias e modelos Gemini configurados via `librechat.yaml`. Hoje há três experiências disponíveis para o usuário final:
+O IAzzas é um fork customizado da LibreChat, com integrações próprias e modelos Gemini configurados via `librechat.yaml`. Hoje há duas experiências disponíveis para o usuário final:
 
-- **IAzzas (Flash)** — Gemini 2.5 Flash, respostas rápidas.
-- **IAzzas (Pro)** — Gemini 2.5 Pro, respostas mais profundas.
-- **IAzzas (Imagens)** — Gemini 2.5 Flash Image (Nano Banana), geração de imagens em conversa.
+- **IAzzas (Flash)** — Gemini 2.5 Flash, respostas rápidas. Pesquisa web e geração de imagem ativas via tools.
+- **IAzzas (Pro)** — Gemini 2.5 Pro, respostas mais profundas. Mesmas capacidades do Flash, com raciocínio maior.
+
+Ambos são expostos como **agentes efêmeros** (`endpoint: "agents"` + `agent_id: "ephemeral"`), com as tools `web_search` (Serper/Firecrawl/Jina) e `gemini_image_gen` (Nano Banana) anexadas. O modelo decide via function-calling quando chamar cada uma — geração de imagem e pesquisa ficam transparentes para o usuário.
 
 Backend em Node/Express (legado JS) delegando para pacotes TypeScript (`packages/api`, `packages/data-schemas`, `packages/data-provider`). Frontend em React/TypeScript. Dependência chave: `@librechat/agents` (fornece a camada de function-calling dos agentes).
 
@@ -159,18 +160,78 @@ Resultado: o usuário anexa uma planilha, o IAzzas entende e executa código sob
 
 ---
 
-## 5. IAzzas (Imagens) — geração de imagens em conversa
+## 5. Flash e Pro como agentes efêmeros (migração de 2026-04-16)
 
-Necessidade: permitir geração de imagem usando o modelo Nano Banana (`gemini-2.5-flash-image-preview`), que retorna `inline_data` com bytes PNG, não texto.
+### Contexto da mudança
 
-### Caminho escolhido: modelSpec nova + agente efêmero com tool
+Inicialmente existiam três specs: `iazzas-flash`, `iazzas-pro` (ambos em `endpoint: "google"` com grounding nativo) e `iazzas-imagens` (em `endpoint: "agents"` com a tool `gemini_image_gen`). O problema: geração de imagem só estava disponível num spec separado. O usuário precisava **trocar explicitamente** de modelo para gerar imagem — experiência ruim.
 
-Em vez de patches no provider Google para lidar com `responseModalities` e `inline_data` (frágil e sujeito a conflitos no sync upstream), aproveitamos que o fork já tinha a tool `gemini_image_gen` em `packages/api/src/tools/toolkits/gemini.ts`. Ela emite a imagem como `attachment` via o pipeline existente de tool streaming.
+Requisito novo: **Flash e Pro precisam gerar imagens nativamente, sem toggle manual**, mantendo a experiência atual para todo o resto (pesquisa, análise, etc.).
 
-### Fluxo
+### Restrição fundamental (API Gemini)
+
+A API do Gemini **não permite coexistir `googleSearch` (grounding nativo) com tools customizadas na mesma chamada** — é um ou outro. Isso significa:
+
+- Com grounding nativo ativo (`endpoint: "google"` + `web_search: true`), não dá para anexar `gemini_image_gen`.
+- Com `gemini_image_gen` ativo, tem que desligar o grounding.
+
+Essa restrição fechou o caminho óbvio de "só adicionar a tool nos specs atuais".
+
+### Alternativas avaliadas
+
+**Alternativa A — Tag-based server-side (rejeitada)**
+Manter `endpoint: "google"` com grounding, e instruir via promptPrefix que o modelo emita uma tag `<image_request>...</image_request>` quando o usuário pedir imagem. Um middleware no backend interceptaria o stream, extrairia o prompt, chamaria o modelo de imagem separadamente e injetaria o resultado.
+
+- Ganhos: preserva grounding do Google (sem custo extra de infra de busca).
+- Custos: código custom vive em `api/app/clients/GoogleClient.js` (área altamente volátil no upstream → conflitos de merge em quase todo sync). Implementação frágil (parsing de tag mid-stream, falha de chamada de imagem, edge cases de cancelamento). ~150-250 linhas em arquivo upstream-instável.
+
+**Alternativa B — Migrar Flash/Pro para agentes efêmeros (escolhida)**
+Converter os dois specs para `endpoint: "agents"` + `agent_id: "ephemeral"` com as tools `web_search` e `gemini_image_gen`. O próprio Gemini decide via function-calling quando chamar cada tool.
+
+- Ganhos: zero código custom de orquestração. Function-calling natural resolve o "quando gerar imagem". Usa primitives nativas do LibreChat, sync-friendly (patches já existentes em `loadEphemeralAgent` são pontuais).
+- Custos: perde grounding nativo. Pesquisa passa a usar stack Serper + Firecrawl + Jina. Isso custa dinheiro por chamada (ver análise abaixo).
+
+**Alternativa C — Toggle manual de imagem no chat (rejeitada)**
+Botão explícito no input ("gerar imagem") que flipa a conversa para agente efêmero só quando o usuário clica. Flash/Pro mantêm grounding nativo por padrão.
+
+- Ganhos: preserva grounding quando não é imagem.
+- Rejeitada porque **o usuário explicitou que quer geração automática, sem ativação manual**.
+
+### Análise de custo da Alternativa B
+
+Como Flash/Pro passam a poder chamar `web_search`, toda query pesquisada paga infra externa:
+
+| Componente | Custo típico |
+|---|---|
+| Serper (busca) | ~US$ 0,001 |
+| Firecrawl (5 páginas scrape) | ~US$ 0,005–0,025 |
+| Jina (rerank) | ~US$ 0,0001 |
+| **Infra por busca** | **~US$ 0,01–0,03** |
+
+**Cenário limite** (1000 usuários × US$ 1/dia em créditos × 100% das queries pesquisam × 30 dias):
+
+- ~100 queries/usuário/dia (mix Flash/Pro)
+- Infra: ~US$ 1,50/usuário/dia
+- **Teto mensal: ~US$ 45.000**
+
+**Cenário realista** (40% das queries pesquisam, 50% de usuários ativos):
+
+- **~US$ 9.000/mês**
+
+⚠️ **Importante**: o sistema de créditos (`tokenCredits`) só conta tokens do modelo, **não conta infra de busca**. O limite de US$ 1/dia não cobre `web_search`. Pra produção, é necessário adicionar rate-limit explícito por usuário no `web_search` e instruir o modelo via prompt a pesquisar só quando necessário.
+
+### Decisão e fundamentação
+
+Seguimos com a **Alternativa B** por três razões:
+
+1. **Sync-friendly**: patches ficam em arquivos relativamente estáveis (`packages/api/src/agents/load.ts`, yaml, frontend icons). A Alternativa A tocaria `GoogleClient.js`, um dos arquivos mais ativos do upstream.
+2. **Teste empírico**: uma query de comparação direta mostrou a stack Serper/Firecrawl/Jina produzindo resposta mais profunda que o grounding nativo em consulta de pesquisa. N=1 não é estatística, mas alinha com a intuição: Firecrawl traz página inteira, Jina rerankeia, vs grounding que expõe só top-3 snippets curtos.
+3. **Custo controlável**: com prompt bem calibrado ("use `web_search` só quando necessário") e rate-limit futuro, o gasto projetado é aceitável para a fase atual.
+
+### Fluxo atual
 
 ```
-Usuário seleciona "IAzzas (Imagens)"
+Usuário seleciona "IAzzas (Flash)" ou "IAzzas (Pro)"
         │
         ▼
 ┌──────────────────────────┐
@@ -178,9 +239,10 @@ Usuário seleciona "IAzzas (Imagens)"
 │  endpoint: "agents"      │
 │  agent_id: "ephemeral"   │
 │  model: gemini-2.5-      │
-│    flash-image-preview   │
-│  tools: [gemini_image_   │
-│    gen]                  │
+│    flash | pro           │
+│  tools:                  │
+│    - web_search          │
+│    - gemini_image_gen    │
 └─────────┬────────────────┘
           │
           ▼
@@ -192,44 +254,50 @@ Usuário seleciona "IAzzas (Imagens)"
           │
           ▼
 ┌──────────────────────────┐
-│ Agente chama             │
-│ gemini_image_gen         │
-│  (tool → API Gemini      │
-│   Image com              │
-│   responseModalities)    │
+│ Gemini decide via        │
+│ function-calling:        │
+│  - pedido de imagem      │
+│    → gemini_image_gen    │
+│  - pergunta atual/       │
+│    externa → web_search  │
+│  - caso comum → sem tool │
 └─────────┬────────────────┘
           │
           ▼
 ┌──────────────────────────┐
-│ Tool retorna             │
-│  content_and_artifact    │
-│  → stream SSE            │
-│  attachment event        │
-└─────────┬────────────────┘
-          │
-          ▼
-┌──────────────────────────┐
-│ Frontend renderiza       │
-│ imagem inline no chat    │
+│ Resposta (texto + imagem │
+│ inline se aplicável)     │
 └──────────────────────────┘
 ```
 
-### Patches necessários no fork
+### Mudanças entregues
 
-1. **`packages/data-provider/src/models.ts`** — adicionar `tools?: string[]` em `TModelSpec` e no schema Zod.
-2. **`packages/api/src/agents/load.ts` (`loadEphemeralAgent`)** — quatro ajustes:
-   - Ler `modelSpec.tools` e anexar ao array de tools do agente.
-   - Fallback para `modelSpec.preset.model` quando body não tem model (schema agents strippa model por design).
-   - Fallback para `modelSpec.preset.promptPrefix` quando body não tem (mesmo motivo).
-   - Resolver `provider` a partir do prefixo do model (`gemini-*` → `"google"`) em vez de usar `endpoint: "agents"` cru (que a validação rejeita).
-3. **`client/src/components/Chat/Menus/Endpoints/ModelSelectorContext.tsx`** — permitir modelSpec com `agent_id === "ephemeral"` passar pelo filtro que checa se o agent existe no banco.
-4. **`librechat.yaml`** — novo modelSpec `iazzas-imagens` usando `endpoint: "agents"`, `agent_id: "ephemeral"`, `tools: [gemini_image_gen]` + o prompt institucional do IAzzas.
+**Em `librechat.yaml`:**
 
-### Por que não migramos Flash/Pro junto?
+- Specs `iazzas-flash` e `iazzas-pro` migrados para `endpoint: "agents"` + `agent_id: "ephemeral"` com `tools: [web_search, gemini_image_gen]`.
+- `promptPrefix` estendido com duas diretivas:
+  - "Use `web_search` apenas quando a resposta depender de informação atual, externa ou o usuário solicitar explicitamente."
+  - "Quando gerar imagens com `gemini_image_gen`, faça-o diretamente sem anunciar — apenas entregue o resultado."
+- `iazzas-imagens` removido (redundante).
+- **Specs antigos com `endpoint: "google"` ficam comentados no mesmo yaml** — rollback é descomentar o bloco e remover as versões ativas acima. O texto do promptPrefix original está preservado no bloco comentado para facilitar.
 
-Fazer Flash/Pro subir para `endpoint: "agents"` também funcionaria, mas **perde o grounding nativo do Google Search** (vira tool `web_search` via Serper). Mantivemos Flash/Pro em `endpoint: "google"` direto por enquanto, com a tool de imagem disponível apenas no spec dedicado "IAzzas (Imagens)".
+**Patches de UX (necessários para experiência parecer nativa):**
 
-Caminho futuro avaliado: adicionar um toggle no chat (como o do Code Interpreter) que flipa a conversa para agente efêmero com `gemini_image_gen` quando o usuário quer imagem, sem trocar de modelSpec.
+1. `client/src/components/Chat/Menus/Endpoints/components/SpecIcon.tsx` — se o spec é ephemeral agent com model `gemini-*`, usa o ícone do Google (Gemini G) em vez da folha padrão do endpoint agents. Afeta dropdown de seleção e ícone do header.
+2. `client/src/components/Endpoints/MessageEndpointIcon.tsx` — mesma regra para o avatar ao lado de cada mensagem no chat.
+3. `client/src/hooks/Messages/useMessageActions.tsx` — prioriza `conversation.modelLabel` ("IAzzas") antes de cair para `agent.name` (que vinha "Gemini" para agentes efêmeros Gemini). Afeta o nome do remetente mostrado no chat.
+
+**Patches anteriores ainda em uso** (já commitados em `a1d7f6fd7`, continuam válidos):
+
+- `packages/data-provider/src/models.ts` — `tools?: string[]` em `TModelSpec`.
+- `packages/api/src/agents/load.ts (loadEphemeralAgent)` — leitura de `modelSpec.tools`, fallback de model/promptPrefix, inferência de provider pelo prefixo do model.
+- `client/src/components/Chat/Menus/Endpoints/ModelSelectorContext.tsx` — filtro de specs permite ephemeral agents.
+
+### Pontos abertos para próxima sessão
+
+- **Rate-limit de `web_search`**: não existe ainda. Produção precisa de um limite por usuário (ex: N buscas/dia) para capear custo de infra.
+- **Validação em múltiplos cenários**: teste de qualidade Flash-agent vs Flash-nativo foi feito com poucas queries. Antes de deploy amplo, rodar um set variado (pesquisa profunda, análise, conversa casual, geração de imagem) comparando as duas versões.
+- **Refill diário de créditos**: combinado de implementar, ainda pendente. A mensagem de "créditos esgotados" já promete renovação à meia-noite (commit `782b4a464`), mas o mecanismo de refill não foi ligado.
 
 ---
 
@@ -268,7 +336,8 @@ Categorias cobertas: dados internos, tempo real, análise de arquivo, info pesso
 
 ## 8. Pontos de atenção para manutenção
 
-- **Sync com upstream LibreChat**: patches em `packages/api` e `packages/data-provider` podem conflitar em merges. Revisar `loadEphemeralAgent` e `TModelSpec` após cada sync.
+- **Sync com upstream LibreChat**: patches em `packages/api` e `packages/data-provider` podem conflitar em merges. Revisar `loadEphemeralAgent`, `TModelSpec`, `SpecIcon.tsx`, `MessageEndpointIcon.tsx` e `useMessageActions.tsx` após cada sync.
+- **Rollback Flash/Pro para google endpoint**: o `librechat.yaml` preserva os specs antigos comentados ao final do bloco `modelSpecs.list`. Para reverter, remover os specs ativos e descomentar o bloco — grounding nativo volta, mas geração de imagem é perdida.
 - **Docker Compose**: primeira execução pós-clean baixa ~700 MB de imagens (mongo, meilisearch, pgvector, rag_api, librechat-dev). Cacheia nas rodadas seguintes.
 - **Nodemon zumbi na 3080 (Windows)**: após restart de backend em dev, se der `EADDRINUSE`, matar PID com `taskkill //F //PID <pid>`.
 - **Build do frontend com OOM**: `npm run frontend` (production build) estoura heap em máquinas com pouca RAM. Para dev local usamos `npm run frontend:dev` (Vite HMR em :3090, proxy para backend em :3080).

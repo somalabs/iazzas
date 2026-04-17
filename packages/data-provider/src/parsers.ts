@@ -255,6 +255,16 @@ export const getResponseSender = (endpointOption: Partial<t.TEndpointOption>): s
     return 'Gemini';
   }
 
+  if (endpoint === EModelEndpoint.agents) {
+    if (modelLabel) {
+      return modelLabel;
+    }
+    if (modelDisplayLabel) {
+      return modelDisplayLabel;
+    }
+    return '';
+  }
+
   if (endpoint === EModelEndpoint.custom || endpointType === EModelEndpoint.custom) {
     if (modelLabel) {
       return modelLabel;
