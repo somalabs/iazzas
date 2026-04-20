@@ -529,7 +529,6 @@ class BaseClient {
           logViolation,
           getMultiplier: db.getMultiplier,
           findBalanceByUser: db.findBalanceByUser,
-          createAutoRefillTransaction: db.createAutoRefillTransaction,
           balanceConfig,
           upsertBalanceFields: db.upsertBalanceFields,
         },

@@ -16,7 +16,6 @@ describe('checkBalance', () => {
   const createMockDeps = (overrides: Partial<CheckBalanceDeps> = {}): CheckBalanceDeps => ({
     findBalanceByUser: jest.fn().mockResolvedValue({ tokenCredits: 1000 }),
     getMultiplier: jest.fn().mockReturnValue(1),
-    createAutoRefillTransaction: jest.fn(),
     logViolation: jest.fn().mockResolvedValue(undefined),
     ...overrides,
   });
