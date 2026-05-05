@@ -35,7 +35,7 @@ services:
 
   code-gateway:
     container_name: code-gateway
-    build: ./code-interpreter-gateway
+    image: ghcr.io/somalabs/iazzas-code-gateway:latest
     environment:
       - USE_LOCAL_EXEC=true
       - GATEWAY_API_KEY=${LIBRECHAT_CODE_API_KEY}
