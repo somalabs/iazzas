@@ -17,6 +17,16 @@ The source code for `@librechat/agents` (major backend dependency, same team) is
 
 ---
 
+## Operational docs
+
+Read these before changing infra or shipping code that affects deploy:
+
+- [`docs/DEPLOY.md`](docs/DEPLOY.md) — deploy procedure, GHCR auth, Docker Compose flags, SSO diagnostics, rollback, known pitfalls
+- [`docs/iazzas-arquitetura.md`](docs/iazzas-arquitetura.md) — IAzzas architecture (containers, agents, web search, code interpreter, image generation)
+- [`docs/env-production.md`](docs/env-production.md) — production environment variables
+
+---
+
 ## Workspace Boundaries
 
 - **All new backend code must be TypeScript** in `/packages/api`.
