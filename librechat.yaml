@@ -196,3 +196,11 @@ fileConfig:
         - image/jpeg
         - image/png
         - image/webp
+
+mcpServers:
+  azzas:
+    type: stdio
+    command: node
+    args:
+      - /opt/azzas-mcp/index.js
+    timeout: 60000

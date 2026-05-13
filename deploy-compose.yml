@@ -29,6 +29,8 @@ services:
       - type: bind
         source: ./librechat.yaml
         target: /app/librechat.yaml
+      - ./mcp/azzas:/opt/azzas-mcp:ro
+      - /home/correa/azzas-mcp-creds:/root/.mcp
       - ./images:/app/client/public/images
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
