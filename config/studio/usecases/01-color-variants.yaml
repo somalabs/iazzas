@@ -1,0 +1,70 @@
+use_case: color_variants
+version: 1.0.0
+display_name: "Variantes de Cor"
+description: "Change the colorway of an existing product while preserving shape, fabric texture, and construction."
+default_model: flux-kontext
+fallback_model: nano-banana-2
+
+ui_defaults:
+  aspect_ratio: "4:5"
+  image_count: 4
+  resolution: "2K"
+
+image_slots:
+  - id: product_image
+    label: "Produto"
+    description: "Foto do produto original para recolorir"
+    required: true
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+  - id: color_reference
+    label: "Referência de cor"
+    description: "Imagem com a paleta ou colorway desejado (opcional)"
+    required: false
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+form_fields:
+  - id: target_colorway
+    type: text
+    label: "Colorway desejado"
+    placeholder: "ex: dusty rose, cobalt blue / ivory, all-black"
+    required: true
+    max_length: 200
+
+  - id: preserve_details
+    type: text
+    label: "Detalhes a preservar"
+    placeholder: "ex: bordados, estampa original, rebites dourados"
+    required: false
+    max_length: 200
+
+  - id: style_notes
+    type: text
+    label: "Notas adicionais"
+    placeholder: "ex: manter fundo neutro de estúdio"
+    required: false
+    max_length: 300
+
+prompt_template: |
+  Recolor this fashion garment to {{target_colorway}}.
+  Preserve the exact silhouette, drape, and fabric texture from the input image.
+  {{#if color_reference}}Apply the colorway from the provided color reference.{{/if}}
+  {{#if preserve_details}}Keep these details intact: {{preserve_details}}.{{/if}}
+  Studio product photography lighting, clean background, sharp focus on fabric detail.
+  {{#if style_notes}}{{style_notes}}{{/if}}
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - check: color_fidelity
+    description: "Dominant hue matches target_colorway"
+  - check: silhouette_preservation
+    description: "Product silhouette unchanged from input image"
+  - check: texture_retention
+    description: "Fabric weave and surface texture remain consistent with input"
+  - check: background_neutral
+    description: "Background is clean and matches input composition"

@@ -1,0 +1,91 @@
+use_case: sketch_to_render
+version: 1.0.0
+display_name: "Sketch-to-Render"
+description: "Convert a fashion sketch, flat drawing, or CAD into a photorealistic or editorial render."
+default_model: nano-banana-pro
+fallback_model: nano-banana-2
+
+ui_defaults:
+  aspect_ratio: "4:5"
+  image_count: 4
+  resolution: "2K"
+
+image_slots:
+  - id: sketch_image
+    label: "Sketch / Flat"
+    description: "Desenho de moda, flat técnico ou CAD da peça"
+    required: true
+    accepts: [jpg, jpeg, png, webp, pdf]
+    max_size_mb: 15
+
+  - id: style_reference
+    label: "Referência de estilo"
+    description: "Imagem de mood ou referência visual para o render (opcional)"
+    required: false
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+form_fields:
+  - id: render_style
+    type: select
+    label: "Estilo do render"
+    required: true
+    default: photorealistic
+    options:
+      - value: photorealistic
+        label: "Fotorrealista (e-commerce / produto)"
+      - value: editorial
+        label: "Editorial (alta moda)"
+      - value: illustration
+        label: "Ilustração técnica (mantém linguagem do flat)"
+
+  - id: fabric_type
+    type: text
+    label: "Tecido / Material"
+    placeholder: "ex: silk chiffon, heavy cotton canvas, boucle, leather"
+    required: false
+    max_length: 150
+
+  - id: colorway
+    type: text
+    label: "Colorway"
+    placeholder: "ex: ivory / dusty rose, all-black (se não estiver no sketch)"
+    required: false
+    max_length: 150
+
+  - id: setting
+    type: select
+    label: "Cenário"
+    required: true
+    default: studio-white
+    options:
+      - value: studio-white
+        label: "Estúdio fundo branco"
+      - value: editorial-environment
+        label: "Ambiente editorial"
+
+prompt_template: |
+  Render this fashion sketch as a {{render_style}} image.
+  Preserve the exact silhouette, proportions, and design details from the sketch.
+  {{#if fabric_type}}Fabric: {{fabric_type}} — render the material with accurate texture, drape, and specular highlights.{{/if}}
+  {{#if colorway}}Colorway: {{colorway}}.{{else}}Use the colors indicated in the sketch.{{/if}}
+  {{#if style_reference}}Apply the mood and aesthetic from the style reference.{{/if}}
+  {{#if setting == "studio-white"}}Clean white studio background, product photography lighting.{{/if}}
+  {{#if setting == "editorial-environment"}}High-fashion editorial environment, expressive styling.{{/if}}
+  {{#if render_style == "photorealistic"}}Photorealistic product photography quality, sharp fabric detail.{{/if}}
+  {{#if render_style == "editorial"}}High-fashion editorial aesthetic, dramatic lighting.{{/if}}
+  {{#if render_style == "illustration"}}Technical fashion illustration style, clean construction lines.{{/if}}
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - check: sketch_fidelity
+    description: "Output silhouette and proportions match the input sketch"
+  - check: fabric_rendering
+    description: "If fabric_type specified, material texture and drape are realistic"
+  - check: colorway_accuracy
+    description: "Colors match target colorway or sketch indication"
+  - check: render_style_match
+    description: "Visual quality and aesthetic match the selected render_style"
