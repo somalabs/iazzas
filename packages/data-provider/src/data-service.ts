@@ -6,6 +6,7 @@ import * as ag from './types/agents';
 import * as m from './types/mutations';
 import * as q from './types/queries';
 import * as f from './types/files';
+import * as img from './types/images';
 import * as mcp from './types/mcpServers';
 import * as config from './config';
 import request from './request';
@@ -1371,3 +1372,27 @@ export interface ActiveJobsResponse {
 export const getActiveJobs = (): Promise<ActiveJobsResponse> => {
   return request.get(endpoints.activeJobs());
 };
+
+/* Fashion image-generation service (PRD §5) */
+export function generateImage(
+  payload: img.TGenerateImageRequest,
+): Promise<img.TImageGenerationRecord> {
+  return request.post(endpoints.generateImage(), payload);
+}
+
+export function editImage(
+  payload: img.TEditImageRequest,
+): Promise<img.TImageGenerationRecord> {
+  return request.post(endpoints.editImage(), payload);
+}
+
+export function getImageGenerations(params?: {
+  cursor?: string;
+  limit?: number;
+}): Promise<img.TImageGenerationListResponse> {
+  return request.get(endpoints.imageGenerations(params));
+}
+
+export function getImageGeneration(id: string): Promise<img.TImageGenerationRecord> {
+  return request.get(endpoints.imageGeneration(id));
+}

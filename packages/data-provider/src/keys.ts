@@ -77,6 +77,8 @@ export enum QueryKeys {
   adminEffectiveBalance = 'adminEffectiveBalance',
   adminAnalytics = 'adminAnalytics',
   adminAnalyticsModels = 'adminAnalyticsModels',
+  imageGenerations = 'imageGenerations',
+  imageGeneration = 'imageGeneration',
 }
 
 // Dynamic query keys that require parameters
@@ -128,4 +130,6 @@ export enum MutationKeys {
   deleteAdminConfig = 'deleteAdminConfig',
   toggleAdminConfig = 'toggleAdminConfig',
   adjustAdminUserBalance = 'adjustAdminUserBalance',
+  generateImage = 'generateImage',
+  editImage = 'editImage',
 }

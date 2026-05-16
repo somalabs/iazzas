@@ -289,6 +289,15 @@ export const agentFiles = (agentId: string) => `${BASE_URL}/api/files/agent/${ag
 
 export const images = () => `${files()}/images`;
 
+/* Fashion image-generation service (PRD §5) */
+const imageGenRoot = `${BASE_URL}/api/images`;
+export const generateImage = () => `${imageGenRoot}/generate`;
+export const editImage = () => `${imageGenRoot}/edit`;
+export const imageGeneration = (id: string) =>
+  `${imageGenRoot}/generations/${encodeURIComponent(id)}`;
+export const imageGenerations = (params?: { cursor?: string; limit?: number }) =>
+  `${imageGenRoot}/generations${buildQuery(params ?? {})}`;
+
 export const avatar = () => `${images()}/avatar`;
 
 export const speech = () => `${files()}/speech`;
