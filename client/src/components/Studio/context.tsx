@@ -1,12 +1,14 @@
-import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import type { Dispatch, ReactNode } from 'react';
 import type {
   AspectRatio,
   Resolution,
   StudioCreation,
   StudioReference,
+  StudioReferenceInput,
   StudioUseCase,
 } from 'librechat-data-provider';
+import { useStudioCreationsQuery, useStudioGenerateMutation } from '~/data-provider';
 import { USE_CASE_SCHEMAS } from './schemas';
 
 type StudioMode = 'workspace' | 'detail' | 'editing';
@@ -37,7 +39,9 @@ type StudioAction =
   | { type: 'REMOVE_REFERENCE'; payload: string }
   | { type: 'SELECT_CREATION'; payload: StudioCreation | null }
   | { type: 'SET_MODE'; payload: StudioMode }
-  | { type: 'ADD_CREATION'; payload: StudioCreation };
+  | { type: 'ADD_CREATION'; payload: StudioCreation }
+  | { type: 'UPDATE_CREATION'; payload: { id: string; creation: StudioCreation } }
+  | { type: 'HYDRATE_CREATIONS'; payload: StudioCreation[] };
 
 function buildDefaultFormValues(useCaseId: StudioUseCase): Record<string, string | boolean> {
   const schema = USE_CASE_SCHEMAS.find((s) => s.id === useCaseId);
@@ -134,6 +138,24 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
       return { ...state, mode: action.payload };
     case 'ADD_CREATION':
       return { ...state, creations: [action.payload, ...state.creations] };
+    case 'UPDATE_CREATION':
+      return {
+        ...state,
+        creations: state.creations.map((c) =>
+          c.id === action.payload.id ? action.payload.creation : c,
+        ),
+      };
+    case 'HYDRATE_CREATIONS': {
+      const localOnly = state.creations.filter((c) => c.status === 'generating');
+      const serverIds = new Set(action.payload.map((c) => c.id));
+      return {
+        ...state,
+        creations: [
+          ...localOnly.filter((c) => !serverIds.has(c.id)),
+          ...action.payload,
+        ],
+      };
+    }
     default:
       return state;
   }
@@ -183,15 +205,34 @@ export function useStudioDispatch() {
   return dispatch;
 }
 
-export function useGenerateImages() {
-  const { activeUseCase, prompt, imageCount, aspectRatio, resolution, activeSchema, references } =
-    useStudio();
+export function useStudioHistory() {
   const dispatch = useStudioDispatch();
+  const { data } = useStudioCreationsQuery({ limit: 30 });
+  useEffect(() => {
+    if (data?.items) {
+      dispatch({ type: 'HYDRATE_CREATIONS', payload: data.items });
+    }
+  }, [data, dispatch]);
+}
+
+export function useGenerateImages() {
+  const {
+    activeUseCase,
+    prompt,
+    formValues,
+    imageCount,
+    aspectRatio,
+    resolution,
+    activeSchema,
+    references,
+  } = useStudio();
+  const dispatch = useStudioDispatch();
+  const generateMutation = useStudioGenerateMutation();
 
   return useCallback(() => {
-    // TODO(tech): wire to actual generation API
-    const creation: StudioCreation = {
-      id: crypto.randomUUID(),
+    const optimisticId = crypto.randomUUID();
+    const optimistic: StudioCreation = {
+      id: optimisticId,
       prompt: prompt || '(sem prompt)',
       useCase: activeUseCase,
       model: activeSchema?.defaultModel ?? 'nano-banana-pro',
@@ -204,6 +245,50 @@ export function useGenerateImages() {
       collectionName: null,
       status: 'generating',
     };
-    dispatch({ type: 'ADD_CREATION', payload: creation });
-  }, [activeUseCase, prompt, imageCount, aspectRatio, resolution, activeSchema, references, dispatch]);
+    dispatch({ type: 'ADD_CREATION', payload: optimistic });
+
+    const referenceInputs: StudioReferenceInput[] = references
+      .filter((r) => !!r.fileId)
+      .map((r) => ({
+        slotId: r.slotId ?? r.slotType,
+        slotType: r.slotType,
+        label: r.label,
+        fileId: r.fileId as string,
+      }));
+
+    generateMutation.mutate(
+      {
+        useCase: activeUseCase,
+        prompt,
+        formValues,
+        references: referenceInputs,
+        imageCount,
+        aspectRatio,
+        resolution,
+        modelOverride: null,
+      },
+      {
+        onSuccess: (creation) => {
+          dispatch({ type: 'UPDATE_CREATION', payload: { id: optimisticId, creation } });
+        },
+        onError: () => {
+          dispatch({
+            type: 'UPDATE_CREATION',
+            payload: { id: optimisticId, creation: { ...optimistic, status: 'error' } },
+          });
+        },
+      },
+    );
+  }, [
+    activeUseCase,
+    prompt,
+    formValues,
+    imageCount,
+    aspectRatio,
+    resolution,
+    activeSchema,
+    references,
+    dispatch,
+    generateMutation,
+  ]);
 }

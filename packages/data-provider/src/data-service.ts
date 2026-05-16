@@ -1371,3 +1371,23 @@ export interface ActiveJobsResponse {
 export const getActiveJobs = (): Promise<ActiveJobsResponse> => {
   return request.get(endpoints.activeJobs());
 };
+
+/* Studio (fashion image generation) */
+export const studioGenerate = (payload: t.TStudioGenerateRequest): Promise<t.StudioCreation> => {
+  return request.post(endpoints.studioGenerate(), payload);
+};
+
+export const studioEdit = (payload: t.TStudioEditRequest): Promise<t.StudioCreation> => {
+  return request.post(endpoints.studioEdit(), payload);
+};
+
+export const getStudioCreation = (id: string): Promise<t.StudioCreation> => {
+  return request.get(endpoints.studioCreation(id));
+};
+
+export const getStudioCreations = (params: {
+  cursor?: string | null;
+  limit?: number;
+}): Promise<t.TStudioCreationListResponse> => {
+  return request.get(endpoints.studioCreations(params));
+};

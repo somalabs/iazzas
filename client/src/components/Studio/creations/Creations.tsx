@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, ImageIcon } from 'lucide-react';
 import { useLocalize } from '~/hooks';
-import { useStudio, useStudioDispatch } from '../context';
+import { useStudio, useStudioDispatch, useStudioHistory } from '../context';
 import { MODEL_DISPLAY_NAMES } from '../schemas';
 import type { StudioCreation } from 'librechat-data-provider';
 
@@ -56,6 +56,7 @@ function CreationItem({
 
 export default function Creations() {
   const localize = useLocalize();
+  useStudioHistory();
   const { creations } = useStudio();
   const dispatch = useStudioDispatch();
   const [search, setSearch] = useState('');

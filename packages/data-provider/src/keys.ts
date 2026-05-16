@@ -77,6 +77,9 @@ export enum QueryKeys {
   adminEffectiveBalance = 'adminEffectiveBalance',
   adminAnalytics = 'adminAnalytics',
   adminAnalyticsModels = 'adminAnalyticsModels',
+  /* Studio */
+  studioCreations = 'studioCreations',
+  studioCreation = 'studioCreation',
 }
 
 // Dynamic query keys that require parameters
@@ -128,4 +131,7 @@ export enum MutationKeys {
   deleteAdminConfig = 'deleteAdminConfig',
   toggleAdminConfig = 'toggleAdminConfig',
   adjustAdminUserBalance = 'adjustAdminUserBalance',
+  /* Studio */
+  studioGenerate = 'studioGenerate',
+  studioEdit = 'studioEdit',
 }

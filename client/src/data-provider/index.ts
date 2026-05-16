@@ -5,6 +5,8 @@ export * from './Endpoints';
 export * from './Files';
 /* Memories */
 export * from './Memories';
+/* Studio */
+export * from './Studio';
 export * from './Messages';
 export * from './Misc';
 export * from './Tools';

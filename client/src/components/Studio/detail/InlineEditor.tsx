@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Paperclip, ChevronUp, X } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
+import { useStudioEditMutation } from '~/data-provider';
 import { useStudio, useStudioDispatch } from '../context';
 
 type EditorTab = 'prompt' | 'visual';
@@ -12,6 +13,7 @@ export default function InlineEditor() {
   const { selectedCreation } = useStudio();
   const [tab, setTab] = useState<EditorTab>('prompt');
   const [value, setValue] = useState('');
+  const editMutation = useStudioEditMutation();
 
   if (!selectedCreation) return null;
 
@@ -20,9 +22,29 @@ export default function InlineEditor() {
   }
 
   function handleSubmit() {
-    // TODO(tech): wire to image edit API
-    setValue('');
-    handleClose();
+    if (!selectedCreation || !value.trim() || editMutation.isLoading) {
+      return;
+    }
+    const sourceImage = selectedCreation.images[0];
+    if (!sourceImage) {
+      return;
+    }
+    editMutation.mutate(
+      {
+        creationId: selectedCreation.id,
+        imageId: sourceImage.id,
+        prompt: value.trim(),
+        modelOverride: null,
+      },
+      {
+        onSuccess: (creation) => {
+          dispatch({ type: 'ADD_CREATION', payload: creation });
+          dispatch({ type: 'SELECT_CREATION', payload: creation });
+          setValue('');
+          dispatch({ type: 'SET_MODE', payload: 'detail' });
+        },
+      },
+    );
   }
 
   return (

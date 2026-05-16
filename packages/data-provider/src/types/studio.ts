@@ -21,12 +21,16 @@ export type Resolution = '1K' | '2K' | '4K';
 
 export type ReferenceSlotType = 'style' | 'character' | 'image';
 
+export type StudioModel = 'flux-kontext' | 'nano-banana-2' | 'nano-banana-pro';
+
 export type StudioReference = {
   id: string;
   slotType: ReferenceSlotType;
   label: string;
   previewUrl: string | null;
   fileName: string | null;
+  fileId?: string | null;
+  slotId?: string;
 };
 
 export type StudioImageResult = {
@@ -95,4 +99,34 @@ export type StudioUseCaseSchema = {
     requiresHumanReview: boolean;
     reviewReason: string;
   };
+};
+
+export type StudioReferenceInput = {
+  slotId: string;
+  slotType: ReferenceSlotType;
+  label: string;
+  fileId: string;
+};
+
+export type TStudioGenerateRequest = {
+  useCase: StudioUseCase;
+  prompt: string;
+  formValues: Record<string, string | boolean>;
+  references: StudioReferenceInput[];
+  imageCount: number;
+  aspectRatio: AspectRatio;
+  resolution: Resolution;
+  modelOverride?: StudioModel | null;
+};
+
+export type TStudioEditRequest = {
+  creationId: string;
+  imageId: string;
+  prompt: string;
+  modelOverride?: StudioModel | null;
+};
+
+export type TStudioCreationListResponse = {
+  items: StudioCreation[];
+  nextCursor: string | null;
 };
