@@ -1,0 +1,136 @@
+use_case: virtual_tryon
+version: "1.0.0"
+# WORKING ASSUMPTION: model IDs below must be validated against PRD §2.2 before router implementation.
+# NOTE FOR TECH STREAM: if a dedicated try-on service is available in the stack
+# (e.g. IDM-VTON, OOTDiffusion), it MUST be preferred over the generic default below.
+default_model: flux-kontext-pro   # structural control + garment fidelity
+fallback_model: flux-1.1-pro
+
+ui_defaults:
+  aspect_ratio: "2:3"   # portrait/model — PRD §4.1-F4
+  image_count: 4        # exploration default — PRD §4.1-F3; refinement = 1 (user override)
+
+image_slots:
+  - id: garment
+    label_pt: "Foto do produto / peça"
+    label_en: "Garment / product photo"
+    required: true
+    hint_pt: "Foto da peça isolada (flat lay, ghost mannequin ou manequim). Fundo limpo recomendado."
+    hint_en: "Isolated garment photo (flat lay, ghost mannequin, or mannequin). Clean background recommended."
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+  - id: model_reference
+    label_pt: "Referência do modelo"
+    label_en: "Model reference"
+    required: false
+    hint_pt: "Opcional: foto de referência do modelo ou tipo de modelo desejado (pose, corpo)"
+    hint_en: "Optional: model reference photo or desired model type (pose, body type)"
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+form_fields:
+  - id: model_description
+    type: text
+    label_pt: "Descrição do modelo"
+    label_en: "Model description"
+    required: false
+    placeholder_pt: "Ex.: modelo feminino, altura média, pele morena, cabelo preto"
+    placeholder_en: "e.g. female model, medium height, brown skin, black hair"
+    hint_pt: "Descreva características físicas ou deixe em branco para modelo neutro"
+
+  - id: pose
+    type: select
+    label_pt: "Pose"
+    label_en: "Pose"
+    required: false
+    default: front_standing
+    options:
+      - value: front_standing
+        label_pt: "Em pé, frente"
+        label_en: "Standing, front"
+      - value: front_walking
+        label_pt: "Andando, frente"
+        label_en: "Walking, front"
+      - value: three_quarter
+        label_pt: "3/4 (diagonal)"
+        label_en: "Three-quarter (diagonal)"
+      - value: back
+        label_pt: "De costas"
+        label_en: "Back view"
+      - value: sitting
+        label_pt: "Sentada"
+        label_en: "Sitting"
+      - value: editorial
+        label_pt: "Editorial / movimento"
+        label_en: "Editorial / movement"
+
+  - id: setting
+    type: select
+    label_pt: "Cenário"
+    label_en: "Setting / background"
+    required: false
+    default: studio_white
+    options:
+      - value: studio_white
+        label_pt: "Estúdio branco"
+        label_en: "White studio"
+      - value: studio_grey
+        label_pt: "Estúdio cinza"
+        label_en: "Grey studio"
+      - value: lifestyle_urban
+        label_pt: "Lifestyle urbano"
+        label_en: "Lifestyle urban"
+      - value: lifestyle_nature
+        label_pt: "Lifestyle natureza"
+        label_en: "Lifestyle nature"
+      - value: editorial_abstract
+        label_pt: "Editorial / abstrato"
+        label_en: "Editorial / abstract"
+
+  - id: styling_notes
+    type: textarea
+    label_pt: "Notas de styling"
+    label_en: "Styling notes"
+    required: false
+    max_chars: 300
+    placeholder_pt: "Ex.: acessórios, calçados, sobreposições, cabelo solto..."
+
+prompt_template: |
+  Dress a {{#if model_description}}{{model_description}}{{else}}neutral professional fashion model{{/if}}
+  in the exact garment shown in the provided product photo.
+  Garment fidelity is paramount: preserve all design details — silhouette, colorway, fabric texture,
+  drape behavior, seam lines, buttons, closures, trims, and any surface print or embellishment
+  exactly as they appear in the source product image.
+  Simulate realistic gravity-correct fabric behavior and drape as the garment falls on the model's body.
+  {{#if (eq fabric_type "silk_satin")}}Render specular highlights consistent with silk draping over
+  the body's three-dimensional form.{{/if}}
+  Pose: {{pose}}.
+  Setting: {{setting}}.
+  {{#if styling_notes}}Styling: {{styling_notes}}.{{/if}}
+  {{#if model_reference}}Use the model reference image for body type and pose guidance.{{/if}}
+  Lighting: professional fashion photography lighting consistent with {{setting}}.
+  Shot: full-body or 3/4 crop appropriate for the pose, portrait orientation 2:3.
+  Output: high-quality editorial or e-commerce fashion photo. No watermarks, logos, or props
+  beyond what is described in styling notes.
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - id: garment_fidelity
+    description: "All garment design details (silhouette, color, texture, trims) preserved from source"
+  - id: drape_realism
+    description: "Fabric drapes naturally on model body — gravity-correct, no floating or flat projection"
+  - id: model_garment_fit
+    description: "Garment fits model proportionally — no visible scaling artifacts"
+  - id: pose_accuracy
+    description: "Model pose matches selected option"
+  - id: setting_coherence
+    description: "Background, lighting, and model style are coherent with selected setting"
+
+compliance_note: >
+  Human review MANDATORY before any commercial use — especially to verify model representation
+  is appropriate and garment fidelity meets commercial standards.
+  All outputs include C2PA provenance watermark.

@@ -1,0 +1,164 @@
+use_case: multi_reference
+version: "1.0.0"
+# WORKING ASSUMPTION: model IDs below must be validated against PRD §2.2 before router implementation.
+default_model: flux-redux-pro     # multi-image conditioning required
+fallback_model: flux-1.1-pro
+
+ui_defaults:
+  aspect_ratio: "4:5"   # e-commerce default; user may switch to 2:3 for editorial — PRD §4.1-F4
+  image_count: 4        # exploration default — PRD §4.1-F3; refinement = 1 (user override)
+
+image_slots:
+  - id: reference_1
+    label_pt: "Referência 1 (principal)"
+    label_en: "Reference 1 (primary)"
+    required: true
+    hint_pt: "Referência de maior peso — silhueta, produto base, ou peça protagonista"
+    hint_en: "Highest-weight reference — silhouette, base product, or hero piece"
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+  - id: reference_2
+    label_pt: "Referência 2"
+    label_en: "Reference 2"
+    required: true
+    hint_pt: "Segunda referência — textura, estampa, detalhe de construção, ou produto complementar"
+    hint_en: "Second reference — texture, pattern, construction detail, or complementary product"
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+  - id: reference_3
+    label_pt: "Referência 3 (opcional)"
+    label_en: "Reference 3 (optional)"
+    required: false
+    hint_pt: "Terceira referência — paleta, detalhe de acabamento, ou inspiração de estilo"
+    hint_en: "Third reference — color palette, finishing detail, or style inspiration"
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+  - id: reference_4
+    label_pt: "Referência 4 (opcional)"
+    label_en: "Reference 4 (optional)"
+    required: false
+    hint_pt: "Quarta referência adicional"
+    hint_en: "Additional fourth reference"
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+form_fields:
+  - id: creation_intent
+    type: select
+    label_pt: "Intenção criativa"
+    label_en: "Creative intent"
+    required: true
+    default: new_product
+    options:
+      - value: new_product
+        label_pt: "Criar novo produto combinando referências"
+        label_en: "Create new product combining references"
+      - value: texture_transfer
+        label_pt: "Aplicar textura/material de uma referência em outra"
+        label_en: "Transfer texture/material from one reference to another"
+      - value: style_fusion
+        label_pt: "Fusão de estilos / silhuetas"
+        label_en: "Style / silhouette fusion"
+      - value: collection_piece
+        label_pt: "Nova peça coerente com coleção existente"
+        label_en: "New piece coherent with existing collection"
+
+  - id: primary_element
+    type: select
+    label_pt: "Elemento dominante na composição"
+    label_en: "Dominant element in composition"
+    required: false
+    default: silhouette
+    options:
+      - value: silhouette
+        label_pt: "Silhueta (da referência 1)"
+        label_en: "Silhouette (from reference 1)"
+      - value: texture
+        label_pt: "Textura / material"
+        label_en: "Texture / material"
+      - value: color_palette
+        label_pt: "Paleta de cor"
+        label_en: "Color palette"
+      - value: print
+        label_pt: "Estampa / motivo"
+        label_en: "Print / motif"
+
+  - id: output_context
+    type: select
+    label_pt: "Contexto de saída"
+    label_en: "Output context"
+    required: false
+    default: ecommerce
+    options:
+      - value: ecommerce
+        label_pt: "E-commerce (produto isolado)"
+        label_en: "E-commerce (isolated product)"
+      - value: editorial
+        label_pt: "Editorial (ambiente / modelo)"
+        label_en: "Editorial (setting / model)"
+      - value: lookbook
+        label_pt: "Lookbook (composição completa)"
+        label_en: "Lookbook (full look composition)"
+
+  - id: design_direction
+    type: textarea
+    label_pt: "Direção criativa"
+    label_en: "Creative direction"
+    required: false
+    max_chars: 400
+    placeholder_pt: "Descreva o que quer combinar de cada referência: ex. silhueta da ref 1, estampa da ref 2, paleta da ref 3..."
+    placeholder_en: "Describe what to combine from each reference: e.g. silhouette from ref 1, print from ref 2, palette from ref 3..."
+
+prompt_template: |
+  Create a new fashion garment {{#if (eq creation_intent "new_product")}}synthesizing design
+  elements from the provided reference images{{/if}}{{#if (eq creation_intent "texture_transfer")}}
+  by transferring the texture and material quality of one reference onto the silhouette and
+  construction of another{{/if}}{{#if (eq creation_intent "style_fusion")}}through a fusion
+  of the silhouettes and style codes from the reference images{{/if}}{{#if (eq creation_intent
+  "collection_piece")}}as a new piece that is stylistically coherent with the existing collection
+  shown in the reference images{{/if}}.
+  Dominant element: {{primary_element}} from reference 1.
+  {{#if design_direction}}Design direction: {{design_direction}}.{{/if}}
+  Synthesize the following from the references:
+  - From reference 1 (primary): silhouette, proportions, and garment category.
+  - From reference 2: {{#if (eq primary_element "texture")}}texture, fabric behavior, and
+    material quality{{else if (eq primary_element "print")}}print motif and pattern application
+    {{else if (eq primary_element "color_palette")}}colorway and tonal balance
+    {{else}}construction and finishing details{{/if}}.
+  {{#if reference_3}}- From reference 3: additional design accent, color palette refinement,
+  or styling element.{{/if}}
+  {{#if reference_4}}- From reference 4: further design detail or complementary inspiration.{{/if}}
+  The resulting garment must be cohesive and wearable — a single unified design, not a collage.
+  Fabric drape must be gravity-correct. Preserve realistic warp-and-weft texture, seam logic,
+  and garment construction plausibility.
+  Output context: {{output_context}}.
+  {{#if (eq output_context "ecommerce")}}Present on a clean white or neutral background,
+  ghost-mannequin or flat-lay.{{/if}}
+  {{#if (eq output_context "editorial")}}Present in a fashion editorial setting with
+  professional lighting and model.{{/if}}
+  {{#if (eq output_context "lookbook")}}Present as a complete look with complementary styling.{{/if}}
+  Output: high-quality fashion image. No watermarks, logos, or unintended props.
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - id: design_synthesis
+    description: "Output is a unified, coherent new garment — not a visual collage of references"
+  - id: primary_element_dominance
+    description: "Selected dominant element (silhouette/texture/print/palette) visibly leads the composition"
+  - id: construction_plausibility
+    description: "Garment seams, closures, and structure are physically plausible"
+  - id: drape_realism
+    description: "Fabric behavior is gravity-correct and consistent with material type"
+  - id: context_coherence
+    description: "Output matches selected context (e-commerce / editorial / lookbook)"
+
+compliance_note: >
+  Human review required before any commercial use. Validate that synthesized design does not
+  reproduce protected third-party designs or IP from reference images.
+  All outputs include C2PA provenance watermark.

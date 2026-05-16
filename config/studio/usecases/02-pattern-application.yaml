@@ -1,0 +1,183 @@
+use_case: pattern_application
+version: "1.0.0"
+# WORKING ASSUMPTION: model IDs below must be validated against PRD §2.2 before router implementation.
+default_model: flux-fill-pro      # inpainting / surface-mapping capability required
+fallback_model: flux-1.1-pro
+
+ui_defaults:
+  aspect_ratio: "4:5"   # still e-commerce — PRD §4.1-F4
+  image_count: 4        # exploration default — PRD §4.1-F3; refinement = 1 (user override)
+
+image_slots:
+  - id: source_product
+    label_pt: "Foto do produto base"
+    label_en: "Base product photo"
+    required: true
+    hint_pt: "Produto com fundo limpo; cor lisa ou neutra para melhor mapeamento da estampa"
+    hint_en: "Clean background; solid or neutral color for best pattern mapping"
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+  - id: pattern_reference
+    label_pt: "Arquivo da estampa"
+    label_en: "Pattern / print file"
+    required: true
+    hint_pt: "Tile repetível ou motivo de estampa em alta resolução"
+    hint_en: "Repeatable tile or print motif at high resolution"
+    accepted_formats: [jpg, png, webp, tiff]
+    max_size_mb: 40
+
+form_fields:
+  - id: print_type
+    type: select
+    label_pt: "Tipo de aplicação da estampa"
+    label_en: "Print application type"
+    required: true
+    default: all_over
+    options:
+      - value: all_over
+        label_pt: "All-over (cobre toda a superfície)"
+        label_en: "All-over print (full surface coverage)"
+      - value: placement
+        label_pt: "Placement (motivo posicionado)"
+        label_en: "Placement print (single positioned motif)"
+      - value: panel
+        label_pt: "Panel (limitado a painéis do molde)"
+        label_en: "Panel print (limited to pattern panels)"
+      - value: engineered
+        label_pt: "Engineered (projetado para o molde)"
+        label_en: "Engineered print (designed for the cut)"
+
+  - id: fabric_type
+    type: select
+    label_pt: "Tipo de tecido"
+    label_en: "Fabric type"
+    required: false
+    default: ""
+    options:
+      - value: ""
+        label_pt: "Não especificado"
+        label_en: "Not specified"
+      - value: cotton_jersey
+        label_pt: "Malha / Jersey"
+        label_en: "Cotton jersey"
+      - value: woven_cotton
+        label_pt: "Algodão tecido"
+        label_en: "Woven cotton"
+      - value: silk_satin
+        label_pt: "Seda / Cetim"
+        label_en: "Silk / Satin"
+      - value: linen
+        label_pt: "Linho"
+        label_en: "Linen"
+      - value: chiffon
+        label_pt: "Chiffon"
+        label_en: "Chiffon"
+      - value: denim
+        label_pt: "Denim"
+        label_en: "Denim"
+
+  - id: scale
+    type: select
+    label_pt: "Escala da estampa"
+    label_en: "Print scale"
+    required: false
+    default: original
+    options:
+      - value: original
+        label_pt: "Original (manter escala do arquivo)"
+        label_en: "Original (keep file scale)"
+      - value: small
+        label_pt: "Pequena"
+        label_en: "Small"
+      - value: medium
+        label_pt: "Média"
+        label_en: "Medium"
+      - value: large
+        label_pt: "Grande"
+        label_en: "Large"
+
+  - id: color_adjustment
+    type: select
+    label_pt: "Ajuste de cor da estampa"
+    label_en: "Pattern color adjustment"
+    required: false
+    default: none
+    options:
+      - value: none
+        label_pt: "Nenhum (manter cores originais)"
+        label_en: "None (keep original colors)"
+      - value: harmonize
+        label_pt: "Harmonizar com o produto base"
+        label_en: "Harmonize with base product"
+
+  - id: background
+    type: select
+    label_pt: "Fundo da imagem"
+    label_en: "Background"
+    required: false
+    default: white
+    options:
+      - value: white
+        label_pt: "Branco"
+        label_en: "White"
+      - value: light_grey
+        label_pt: "Cinza claro"
+        label_en: "Light grey"
+      - value: transparent
+        label_pt: "Transparente (PNG)"
+        label_en: "Transparent (PNG)"
+
+  - id: extra_instructions
+    type: textarea
+    label_pt: "Instruções adicionais"
+    label_en: "Additional instructions"
+    required: false
+    max_chars: 300
+    placeholder_pt: "Ex.: centralizar o motivo principal no busto, girar estampa 45°..."
+
+prompt_template: |
+  Apply the provided print/pattern artwork onto the garment in the source product photo.
+  Print type: {{print_type}}.
+  {{#if (eq print_type "all_over")}}Map the pattern across the entire garment surface as a
+  continuous, seamlessly repeating all-over print.{{/if}}
+  {{#if (eq print_type "placement")}}Position the print motif as a single prominent placement
+  print — centered or as most visually balanced on the garment silhouette.{{/if}}
+  {{#if (eq print_type "panel")}}Apply the pattern only to the designated structural panels of
+  the garment, following the seam lines as panel boundaries.{{/if}}
+  {{#if (eq print_type "engineered")}}Map the print as an engineered print — designed to align
+  precisely with the garment's cut, seams, and silhouette as a single intentional composition.{{/if}}
+  {{#if fabric_type}}Fabric: {{fabric_type}}. Simulate realistic fabric interaction: drape,
+  warp-and-weft deformation, and surface curvature wrapping the pattern naturally around the
+  garment's three-dimensional form.{{/if}}
+  {{#if (eq fabric_type "silk_satin")}}Render subtle specular highlights where the fabric surface
+  catches directional light, slightly softening print edges.{{/if}}
+  {{#if (eq fabric_type "chiffon")}}Apply slight translucency and soft diffusion consistent with
+  chiffon, preserving pattern legibility.{{/if}}
+  Pattern scale: {{scale}}.
+  {{#if (eq color_adjustment "harmonize")}}Adjust the pattern colorway to harmonize with the
+  base garment's neutral or accent tones while preserving print motif fidelity.{{/if}}
+  Preserve original garment silhouette, construction details, buttons, trims, and seams.
+  Background: {{background}}. Lighting: soft, even studio light.
+  {{#if extra_instructions}}Additional: {{extra_instructions}}.{{/if}}
+  Output: clean, e-commerce-ready product image. No watermarks, logos, or props.
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - id: pattern_fidelity
+    description: "Pattern motifs, colors, and scale faithfully reproduce the source artwork"
+  - id: surface_wrapping
+    description: "Pattern wraps naturally around garment curves and drape — no flat projection artifacts"
+  - id: print_type_correctness
+    description: "all-over / placement / panel / engineered applied as specified"
+  - id: silhouette_integrity
+    description: "Garment silhouette and construction unchanged from source product photo"
+  - id: seam_alignment
+    description: "Pattern registration matches across seam lines (especially for panel/engineered)"
+
+compliance_note: >
+  Human review required before any commercial use. Validate that applied artwork does not
+  infringe third-party IP. All outputs include C2PA provenance watermark.

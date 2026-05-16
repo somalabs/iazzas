@@ -1,0 +1,140 @@
+use_case: color_variants
+version: "1.0.0"
+# WORKING ASSUMPTION: model IDs below must be validated against PRD §2.2 before router implementation.
+default_model: flux-1.1-pro
+fallback_model: stable-diffusion-3-5-large
+
+ui_defaults:
+  aspect_ratio: "4:5"   # still e-commerce — PRD §4.1-F4
+  image_count: 4        # exploration default — PRD §4.1-F3; refinement = 1 (user override)
+
+image_slots:
+  - id: source_product
+    label_pt: "Foto do produto original"
+    label_en: "Source product photo"
+    required: true
+    hint_pt: "Foto com fundo limpo (branco ou neutro) para melhor resultado"
+    hint_en: "Clean background (white or neutral) recommended"
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+form_fields:
+  - id: target_colors
+    type: text
+    label_pt: "Cores alvo"
+    label_en: "Target colors"
+    required: true
+    placeholder_pt: "Ex.: dusty rose, cobalt blue, off-white"
+    placeholder_en: "e.g. dusty rose, cobalt blue, off-white"
+    hint_pt: "Liste os colorways desejados separados por vírgula"
+
+  - id: fabric_type
+    type: select
+    label_pt: "Tipo de tecido"
+    label_en: "Fabric type"
+    required: false
+    default: ""
+    options:
+      - value: ""
+        label_pt: "Não especificado"
+        label_en: "Not specified"
+      - value: cotton_jersey
+        label_pt: "Malha / Jersey"
+        label_en: "Cotton jersey"
+      - value: woven_cotton
+        label_pt: "Algodão tecido"
+        label_en: "Woven cotton"
+      - value: silk_satin
+        label_pt: "Seda / Cetim"
+        label_en: "Silk / Satin"
+      - value: linen
+        label_pt: "Linho"
+        label_en: "Linen"
+      - value: denim
+        label_pt: "Denim"
+        label_en: "Denim"
+      - value: velvet
+        label_pt: "Veludo"
+        label_en: "Velvet"
+      - value: leather_faux
+        label_pt: "Couro / Couro vegano"
+        label_en: "Leather / Faux leather"
+      - value: boucle
+        label_pt: "Bouclê"
+        label_en: "Boucle"
+      - value: ripstop
+        label_pt: "Ripstop"
+        label_en: "Ripstop"
+
+  - id: preserve_texture
+    type: checkbox
+    label_pt: "Preservar textura e detalhes do tecido original"
+    label_en: "Preserve original fabric texture and details"
+    required: false
+    default: true
+
+  - id: background
+    type: select
+    label_pt: "Fundo da imagem"
+    label_en: "Background"
+    required: false
+    default: white
+    options:
+      - value: white
+        label_pt: "Branco"
+        label_en: "White"
+      - value: light_grey
+        label_pt: "Cinza claro"
+        label_en: "Light grey"
+      - value: match_product
+        label_pt: "Neutro combinando com o produto"
+        label_en: "Neutral matching product"
+      - value: transparent
+        label_pt: "Transparente (PNG)"
+        label_en: "Transparent (PNG)"
+
+  - id: extra_instructions
+    type: textarea
+    label_pt: "Instruções adicionais"
+    label_en: "Additional instructions"
+    required: false
+    max_chars: 300
+    placeholder_pt: "Ex.: manter botões dourados, cinto no mesmo tom..."
+
+prompt_template: |
+  Generate {{image_count}} product image variations of the garment in the source photo,
+  each in a distinct colorway: {{target_colors}}.
+  {{#if fabric_type}}Fabric: {{fabric_type}}.{{/if}}
+  {{#if preserve_texture}}Faithfully preserve the original fabric texture, weave structure,
+  warp-and-weft pattern, and surface character (grain, sheen, drape) — only shift the hue
+  and saturation to match each target colorway.{{/if}}
+  Maintain identical silhouette, garment construction, seams, stitching details, buttons,
+  and trims as in the source image.
+  {{#if (eq fabric_type "silk_satin")}}Render accurate specular highlights and bias-cut movement
+  consistent with silk/satin behavior.{{/if}}
+  {{#if (eq fabric_type "leather_faux")}}Render directional specular highlights and subtle
+  grain characteristic of {{fabric_type}}.{{/if}}
+  Background: {{background}}.
+  Lighting: soft, even studio light — no hard shadows. Shot angle: front-facing still,
+  ghost-mannequin or flat-lay consistent with source.
+  {{#if extra_instructions}}Additional: {{extra_instructions}}.{{/if}}
+  Output: clean, e-commerce-ready product image. No watermarks, logos, or props.
+
+post_processing:
+  upscale_if_below: 2048        # long edge, pixels
+  apply_watermark: c2pa         # Content Credentials / C2PA provenance standard
+
+quality_signals:
+  - id: colorway_accuracy
+    description: "Each output matches the specified target colorway without color bleed from source"
+  - id: texture_preservation
+    description: "Fabric texture, weave, and surface character match source when preserve_texture=true"
+  - id: silhouette_integrity
+    description: "Garment silhouette, construction details, and trims identical to source"
+  - id: background_cleanliness
+    description: "Background matches requested option with no artifacts"
+  - id: lighting_consistency
+    description: "Soft, even studio lighting — no hard shadows or color cast"
+
+compliance_note: >
+  Human review required before any commercial use. All outputs include C2PA provenance watermark.

@@ -1,0 +1,197 @@
+use_case: sketch_to_render
+version: "1.0.0"
+# WORKING ASSUMPTION: model IDs below must be validated against PRD §2.2 before router implementation.
+default_model: flux-canny-pro     # ControlNet / edge conditioning required
+fallback_model: flux-1.1-pro
+
+ui_defaults:
+  aspect_ratio: "4:5"   # e-commerce default; designer may prefer 2:3 for full-length — PRD §4.1-F4
+  image_count: 4        # exploration default — PRD §4.1-F3; refinement = 1 (user override)
+
+image_slots:
+  - id: sketch
+    label_pt: "Sketch / croqui"
+    label_en: "Sketch / croqui"
+    required: true
+    hint_pt: "Desenho técnico ou croqui de moda. Fundo branco e linhas claras para melhor extração de borda."
+    hint_en: "Technical drawing or fashion croqui. White background and clear lines for best edge extraction."
+    accepted_formats: [jpg, png, webp, pdf]
+    max_size_mb: 30
+
+  - id: texture_reference
+    label_pt: "Referência de textura / tecido (opcional)"
+    label_en: "Texture / fabric reference (optional)"
+    required: false
+    hint_pt: "Foto de tecido ou material para guiar a renderização"
+    hint_en: "Fabric or material photo to guide rendering"
+    accepted_formats: [jpg, png, webp]
+    max_size_mb: 20
+
+form_fields:
+  - id: fabric_type
+    type: select
+    label_pt: "Tipo de tecido principal"
+    label_en: "Primary fabric type"
+    required: false
+    default: ""
+    options:
+      - value: ""
+        label_pt: "Não especificado"
+        label_en: "Not specified"
+      - value: cotton_jersey
+        label_pt: "Malha / Jersey"
+        label_en: "Cotton jersey"
+      - value: woven_cotton
+        label_pt: "Algodão tecido"
+        label_en: "Woven cotton"
+      - value: silk_satin
+        label_pt: "Seda / Cetim"
+        label_en: "Silk / Satin"
+      - value: linen
+        label_pt: "Linho"
+        label_en: "Linen"
+      - value: denim
+        label_pt: "Denim"
+        label_en: "Denim"
+      - value: velvet
+        label_pt: "Veludo"
+        label_en: "Velvet"
+      - value: leather_faux
+        label_pt: "Couro / Couro vegano"
+        label_en: "Leather / Faux leather"
+      - value: boucle
+        label_pt: "Bouclê"
+        label_en: "Boucle"
+      - value: ripstop
+        label_pt: "Ripstop"
+        label_en: "Ripstop"
+      - value: chiffon
+        label_pt: "Chiffon"
+        label_en: "Chiffon"
+
+  - id: colorway
+    type: text
+    label_pt: "Colorway"
+    label_en: "Colorway"
+    required: false
+    placeholder_pt: "Ex.: off-white, terracota, navy"
+    placeholder_en: "e.g. off-white, terracotta, navy"
+    hint_pt: "Descreva as cores da peça como um colorway de coleção"
+
+  - id: render_style
+    type: select
+    label_pt: "Estilo de renderização"
+    label_en: "Render style"
+    required: false
+    default: ecommerce_photo
+    options:
+      - value: ecommerce_photo
+        label_pt: "Foto e-commerce (produto isolado, realista)"
+        label_en: "E-commerce photo (isolated product, realistic)"
+      - value: editorial_photo
+        label_pt: "Foto editorial (ambiente, modelo)"
+        label_en: "Editorial photo (setting, model)"
+      - value: technical_illustration
+        label_pt: "Ilustração técnica (flat, semi-realista)"
+        label_en: "Technical illustration (flat, semi-realistic)"
+
+  - id: presentation
+    type: select
+    label_pt: "Apresentação"
+    label_en: "Presentation"
+    required: false
+    default: ghost_mannequin
+    options:
+      - value: ghost_mannequin
+        label_pt: "Ghost mannequin"
+        label_en: "Ghost mannequin"
+      - value: flat_lay
+        label_pt: "Flat lay"
+        label_en: "Flat lay"
+      - value: on_model
+        label_pt: "Em modelo (gera modelo neutro)"
+        label_en: "On model (generates neutral model)"
+
+  - id: edge_fidelity
+    type: select
+    label_pt: "Fidelidade ao sketch"
+    label_en: "Sketch fidelity"
+    required: false
+    default: high
+    options:
+      - value: strict
+        label_pt: "Estrita (seguir o sketch exatamente)"
+        label_en: "Strict (follow sketch exactly)"
+      - value: high
+        label_pt: "Alta (interpretar silhueta com liberdade leve)"
+        label_en: "High (interpret silhouette with slight freedom)"
+      - value: creative
+        label_pt: "Criativa (usar sketch como inspiração)"
+        label_en: "Creative (use sketch as inspiration)"
+
+  - id: design_notes
+    type: textarea
+    label_pt: "Notas de design"
+    label_en: "Design notes"
+    required: false
+    max_chars: 400
+    placeholder_pt: "Detalhes de construção, acabamentos, ornamentos, proporções específicas..."
+    placeholder_en: "Construction details, finishings, ornaments, specific proportions..."
+
+prompt_template: |
+  Render a photorealistic fashion garment from the provided sketch/croqui.
+  Sketch fidelity: {{edge_fidelity}} — {{#if (eq edge_fidelity "strict")}}reproduce the exact
+  silhouette, proportions, and construction lines from the sketch with precision{{/if}}
+  {{#if (eq edge_fidelity "high")}}follow the sketch's silhouette and key structural lines;
+  allow slight interpretation for natural fabric drape and realistic proportions{{/if}}
+  {{#if (eq edge_fidelity "creative")}}use the sketch as a directional reference and inspiration;
+  interpret the design with creative liberty toward a commercially compelling result{{/if}}.
+  {{#if colorway}}Colorway: {{colorway}}.{{/if}}
+  {{#if fabric_type}}Primary fabric: {{fabric_type}}.
+  Render realistic fabric behavior: gravity-correct drape, warp-and-weft texture,
+  and surface character consistent with {{fabric_type}}.{{/if}}
+  {{#if (eq fabric_type "silk_satin")}}Add directional specular highlights and bias-cut movement
+  consistent with silk/satin.{{/if}}
+  {{#if (eq fabric_type "boucle")}}Render the characteristic irregular looped surface texture
+  of boucle fabric with depth and tactility.{{/if}}
+  {{#if (eq fabric_type "leather_faux")}}Add subtle surface grain and directional specular
+  highlights characteristic of leather.{{/if}}
+  {{#if (eq fabric_type "ripstop")}}Render the visible reinforcement grid pattern of ripstop
+  fabric with correct technical texture.{{/if}}
+  {{#if texture_reference}}Use the provided texture reference to guide fabric surface rendering.{{/if}}
+  {{#if design_notes}}Design details: {{design_notes}}.{{/if}}
+  Render style: {{render_style}}.
+  Presentation: {{presentation}}.
+  {{#if (eq presentation "ghost_mannequin")}}Ghost mannequin presentation — garment appears
+  three-dimensional and filled as if worn, with no visible mannequin.{{/if}}
+  {{#if (eq presentation "flat_lay")}}Flat lay presentation — garment laid flat on a clean
+  white surface, camera directly overhead.{{/if}}
+  {{#if (eq presentation "on_model")}}Dressed on a neutral professional fashion model,
+  standing front pose.{{/if}}
+  {{#if (eq render_style "ecommerce_photo")}}Clean white or light neutral background,
+  soft even studio lighting, no props.{{/if}}
+  {{#if (eq render_style "editorial_photo")}}Fashion editorial setting, professional lighting,
+  model and environment consistent with the garment's design language.{{/if}}
+  {{#if (eq render_style "technical_illustration")}}Semi-realistic technical illustration style
+  — clean lines, flat perspective, fabric texture suggested rather than hyper-realistic.{{/if}}
+  Output: high-quality fashion image capturing design intent. No unintended watermarks or logos.
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - id: sketch_fidelity
+    description: "Output silhouette and construction match sketch at specified fidelity level (strict/high/creative)"
+  - id: fabric_rendering
+    description: "Fabric texture, drape, and surface behavior are realistic and consistent with specified fabric type"
+  - id: colorway_accuracy
+    description: "Output colorway matches specified colors — no unintended color bleed or shift"
+  - id: presentation_correctness
+    description: "Ghost mannequin / flat lay / on-model presentation rendered correctly"
+  - id: commercial_viability
+    description: "Result is suitable for its intended render style (e-commerce / editorial / technical)"
+
+compliance_note: >
+  Human review required before any commercial use.
+  All outputs include C2PA provenance watermark.
