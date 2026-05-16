@@ -14,6 +14,7 @@ import {
   ConfigsView,
   AnalyticsView,
 } from '~/components/Admin';
+import { StudioView } from '~/components/Studio';
 import DashboardRoute from './Layouts/Dashboard';
 
 const dashboardRoutes = {
@@ -64,6 +65,10 @@ const dashboardRoutes = {
     },
     */
     {
+      path: 'studio',
+      element: <StudioView />,
+    },
+    {
       path: 'prompts/*',
       element: <PromptsView />,
       children: [
@@ -98,7 +103,7 @@ const dashboardRoutes = {
     },
     {
       path: '*',
-      element: <Navigate to="/d/files" replace={true} />,
+      element: <Navigate to="/d/studio" replace={true} />,
     },
   ],
 };
