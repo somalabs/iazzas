@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ImageIcon } from 'lucide-react';
+import { Search, ImageIcon, AlertCircle, RotateCcw } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { useStudio, useStudioDispatch, useStudioHistory } from '../context';
 import { MODEL_DISPLAY_NAMES } from '../schemas';
@@ -8,10 +8,13 @@ import type { StudioCreation } from 'librechat-data-provider';
 function CreationItem({
   creation,
   onSelect,
+  onRetry,
 }: {
   creation: StudioCreation;
   onSelect: (c: StudioCreation) => void;
+  onRetry: (creation: StudioCreation) => void;
 }) {
+  const localize = useLocalize();
   const model = MODEL_DISPLAY_NAMES[creation.model] ?? creation.model;
   const date = new Date(creation.createdAt).toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -19,38 +22,63 @@ function CreationItem({
   });
 
   const thumbnail = creation.images[0]?.thumbnailUrl ?? null;
+  const isError = creation.status === 'error';
 
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(creation)}
-      className="group flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
-    >
-      {/* Thumbnail */}
-      <div className="flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-medium bg-surface-secondary">
-        {thumbnail ? (
-          <img src={thumbnail} alt="" className="h-full w-full object-cover" />
-        ) : creation.status === 'generating' ? (
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-medium border-t-text-secondary" />
-        ) : (
-          <ImageIcon className="h-5 w-5 text-text-tertiary" strokeWidth={1.5} />
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 text-xs text-text-secondary leading-relaxed">
-          {creation.prompt}
-        </p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-          <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary">
-            {creation.aspectRatio}
-          </span>
-          <span className="text-[10px] text-text-tertiary">{model}</span>
-          <span className="ml-auto text-[10px] text-text-tertiary">{date}</span>
+    <div className="group relative flex w-full items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-hover">
+      <button
+        type="button"
+        onClick={() => !isError && onSelect(creation)}
+        className="flex min-w-0 flex-1 items-start gap-3 text-left"
+        aria-label={isError ? localize('com_studio_error_status') : creation.prompt}
+      >
+        {/* Thumbnail */}
+        <div
+          className={`flex h-[72px] w-[72px] flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-surface-secondary ${
+            isError ? 'border-red-500/40 bg-red-500/10' : 'border-border-medium'
+          }`}
+        >
+          {thumbnail ? (
+            <img src={thumbnail} alt="" className="h-full w-full object-cover" />
+          ) : creation.status === 'generating' ? (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-medium border-t-text-secondary" />
+          ) : isError ? (
+            <AlertCircle className="h-5 w-5 text-red-400" strokeWidth={1.5} />
+          ) : (
+            <ImageIcon className="h-5 w-5 text-text-tertiary" strokeWidth={1.5} />
+          )}
         </div>
-      </div>
-    </button>
+
+        {/* Info */}
+        <div className="min-w-0 flex-1">
+          <p
+            className={`line-clamp-2 text-xs leading-relaxed ${isError ? 'text-red-400' : 'text-text-secondary'}`}
+          >
+            {isError ? localize('com_studio_error_status') : creation.prompt}
+          </p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <span className="rounded bg-surface-secondary px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary">
+              {creation.aspectRatio}
+            </span>
+            <span className="text-[10px] text-text-tertiary">{model}</span>
+            <span className="ml-auto text-[10px] text-text-tertiary">{date}</span>
+          </div>
+        </div>
+      </button>
+
+      {/* Retry button — only visible on error cards; tech wires the actual re-generation call here */}
+      {isError && (
+        <button
+          type="button"
+          onClick={() => onRetry(creation)}
+          className="flex h-7 w-7 flex-shrink-0 items-center justify-center self-center rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20"
+          aria-label={localize('com_studio_retry')}
+          title={localize('com_studio_retry')}
+        >
+          <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -67,6 +95,17 @@ export default function Creations() {
 
   function handleSelect(creation: StudioCreation) {
     dispatch({ type: 'SELECT_CREATION', payload: creation });
+  }
+
+  function handleRetry(creation: StudioCreation) {
+    // Reset status to 'generating' optimistically so the spinner shows immediately.
+    // TODO(tech-stream-3a): after this dispatch, re-trigger generateMutation with
+    // creation.useCase, creation.prompt, creation.aspectRatio, creation.resolution,
+    // creation.imageCount so the card resolves to success/error instead of spinning forever.
+    dispatch({
+      type: 'UPDATE_CREATION',
+      payload: { id: creation.id, creation: { ...creation, status: 'generating' } },
+    });
   }
 
   return (
@@ -112,7 +151,12 @@ export default function Creations() {
           </div>
         ) : (
           filtered.map((creation) => (
-            <CreationItem key={creation.id} creation={creation} onSelect={handleSelect} />
+            <CreationItem
+              key={creation.id}
+              creation={creation}
+              onSelect={handleSelect}
+              onRetry={handleRetry}
+            />
           ))
         )}
       </div>

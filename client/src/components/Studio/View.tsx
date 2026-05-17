@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from '@librechat/client';
 import { PanelLeftOpen } from 'lucide-react';
 import { useLocalize } from '~/hooks';
@@ -14,8 +14,21 @@ export default function StudioView() {
   const localize = useLocalize();
   const { mode } = useStudio();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const [panelOpen, setPanelOpen] = useState(!isMobile);
+  // Start closed — useEffect below resolves to !isMobile once the media query settles,
+  // avoiding the useState(!isMobile) pitfall where isMobile=false on first render
+  // causes the panel to always open on mobile before the query resolves.
+  const [panelOpen, setPanelOpen] = useState(false);
+  const panelInitialized = useRef(false);
   const openBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!panelInitialized.current) {
+      panelInitialized.current = true;
+      setPanelOpen(!isMobile);
+    } else if (isMobile) {
+      setPanelOpen(false);
+    }
+  }, [isMobile]);
 
   const togglePanel = useCallback(() => {
     setPanelOpen((prev) => !prev);

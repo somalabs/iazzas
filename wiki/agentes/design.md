@@ -93,7 +93,34 @@ Schemas hardcoded em `client/src/components/Studio/schemas.ts` — stream tech s
 
 ### Chaves i18n adicionadas
 
-Prefixo: `com_studio_` — ~50 chaves em `client/src/locales/en/translation.json`.
+Prefixo: `com_studio_` — ~54 chaves em `client/src/locales/en/translation.json`.
+Valores em **PT-BR** (decisão de produto confirmada pelo Artur para cliente Azzas/Brasil).
+EN é apenas fallback técnico — outras línguas são automatizadas externamente.
+
+Chaves criadas para consumo do stream tech:
+- `com_studio_error_toast` — mensagem do toast de erro de geração (stream 3a)
+- `com_studio_model_override_help` — label de ajuda do model override (stream F13/defeito 2)
+
+Chaves criadas para consumo do design (LEM-28):
+- `com_studio_error_status` — texto do card em estado de erro
+- `com_studio_retry` — label do botão de retry no card de erro
+
+### Padrão de estado de erro em cards (`Creations.tsx`)
+
+Card de erro visual distinto de placeholder e loading:
+- Thumbnail: `border-red-500/40 bg-red-500/10` + `AlertCircle` vermelho (não `ImageIcon`)
+- Texto: `text-red-400` + mensagem `com_studio_error_status`
+- Retry: botão `RotateCcw` alinhado à direita do card — chama `onRetry(creation)`
+- `onRetry` em `Creations.tsx` faz `dispatch UPDATE_CREATION status:'generating'` + `// TODO(tech-stream-3a)` para o tech completar o wiring da mutation real
+
+### Fix do drawer mobile (`View.tsx`)
+
+Causa-raiz: `useState(!isMobile)` roda uma única vez no mount com `isMobile=false` (useMediaQuery retorna false antes de resolver), deixando o painel aberto no mobile.
+
+Solução: `useState(false)` + `useEffect([isMobile])` com `panelInitialized` ref:
+- Primeira resolução: `setPanelOpen(!isMobile)` — desktop abre, mobile fica fechado
+- Mudança posterior para mobile (resize): `setPanelOpen(false)`
+- Mudança posterior para desktop: não força abertura — respeita escolha explícita do usuário
 
 ## Decisões pendentes recorrentes
 
