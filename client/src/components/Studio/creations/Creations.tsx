@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, ImageIcon, AlertCircle, RotateCcw } from 'lucide-react';
 import { useLocalize } from '~/hooks';
-import { useStudio, useStudioDispatch, useStudioHistory } from '../context';
+import { useStudio, useStudioDispatch, useStudioHistory, useRetryGeneration } from '../context';
 import { MODEL_DISPLAY_NAMES } from '../schemas';
 import type { StudioCreation } from 'librechat-data-provider';
 
@@ -87,6 +87,7 @@ export default function Creations() {
   useStudioHistory();
   const { creations } = useStudio();
   const dispatch = useStudioDispatch();
+  const retryGeneration = useRetryGeneration();
   const [search, setSearch] = useState('');
 
   const filtered = creations.filter((c) =>
@@ -98,14 +99,7 @@ export default function Creations() {
   }
 
   function handleRetry(creation: StudioCreation) {
-    // Reset status to 'generating' optimistically so the spinner shows immediately.
-    // TODO(tech-stream-3a): after this dispatch, re-trigger generateMutation with
-    // creation.useCase, creation.prompt, creation.aspectRatio, creation.resolution,
-    // creation.imageCount so the card resolves to success/error instead of spinning forever.
-    dispatch({
-      type: 'UPDATE_CREATION',
-      payload: { id: creation.id, creation: { ...creation, status: 'generating' } },
-    });
+    retryGeneration(creation);
   }
 
   return (

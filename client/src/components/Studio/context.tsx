@@ -1,14 +1,17 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import type { Dispatch, ReactNode } from 'react';
+import { useToastContext } from '@librechat/client';
 import type {
   AspectRatio,
   Resolution,
+  StudioModel,
   StudioCreation,
   StudioReference,
   StudioReferenceInput,
   StudioUseCase,
 } from 'librechat-data-provider';
 import { useStudioCreationsQuery, useStudioGenerateMutation } from '~/data-provider';
+import { useLocalize } from '~/hooks';
 import { USE_CASE_SCHEMAS } from './schemas';
 
 type StudioMode = 'workspace' | 'detail' | 'editing';
@@ -16,6 +19,7 @@ type StudioMode = 'workspace' | 'detail' | 'editing';
 type StudioState = {
   activeUseCase: StudioUseCase;
   advancedMode: boolean;
+  modelOverride: StudioModel | null;
   mode: StudioMode;
   references: StudioReference[];
   formValues: Record<string, string | boolean>;
@@ -30,6 +34,7 @@ type StudioState = {
 type StudioAction =
   | { type: 'SET_USE_CASE'; payload: StudioUseCase }
   | { type: 'SET_ADVANCED_MODE'; payload: boolean }
+  | { type: 'SET_MODEL_OVERRIDE'; payload: StudioModel | null }
   | { type: 'SET_PROMPT'; payload: string }
   | { type: 'SET_FORM_VALUE'; payload: { id: string; value: string | boolean } }
   | { type: 'SET_IMAGE_COUNT'; payload: number }
@@ -78,6 +83,7 @@ const initialUCDefaults = buildDefaults(INITIAL_USE_CASE);
 const initialState: StudioState = {
   activeUseCase: INITIAL_USE_CASE,
   advancedMode: false,
+  modelOverride: null,
   mode: 'workspace',
   references: [],
   formValues: initialUCDefaults.formValues ?? {},
@@ -96,6 +102,7 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
       return {
         ...state,
         activeUseCase: action.payload,
+        modelOverride: null,
         formValues: defaults.formValues ?? {},
         aspectRatio: defaults.aspectRatio ?? state.aspectRatio,
         imageCount: defaults.imageCount ?? state.imageCount,
@@ -106,6 +113,8 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
     }
     case 'SET_ADVANCED_MODE':
       return { ...state, advancedMode: action.payload };
+    case 'SET_MODEL_OVERRIDE':
+      return { ...state, modelOverride: action.payload };
     case 'SET_PROMPT':
       return { ...state, prompt: action.payload };
     case 'SET_FORM_VALUE':
@@ -225,9 +234,12 @@ export function useGenerateImages() {
     resolution,
     activeSchema,
     references,
+    modelOverride,
   } = useStudio();
   const dispatch = useStudioDispatch();
   const generateMutation = useStudioGenerateMutation();
+  const { showToast } = useToastContext();
+  const localize = useLocalize();
 
   return useCallback(() => {
     const optimisticId = crypto.randomUUID();
@@ -235,7 +247,7 @@ export function useGenerateImages() {
       id: optimisticId,
       prompt: prompt || '(sem prompt)',
       useCase: activeUseCase,
-      model: activeSchema?.defaultModel ?? 'nano-banana-pro',
+      model: modelOverride ?? activeSchema?.defaultModel ?? 'nano-banana-pro',
       aspectRatio,
       resolution,
       imageCount,
@@ -265,7 +277,7 @@ export function useGenerateImages() {
         imageCount,
         aspectRatio,
         resolution,
-        modelOverride: null,
+        modelOverride,
       },
       {
         onSuccess: (creation) => {
@@ -276,6 +288,7 @@ export function useGenerateImages() {
             type: 'UPDATE_CREATION',
             payload: { id: optimisticId, creation: { ...optimistic, status: 'error' } },
           });
+          showToast({ status: 'error', message: localize('com_studio_error_toast') });
         },
       },
     );
@@ -288,7 +301,52 @@ export function useGenerateImages() {
     resolution,
     activeSchema,
     references,
+    modelOverride,
     dispatch,
     generateMutation,
+    showToast,
+    localize,
   ]);
+}
+
+export function useRetryGeneration() {
+  const dispatch = useStudioDispatch();
+  const generateMutation = useStudioGenerateMutation();
+  const { showToast } = useToastContext();
+  const localize = useLocalize();
+
+  return useCallback(
+    (creation: StudioCreation) => {
+      dispatch({
+        type: 'UPDATE_CREATION',
+        payload: { id: creation.id, creation: { ...creation, status: 'generating' } },
+      });
+
+      generateMutation.mutate(
+        {
+          useCase: creation.useCase,
+          prompt: creation.prompt,
+          formValues: {},
+          references: [],
+          imageCount: creation.imageCount,
+          aspectRatio: creation.aspectRatio,
+          resolution: creation.resolution,
+          modelOverride: null,
+        },
+        {
+          onSuccess: (result) => {
+            dispatch({ type: 'UPDATE_CREATION', payload: { id: creation.id, creation: result } });
+          },
+          onError: () => {
+            dispatch({
+              type: 'UPDATE_CREATION',
+              payload: { id: creation.id, creation: { ...creation, status: 'error' } },
+            });
+            showToast({ status: 'error', message: localize('com_studio_error_toast') });
+          },
+        },
+      );
+    },
+    [dispatch, generateMutation, showToast, localize],
+  );
 }

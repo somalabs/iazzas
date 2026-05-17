@@ -1660,6 +1660,7 @@
   "com_studio_prompt_change_placeholder": "O que você quer alterar?",
   "com_studio_advanced_prompt_label": "Prompt final",
   "com_studio_model_label": "Modelo",
+  "com_studio_model_auto": "Automático (recomendado)",
   "com_studio_use_image": "Usar imagem",
   "com_studio_use_as_style": "Usar como estilo",
   "com_studio_use_as_reference": "Usar como referência",
