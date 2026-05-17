@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { logger } = require('@librechat/data-schemas');
 const { FileContext } = require('librechat-data-provider');
 const {
@@ -11,6 +12,77 @@ const { getStrategyFunctions } = require('~/server/services/Files/strategies');
 const { saveBase64Image } = require('~/server/services/Files/process');
 const { getFiles } = require('~/models');
 const { StudioCreation } = require('~/db/models');
+
+const STUDIO_USE_CASES = [
+  'color_variants',
+  'pattern_application',
+  'virtual_tryon',
+  'multi_reference',
+  'sketch_to_render',
+];
+const STUDIO_ASPECT_RATIOS = [
+  '1:1',
+  '16:9',
+  '9:16',
+  '2:3',
+  '3:4',
+  '1:2',
+  '2:1',
+  '4:5',
+  '3:2',
+  '4:3',
+];
+const STUDIO_RESOLUTIONS = ['1K', '2K', '4K'];
+const STUDIO_MODELS = ['flux-kontext', 'nano-banana-2', 'nano-banana-pro'];
+
+const isModelOverrideValid = (value) =>
+  value == null || STUDIO_MODELS.includes(value);
+
+const validateGenerateBody = (body) => {
+  if (!body || typeof body !== 'object') {
+    return 'Request body is required';
+  }
+  if (!STUDIO_USE_CASES.includes(body.useCase)) {
+    return 'Invalid useCase';
+  }
+  if (
+    typeof body.imageCount !== 'number' ||
+    !Number.isInteger(body.imageCount) ||
+    body.imageCount < 1 ||
+    body.imageCount > 10
+  ) {
+    return 'Invalid imageCount';
+  }
+  if (!STUDIO_ASPECT_RATIOS.includes(body.aspectRatio)) {
+    return 'Invalid aspectRatio';
+  }
+  if (!STUDIO_RESOLUTIONS.includes(body.resolution)) {
+    return 'Invalid resolution';
+  }
+  if (!isModelOverrideValid(body.modelOverride)) {
+    return 'Invalid modelOverride';
+  }
+  return null;
+};
+
+const validateEditBody = (body) => {
+  if (!body || typeof body !== 'object') {
+    return 'Request body is required';
+  }
+  if (typeof body.creationId !== 'string' || body.creationId.trim() === '') {
+    return 'Invalid creationId';
+  }
+  if (typeof body.imageId !== 'string' || body.imageId.trim() === '') {
+    return 'Invalid imageId';
+  }
+  if (typeof body.prompt !== 'string' || body.prompt.trim() === '') {
+    return 'Invalid prompt';
+  }
+  if (!isModelOverrideValid(body.modelOverride)) {
+    return 'Invalid modelOverride';
+  }
+  return null;
+};
 
 const streamToBuffer = (stream) =>
   new Promise((resolve, reject) => {
@@ -83,8 +155,8 @@ const buildRepository = (req) => ({
     });
     return { ...toRecord(doc), userId: req.user.id };
   },
-  async findById(id) {
-    const doc = await StudioCreation.findOne({ _id: id, userId: req.user.id }).lean();
+  async findById(id, userId) {
+    const doc = await StudioCreation.findOne({ _id: id, userId }).lean();
     if (!doc) {
       return null;
     }
@@ -106,9 +178,11 @@ const buildRepository = (req) => ({
   },
 });
 
+const studioAdapters = createStudioAdapters();
+
 const buildService = (req) =>
   new StudioGenerationService({
-    adapters: createStudioAdapters(),
+    adapters: studioAdapters,
     resolveReference: buildReferenceResolver(req),
     persistImage: buildImagePersister(req),
     repository: buildRepository(req),
@@ -131,6 +205,10 @@ const handleError = (res, err) => {
 };
 
 const generate = async (req, res) => {
+  const invalid = validateGenerateBody(req.body);
+  if (invalid) {
+    return res.status(422).json({ error: invalid });
+  }
   try {
     const creation = await buildService(req).generate(req.user.id, req.body);
     res.status(201).json(creation);
@@ -140,6 +218,10 @@ const generate = async (req, res) => {
 };
 
 const edit = async (req, res) => {
+  const invalid = validateEditBody(req.body);
+  if (invalid) {
+    return res.status(422).json({ error: invalid });
+  }
   try {
     const creation = await buildService(req).edit(req.user.id, req.body);
     res.status(201).json(creation);
@@ -166,10 +248,18 @@ const getCreation = async (req, res) => {
 const listCreations = async (req, res) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 20, 50);
-    const result = await buildRepository(req).list({
-      cursor: req.query.cursor || null,
-      limit,
-    });
+    let cursor = null;
+    if (req.query.cursor) {
+      try {
+        if (!mongoose.Types.ObjectId.isValid(req.query.cursor)) {
+          throw new Error('invalid cursor');
+        }
+        cursor = new mongoose.Types.ObjectId(req.query.cursor);
+      } catch {
+        return res.status(400).json({ error: 'Invalid cursor' });
+      }
+    }
+    const result = await buildRepository(req).list({ cursor, limit });
     res.json(result);
   } catch (err) {
     handleError(res, err);

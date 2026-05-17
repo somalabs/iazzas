@@ -4,6 +4,7 @@ import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { useStudio, useStudioDispatch } from '../context';
 import { MODEL_DISPLAY_NAMES } from '../schemas';
+import { formatStudioDate } from '../date';
 import InlineEditor from './InlineEditor';
 
 const USE_IMAGE_OPTIONS = [
@@ -32,11 +33,7 @@ export default function ImageDetail() {
 
   const isEditing = mode === 'editing';
   const model = MODEL_DISPLAY_NAMES[selectedCreation.model] ?? selectedCreation.model;
-  const date = new Date(selectedCreation.createdAt).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  const date = formatStudioDate(selectedCreation.createdAt, true);
   const prompt = selectedCreation.prompt;
   const truncated = prompt.length > 140 && !promptExpanded;
 

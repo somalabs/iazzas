@@ -12,6 +12,26 @@ import { AdapterRequestError } from '../types';
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLLS = 60;
 
+/**
+ * SSRF guard for the result image URL returned by the Flux API.
+ * `result.result.sample` is a presigned URL the BFL API serves from its own
+ * delivery domain (`delivery-*.bfl.ai`, a subdomain of `bfl.ai`) — see the BFL
+ * vendor doc captured in the tech wiki. Without a live API key we cannot observe
+ * the exact CDN host here, so the default allowlist covers `bfl.ai` and any
+ * subdomain; `FLUX_DELIVERY_HOSTS` (comma-separated) lets ops add a host without
+ * a code change should BFL switch to external object storage.
+ */
+const DEFAULT_FLUX_HOSTS = ['bfl.ai'];
+
+const isAllowedFluxHost = (hostname: string): boolean => {
+  const extra = (process.env.FLUX_DELIVERY_HOSTS || '')
+    .split(',')
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean);
+  const allowed = [...DEFAULT_FLUX_HOSTS, ...extra];
+  return allowed.some((h) => hostname === h || hostname.endsWith(`.${h}`));
+};
+
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 type FluxSubmit = { id?: string };
@@ -95,6 +115,19 @@ export class FluxKontextAdapter implements StudioAdapter {
   }
 
   private async download(url: string): Promise<{ base64: string; mimeType: string }> {
+    let hostname: string;
+    try {
+      hostname = new URL(url).hostname.toLowerCase();
+    } catch {
+      throw new AdapterRequestError(this.model, `Flux returned an invalid image URL`, false);
+    }
+    if (!isAllowedFluxHost(hostname)) {
+      throw new AdapterRequestError(
+        this.model,
+        `Flux: disallowed image host: ${hostname}`,
+        false,
+      );
+    }
     try {
       const res = await this.http.get(url, {
         responseType: 'arraybuffer',

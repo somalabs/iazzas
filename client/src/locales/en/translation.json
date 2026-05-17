@@ -1695,6 +1695,7 @@
   "com_studio_close_sidebar": "Fechar criações",
   "com_studio_error_status": "Falha na geração. Tente novamente.",
   "com_studio_retry": "Tentar novamente",
+  "com_studio_retry_unavailable": "Não é possível repetir automaticamente — refaça o formulário para gerar novamente.",
   "com_studio_error_toast": "Não foi possível gerar as imagens. Verifique sua conexão e tente novamente.",
   "com_studio_model_override_help": "Selecione o modelo para esta geração. Deixe em automático para usar o modelo recomendado para o caso de uso."
 }

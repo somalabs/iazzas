@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Search, ImageIcon, AlertCircle, RotateCcw } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { useStudio, useStudioDispatch, useStudioHistory, useRetryGeneration } from '../context';
-import { MODEL_DISPLAY_NAMES } from '../schemas';
+import { MODEL_DISPLAY_NAMES, useCaseHasRequiredInputs } from '../schemas';
+import { formatStudioDate } from '../date';
 import type { StudioCreation } from 'librechat-data-provider';
 
 function CreationItem({
@@ -16,13 +17,11 @@ function CreationItem({
 }) {
   const localize = useLocalize();
   const model = MODEL_DISPLAY_NAMES[creation.model] ?? creation.model;
-  const date = new Date(creation.createdAt).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-  });
+  const date = formatStudioDate(creation.createdAt, false);
 
   const thumbnail = creation.images[0]?.thumbnailUrl ?? null;
   const isError = creation.status === 'error';
+  const canRetry = !useCaseHasRequiredInputs(creation.useCase);
 
   return (
     <div className="group relative flex w-full items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-hover">
@@ -66,14 +65,17 @@ function CreationItem({
         </div>
       </button>
 
-      {/* Retry button — only visible on error cards; tech wires the actual re-generation call here */}
+      {/* Retry only re-sends prompt + base settings (no formValues/references),
+          so it is disabled for use cases with required inputs — those must be
+          redone via the form. */}
       {isError && (
         <button
           type="button"
-          onClick={() => onRetry(creation)}
-          className="flex h-7 w-7 flex-shrink-0 items-center justify-center self-center rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20"
-          aria-label={localize('com_studio_retry')}
-          title={localize('com_studio_retry')}
+          onClick={() => canRetry && onRetry(creation)}
+          disabled={!canRetry}
+          className="flex h-7 w-7 flex-shrink-0 items-center justify-center self-center rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-red-500/10"
+          aria-label={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
+          title={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
         >
           <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
         </button>

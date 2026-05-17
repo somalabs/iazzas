@@ -353,3 +353,19 @@ export const MODEL_DISPLAY_NAMES: Record<string, string> = {
   'nano-banana-2': 'Google Nano Banana 2',
   'nano-banana-pro': 'Google Nano Banana Pro',
 };
+
+/**
+ * A use case has required inputs when it declares a required image slot or a
+ * required form field. Retry re-sends the persisted creation with empty
+ * formValues/references, so retrying such a use case would fail validation
+ * server-side — the UI disables Retry for these and tells the user to redo
+ * the form instead.
+ */
+export function useCaseHasRequiredInputs(useCaseId: string): boolean {
+  const schema = USE_CASE_SCHEMAS.find((s) => s.id === useCaseId);
+  if (!schema) return false;
+  return (
+    schema.imageSlots.some((slot) => slot.required) ||
+    schema.formFields.some((field) => field.required)
+  );
+}
