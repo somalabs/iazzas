@@ -164,14 +164,21 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
         ),
       };
     case 'HYDRATE_CREATIONS': {
-      const localOnly = state.creations.filter((c) => c.status === 'generating');
       const serverIds = new Set(action.payload.map((c) => c.id));
+      // Once the server has its own generating row (it persists one up
+      // front now), it's the source of truth — drop client-only optimistic
+      // generating items so they don't show up twice.
+      const serverHasGenerating = action.payload.some(
+        (c) => c.status === 'generating',
+      );
+      const localOnly = serverHasGenerating
+        ? []
+        : state.creations.filter(
+            (c) => c.status === 'generating' && !serverIds.has(c.id),
+          );
       return {
         ...state,
-        creations: [
-          ...localOnly.filter((c) => !serverIds.has(c.id)),
-          ...action.payload,
-        ],
+        creations: [...localOnly, ...action.payload],
       };
     }
     default:
@@ -225,7 +232,15 @@ export function useStudioDispatch() {
 
 export function useStudioHistory() {
   const dispatch = useStudioDispatch();
-  const { data } = useStudioCreationsQuery({ limit: 30 });
+  const { data } = useStudioCreationsQuery(
+    { limit: 30 },
+    {
+      // While a project is still generating (e.g. after a page refresh
+      // mid-generation), poll so it flips to done/error on its own.
+      refetchInterval: (d) =>
+        d?.items?.some((i) => i.status === 'generating') ? 4000 : false,
+    },
+  );
   useEffect(() => {
     if (data?.items) {
       dispatch({ type: 'HYDRATE_CREATIONS', payload: data.items });
@@ -284,6 +299,8 @@ export function useGenerateImages() {
       status: 'generating',
     };
     dispatch({ type: 'ADD_CREATION', payload: optimistic });
+    // Take the user to the in-progress project right away.
+    dispatch({ type: 'SELECT_CREATION', payload: optimistic });
 
     const referenceInputs: StudioReferenceInput[] = references
       .filter((r) => !!r.fileId)
@@ -308,12 +325,15 @@ export function useGenerateImages() {
       {
         onSuccess: (creation) => {
           dispatch({ type: 'UPDATE_CREATION', payload: { id: optimisticId, creation } });
+          dispatch({ type: 'SELECT_CREATION', payload: creation });
         },
         onError: () => {
+          const errored = { ...optimistic, status: 'error' as const };
           dispatch({
             type: 'UPDATE_CREATION',
-            payload: { id: optimisticId, creation: { ...optimistic, status: 'error' } },
+            payload: { id: optimisticId, creation: errored },
           });
+          dispatch({ type: 'SELECT_CREATION', payload: errored });
           showToast({ status: 'error', message: localize('com_studio_error_toast') });
         },
       },

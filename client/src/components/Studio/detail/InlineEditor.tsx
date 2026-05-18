@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Paperclip, ChevronUp, X } from 'lucide-react';
 import { dataService } from 'librechat-data-provider';
+import type { StudioCreation } from 'librechat-data-provider';
 import { useToastContext } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
@@ -104,25 +105,54 @@ export default function InlineEditor() {
     const referenceFileIds = attachments
       .filter((a) => a.status === 'ready' && a.fileId)
       .map((a) => a.fileId as string);
+    const trimmed = value.trim();
+
+    // Take the user straight to the in-progress project instead of
+    // leaving them in the editor while the request blocks.
+    const optimisticId =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `tmp-${Date.now()}`;
+    const optimistic: StudioCreation = {
+      id: optimisticId,
+      prompt: trimmed,
+      useCase: selectedCreation.useCase,
+      model: selectedCreation.model,
+      aspectRatio: selectedCreation.aspectRatio,
+      resolution: selectedCreation.resolution,
+      imageCount: 1,
+      createdAt: new Date(),
+      images: [],
+      referenceCount: referenceFileIds.length + 1,
+      collectionName: null,
+      status: 'generating',
+    };
+    dispatch({ type: 'ADD_CREATION', payload: optimistic });
+    dispatch({ type: 'SELECT_CREATION', payload: optimistic });
+    dispatch({ type: 'SET_MODE', payload: 'detail' });
+    setValue('');
+    setAttachments([]);
+
     editMutation.mutate(
       {
         creationId: selectedCreation.id,
         imageId: sourceImage.id,
-        prompt: value.trim(),
+        prompt: trimmed,
         modelOverride: null,
         referenceFileIds,
       },
       {
         onSuccess: (creation) => {
-          dispatch({ type: 'ADD_CREATION', payload: creation });
+          dispatch({ type: 'UPDATE_CREATION', payload: { id: optimisticId, creation } });
           dispatch({ type: 'SELECT_CREATION', payload: creation });
-          setValue('');
-          setAttachments([]);
-          dispatch({ type: 'SET_MODE', payload: 'detail' });
         },
         onError: () => {
-          // Without this the edit failed silently — the prompt just sat
-          // there with no feedback. Keep the text so the user can retry.
+          const errored = { ...optimistic, status: 'error' as const };
+          dispatch({
+            type: 'UPDATE_CREATION',
+            payload: { id: optimisticId, creation: errored },
+          });
+          dispatch({ type: 'SELECT_CREATION', payload: errored });
           showToast({ status: 'error', message: localize('com_studio_edit_failed') });
         },
       },
