@@ -21,6 +21,8 @@ export * from './share';
 export * from './pluginAuth';
 /* Memories */
 export * from './memory';
+/* Agent Flows (Agent Studio) */
+export * from './agentFlow';
 /* Prompts */
 export * from './prompts';
 /* Access Control */

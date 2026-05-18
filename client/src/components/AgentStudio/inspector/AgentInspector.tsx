@@ -1,11 +1,21 @@
 import { useLocalize } from '~/hooks';
+import { useListAgentsQuery } from '~/data-provider';
 import { useFlowContext } from '../context';
-import { FieldGroup, FieldLabel, FieldHint, InspectorTextarea, InspectorInput } from './shared';
+import {
+  FieldGroup,
+  FieldLabel,
+  FieldHint,
+  InspectorInput,
+  InspectorSelect,
+  InspectorTextarea,
+} from './shared';
 import type { AgentNodeData } from 'librechat-data-provider';
 
 export default function AgentInspector({ nodeId, data }: { nodeId: string; data: AgentNodeData }) {
   const localize = useLocalize();
   const { dispatch } = useFlowContext();
+  const { data: agentsList } = useListAgentsQuery();
+  const agents = agentsList?.data ?? [];
 
   const update = (patch: Partial<AgentNodeData>) =>
     dispatch({ type: 'UPDATE_NODE_DATA', payload: { id: nodeId, data: patch } });
@@ -16,12 +26,17 @@ export default function AgentInspector({ nodeId, data }: { nodeId: string; data:
         <FieldLabel htmlFor={`agent-id-${nodeId}`}>
           {localize('com_studio_flow_agent_id_label')}
         </FieldLabel>
-        {/* TODO(tech-stream): replace with agent dropdown listing tenant agents */}
-        <InspectorInput
+        <InspectorSelect
           id={`agent-id-${nodeId}`}
           value={data.agentId}
-          onChange={(v) => update({ agentId: v })}
-          placeholder={localize('com_studio_flow_agent_id_placeholder')}
+          onChange={(v) => {
+            const picked = agents.find((a) => a.id === v);
+            update({ agentId: v, agentName: picked?.name ?? undefined });
+          }}
+          options={[
+            { value: '', label: localize('com_studio_flow_agent_id_placeholder') },
+            ...agents.map((a) => ({ value: a.id, label: a.name || a.id })),
+          ]}
         />
         {data.agentName && (
           <p className="mt-1 text-xs font-medium text-text-primary">{data.agentName}</p>

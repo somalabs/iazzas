@@ -1,7 +1,10 @@
 import { Save, Play, History, ArrowLeft, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToastContext } from '@librechat/client';
 import { useLocalize } from '~/hooks';
+import { useCreateFlowMutation, useUpdateFlowMutation } from '~/data-provider';
 import { useFlowContext } from '../context';
+import { serializeNodes, serializeEdges } from '../serialize';
 import { hasBlockingErrors } from '../canvas/validation';
 import { cn } from '~/utils';
 
@@ -10,13 +13,46 @@ export default function Toolbar() {
   const navigate = useNavigate();
   const { state, dispatch } = useFlowContext();
 
-  const canRun = !hasBlockingErrors(state.validationErrors);
+  const { showToast } = useToastContext();
+  const createFlow = useCreateFlowMutation();
+  const updateFlow = useUpdateFlowMutation();
+
+  const canRun = !hasBlockingErrors(state.validationErrors) && !!state.flowId;
   const canSave = !state.saving;
 
   const handleSave = () => {
-    if (!canSave) return;
+    if (!canSave) {
+      return;
+    }
     dispatch({ type: 'SET_SAVING', payload: true });
-    // TODO(tech-stream): PUT /flows/:flowId with nodes/edges, then dispatch SET_SAVING false
+    const payload = {
+      name: state.flowName.trim() || localize('com_studio_flow_name_placeholder'),
+      nodes: serializeNodes(state.nodes),
+      edges: serializeEdges(state.edges),
+    };
+    const onSuccess = (flowId: string, name: string) => {
+      dispatch({
+        type: 'SET_FLOW',
+        payload: { id: flowId, name, nodes: state.nodes, edges: state.edges },
+      });
+      dispatch({ type: 'SET_SAVING', payload: false });
+      showToast({ message: localize('com_studio_flow_save_success'), status: 'success' });
+    };
+    const onError = () => {
+      dispatch({ type: 'SET_SAVING', payload: false });
+      showToast({ message: localize('com_studio_flow_save_error'), status: 'error' });
+    };
+    if (state.flowId) {
+      updateFlow.mutate(
+        { id: state.flowId, data: payload },
+        { onSuccess: (res) => onSuccess(res.flow._id, res.flow.name), onError },
+      );
+    } else {
+      createFlow.mutate(payload, {
+        onSuccess: (res) => onSuccess(res.flow._id, res.flow.name),
+        onError,
+      });
+    }
   };
 
   return (

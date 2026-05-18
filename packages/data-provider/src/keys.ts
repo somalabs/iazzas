@@ -53,6 +53,10 @@ export enum QueryKeys {
   banner = 'banner',
   /* Memories */
   memories = 'memories',
+  /* Agent Studio flows */
+  flows = 'flows',
+  flow = 'flow',
+  flowRuns = 'flowRuns',
   principalSearch = 'principalSearch',
   accessRoles = 'accessRoles',
   resourcePermissions = 'resourcePermissions',
@@ -128,4 +132,10 @@ export enum MutationKeys {
   deleteAdminConfig = 'deleteAdminConfig',
   toggleAdminConfig = 'toggleAdminConfig',
   adjustAdminUserBalance = 'adjustAdminUserBalance',
+  /* Agent Studio flows */
+  createFlow = 'createFlow',
+  updateFlow = 'updateFlow',
+  deleteFlow = 'deleteFlow',
+  runFlow = 'runFlow',
+  resumeFlowRun = 'resumeFlowRun',
 }

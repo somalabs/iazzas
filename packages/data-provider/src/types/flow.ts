@@ -113,4 +113,43 @@ export type FlowRun = {
   startedAt: string;
   completedAt?: string;
   flowSnapshot: Flow;
+  /** Monotonic flow revision captured at dispatch (epoch ms of flow.updatedAt). */
+  flowVersion?: number;
+  /** Node id a `paused` run is waiting on (human-approval). */
+  pausedNodeId?: string;
+  /** Accumulated RunContext, restored on resume. */
+  context?: Record<string, string>;
+};
+
+export type TFlowListResponse = {
+  flows: Flow[];
+  nextCursor: string | null;
+};
+
+export type TFlowResponse = {
+  flow: Flow;
+};
+
+export type TFlowMutationRequest = {
+  name: string;
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+};
+
+export type TRunFlowRequest = {
+  input?: string;
+};
+
+export type TRunFlowResponse = {
+  runId: string;
+  status: FlowRunStatus;
+};
+
+export type TFlowRunsResponse = {
+  runs: FlowRun[];
+  nextCursor: string | null;
+};
+
+export type TResumeRunRequest = {
+  approved: boolean;
 };

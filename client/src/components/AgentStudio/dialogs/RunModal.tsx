@@ -1,17 +1,31 @@
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Play } from 'lucide-react';
+import { useToastContext } from '@librechat/client';
 import { useLocalize } from '~/hooks';
+import { useRunFlowMutation } from '~/data-provider';
 import { useFlowContext } from '../context';
 
 export default function RunModal() {
   const localize = useLocalize();
   const { state, dispatch } = useFlowContext();
+  const { showToast } = useToastContext();
+  const runFlow = useRunFlowMutation();
   const [input, setInput] = useState('');
 
   const handleRun = () => {
-    if (!input.trim()) return;
-    // TODO(tech-stream): POST /flows/:flowId/run { input }
+    if (!input.trim() || !state.flowId) {
+      return;
+    }
+    runFlow.mutate(
+      { id: state.flowId, input },
+      {
+        onSuccess: () =>
+          showToast({ message: localize('com_studio_flow_run_started'), status: 'success' }),
+        onError: () =>
+          showToast({ message: localize('com_studio_flow_run_error'), status: 'error' }),
+      },
+    );
     dispatch({ type: 'TOGGLE_RUN_MODAL' });
     setInput('');
   };

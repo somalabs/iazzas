@@ -3,13 +3,45 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHasAccess } from '~/hooks';
-import { FlowProvider } from '../context';
+import { useFlowsQuery, useFlowRunsQuery } from '~/data-provider';
+import { FlowProvider, useFlowContext } from '../context';
+import { deserializeNodes, deserializeEdges } from '../serialize';
 import { Toolbar } from '../toolbar';
 import { Palette } from '../palette';
 import { Canvas } from '../canvas';
 import { Inspector } from '../inspector';
 import { RunsDrawer } from '../runs';
 import { RunModal } from '../dialogs';
+
+/** Loads the tenant's most recent flow + its runs into the reducer. */
+function FlowLoader() {
+  const { state, dispatch } = useFlowContext();
+  const { data: flowsData } = useFlowsQuery();
+  const firstFlow = flowsData?.flows?.[0];
+  const { data: runsData } = useFlowRunsQuery(state.flowId ?? '');
+
+  useEffect(() => {
+    if (firstFlow && !state.flowId) {
+      dispatch({
+        type: 'SET_FLOW',
+        payload: {
+          id: firstFlow._id,
+          name: firstFlow.name,
+          nodes: deserializeNodes(firstFlow.nodes),
+          edges: deserializeEdges(firstFlow.edges),
+        },
+      });
+    }
+  }, [firstFlow, state.flowId, dispatch]);
+
+  useEffect(() => {
+    if (runsData?.runs) {
+      dispatch({ type: 'SET_RUNS', payload: runsData.runs });
+    }
+  }, [runsData, dispatch]);
+
+  return null;
+}
 
 function StudioLayout() {
   return (
@@ -50,6 +82,7 @@ export default function AgentStudioView() {
   return (
     <FlowProvider>
       <ReactFlowProvider>
+        <FlowLoader />
         <StudioLayout />
       </ReactFlowProvider>
     </FlowProvider>

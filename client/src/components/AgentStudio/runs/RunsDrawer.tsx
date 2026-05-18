@@ -1,21 +1,31 @@
 import { X } from 'lucide-react';
+import { useToastContext } from '@librechat/client';
 import { useLocalize } from '~/hooks';
+import { useResumeFlowRunMutation } from '~/data-provider';
 import { useFlowContext } from '../context';
 import RunCard from './RunCard';
 
 export default function RunsDrawer() {
   const localize = useLocalize();
   const { state, dispatch } = useFlowContext();
+  const { showToast } = useToastContext();
+  const resumeRun = useResumeFlowRunMutation(state.flowId ?? '');
 
-  if (!state.runsOpen) return null;
+  if (!state.runsOpen) {
+    return null;
+  }
 
-  const handleApprove = (_runId: string) => {
-    // TODO(tech-stream): POST /runs/:runId/resume { approved: true }
-  };
+  const decide = (runId: string, approved: boolean) =>
+    resumeRun.mutate(
+      { runId, approved },
+      {
+        onError: () =>
+          showToast({ message: localize('com_studio_flow_run_error'), status: 'error' }),
+      },
+    );
 
-  const handleReject = (_runId: string) => {
-    // TODO(tech-stream): POST /runs/:runId/resume { approved: false }
-  };
+  const handleApprove = (runId: string) => decide(runId, true);
+  const handleReject = (runId: string) => decide(runId, false);
 
   return (
     <aside
