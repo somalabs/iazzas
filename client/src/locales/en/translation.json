@@ -1706,6 +1706,7 @@
   "com_studio_edit_failed": "Não foi possível aplicar a edição. Seu texto foi mantido — tente novamente.",
   "com_studio_image_nav": "Studio de Imagens",
   "com_studio_coming_soon": "Em breve",
+  "com_studio_model_unavailable": "Chave de API não configurada",
   "com_studio_model_override_help": "Selecione o modelo para esta geração. Deixe em automático para usar o modelo recomendado para o caso de uso.",
   "com_studio_flow_palette_title": "Nós disponíveis",
   "com_studio_flow_node_trigger": "Trigger",

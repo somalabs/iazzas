@@ -3,6 +3,7 @@ import { Cpu } from 'lucide-react';
 import type { StudioModel } from 'librechat-data-provider';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
+import { useStudioModelsQuery } from '~/data-provider';
 import { useStudio, useStudioDispatch } from '../context';
 import { MODEL_DISPLAY_NAMES } from '../schemas';
 
@@ -12,6 +13,9 @@ export default function ModelSelector() {
   const localize = useLocalize();
   const { modelOverride, activeSchema } = useStudio();
   const dispatch = useStudioDispatch();
+  const { data: modelsData } = useStudioModelsQuery();
+  const availability = modelsData?.available;
+  const isAvailable = (id: StudioModel) => availability?.[id] !== false;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -79,14 +83,24 @@ export default function ModelSelector() {
               key={id}
               role="option"
               aria-selected={modelOverride === id}
+              aria-disabled={!isAvailable(id)}
               type="button"
+              disabled={!isAvailable(id)}
               onClick={() => select(id)}
               className={cn(
-                'w-full px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-surface-hover',
+                'flex w-full flex-col px-3 py-2 text-left transition-colors',
+                !isAvailable(id)
+                  ? 'cursor-not-allowed opacity-40'
+                  : 'hover:bg-surface-hover',
                 modelOverride === id ? 'text-text-primary' : 'text-text-secondary',
               )}
             >
-              {name}
+              <span className="text-sm font-medium">{name}</span>
+              {!isAvailable(id) && (
+                <span className="text-[11px] text-text-tertiary">
+                  {localize('com_studio_model_unavailable')}
+                </span>
+              )}
             </button>
           ))}
         </div>

@@ -23,6 +23,10 @@ export type ReferenceSlotType = 'style' | 'character' | 'image';
 
 export type StudioModel = 'flux-kontext' | 'nano-banana-2' | 'nano-banana-pro';
 
+export type TStudioModelsResponse = {
+  available: Record<StudioModel, boolean>;
+};
+
 export type StudioReference = {
   id: string;
   slotType: ReferenceSlotType;

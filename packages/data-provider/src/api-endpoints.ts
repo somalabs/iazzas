@@ -483,6 +483,8 @@ export const studioGenerate = () => `${studioRoot}/generate`;
 
 export const studioEdit = () => `${studioRoot}/edit`;
 
+export const studioModels = () => `${studioRoot}/models`;
+
 export const studioCreation = (id: string) => `${studioRoot}/creations/${encodeURIComponent(id)}`;
 
 export const studioCreations = (params: { cursor?: string | null; limit?: number } = {}) =>

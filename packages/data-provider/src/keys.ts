@@ -84,6 +84,7 @@ export enum QueryKeys {
   /* Studio */
   studioCreations = 'studioCreations',
   studioCreation = 'studioCreation',
+  studioModels = 'studioModels',
   adminFeedbacks = 'adminFeedbacks',
 }
 

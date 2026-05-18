@@ -4,6 +4,7 @@ const { FileContext } = require('librechat-data-provider');
 const {
   StudioGenerationService,
   createStudioAdapters,
+  getStudioModelAvailability,
   AdapterCapabilityError,
   AdapterRequestError,
   TemplateInputError,
@@ -266,4 +267,8 @@ const listCreations = async (req, res) => {
   }
 };
 
-module.exports = { generate, edit, getCreation, listCreations };
+const getModels = (req, res) => {
+  res.json({ available: getStudioModelAvailability() });
+};
+
+module.exports = { generate, edit, getCreation, listCreations, getModels };

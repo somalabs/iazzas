@@ -1382,6 +1382,10 @@ export const studioEdit = (payload: t.TStudioEditRequest): Promise<t.StudioCreat
   return request.post(endpoints.studioEdit(), payload);
 };
 
+export const getStudioModels = (): Promise<t.TStudioModelsResponse> => {
+  return request.get(endpoints.studioModels());
+};
+
 export const getStudioCreation = (id: string): Promise<t.StudioCreation> => {
   return request.get(endpoints.studioCreation(id));
 };

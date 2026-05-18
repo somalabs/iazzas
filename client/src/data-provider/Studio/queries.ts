@@ -7,6 +7,7 @@ import type {
   TStudioEditRequest,
   TStudioGenerateRequest,
   TStudioCreationListResponse,
+  TStudioModelsResponse,
 } from 'librechat-data-provider';
 
 export const useStudioCreationsQuery = (
@@ -18,6 +19,20 @@ export const useStudioCreationsQuery = (
     () => dataService.getStudioCreations({ limit: params.limit ?? 20 }),
     {
       refetchOnWindowFocus: false,
+      ...config,
+    },
+  );
+};
+
+export const useStudioModelsQuery = (
+  config?: UseQueryOptions<TStudioModelsResponse>,
+) => {
+  return useQuery<TStudioModelsResponse>(
+    [QueryKeys.studioModels],
+    () => dataService.getStudioModels(),
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
       ...config,
     },
   );
