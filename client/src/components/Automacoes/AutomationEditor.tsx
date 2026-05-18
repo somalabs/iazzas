@@ -2,7 +2,11 @@ import { useState, useEffect, useId } from 'react';
 import { AlertTriangle, Loader } from 'lucide-react';
 import { useToastContext } from '@librechat/client';
 import { useLocalize } from '~/hooks';
-import { useFlowsQuery } from '~/data-provider';
+import {
+  useFlowsQuery,
+  useCreateAutomationMutation,
+  useUpdateAutomationMutation,
+} from '~/data-provider';
 import { cn } from '~/utils';
 import type { Automation } from './context';
 
@@ -81,7 +85,7 @@ type ApiError = { response?: { data?: { error?: string } } };
 
 export type AutomationEditorProps = {
   automation?: Automation;
-  onSaved: (automation: Automation) => void;
+  onSaved: () => void;
   onCancel: () => void;
 };
 
@@ -90,6 +94,8 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
   const uid = useId();
   const { showToast } = useToastContext();
   const { data: flowsData } = useFlowsQuery();
+  const createMutation = useCreateAutomationMutation();
+  const updateMutation = useUpdateAutomationMutation();
 
   const isCreating = !automation;
   const flows = flowsData?.flows ?? [];
@@ -165,23 +171,16 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
     setLimitError('');
     setSaving(true);
 
-    try {
-      // Seam: tech stream wires POST /api/automacoes or PUT /api/automacoes/:id
-      const selectedFlow = flows.find((f) => f._id === flowId);
-      const saved: Automation = {
-        _id: automation?._id ?? crypto.randomUUID(),
-        flowId,
-        flowName: selectedFlow?.name,
-        name: name.trim(),
-        cron: currentCron,
-        timezone,
-        triggerInput: triggerInput.trim() || undefined,
-        enabled,
-        createdAt: automation?.createdAt ?? new Date().toISOString(),
-      };
-      onSaved(saved);
-      showToast({ message: localize('com_automacoes_save_success'), status: 'success' });
-    } catch (err) {
+    const payload = {
+      flowId,
+      name: name.trim(),
+      cron: currentCron,
+      timezone,
+      triggerInput: triggerInput.trim() || undefined,
+      enabled,
+    };
+
+    const onError = (err: unknown) => {
       const code = (err as ApiError)?.response?.data?.error;
       if (code === 'approvalNodeIncompatible') {
         setApprovalError(localize('com_automacoes_error_approval_node'));
@@ -189,13 +188,29 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
         setLimitError(localize('com_automacoes_error_limit_reached', { limit: '20' }));
       } else if (code === 'cronInvalid') {
         setCronError(localize('com_automacoes_error_cron_invalid'));
+      } else if (code === 'timezoneInvalid') {
+        setCronError(localize('com_automacoes_error_timezone_invalid'));
       } else if (code === 'cronIntervalTooShort') {
         setCronError(localize('com_automacoes_error_cron_too_short', { min: '5' }));
       } else {
         showToast({ message: localize('com_automacoes_save_error'), status: 'error' });
       }
-    } finally {
       setSaving(false);
+    };
+
+    const onSuccess = () => {
+      showToast({ message: localize('com_automacoes_save_success'), status: 'success' });
+      setSaving(false);
+      onSaved();
+    };
+
+    if (automation) {
+      updateMutation.mutate(
+        { id: automation._id, data: payload },
+        { onSuccess, onError },
+      );
+    } else {
+      createMutation.mutate(payload, { onSuccess, onError });
     }
   };
 

@@ -19,6 +19,8 @@ export interface IAgentFlow extends Document {
 export interface IAgentFlowRun extends Document {
   tenantId?: string;
   flowId: Types.ObjectId;
+  /** Present when this run was dispatched by an Automation (scheduled or "run now"). */
+  automationId?: Types.ObjectId;
   status: FlowRunStatus;
   input: string;
   nodeRuns: FlowNodeRun[];

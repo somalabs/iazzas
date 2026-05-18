@@ -32,6 +32,7 @@ import { createStudioCreationModel } from './studio';
 import { createFeedbackModel } from './feedback';
 import { createAgentFlowModel } from './agentFlow';
 import { createAgentFlowRunModel } from './agentFlowRun';
+import { createAutomationModel, createNotificationModel } from './automation';
 
 /**
  * Creates all database models for all collections
@@ -72,5 +73,7 @@ export function createModels(mongoose: typeof import('mongoose')) {
     Feedback: createFeedbackModel(mongoose),
     AgentFlow: createAgentFlowModel(mongoose),
     AgentFlowRun: createAgentFlowRunModel(mongoose),
+    Automation: createAutomationModel(mongoose),
+    Notification: createNotificationModel(mongoose),
   };
 }

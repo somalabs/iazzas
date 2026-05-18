@@ -1,12 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
+import { useToastContext } from '@librechat/client';
+import {
+  useAutomationsQuery,
+  useAutomationRunsQuery,
+  useToggleAutomationMutation,
+  useRunAutomationMutation,
+  useDeleteAutomationMutation,
+} from '~/data-provider';
 import { useHasAccess, useLocalize } from '~/hooks';
 import { AutomacoesProvider, useAutomacoesContext } from './context';
 import AutomationList from './AutomationList';
 import AutomationEditor from './AutomationEditor';
 import RunsDrawer from './RunsDrawer';
+import { toAutomationRun } from './runMapper';
 import type { Automation, AutomationRun } from './context';
 
 function EmptyEditorState() {
@@ -21,6 +30,7 @@ function EmptyEditorState() {
 function AutomacoesView() {
   const localize = useLocalize();
   const navigate = useNavigate();
+  const { showToast } = useToastContext();
   const { state, dispatch } = useAutomacoesContext();
 
   const canCreate = useHasAccess({
@@ -28,34 +38,58 @@ function AutomacoesView() {
     permission: Permissions.CREATE,
   });
 
-  // Seam: tech stream replaces with useAutomationsQuery + useMutations
-  const [automations, setAutomations] = useState<Automation[]>([]);
-  const [runs] = useState<AutomationRun[]>([]);
+  const { data: automationsData } = useAutomationsQuery();
+  const automations = (automationsData?.automations ?? []) as unknown as Automation[];
+
+  const { data: runsData } = useAutomationRunsQuery(state.runsAutomationId ?? '');
+  const runs: AutomationRun[] = (runsData?.runs ?? []).map((r) =>
+    toAutomationRun(r, state.runsAutomationId ?? ''),
+  );
+
+  const toggleMutation = useToggleAutomationMutation();
+  const runMutation = useRunAutomationMutation();
+  const deleteMutation = useDeleteAutomationMutation();
 
   const selectedAutomation = automations.find((a) => a._id === state.selectedId);
   const runsAutomation = automations.find((a) => a._id === state.runsAutomationId);
 
-  const handleSaved = (saved: Automation) => {
-    setAutomations((prev) => {
-      const idx = prev.findIndex((a) => a._id === saved._id);
-      return idx >= 0 ? prev.map((a, i) => (i === idx ? saved : a)) : [saved, ...prev];
-    });
+  const handleSaved = () => {
     dispatch({ type: 'CANCEL' });
   };
 
   const handleToggleEnabled = (id: string, enabled: boolean) => {
-    // Seam: tech wires PATCH /api/automacoes/:id/enabled
-    setAutomations((prev) => prev.map((a) => (a._id === id ? { ...a, enabled } : a)));
+    toggleMutation.mutate(
+      { id, enabled },
+      {
+        onError: () =>
+          showToast({ message: localize('com_automacoes_save_error'), status: 'error' }),
+      },
+    );
   };
 
-  const handleRunNow = (_id: string) => {
-    // Seam: tech wires POST /api/automacoes/:id/run
+  const handleRunNow = (id: string) => {
+    runMutation.mutate(
+      { id },
+      {
+        onSuccess: () =>
+          showToast({ message: localize('com_automacoes_run_triggered'), status: 'success' }),
+        onError: () =>
+          showToast({ message: localize('com_automacoes_run_trigger_error'), status: 'error' }),
+      },
+    );
   };
 
   const handleDelete = (id: string) => {
-    // Seam: tech wires DELETE /api/automacoes/:id
-    setAutomations((prev) => prev.filter((a) => a._id !== id));
-    if (state.selectedId === id) dispatch({ type: 'CANCEL' });
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        showToast({ message: localize('com_automacoes_delete_success'), status: 'success' });
+        if (state.selectedId === id) {
+          dispatch({ type: 'CANCEL' });
+        }
+      },
+      onError: () =>
+        showToast({ message: localize('com_automacoes_save_error'), status: 'error' }),
+    });
   };
 
   const showEditor = state.isCreating || !!state.selectedId;

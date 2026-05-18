@@ -14,6 +14,7 @@ const messages = require('./messages');
 const memories = require('./memories');
 const studio = require('./studio');
 const flows = require('./flows');
+const automations = require('./automations');
 const presets = require('./presets');
 const prompts = require('./prompts');
 const balance = require('./balance');
@@ -69,6 +70,7 @@ module.exports = {
   memories,
   studio,
   flows,
+  automations,
   endpoints,
   assistants,
   categories,

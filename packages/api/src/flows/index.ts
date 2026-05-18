@@ -9,3 +9,19 @@ export { conditionNode } from './nodes/conditionNode';
 export { httpNode, isAllowedHost, parseAllowedHosts } from './nodes/httpNode';
 export { humanNode } from './nodes/humanNode';
 export { outputNode } from './nodes/outputNode';
+export {
+  nextRunAt,
+  validateSchedule,
+  isValidTimezone,
+  getMinIntervalMinutes,
+  ScheduleValidationError,
+} from './schedule';
+export type { ScheduleErrorCode } from './schedule';
+export { publishOutputTargets, scrubReason, formatInTimezone } from './outputTargets';
+export type {
+  OutputTargetParams,
+  OutputTargetDeps,
+  OutputRunStatus,
+} from './outputTargets';
+export { AutomationScheduler } from './AutomationScheduler';
+export type { AutomationLite, AutomationSchedulerDeps } from './AutomationScheduler';

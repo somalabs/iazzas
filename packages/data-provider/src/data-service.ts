@@ -8,6 +8,7 @@ import * as q from './types/queries';
 import * as f from './types/files';
 import * as mcp from './types/mcpServers';
 import * as fl from './types/flow';
+import * as au from './types/automations';
 import * as config from './config';
 import request from './request';
 import * as s from './schemas';
@@ -1493,4 +1494,57 @@ export const resumeFlowRun = (
   data: fl.TResumeRunRequest,
 ): Promise<fl.TRunFlowResponse> => {
   return request.post(endpoints.resumeFlowRun(runId), data);
+};
+
+/* Automations */
+export const getAutomations = (cursor?: string): Promise<au.TAutomationListResponse> => {
+  const url = cursor
+    ? `${endpoints.automations()}?cursor=${encodeURIComponent(cursor)}`
+    : endpoints.automations();
+  return request.get(url);
+};
+
+export const getAutomation = (id: string): Promise<au.TAutomationResponse> => {
+  return request.get(endpoints.automation(id));
+};
+
+export const createAutomation = (
+  data: au.TAutomationCreateRequest,
+): Promise<au.TAutomationResponse> => {
+  return request.post(endpoints.automations(), data);
+};
+
+export const updateAutomation = (
+  id: string,
+  data: au.TAutomationUpdateRequest,
+): Promise<au.TAutomationResponse> => {
+  return request.put(endpoints.automation(id), data);
+};
+
+export const deleteAutomation = (id: string): Promise<au.TAutomationDeleteResponse> => {
+  return request.delete(endpoints.automation(id));
+};
+
+export const toggleAutomation = (
+  id: string,
+  data: au.TAutomationToggleRequest,
+): Promise<au.TAutomationResponse> => {
+  return request.patch(endpoints.automationEnabled(id), data);
+};
+
+export const runAutomation = (
+  id: string,
+  data: au.TAutomationRunRequest,
+): Promise<au.TAutomationRunResponse> => {
+  return request.post(endpoints.automationRun(id), data);
+};
+
+export const getAutomationRuns = (
+  id: string,
+  cursor?: string,
+): Promise<au.TAutomationRunsResponse> => {
+  const url = cursor
+    ? `${endpoints.automationRuns(id)}?cursor=${encodeURIComponent(cursor)}`
+    : endpoints.automationRuns(id);
+  return request.get(url);
 };

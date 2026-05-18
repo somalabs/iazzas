@@ -8,6 +8,10 @@ const agentFlowRunSchema = new Schema<IAgentFlowRun>(
       ref: 'AgentFlow',
       required: true,
     },
+    automationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Automation',
+    },
     status: {
       type: String,
       enum: ['running', 'paused', 'success', 'failed', 'skipped'],
@@ -54,6 +58,7 @@ const agentFlowRunSchema = new Schema<IAgentFlowRun>(
 );
 
 agentFlowRunSchema.index({ tenantId: 1, flowId: 1, startedAt: -1 });
+agentFlowRunSchema.index({ tenantId: 1, automationId: 1, _id: -1 });
 agentFlowRunSchema.index(
   { tenantId: 1, flowId: 1 },
   { partialFilterExpression: { status: { $in: ['running', 'paused'] } } },
