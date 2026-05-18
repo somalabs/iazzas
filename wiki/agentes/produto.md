@@ -2,7 +2,7 @@
 
 > Atualizado em: 2026-05-18
 > Escopo: fork LibreChat para Azzas 2154 (varejo de moda, multimarca: Farm, Animale, Cris Barros, etc.)
-> Produto central desta fase: **Studio** (imagens de moda) + **Studio de Agentes** (orquestração visual)
+> Produto central desta fase: **Studio** (imagens de moda) + **Flows/Studio de Agentes** (orquestração visual) + **Automações** (agendamento) + **Revisão UX/UI** (LEM-52)
 
 ---
 
@@ -189,6 +189,34 @@ Criados em `config/agent-studio/`:
 - **UC como "unidade fundamental"**: cada UC mapeia a um workflow completo com form schema, routing, prompt e QA. Não misturar UCs ou criar "modo avançado" que contorna os templates.
 - **O Studio é a versão guiada do Freepik**: o time já usa Freepik com @img1..N e prompts livres. O Studio estrutura isso em UCs tipados. A intuição de produto sempre parte do que o time já faz na ferramenta de referência.
 - **Reutilizar permissões existentes, não inventar**: `PermissionTypes.AGENTS` cobre flows de agentes. Criar novos PermissionTypes tem custo de migração e manutenção — evitar (lição LEM-31).
+- **Nomeação resolve hierarquia sem reescrever código**: quando dois componentes parecem fazer a mesma coisa, a primeira correção é renomear/reframar para comunicar a distinção. (LEM-52: AgentPanel="Agentes", AgentStudio="Flows" — zero mudança estrutural.)
+- **Destinos de trabalho nunca ficam no menu de conta**: Studios, Flows, Automações pertencem à sidebar primária. Menu de conta (avatar dropdown) = exclusivo para operações sobre perfil. (LEM-52 Área 1.)
+- **"Virada" = auto-refill mensal reframado**: no modelo corporativo iazzas, auto-refill monthly IS a virada de ciclo. Não há novo sistema — apenas reframing de UX e exposição do `refillAmount` no widget. (LEM-52 Área 2.)
+- **Toggle global vs comportamento contextual**: raciocínio/thinking expandido é estado transitório (feedback durante streaming), não preferência permanente. Comportamento correto: expand-durante-streaming, collapse-quando-pronto. Toggle de Settings é anti-padrão. (LEM-52 Área 3.)
+- **Ocultar antes de remover**: features desnecessárias são primeiro desabilitadas via config, código preservado. Remoção de código vem após confirmar zero uso. Reduz risco, facilita reversão. (LEM-52 Área 5.)
+
+---
+
+## Domínio: UX/UI — Revisão LEM-52
+
+### Decisões ratificadas (2026-05-18)
+
+Documento autoritativo: `config/ux-revisao/DECISAO.md`
+
+| Área | Decisão-chave |
+|------|---------------|
+| 1 — Menu/Nav | Studios saem do dropdown de conta → ícones primários na sidebar |
+| 2 — Tokens | Modelo = ciclo mensal; widget mostra barra de progresso + "Vira DD/MM" |
+| 3 — Raciocínio | Reasoning.tsx canônico; expand durante streaming, collapse ao finalizar; labels PT-BR |
+| 4 — Agentes | AgentPanel = "Agentes" (individual); AgentStudio = "Flows" (pipeline) |
+| 5 — Fluxos | 6 features ocultadas/removidas: bookmarks, multiConvo, temporaryChat, peoplePicker, marketplace, remoteAgents |
+
+### Nomenclatura canônica (LEM-52)
+
+- **Agente** = assistente individual configurado (modelo, instrução, tools) — gerenciado pelo AgentPanel
+- **Flow** = pipeline visual que encadeia agentes — gerenciado pelo AgentStudio (renomeado "Flows")
+- **Automação** = flow agendado (cron) — gerenciado pelo Automações
+- Nunca intercambiar "Agente" e "Flow" em UI ou docs.
 
 ---
 
@@ -205,7 +233,9 @@ Criados em `config/agent-studio/`:
 │       ├── 03-virtual-tryon.yaml
 │       ├── 04-multi-reference.yaml
 │       └── 05-sketch-to-render.yaml
-├── config/agent-studio/             # Agent Studio — spec e contrato de produto (LEM-33)
+├── config/ux-revisao/               # Revisão UX/UI — decisão de produto (LEM-52)
+│   └── DECISAO.md                   # Documento autoritativo das 5 áreas (RATIFICADO)
+├── config/agent-studio/             # Agent Studio/Flows — spec e contrato de produto (LEM-33)
 │   ├── CONTRACT.md                  # Contrato autoritativo (RATIFICADO)
 │   └── nodes/
 │       ├── 01-trigger.yaml
