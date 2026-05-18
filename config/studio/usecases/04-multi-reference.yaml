@@ -1,0 +1,114 @@
+use_case: multi_reference
+version: 1.0.0
+display_name: "Múltiplas Referências"
+description: "Create new compositions from multiple style, garment, or character references (up to 14 total). Requires human review before commercial use."
+default_model: nano-banana-pro
+fallback_model: nano-banana-2
+
+compliance:
+  requires_human_review: true
+  review_reason: "Multi-reference compositions may combine brand assets; commercial use requires approval"
+
+ui_defaults:
+  aspect_ratio: "4:5"
+  image_count: 4
+  resolution: "2K"
+
+image_slots:
+  - id: style_reference
+    label: "Referência de estilo"
+    description: "Imagem principal de mood, cenário ou composição"
+    required: true
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+  - id: garment_references
+    label: "Peças / Produtos"
+    description: "Roupas e produtos a incluir na composição (até 11 imagens)"
+    required: false
+    multiple: true
+    max_count: 11
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+  - id: character_reference
+    label: "Referência de modelo"
+    description: "Para manter consistência de modelo ou personagem (opcional)"
+    required: false
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+# Total image slots: 1 style + up to 11 garments + 1 character = 13 refs max (within 14-ref model limit)
+
+form_fields:
+  - id: primary_intent
+    type: select
+    label: "Intenção"
+    required: true
+    default: mix-elements
+    options:
+      - value: mix-elements
+        label: "Combinar elementos das referências"
+      - value: recreate-colorway
+        label: "Recriar em novo colorway"
+      - value: lookbook-display
+        label: "Exibição tipo lookbook / araras"
+      - value: editorial-composition
+        label: "Composição editorial"
+
+  - id: output_format
+    type: select
+    label: "Formato de saída"
+    required: true
+    default: on-model
+    options:
+      - value: on-model
+        label: "Em modelo"
+      - value: flat-lay
+        label: "Flat lay"
+      - value: on-hanger
+        label: "Em cabide / arara"
+      - value: product-still
+        label: "Still de produto"
+
+  - id: creative_direction
+    type: text
+    label: "Direção criativa"
+    placeholder: "ex: manter bordados maximalistas, paleta terrosa, inserir todas as peças no expositor"
+    required: false
+    max_length: 500
+
+prompt_template: |
+  {{#if primary_intent == "lookbook-display"}}
+  Create a fashion display showing all the garments from the references arranged as {{output_format}}.
+  Preserve each garment's exact design, print, and colorway from its reference image.
+  {{/if}}
+  {{#if primary_intent == "mix-elements"}}
+  Create a new fashion {{output_format}} combining key style elements from all provided references.
+  {{/if}}
+  {{#if primary_intent == "recreate-colorway"}}
+  Recreate the style from the references in a new colorway, preserving silhouettes and design details.
+  Output format: {{output_format}}.
+  {{/if}}
+  {{#if primary_intent == "editorial-composition"}}
+  Create a high-fashion editorial composition inspired by all provided references.
+  Output format: {{output_format}}.
+  {{/if}}
+  Style and environment guided by the primary style reference.
+  {{#if garment_references}}Include all garments from the references, preserving their exact designs.{{/if}}
+  {{#if character_reference}}Maintain the model appearance from the character reference.{{/if}}
+  {{#if creative_direction}}{{creative_direction}}{{/if}}
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - check: reference_coverage
+    description: "All provided garments and elements are represented in the output"
+  - check: style_coherence
+    description: "Output mood matches the primary style reference"
+  - check: garment_fidelity
+    description: "Individual garment designs are recognizable from their input images"
+  - check: composition_balance
+    description: "Spatial arrangement is coherent and visually balanced"

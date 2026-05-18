@@ -467,3 +467,15 @@ export const getAllEffectivePermissions = (resourceType: ResourceType) =>
 // SharePoint Graph API Token
 export const graphToken = (scopes: string) =>
   `${BASE_URL}/api/auth/graph-token?scopes=${encodeURIComponent(scopes)}`;
+
+/* Studio (fashion image generation) */
+const studioRoot = `${BASE_URL}/api/studio`;
+
+export const studioGenerate = () => `${studioRoot}/generate`;
+
+export const studioEdit = () => `${studioRoot}/edit`;
+
+export const studioCreation = (id: string) => `${studioRoot}/creations/${encodeURIComponent(id)}`;
+
+export const studioCreations = (params: { cursor?: string | null; limit?: number } = {}) =>
+  `${studioRoot}/creations${buildQuery({ cursor: params.cursor, limit: params.limit })}`;

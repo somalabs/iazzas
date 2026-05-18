@@ -1,0 +1,116 @@
+use_case: pattern_application
+version: 1.0.0
+display_name: "Aplicar Estampa"
+description: "Apply a print or artwork onto a garment surface (all-over, placement, panel, or engineered)."
+default_model: nano-banana-2
+fallback_model: nano-banana-pro
+
+# Router upgrades to Pro when intensity or scale exceeds standard thresholds.
+# See config/studio/router.yaml rule: pattern_application_pro
+router_overrides:
+  - condition: "intensity == full OR scale == extra-large"
+    model: nano-banana-pro
+    reason: "Full-intensity or extra-large prints require Pro for surface fidelity"
+
+ui_defaults:
+  aspect_ratio: "4:5"
+  image_count: 4
+  resolution: "2K"
+
+image_slots:
+  - id: product_image
+    label: "Produto"
+    description: "Peça de roupa que receberá a estampa"
+    required: true
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+  - id: pattern_image
+    label: "Estampa / Artwork"
+    description: "A arte, motivo ou estampa a aplicar na peça"
+    required: true
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+form_fields:
+  - id: application_type
+    type: select
+    label: "Tipo de aplicação"
+    required: true
+    default: all-over
+    options:
+      - value: all-over
+        label: "All-over (cobre toda a superfície)"
+      - value: placement
+        label: "Placement (motivo único posicionado)"
+      - value: panel
+        label: "Panel (limitado a painéis do molde)"
+      - value: engineered
+        label: "Engineered (projetado para o molde)"
+
+  - id: scale
+    type: select
+    label: "Escala da estampa"
+    required: true
+    default: medium
+    options:
+      - value: small
+        label: "Pequena"
+      - value: medium
+        label: "Média"
+      - value: large
+        label: "Grande"
+      - value: extra-large
+        label: "Extra-grande"
+
+  - id: intensity
+    type: toggle
+    label: "Intensidade"
+    required: true
+    default: subtle
+    options:
+      - value: subtle
+        label: "Sutil (integrado ao tecido)"
+      - value: full
+        label: "Full (estampa dominante)"
+
+  - id: preserve_structure
+    type: boolean
+    label: "Preservar estrutura da peça"
+    description: "Manter costuras, recortes e volumetria visíveis"
+    default: true
+
+  - id: color_adaptation
+    type: toggle
+    label: "Cores da estampa"
+    default: use-pattern-colors
+    options:
+      - value: use-pattern-colors
+        label: "Usar cores originais da arte"
+      - value: adapt-to-garment
+        label: "Adaptar ao colorway da peça"
+
+prompt_template: |
+  Apply the {{application_type}} print from the pattern reference onto this fashion garment.
+  Print scale: {{scale}}. Intensity: {{intensity}}.
+  {{#if intensity == "full"}}The print should dominate the garment surface with full opacity.{{/if}}
+  {{#if intensity == "subtle"}}Integrate the print naturally into the fabric, maintaining garment texture beneath.{{/if}}
+  {{#if preserve_structure}}Preserve visible seams, darts, and garment construction.{{/if}}
+  {{#if color_adaptation == "adapt-to-garment"}}Adapt print colors to complement the garment's base colorway.{{/if}}
+  {{#if color_adaptation == "use-pattern-colors"}}Maintain the original colors from the pattern artwork.{{/if}}
+  The print should follow the garment's drape, contours, and perspective correctly.
+  Studio product photography lighting, sharp fabric detail.
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - check: pattern_recognizability
+    description: "Pattern motifs are clearly identifiable from source artwork"
+  - check: surface_conformity
+    description: "Print follows garment contours, drape, and perspective correctly"
+  - check: structure_integrity
+    description: "Garment silhouette and seams remain coherent"
+  - check: color_fidelity
+    description: "Pattern colors match source artwork or target adaptation intent"
