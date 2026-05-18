@@ -15,6 +15,7 @@ export default function ImageDetail() {
   const dispatch = useStudioDispatch();
   const [tab, setTab] = useState<DetailTab>('details');
   const [promptExpanded, setPromptExpanded] = useState(false);
+  const [imageIdx, setImageIdx] = useState(0);
 
   if (!selectedCreation) return null;
 
@@ -24,6 +25,8 @@ export default function ImageDetail() {
   const prompt = selectedCreation.prompt;
   const truncated = prompt.length > 140 && !promptExpanded;
   const comingSoon = localize('com_studio_coming_soon');
+  const images = selectedCreation.images;
+  const currentImage = images[imageIdx] ?? images[0];
 
   function handleClose() {
     dispatch({ type: 'SELECT_CREATION', payload: null });
@@ -34,7 +37,7 @@ export default function ImageDetail() {
   }
 
   async function handleDownload() {
-    const image = selectedCreation?.images[0];
+    const image = images[imageIdx] ?? images[0];
     if (!image) {
       return;
     }
@@ -68,9 +71,9 @@ export default function ImageDetail() {
     <div className="flex h-full overflow-hidden">
       {/* Image area */}
       <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-surface-chat">
-        {selectedCreation.images[0] ? (
+        {currentImage ? (
           <img
-            src={selectedCreation.images[0].url}
+            src={currentImage.url}
             alt="Generated creation"
             className="max-h-full max-w-full object-contain"
           />
@@ -100,10 +103,30 @@ export default function ImageDetail() {
           <X className="h-4 w-4" />
         </button>
 
-        {/* Bottom toolbar */}
-        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium bg-surface-primary/80 px-3 py-1.5 backdrop-blur-sm">
-          <span className="text-xs text-text-tertiary">{localize('com_studio_similar_images')}</span>
-        </div>
+        {/* Image picker — shows every image the creation generated */}
+        {images.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium bg-surface-primary/80 px-2 py-1.5 backdrop-blur-sm">
+            {images.map((img, i) => (
+              <button
+                key={img.id}
+                type="button"
+                onClick={() => setImageIdx(i)}
+                className={cn(
+                  'h-10 w-10 overflow-hidden rounded-md border-2 transition-colors',
+                  i === imageIdx ? 'border-text-primary' : 'border-transparent opacity-60 hover:opacity-100',
+                )}
+                aria-label={`Imagem ${i + 1} de ${images.length}`}
+                aria-pressed={i === imageIdx}
+              >
+                <img
+                  src={img.thumbnailUrl ?? img.url}
+                  alt={`Variação ${i + 1}`}
+                  className="h-full w-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Right panel */}
@@ -158,23 +181,30 @@ export default function ImageDetail() {
 
         {/* Tabs */}
         <div className="flex border-b border-border-medium">
-          {(['details', 'comments'] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTab(t)}
-              className={cn(
-                'flex-1 py-2 text-xs font-medium transition-colors',
-                tab === t
-                  ? 'border-b-2 border-text-primary text-text-primary'
-                  : 'text-text-tertiary hover:text-text-secondary',
-              )}
-            >
-              {t === 'details'
-                ? localize('com_studio_details')
-                : localize('com_studio_comments')}
-            </button>
-          ))}
+          <button
+            type="button"
+            onClick={() => setTab('details')}
+            className={cn(
+              'flex-1 py-2 text-xs font-medium transition-colors',
+              tab === 'details'
+                ? 'border-b-2 border-text-primary text-text-primary'
+                : 'text-text-tertiary hover:text-text-secondary',
+            )}
+          >
+            {localize('com_studio_details')}
+          </button>
+          <button
+            type="button"
+            disabled
+            title={`${localize('com_studio_comments')} · ${comingSoon}`}
+            aria-label={`${localize('com_studio_comments')} (${comingSoon})`}
+            className="flex flex-1 cursor-not-allowed items-center justify-center gap-1 py-2 text-xs font-medium text-text-tertiary opacity-50"
+          >
+            {localize('com_studio_comments')}
+            <span className="rounded-full bg-surface-active px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider">
+              {comingSoon}
+            </span>
+          </button>
         </div>
 
         {/* Tab content */}
@@ -240,13 +270,6 @@ export default function ImageDetail() {
                 </div>
               )}
             </>
-          )}
-
-          {tab === 'comments' && (
-            <p className="text-xs text-text-tertiary">
-              {/* TODO(tech): wire comments */}
-              Sem comentários ainda.
-            </p>
           )}
         </div>
 

@@ -131,6 +131,7 @@ export type TStudioEditRequest = {
   imageId: string;
   prompt: string;
   modelOverride?: StudioModel | null;
+  referenceFileIds?: string[];
 };
 
 export type TStudioCreationListResponse = {

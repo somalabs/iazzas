@@ -76,6 +76,18 @@ export type StudioServiceDeps = {
   now?: () => Date;
 };
 
+/**
+ * The persisted/displayed resolution must match what the model actually
+ * produced. Models without imageSize support (e.g. the nano-banana-2 fallback)
+ * ignore the requested resolution and emit the SDK default — persisting "4K"
+ * for those would lie to the user (the "imagem super leve" complaint).
+ */
+const effectiveResolution = (
+  model: StudioModelId,
+  requested: StudioCreation['resolution'],
+): StudioCreation['resolution'] =>
+  ADAPTER_CAPABILITIES[model].supportsImageSize ? requested : '1K';
+
 const assertCapabilities = (model: StudioModelId, referenceCount: number): void => {
   const caps = ADAPTER_CAPABILITIES[model];
   if (referenceCount > caps.maxReferenceImages) {
@@ -166,7 +178,7 @@ export class StudioGenerationService {
       prompt,
       model: output.model,
       aspectRatio: req.aspectRatio,
-      resolution: req.resolution,
+      resolution: effectiveResolution(output.model, req.resolution),
       imageCount: req.imageCount,
       images,
       referenceCount: orderedRefs.length,
@@ -202,12 +214,25 @@ export class StudioGenerationService {
     const model: StudioModelId = req.modelOverride ?? parent.model;
     const source = await this.deps.resolveReference(sourceImage.id);
 
+    const references: StudioReferenceImage[] = [
+      { label: '@img1', base64: source.base64, mimeType: source.mimeType },
+    ];
+    for (const fileId of req.referenceFileIds ?? []) {
+      const resolved = await this.deps.resolveReference(fileId);
+      references.push({
+        label: `@img${references.length + 1}`,
+        base64: resolved.base64,
+        mimeType: resolved.mimeType,
+      });
+    }
+    assertCapabilities(model, references.length);
+
     const adapter = this.getAdapter(model);
     let output;
     try {
       output = await adapter.generate({
         prompt: req.prompt,
-        references: [{ label: '@img1', base64: source.base64, mimeType: source.mimeType }],
+        references,
         aspectRatio: parent.aspectRatio,
         resolution: parent.resolution,
         count: 1,
@@ -228,10 +253,10 @@ export class StudioGenerationService {
       prompt: req.prompt,
       model,
       aspectRatio: parent.aspectRatio,
-      resolution: parent.resolution,
+      resolution: effectiveResolution(model, parent.resolution),
       imageCount: 1,
       images,
-      referenceCount: 1,
+      referenceCount: references.length,
       status: 'done',
       provenance,
       routerReason: `Edit of ${parent.id}`,

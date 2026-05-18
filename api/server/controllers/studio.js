@@ -82,6 +82,15 @@ const validateEditBody = (body) => {
   if (!isModelOverrideValid(body.modelOverride)) {
     return 'Invalid modelOverride';
   }
+  if (body.referenceFileIds != null) {
+    if (
+      !Array.isArray(body.referenceFileIds) ||
+      body.referenceFileIds.length > 8 ||
+      !body.referenceFileIds.every((id) => typeof id === 'string' && id.trim() !== '')
+    ) {
+      return 'Invalid referenceFileIds';
+    }
+  }
   return null;
 };
 
