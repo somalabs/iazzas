@@ -1,12 +1,14 @@
 import { memo, useCallback, lazy, Suspense } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-import { QueryKeys } from 'librechat-data-provider';
+import { QueryKeys, SystemRoles } from 'librechat-data-provider';
 import { Skeleton, Sidebar, Button, TooltipAnchor, NewChatIcon } from '@librechat/client';
 import type { NavLink } from '~/common';
 import { CLOSE_SIDEBAR_ID } from '~/components/Chat/Menus/OpenSidebar';
 import { useActivePanel, resolveActivePanel } from '~/Providers';
 import { useLocalize, useNewConvo } from '~/hooks';
+import { useAuthContext } from '~/hooks/AuthContext';
 import { clearMessagesCache, cn } from '~/utils';
 import store from '~/store';
 
@@ -100,7 +102,38 @@ const NavIconButton = memo(function NavIconButton({
           )}
           onClick={handleClick}
         >
-          <link.icon className="h-4 w-4" aria-hidden="true" />
+          {link.icon && <link.icon className="h-4 w-4" aria-hidden="true" />}
+        </Button>
+      }
+    />
+  );
+});
+
+const NavRouteButton = memo(function NavRouteButton({ link }: { link: NavLink }) {
+  const localize = useLocalize();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isNavActive = link.href ? location.pathname.startsWith(link.href) : false;
+
+  return (
+    <TooltipAnchor
+      description={localize(link.title)}
+      side="right"
+      render={
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label={localize(link.title)}
+          aria-current={isNavActive ? 'page' : undefined}
+          className={cn(
+            'h-9 w-9 rounded-lg',
+            isNavActive
+              ? 'bg-surface-active-alt text-text-primary'
+              : 'text-text-secondary hover:bg-surface-hover',
+          )}
+          onClick={() => navigate(link.href!)}
+        >
+          {link.icon && <link.icon className="h-4 w-4" aria-hidden="true" />}
         </Button>
       }
     />
@@ -119,8 +152,11 @@ function ExpandedPanel({
   onExpand?: () => void;
 }) {
   const localize = useLocalize();
+  const { user } = useAuthContext();
+  const isAdmin = user?.role === SystemRoles.ADMIN;
   const { active, setActive } = useActivePanel();
-  const effectiveActive = resolveActivePanel(active, links);
+  const panelLinks = links.filter((l) => !l.href && !l.separator);
+  const effectiveActive = resolveActivePanel(active, panelLinks);
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
   const toggleClick = expanded ? onCollapse : onExpand;
@@ -147,16 +183,34 @@ function ExpandedPanel({
       />
       <NewChatButton />
       <div className="flex flex-col gap-1 overflow-y-auto">
-        {links.map((link) => (
-          <NavIconButton
-            key={link.id}
-            link={link}
-            isActive={link.id === effectiveActive}
-            expanded={expanded ?? true}
-            setActive={setActive}
-            onExpand={onExpand}
-          />
-        ))}
+        {links.map((link) => {
+          if (link.adminOnly && !isAdmin) {
+            return null;
+          }
+          if (link.separator) {
+            return (
+              <div
+                key={link.id}
+                role="separator"
+                aria-hidden="true"
+                className="mx-1.5 my-1 h-px bg-border-light"
+              />
+            );
+          }
+          if (link.href) {
+            return <NavRouteButton key={link.id} link={link} />;
+          }
+          return (
+            <NavIconButton
+              key={link.id}
+              link={link}
+              isActive={link.id === effectiveActive}
+              expanded={expanded ?? true}
+              setActive={setActive}
+              onExpand={onExpand}
+            />
+          );
+        })}
       </div>
 
       <div className="mt-auto flex flex-col gap-1">

@@ -77,10 +77,19 @@ export default function Toolbar() {
           type="button"
           onClick={() => navigate('/c/new')}
           className="rounded-lg p-1.5 text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-          aria-label="Voltar ao chat"
+          aria-label={localize('com_ui_ux_flows_back')}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </button>
+        <span
+          className="select-none text-sm font-semibold text-text-primary"
+          aria-label={localize('com_ui_ux_nav_flows')}
+        >
+          {localize('com_ui_ux_nav_flows')}
+        </span>
+        <span className="text-text-tertiary" aria-hidden="true">
+          /
+        </span>
         <input
           type="text"
           value={state.flowName}

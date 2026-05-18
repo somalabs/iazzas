@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
-import { MessageSquare } from 'lucide-react';
+import { MessageSquare, Image, GitFork, CalendarClock, ShieldCheck } from 'lucide-react';
 import { useUserKeyQuery } from 'librechat-data-provider/react-query';
 import { getConfigDefaults, getEndpointField } from 'librechat-data-provider';
 import type { TEndpointsConfig } from 'librechat-data-provider';
@@ -58,7 +58,40 @@ export default function useUnifiedSidebarLinks() {
       Component: ConversationsSection,
     };
 
-    return [conversationLink, ...sideNavLinks];
+    const destinationLinks: NavLink[] = [
+      {
+        title: 'com_ui_ux_nav_studio_imagens',
+        icon: Image,
+        id: 'nav-studio',
+        href: '/d/studio',
+      },
+      {
+        title: 'com_ui_ux_nav_flows',
+        icon: GitFork,
+        id: 'nav-flows',
+        href: '/d/agent-studio',
+      },
+      {
+        title: 'com_ui_ux_nav_automacoes',
+        icon: CalendarClock,
+        id: 'nav-automacoes',
+        href: '/d/automacoes',
+      },
+      { title: 'com_ui_ux_nav_studio_imagens', id: 'sep-1', separator: true },
+    ];
+
+    const adminGroup: NavLink[] = [
+      { title: 'com_ui_ux_nav_studio_imagens', id: 'sep-2', separator: true, adminOnly: true },
+      {
+        title: 'com_admin_panel',
+        icon: ShieldCheck,
+        id: 'nav-admin',
+        href: '/d/admin',
+        adminOnly: true,
+      },
+    ];
+
+    return [...destinationLinks, conversationLink, ...sideNavLinks, ...adminGroup];
   }, [sideNavLinks]);
 
   return links;

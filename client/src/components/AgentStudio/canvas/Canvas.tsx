@@ -16,7 +16,7 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from '@xyflow/react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Workflow } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { useFlowContext } from '../context';
 import { cn } from '~/utils';
@@ -147,9 +147,13 @@ export default function Canvas() {
       </ReactFlow>
 
       {state.nodes.length === 0 && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <p className="text-sm text-text-tertiary">
-            {localize('com_studio_flow_canvas_empty')}
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
+          <Workflow className="h-8 w-8 text-text-tertiary" aria-hidden="true" />
+          <p className="text-sm text-text-secondary">
+            {localize('com_ui_ux_flows_canvas_vazio')}
+          </p>
+          <p className="text-xs text-text-tertiary">
+            {localize('com_ui_ux_flows_canvas_hint')}
           </p>
         </div>
       )}

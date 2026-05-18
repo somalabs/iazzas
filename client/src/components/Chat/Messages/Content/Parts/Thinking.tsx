@@ -1,6 +1,6 @@
 import { useState, useMemo, memo, useCallback, useRef, useId, type MouseEvent } from 'react';
 import { useAtomValue } from 'jotai';
-import { Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
+import { BrainCircuit, ChevronDown, ChevronUp } from 'lucide-react';
 import { Clipboard, CheckMark, TooltipAnchor } from '@librechat/client';
 import type { FocusEvent, FC } from 'react';
 import { useLocalize, useExpandCollapse } from '~/hooks';
@@ -37,6 +37,7 @@ export const ThinkingButton = memo(
     content,
     contentId,
     showCopyButton = true,
+    isStreaming = false,
   }: {
     isExpanded: boolean;
     onClick: (e: MouseEvent<HTMLButtonElement>) => void;
@@ -44,6 +45,7 @@ export const ThinkingButton = memo(
     content?: string;
     contentId: string;
     showCopyButton?: boolean;
+    isStreaming?: boolean;
   }) => {
     const localize = useLocalize();
     const fontSize = useAtomValue(fontSizeAtom);
@@ -75,8 +77,11 @@ export const ThinkingButton = memo(
           )}
         >
           <span className="relative mr-1.5 inline-flex h-[18px] w-[18px] items-center justify-center">
-            <Lightbulb
-              className="icon-sm absolute text-text-secondary opacity-100 transition-opacity group-hover/button:opacity-0"
+            <BrainCircuit
+              className={cn(
+                'icon-sm absolute text-text-secondary opacity-100 transition-opacity group-hover/button:opacity-0',
+                isStreaming && 'animate-pulse',
+              )}
               aria-hidden="true"
             />
             <ChevronDown
@@ -169,7 +174,7 @@ export const FloatingThinkingBar = memo(
     return (
       <div
         className={cn(
-          'absolute bottom-3 right-3 flex items-center gap-2 transition-opacity duration-150',
+          'absolute bottom-3 right-3 hidden items-center gap-2 transition-opacity duration-150 sm:flex',
           isVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
       >

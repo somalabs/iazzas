@@ -100,7 +100,7 @@ export default function useSideNavLinks({
       endpointsConfig[EModelEndpoint.agents].disableBuilder !== true
     ) {
       links.push({
-        title: 'com_sidepanel_agent_builder',
+        title: 'com_ui_ux_nav_agentes',
         label: '',
         icon: Blocks,
         id: EModelEndpoint.agents,

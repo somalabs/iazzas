@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { showThinkingAtom } from '~/store/showThinking';
 import FontSizeSelector from './FontSizeSelector';
 import { ForkSettings } from './ForkSettings';
 import ChatDirection from './ChatDirection';
@@ -41,13 +40,6 @@ const toggleSwitchConfigs = [
     switchId: 'centerFormOnLanding',
     hoverCardText: undefined,
     key: 'centerFormOnLanding',
-  },
-  {
-    stateAtom: showThinkingAtom,
-    localizationKey: 'com_nav_show_thinking' as const,
-    switchId: 'showThinking',
-    hoverCardText: undefined,
-    key: 'showThinking',
   },
   {
     stateAtom: store.autoExpandTools,

@@ -125,11 +125,17 @@ export type AgentIconMapProps = IconMapProps & { agentName?: string };
 export type NavLink = {
   title: TranslationKeys;
   label?: string;
-  icon: LucideIcon | React.FC;
+  icon?: LucideIcon | React.FC;
   Component?: React.ComponentType;
   onClick?: (e?: React.MouseEvent) => void;
   variant?: 'default' | 'ghost';
   id: string;
+  /** When present, the link navigates to this route instead of opening a panel. */
+  href?: string;
+  /** When true, renders a visual divider (no icon, no panel). */
+  separator?: true;
+  /** When true, only visible to users with the ADMIN system role. */
+  adminOnly?: boolean;
 };
 
 export interface DataColumnMeta {
