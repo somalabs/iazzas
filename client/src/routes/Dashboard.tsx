@@ -15,6 +15,7 @@ import {
   AnalyticsView,
   FeedbacksView,
 } from '~/components/Admin';
+import { AgentStudioView } from '~/components/AgentStudio';
 import DashboardRoute from './Layouts/Dashboard';
 
 const dashboardRoutes = {
@@ -81,6 +82,10 @@ const dashboardRoutes = {
           element: <PromptForm />,
         },
       ],
+    },
+    {
+      path: 'agent-studio',
+      element: <AgentStudioView />,
     },
     {
       path: 'admin',

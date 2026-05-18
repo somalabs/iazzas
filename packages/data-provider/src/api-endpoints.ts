@@ -434,6 +434,14 @@ export const memories = () => `${BASE_URL}/api/memories`;
 export const memory = (key: string) => `${memories()}/${encodeURIComponent(key)}`;
 export const memoryPreferences = () => `${memories()}/preferences`;
 
+/* Agent Studio flows */
+export const flows = () => `${BASE_URL}/api/flows`;
+export const flow = (id: string) => `${flows()}/${encodeURIComponent(id)}`;
+export const flowRuns = (id: string) => `${flow(id)}/runs`;
+export const runFlow = (id: string) => `${flow(id)}/run`;
+export const resumeFlowRun = (runId: string) =>
+  `${flows()}/runs/${encodeURIComponent(runId)}/resume`;
+
 export const searchPrincipals = (params: q.PrincipalSearchParams) => {
   const { q: query, limit, types } = params;
   let url = `${BASE_URL}/api/permissions/search-principals?q=${encodeURIComponent(query)}`;

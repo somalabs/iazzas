@@ -5,6 +5,8 @@ export * from './Endpoints';
 export * from './Files';
 /* Memories */
 export * from './Memories';
+/* Agent Studio flows */
+export * from './Flows';
 export * from './Messages';
 export * from './Misc';
 export * from './Tools';

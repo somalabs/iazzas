@@ -1,14 +1,14 @@
 import { useState, memo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Menu from '@ariakit/react/menu';
-import { FileText, LogOut, ShieldCheck } from 'lucide-react';
-import { SystemRoles } from 'librechat-data-provider';
+import { FileText, LogOut, ShieldCheck, Workflow } from 'lucide-react';
+import { SystemRoles, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { LinkIcon, GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
 import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { formatDisplayCredits } from '~/utils/credits';
-import { useLocalize } from '~/hooks';
+import { useLocalize, useHasAccess } from '~/hooks';
 import Settings from './Settings';
 
 function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
@@ -16,6 +16,10 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuthContext();
   const isAdmin = user?.role === SystemRoles.ADMIN;
+  const canUseAgentStudio = useHasAccess({
+    permissionType: PermissionTypes.AGENTS,
+    permission: Permissions.USE,
+  });
   const { data: startupConfig } = useGetStartupConfig();
   const balanceQuery = useGetUserBalance({
     enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
@@ -90,6 +94,15 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           <GearIcon className="icon-md" aria-hidden="true" />
           {localize('com_nav_settings')}
         </Menu.MenuItem>
+        {canUseAgentStudio && (
+          <Menu.MenuItem
+            onClick={() => navigate('/d/agent-studio')}
+            className="select-item text-sm"
+          >
+            <Workflow className="icon-md" aria-hidden="true" />
+            {localize('com_studio_flow_nav')}
+          </Menu.MenuItem>
+        )}
         {isAdmin && (
           <Menu.MenuItem onClick={() => navigate('/d/admin')} className="select-item text-sm">
             <ShieldCheck className="icon-md" aria-hidden="true" />

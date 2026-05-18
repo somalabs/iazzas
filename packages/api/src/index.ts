@@ -39,6 +39,8 @@ export * from './middleware';
 export * from './memory';
 /* Agents */
 export * from './agents';
+/* Agent Studio flows */
+export * from './flows';
 /* Prompts */
 export * from './prompts';
 /* Endpoints */

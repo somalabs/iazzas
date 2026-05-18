@@ -7,6 +7,7 @@ import * as m from './types/mutations';
 import * as q from './types/queries';
 import * as f from './types/files';
 import * as mcp from './types/mcpServers';
+import * as fl from './types/flow';
 import * as config from './config';
 import request from './request';
 import * as s from './schemas';
@@ -1422,3 +1423,54 @@ export function downloadAdminFeedbacksExport(
     responseType: 'blob',
   });
 }
+
+/* Agent Studio flows */
+export const getFlows = (cursor?: string): Promise<fl.TFlowListResponse> => {
+  const url = cursor
+    ? `${endpoints.flows()}?cursor=${encodeURIComponent(cursor)}`
+    : endpoints.flows();
+  return request.get(url);
+};
+
+export const getFlow = (id: string): Promise<fl.TFlowResponse> => {
+  return request.get(endpoints.flow(id));
+};
+
+export const createFlow = (data: fl.TFlowMutationRequest): Promise<fl.TFlowResponse> => {
+  return request.post(endpoints.flows(), data);
+};
+
+export const updateFlow = (
+  id: string,
+  data: fl.TFlowMutationRequest,
+): Promise<fl.TFlowResponse> => {
+  return request.put(endpoints.flow(id), data);
+};
+
+export const deleteFlow = (id: string): Promise<{ deleted: boolean }> => {
+  return request.delete(endpoints.flow(id));
+};
+
+export const runFlow = (
+  id: string,
+  data: fl.TRunFlowRequest,
+): Promise<fl.TRunFlowResponse> => {
+  return request.post(endpoints.runFlow(id), data);
+};
+
+export const getFlowRuns = (
+  id: string,
+  cursor?: string,
+): Promise<fl.TFlowRunsResponse> => {
+  const url = cursor
+    ? `${endpoints.flowRuns(id)}?cursor=${encodeURIComponent(cursor)}`
+    : endpoints.flowRuns(id);
+  return request.get(url);
+};
+
+export const resumeFlowRun = (
+  runId: string,
+  data: fl.TResumeRunRequest,
+): Promise<fl.TRunFlowResponse> => {
+  return request.post(endpoints.resumeFlowRun(runId), data);
+};

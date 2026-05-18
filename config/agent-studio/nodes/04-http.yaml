@@ -1,0 +1,145 @@
+node_type: http
+version: "1.0.0"
+display_name: "HTTP"
+display_name_pt: "HTTP"
+description: >
+  Realiza uma chamada HTTP externa. O host de destino DEVE estar na allowlist
+  definida pela variável de ambiente FLOW_HTTP_ALLOWED_HOSTS.
+  Erros de allowlist são não-retryáveis.
+
+constraints:
+  max_per_flow: null
+  incoming_edges: 1+
+  outgoing_edges: 1    # handle "default" — sucesso
+  note: >
+    Falha HTTP (4xx, 5xx, timeout, host bloqueado) → node status "failed",
+    run status "failed". Não há handle de erro separado em v1.
+
+# Variável de ambiente obrigatória (não tem default seguro)
+env_vars:
+  FLOW_HTTP_ALLOWED_HOSTS:
+    description: >
+      Lista de hostnames permitidos, separados por vírgula.
+      Cada hostname é verificado com ancoragem exata (sem wildcard em v1).
+      Exemplos: "api.interno.com,webhook.slack.com"
+    required: true
+    behavior_if_absent: "Todas as requests HTTP são bloqueadas (equivale a lista vazia)."
+    note: >
+      Mesma semântica de ancoragem de FLUX_DELIVERY_HOSTS existente no projeto.
+      A verificação ocorre ANTES de qualquer I/O de rede.
+
+fields:
+  - id: method
+    label_pt: "Método"
+    type: enum
+    required: true
+    editable_in_inspector: true
+    interpolation: false
+    options: [GET, POST, PUT, PATCH, DELETE]
+    default: GET
+
+  - id: url
+    label_pt: "URL"
+    hint_pt: "Suporta {{nodeId.output}}. Host deve estar em FLOW_HTTP_ALLOWED_HOSTS."
+    type: string
+    required: true
+    editable_in_inspector: true
+    interpolation: true
+    validation:
+      - must_be_valid_url: true
+      - must_not_be_empty_after_interpolation: true  # URL vazia após interpolação → erro não-retryável
+
+  - id: headers
+    label_pt: "Headers"
+    type: array
+    items:
+      type: object
+      properties:
+        key:
+          type: string
+          required: true
+        value:
+          type: string
+          required: true
+          interpolation: true
+    required: false
+    editable_in_inspector: true
+    default: []
+
+  - id: body
+    label_pt: "Body"
+    hint_pt: "Suporta {{nodeId.output}}. Visível apenas para POST, PUT e PATCH."
+    type: string
+    required: false
+    editable_in_inspector: true
+    interpolation: true
+    visible_for_methods: [POST, PUT, PATCH]
+    default: null
+
+  - id: timeout_ms
+    label_pt: "Timeout (ms)"
+    type: integer
+    required: false
+    editable_in_inspector: true
+    interpolation: false
+    default: 10000
+    validation:
+      min: 1
+      max: 60000
+
+output_shape:
+  type: object
+  description: "Resultado da chamada HTTP."
+  properties:
+    status:
+      type: integer
+      description: "HTTP status code (e.g., 200, 404)"
+    body:
+      type: string
+      description: "Body da resposta como string"
+  reference: "{{nodeId.output}}"
+  note: >
+    O output é serializado como JSON string para uso em interpolação downstream.
+    Exemplo: {{nodeId.output}} → '{"status":200,"body":"..."}'
+
+handles:
+  out:
+    - id: default
+      label_pt: ""
+
+security:
+  allowlist_check:
+    timing: "ANTES de qualquer I/O de rede"
+    on_failure: "node status = failed, run status = failed, não retryável"
+    error_message_to_user: "Host não permitido pela política de segurança"
+  error_scrubbing:
+    - "Headers de autorização (Authorization, x-api-key, etc.) são removidos do log e do output de erro"
+    - "Query params com nomes contendo 'token', 'key', 'secret', 'password' são mascarados nos logs"
+    - "Body de request não é persistido no FlowRun — apenas status code e body de resposta"
+    - "nodeError no FlowRun armazena apenas: tipo do erro, status code (se disponível), mensagem sanitizada"
+
+i18n_keys:
+  - com_studio_flow_node_http
+  - com_studio_flow_node_http_desc
+  - com_studio_flow_http_method_label
+  - com_studio_flow_http_url_label
+  - com_studio_flow_http_url_hint
+  - com_studio_flow_http_headers_label
+  - com_studio_flow_http_headers_add
+  - com_studio_flow_http_body_label
+  - com_studio_flow_http_body_hint
+  - com_studio_flow_http_timeout_label
+  - com_studio_flow_error_url_required
+  - com_studio_flow_error_url_invalid
+  - com_studio_flow_error_host_blocked
+
+acceptance_criteria:
+  - "Nó HTTP com host em FLOW_HTTP_ALLOWED_HOSTS completa a request e propaga output."
+  - "Nó HTTP com host FORA da allowlist falha imediatamente (antes de abrir conexão) com mensagem 'Host não permitido'."
+  - "FLOW_HTTP_ALLOWED_HOSTS vazia ou ausente bloqueia toda request HTTP."
+  - "Campo Body é visível apenas para POST, PUT, PATCH."
+  - "URL vazia após interpolação → node failed, run failed (não retryável)."
+  - "Timeout expirado → node failed, run failed."
+  - "Headers com valores de token não aparecem em logs nem no output do run."
+  - "Output do nó disponível como {{nodeId.output}} (JSON string) para nós posteriores."
+  - "Timeout aceita apenas inteiros positivos até 60000ms; valor fora do range exibe erro de validação."
