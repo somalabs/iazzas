@@ -17,6 +17,7 @@ import {
 } from '~/components/Admin';
 import StudioScreen from '~/components/Studio/StudioScreen';
 import { AgentStudioView } from '~/components/AgentStudio';
+import { AutomacoesScreen } from '~/components/Automacoes';
 import DashboardRoute from './Layouts/Dashboard';
 
 const dashboardRoutes = {
@@ -91,6 +92,10 @@ const dashboardRoutes = {
     {
       path: 'agent-studio',
       element: <AgentStudioView />,
+    },
+    {
+      path: 'automacoes',
+      element: <AutomacoesScreen />,
     },
     {
       path: 'admin',
