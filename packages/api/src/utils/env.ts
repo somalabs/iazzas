@@ -3,6 +3,7 @@ import type { MCPOptions } from 'librechat-data-provider';
 import type { IUser } from '@librechat/data-schemas';
 import type { RequestBody } from '~/types';
 import { extractOpenIDTokenInfo, processOpenIDPlaceholders, isOpenIDTokenValid } from './oidc';
+import { processProxyJwtPlaceholder } from './mcpProxyJwt';
 
 /**
  * List of allowed user fields that can be used in MCP environment variables.
@@ -256,6 +257,8 @@ function processSingleValue({
   if (openidTokenInfo && isOpenIDTokenValid(openidTokenInfo)) {
     value = processOpenIDPlaceholders(value, openidTokenInfo);
   }
+
+  value = processProxyJwtPlaceholder(value, user);
 
   if (body) {
     value = processBodyPlaceholders(value, body);

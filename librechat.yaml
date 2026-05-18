@@ -205,25 +205,25 @@ mcpServers:
     type: streamable-http
     url: https://bq-analista-production.up.railway.app/mcp
     headers:
-      Authorization: "Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}"
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
   azzas_devolucoes:
     type: streamable-http
     url: https://analista-devolucoes-production.up.railway.app/mcp
     headers:
-      Authorization: "Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}"
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
   azzas_ciclo:
     type: streamable-http
     url: https://agent-atacado-production.up.railway.app/mcp
     headers:
-      Authorization: "Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}"
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
   azzas_clientes:
     type: streamable-http
     url: https://agent-clientes-production.up.railway.app/mcp
     headers:
-      Authorization: "Bearer {{LIBRECHAT_OPENID_ID_TOKEN}}"
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
 
   # Rollback: descomente o bloco abaixo e remova os 4 acima pra voltar ao stdio.
