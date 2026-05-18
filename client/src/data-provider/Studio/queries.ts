@@ -82,3 +82,20 @@ export const useStudioEditMutation = (): UseMutationResult<
     },
   );
 };
+
+export const useStudioDeleteMutation = (): UseMutationResult<
+  void,
+  Error,
+  string
+> => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ['studioDelete'],
+    (id: string) => dataService.deleteStudioCreation(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries([QueryKeys.studioCreations]);
+      },
+    },
+  );
+};
