@@ -1,7 +1,7 @@
 import { useState, memo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Menu from '@ariakit/react/menu';
-import { FileText, LogOut, ShieldCheck, Workflow, CalendarClock } from 'lucide-react';
+import { FileText, Image, LogOut, ShieldCheck, Workflow, CalendarClock } from 'lucide-react';
 import { SystemRoles, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { LinkIcon, GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
 import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
@@ -75,8 +75,7 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
         {startupConfig?.balance?.enabled === true && balanceQuery.data != null && (
           <>
             <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
-              {localize('com_nav_balance')}:{' '}
-              {formatDisplayCredits(balanceQuery.data.tokenCredits)}
+              {localize('com_nav_balance')}: {formatDisplayCredits(balanceQuery.data.tokenCredits)}
             </div>
             <DropdownMenuSeparator />
           </>
@@ -107,11 +106,12 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             {localize('com_studio_flow_nav')}
           </Menu.MenuItem>
         )}
+        <Menu.MenuItem onClick={() => navigate('/d/studio')} className="select-item text-sm">
+          <Image className="icon-md" aria-hidden="true" />
+          {localize('com_studio_image_nav')}
+        </Menu.MenuItem>
         {canUseAutomacoes && (
-          <Menu.MenuItem
-            onClick={() => navigate('/d/automacoes')}
-            className="select-item text-sm"
-          >
+          <Menu.MenuItem onClick={() => navigate('/d/automacoes')} className="select-item text-sm">
             <CalendarClock className="icon-md" aria-hidden="true" />
             {localize('com_automacoes_nav_label')}
           </Menu.MenuItem>
