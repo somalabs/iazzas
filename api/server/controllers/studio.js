@@ -236,9 +236,11 @@ const buildService = (req) =>
 
 const handleError = (res, err) => {
   if (err instanceof TemplateInputError || err instanceof AdapterCapabilityError) {
+    logger.warn(`[studio] 422 ${err.constructor.name}: ${err.message}`);
     return res.status(422).json({ error: err.message });
   }
   if (err instanceof AdapterRequestError) {
+    logger.warn(`[studio] 502 AdapterRequestError: ${err.message}`);
     return res.status(502).json({ error: err.message });
   }
   logger.error('[studio] unexpected error', err);

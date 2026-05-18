@@ -8,6 +8,7 @@ import type {
   StudioModelId,
 } from '../types';
 import { AdapterRequestError } from '../types';
+import { generateConcurrently } from './runConcurrent';
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLLS = 60;
@@ -141,10 +142,9 @@ export class FluxKontextAdapter implements StudioAdapter {
   }
 
   async generate(input: AdapterGenerateInput): Promise<AdapterGenerateOutput> {
-    const images: { base64: string; mimeType: string }[] = [];
-    for (let i = 0; i < input.count; i++) {
-      images.push(await this.generateOne(input));
-    }
+    const images = await generateConcurrently(this.model, input.count, () =>
+      this.generateOne(input),
+    );
     return { images };
   }
 }
