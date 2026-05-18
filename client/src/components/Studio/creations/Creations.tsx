@@ -117,9 +117,15 @@ export default function Creations() {
           </button>
           <button
             type="button"
-            className="rounded-md px-2.5 py-1 text-xs text-text-tertiary hover:text-text-secondary"
+            disabled
+            title={`${localize('com_studio_my_templates')} · ${localize('com_studio_coming_soon')}`}
+            aria-label={`${localize('com_studio_my_templates')} (${localize('com_studio_coming_soon')})`}
+            className="flex cursor-not-allowed items-center gap-1.5 rounded-md px-2.5 py-1 text-xs text-text-tertiary opacity-50"
           >
             {localize('com_studio_my_templates')}
+            <span className="rounded-full bg-surface-tertiary px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-text-tertiary">
+              {localize('com_studio_coming_soon')}
+            </span>
           </button>
         </div>
       </div>

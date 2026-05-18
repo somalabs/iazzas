@@ -31,6 +31,9 @@ export type StudioReference = {
   fileName: string | null;
   fileId?: string | null;
   slotId?: string;
+  /** Client-only: upload lifecycle of the reference image. The backend
+   * never sees this — a ref only reaches generate once `fileId` is set. */
+  uploadStatus?: 'uploading' | 'error';
 };
 
 export type StudioImageResult = {

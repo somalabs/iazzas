@@ -41,6 +41,7 @@ type StudioAction =
   | { type: 'SET_ASPECT_RATIO'; payload: AspectRatio }
   | { type: 'SET_RESOLUTION'; payload: Resolution }
   | { type: 'ADD_REFERENCE'; payload: StudioReference }
+  | { type: 'UPDATE_REFERENCE'; payload: { id: string; patch: Partial<StudioReference> } }
   | { type: 'REMOVE_REFERENCE'; payload: string }
   | { type: 'SELECT_CREATION'; payload: StudioCreation | null }
   | { type: 'SET_MODE'; payload: StudioMode }
@@ -132,6 +133,14 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
       if (state.references.length >= 8) return state;
       const updated = assignRefLabels([...state.references, action.payload]);
       return { ...state, references: updated };
+    }
+    case 'UPDATE_REFERENCE': {
+      return {
+        ...state,
+        references: state.references.map((r) =>
+          r.id === action.payload.id ? { ...r, ...action.payload.patch } : r,
+        ),
+      };
     }
     case 'REMOVE_REFERENCE': {
       const filtered = state.references.filter((r) => r.id !== action.payload);
@@ -242,6 +251,23 @@ export function useGenerateImages() {
   const localize = useLocalize();
 
   return useCallback(() => {
+    // A reference only reaches the backend once its upload finished and
+    // `fileId` is set. Guarding here turns the old silent-drop bug (refs=0
+    // sent while the user clearly attached an image) into actionable
+    // feedback instead of a broken generation.
+    const stillUploading = references.some(
+      (r) => r.previewUrl != null && !r.fileId && r.uploadStatus !== 'error',
+    );
+    const failedUploads = references.some((r) => r.uploadStatus === 'error');
+    if (stillUploading) {
+      showToast({ status: 'warning', message: localize('com_studio_refs_uploading') });
+      return;
+    }
+    if (failedUploads) {
+      showToast({ status: 'error', message: localize('com_studio_ref_upload_failed') });
+      return;
+    }
+
     const optimisticId = crypto.randomUUID();
     const optimistic: StudioCreation = {
       id: optimisticId,

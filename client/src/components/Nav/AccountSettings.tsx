@@ -1,7 +1,7 @@
 import { useState, memo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Menu from '@ariakit/react/menu';
-import { FileText, LogOut, ShieldCheck, Workflow } from 'lucide-react';
+import { FileText, LogOut, ShieldCheck, Workflow, Image as ImageIcon } from 'lucide-react';
 import { SystemRoles, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { LinkIcon, GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
 import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
@@ -94,6 +94,15 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           <GearIcon className="icon-md" aria-hidden="true" />
           {localize('com_nav_settings')}
         </Menu.MenuItem>
+        {canUseAgentStudio && (
+          <Menu.MenuItem
+            onClick={() => navigate('/d/studio')}
+            className="select-item text-sm"
+          >
+            <ImageIcon className="icon-md" aria-hidden="true" />
+            {localize('com_studio_image_nav')}
+          </Menu.MenuItem>
+        )}
         {canUseAgentStudio && (
           <Menu.MenuItem
             onClick={() => navigate('/d/agent-studio')}

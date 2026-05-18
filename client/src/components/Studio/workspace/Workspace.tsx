@@ -3,12 +3,12 @@ import { useLocalize } from '~/hooks';
 import { useStudio, useGenerateImages } from '../context';
 import UseCaseSelector from './UseCaseSelector';
 import GuidedForm from './GuidedForm';
-import AdvancedMode from './AdvancedMode';
 import PromptInput from './PromptInput';
 import ReferencesPanel from './ReferencesPanel';
 import ImageCount from './ImageCount';
 import AspectRatioSelector from './AspectRatioSelector';
 import ResolutionSelector from './ResolutionSelector';
+import ModelSelector from './ModelSelector';
 
 export default function Workspace() {
   const localize = useLocalize();
@@ -44,9 +44,6 @@ export default function Workspace() {
         {/* Guided form */}
         {!advancedMode && <GuidedForm />}
 
-        {/* Advanced mode extras */}
-        {advancedMode && <AdvancedMode />}
-
         {/* Prompt */}
         <PromptInput />
 
@@ -60,6 +57,7 @@ export default function Workspace() {
           <ImageCount />
           <AspectRatioSelector />
           <ResolutionSelector />
+          <ModelSelector />
           <div className="ml-auto">
             <button
               type="button"

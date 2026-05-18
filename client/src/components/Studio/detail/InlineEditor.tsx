@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Paperclip, ChevronUp, X } from 'lucide-react';
+import { useToastContext } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { useStudioEditMutation } from '~/data-provider';
@@ -9,6 +10,7 @@ type EditorTab = 'prompt' | 'visual';
 
 export default function InlineEditor() {
   const localize = useLocalize();
+  const { showToast } = useToastContext();
   const dispatch = useStudioDispatch();
   const { selectedCreation } = useStudio();
   const [tab, setTab] = useState<EditorTab>('prompt');
@@ -43,14 +45,19 @@ export default function InlineEditor() {
           setValue('');
           dispatch({ type: 'SET_MODE', payload: 'detail' });
         },
+        onError: () => {
+          // Without this the edit failed silently — the prompt just sat
+          // there with no feedback. Keep the text so the user can retry.
+          showToast({ status: 'error', message: localize('com_studio_edit_failed') });
+        },
       },
     );
   }
 
   return (
-    <div className="flex flex-col border-t border-border-medium bg-surface-primary">
+    <div className="flex h-full flex-col border-t border-border-medium bg-surface-primary">
       {/* Full-screen image area */}
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-surface-chat">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-chat">
         {selectedCreation.images[0] ? (
           <img
             src={selectedCreation.images[0].url}
@@ -73,7 +80,7 @@ export default function InlineEditor() {
       </div>
 
       {/* Prompt bar */}
-      <div className="border-t border-border-medium bg-surface-secondary px-4 py-3">
+      <div className="flex-shrink-0 border-t border-border-medium bg-surface-secondary px-4 py-3">
         <div className="flex items-start gap-2 rounded-xl border border-border-medium bg-surface-primary px-3 py-2.5 focus-within:border-border-heavy">
           <textarea
             value={value}

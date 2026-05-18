@@ -1,23 +1,11 @@
 import { useState } from 'react';
-import { Trash2, Heart, FolderOpen, Download, ChevronDown, X, Pencil } from 'lucide-react';
+import { Trash2, Heart, FolderOpen, Download, X, Pencil, AlertCircle } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { useStudio, useStudioDispatch } from '../context';
 import { MODEL_DISPLAY_NAMES } from '../schemas';
 import { formatStudioDate } from '../date';
 import InlineEditor from './InlineEditor';
-
-const USE_IMAGE_OPTIONS = [
-  'com_studio_use_as_style',
-  'com_studio_use_as_reference',
-  'com_studio_recreate',
-  'com_studio_variations',
-  'com_studio_change_camera',
-  'com_studio_upscale',
-  'com_studio_skin_enhancer',
-  'com_studio_3d_model',
-  'com_studio_create_3d_scene',
-] as const;
 
 type DetailTab = 'details' | 'comments';
 
@@ -26,7 +14,6 @@ export default function ImageDetail() {
   const { selectedCreation, mode } = useStudio();
   const dispatch = useStudioDispatch();
   const [tab, setTab] = useState<DetailTab>('details');
-  const [useImageOpen, setUseImageOpen] = useState(false);
   const [promptExpanded, setPromptExpanded] = useState(false);
 
   if (!selectedCreation) return null;
@@ -36,6 +23,7 @@ export default function ImageDetail() {
   const date = formatStudioDate(selectedCreation.createdAt, true);
   const prompt = selectedCreation.prompt;
   const truncated = prompt.length > 140 && !promptExpanded;
+  const comingSoon = localize('com_studio_coming_soon');
 
   function handleClose() {
     dispatch({ type: 'SELECT_CREATION', payload: null });
@@ -43,6 +31,27 @@ export default function ImageDetail() {
 
   function startEditing() {
     dispatch({ type: 'SET_MODE', payload: 'editing' });
+  }
+
+  async function handleDownload() {
+    const image = selectedCreation?.images[0];
+    if (!image) {
+      return;
+    }
+    try {
+      const res = await fetch(image.url);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `studio-${selectedCreation.id}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      window.open(image.url, '_blank', 'noopener');
+    }
   }
 
   if (isEditing) {
@@ -65,6 +74,16 @@ export default function ImageDetail() {
             alt="Generated creation"
             className="max-h-full max-w-full object-contain"
           />
+        ) : selectedCreation.status === 'error' ? (
+          <div className="flex max-w-xs flex-col items-center gap-3 px-6 text-center text-text-secondary">
+            <AlertCircle className="h-8 w-8 text-red-500" />
+            <span className="text-sm font-medium">
+              {localize('com_studio_generation_failed')}
+            </span>
+            <span className="text-xs text-text-tertiary">
+              {localize('com_studio_generation_failed_hint')}
+            </span>
+          </div>
         ) : (
           <div className="flex flex-col items-center gap-3 text-text-tertiary">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-medium border-t-text-secondary" />
@@ -93,27 +112,34 @@ export default function ImageDetail() {
         <div className="flex items-center gap-1.5 border-b border-border-medium p-3">
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-destructive"
-            aria-label={localize('com_studio_delete_creation')}
+            disabled
+            title={`${localize('com_studio_delete_creation')} · ${comingSoon}`}
+            className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-border-medium text-text-secondary opacity-40"
+            aria-label={`${localize('com_studio_delete_creation')} (${comingSoon})`}
           >
             <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-medium text-text-secondary transition-colors hover:bg-surface-hover"
-            aria-label="Favorite"
+            disabled
+            title={`Favoritar · ${comingSoon}`}
+            className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-border-medium text-text-secondary opacity-40"
+            aria-label={`Favoritar (${comingSoon})`}
           >
             <Heart className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-medium text-text-secondary transition-colors hover:bg-surface-hover"
-            aria-label={localize('com_studio_add_to_collection')}
+            disabled
+            title={`${localize('com_studio_add_to_collection')} · ${comingSoon}`}
+            className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-border-medium text-text-secondary opacity-40"
+            aria-label={`${localize('com_studio_add_to_collection')} (${comingSoon})`}
           >
             <FolderOpen className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>
           <button
             type="button"
+            onClick={handleDownload}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-medium text-text-secondary transition-colors hover:bg-surface-hover"
             aria-label={localize('com_studio_download')}
           >
@@ -229,33 +255,16 @@ export default function ImageDetail() {
           <div className="relative">
             <button
               type="button"
-              onClick={() => setUseImageOpen((v) => !v)}
-              className="flex w-full items-center justify-between rounded-lg bg-surface-submit px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-surface-submit-hover"
-              aria-haspopup="menu"
-              aria-expanded={useImageOpen}
+              disabled
+              title={`${localize('com_studio_use_image')} · ${comingSoon}`}
+              className="flex w-full cursor-not-allowed items-center justify-between rounded-lg bg-surface-submit px-3 py-2 text-sm font-semibold text-white opacity-50"
+              aria-label={`${localize('com_studio_use_image')} (${comingSoon})`}
             >
               {localize('com_studio_use_image')}
-              <ChevronDown className={cn('h-4 w-4 transition-transform', useImageOpen && 'rotate-180')} />
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider">
+                {comingSoon}
+              </span>
             </button>
-
-            {useImageOpen && (
-              <div
-                role="menu"
-                className="absolute bottom-full left-0 right-0 z-50 mb-1 rounded-xl border border-border-medium bg-surface-dialog py-1 shadow-xl"
-              >
-                {USE_IMAGE_OPTIONS.map((key) => (
-                  <button
-                    key={key}
-                    role="menuitem"
-                    type="button"
-                    onClick={() => setUseImageOpen(false)}
-                    className="w-full px-3 py-2 text-left text-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
-                  >
-                    {localize(key)}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
