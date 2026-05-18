@@ -17,6 +17,21 @@ const NODE_TYPES = new Set([
 ]);
 const PAGE_LIMIT = 20;
 
+/** Structural errors that must block persistence (mirrors client hasBlockingErrors). */
+const SAVE_BLOCKING_CODES = new Set([
+  'no_trigger',
+  'no_output',
+  'multiple_triggers',
+  'cycle',
+  'path_without_output',
+]);
+
+/** @returns {Array|null} blocking graph errors, or null when the graph may be saved */
+function validateGraphForSave(nodes, edges) {
+  const errors = validateGraph(nodes, edges).filter((e) => SAVE_BLOCKING_CODES.has(e.code));
+  return errors.length > 0 ? errors : null;
+}
+
 /** @returns {string|null} validation message, or null when valid */
 function validateFlowBody(body) {
   if (!body || typeof body !== 'object') {
@@ -149,6 +164,10 @@ const createFlow = async (req, res) => {
   if (invalid) {
     return res.status(422).json({ error: invalid });
   }
+  const graphErrors = validateGraphForSave(req.body.nodes, req.body.edges);
+  if (graphErrors) {
+    return res.status(422).json({ error: 'Invalid flow graph', details: graphErrors });
+  }
   try {
     const flow = await repo.createFlow({
       tenantId: req.user.tenantId,
@@ -167,6 +186,10 @@ const updateFlow = async (req, res) => {
   const invalid = validateFlowBody(req.body);
   if (invalid) {
     return res.status(422).json({ error: invalid });
+  }
+  const graphErrors = validateGraphForSave(req.body.nodes, req.body.edges);
+  if (graphErrors) {
+    return res.status(422).json({ error: 'Invalid flow graph', details: graphErrors });
   }
   try {
     const flow = await repo.updateFlow({

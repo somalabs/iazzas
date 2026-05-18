@@ -1,6 +1,7 @@
 import { Save, Play, History, ArrowLeft, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToastContext } from '@librechat/client';
+import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
 import { useCreateFlowMutation, useUpdateFlowMutation } from '~/data-provider';
 import { useFlowContext } from '../context';
@@ -39,9 +40,19 @@ export default function Toolbar() {
       dispatch({ type: 'SET_SAVING', payload: false });
       showToast({ message: localize('com_studio_flow_save_success'), status: 'success' });
     };
-    const onError = () => {
+    const onError = (error: unknown) => {
       dispatch({ type: 'SET_SAVING', payload: false });
-      showToast({ message: localize('com_studio_flow_save_error'), status: 'error' });
+      const details = (
+        error as { response?: { data?: { details?: Array<{ code: string }> } } }
+      )?.response?.data?.details;
+      const firstCode = Array.isArray(details) && details.length > 0 ? details[0].code : null;
+      const msgKey = firstCode ? `com_studio_flow_run_error_${firstCode}` : null;
+      showToast({
+        message: msgKey
+          ? localize(msgKey as TranslationKeys)
+          : localize('com_studio_flow_save_error'),
+        status: 'error',
+      });
     };
     if (state.flowId) {
       updateFlow.mutate(

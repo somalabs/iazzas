@@ -21,7 +21,7 @@ const flowPayloadLimit = express.json({ limit: '1mb' });
 /** RBAC reuses PermissionTypes.AGENTS — flows orchestrate existing agents. */
 const checkFlowRead = generateCheckAccess({
   permissionType: PermissionTypes.AGENTS,
-  permissions: [Permissions.USE, Permissions.READ],
+  permissions: [Permissions.USE],
   getRoleByName,
 });
 const checkFlowCreate = generateCheckAccess({
@@ -31,7 +31,7 @@ const checkFlowCreate = generateCheckAccess({
 });
 const checkFlowUpdate = generateCheckAccess({
   permissionType: PermissionTypes.AGENTS,
-  permissions: [Permissions.USE, Permissions.UPDATE],
+  permissions: [Permissions.USE, Permissions.CREATE],
   getRoleByName,
 });
 const checkFlowRun = generateCheckAccess({

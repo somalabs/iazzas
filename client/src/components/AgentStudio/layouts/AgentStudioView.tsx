@@ -3,7 +3,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHasAccess } from '~/hooks';
-import { useFlowsQuery, useFlowRunsQuery } from '~/data-provider';
+import { useFlowsQuery, useFlowRunsQuery, useGetEndpointsQuery } from '~/data-provider';
 import { FlowProvider, useFlowContext } from '../context';
 import { deserializeNodes, deserializeEdges } from '../serialize';
 import { Toolbar } from '../toolbar';
@@ -16,6 +16,7 @@ import { RunModal } from '../dialogs';
 /** Loads the tenant's most recent flow + its runs into the reducer. */
 function FlowLoader() {
   const { state, dispatch } = useFlowContext();
+  useGetEndpointsQuery();
   const { data: flowsData } = useFlowsQuery();
   const firstFlow = flowsData?.flows?.[0];
   const { data: runsData } = useFlowRunsQuery(state.flowId ?? '');

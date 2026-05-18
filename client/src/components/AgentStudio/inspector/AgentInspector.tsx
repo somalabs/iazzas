@@ -1,3 +1,4 @@
+import { PermissionBits } from 'librechat-data-provider';
 import { useLocalize } from '~/hooks';
 import { useListAgentsQuery } from '~/data-provider';
 import { useFlowContext } from '../context';
@@ -14,7 +15,10 @@ import type { AgentNodeData } from 'librechat-data-provider';
 export default function AgentInspector({ nodeId, data }: { nodeId: string; data: AgentNodeData }) {
   const localize = useLocalize();
   const { dispatch } = useFlowContext();
-  const { data: agentsList } = useListAgentsQuery();
+  const { data: agentsList } = useListAgentsQuery({
+    limit: 100,
+    requiredPermission: PermissionBits.VIEW,
+  });
   const agents = agentsList?.data ?? [];
 
   const update = (patch: Partial<AgentNodeData>) =>
