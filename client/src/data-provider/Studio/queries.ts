@@ -59,7 +59,10 @@ export const useStudioGenerateMutation = (): UseMutationResult<
     [MutationKeys.studioGenerate],
     (payload: TStudioGenerateRequest) => dataService.studioGenerate(payload),
     {
-      onSuccess: () => {
+      // Refetch on success AND failure: a failed generation still persists
+      // a real error doc server-side (two-phase). Without this the client
+      // keeps an optimistic UUID-id card that can't be deleted.
+      onSettled: () => {
         queryClient.invalidateQueries([QueryKeys.studioCreations]);
       },
     },
@@ -76,7 +79,7 @@ export const useStudioEditMutation = (): UseMutationResult<
     [MutationKeys.studioEdit],
     (payload: TStudioEditRequest) => dataService.studioEdit(payload),
     {
-      onSuccess: () => {
+      onSettled: () => {
         queryClient.invalidateQueries([QueryKeys.studioCreations]);
       },
     },

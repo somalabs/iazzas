@@ -53,7 +53,17 @@ export default function ImageDetail() {
         dispatch({ type: 'REMOVE_CREATION', payload: id });
         showToast({ status: 'success', message: localize('com_studio_deleted') });
       },
-      onError: () => {
+      onError: (err: unknown) => {
+        const status = (err as { response?: { status?: number } })?.response
+          ?.status;
+        if (status === 404) {
+          // Nothing exists server-side under this id (a still-optimistic
+          // card from a failed generation, or already deleted). Clearing
+          // the stuck client card loses nothing.
+          dispatch({ type: 'REMOVE_CREATION', payload: id });
+          showToast({ status: 'success', message: localize('com_studio_deleted') });
+          return;
+        }
         showToast({ status: 'error', message: localize('com_studio_delete_failed') });
       },
     });
