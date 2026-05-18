@@ -185,6 +185,7 @@ const startServer = async () => {
   app.use('/api/feedbacks', routes.feedbacks);
   app.use('/api/admin/feedbacks', routes.feedbacks);
   app.use('/api/memories', routes.memories);
+  app.use('/api/studio', routes.studio);
   app.use('/api/flows', routes.flows);
   app.use('/api/permissions', routes.accessPermissions);
 

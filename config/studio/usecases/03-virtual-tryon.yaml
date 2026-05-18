@@ -1,0 +1,100 @@
+use_case: virtual_tryon
+version: 1.0.0
+display_name: "Produto em Modelo"
+description: "Show a garment worn by a model figure. Requires human review before commercial use."
+default_model: nano-banana-pro
+fallback_model: nano-banana-2
+
+compliance:
+  requires_human_review: true
+  review_reason: "Model likeness and garment fidelity require human approval before commercial distribution"
+
+# Tech note: if a dedicated try-on service (e.g. IDM-VTON, OOTDiffusion) is available
+# in the stack, it should be preferred over nano-banana-pro for UC3.
+# Evaluate during tech implementation.
+
+ui_defaults:
+  aspect_ratio: "2:3"
+  image_count: 4
+  resolution: "2K"
+
+image_slots:
+  - id: garment_image
+    label: "Produto"
+    description: "Peça de roupa a exibir no modelo"
+    required: true
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+  - id: model_reference
+    label: "Referência de modelo"
+    description: "Foto de referência para manter consistência do modelo/personagem (opcional)"
+    required: false
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 10
+
+form_fields:
+  - id: pose
+    type: select
+    label: "Pose"
+    required: true
+    default: front
+    options:
+      - value: front
+        label: "Frontal"
+      - value: three-quarter
+        label: "Três quartos"
+      - value: side
+        label: "Lateral"
+      - value: walking
+        label: "Andando"
+      - value: sitting
+        label: "Sentado/a"
+
+  - id: setting
+    type: select
+    label: "Cenário"
+    required: true
+    default: studio-white
+    options:
+      - value: studio-white
+        label: "Estúdio fundo branco"
+      - value: store
+        label: "Loja / varejo"
+      - value: outdoor
+        label: "Externo"
+      - value: editorial
+        label: "Editorial"
+
+  - id: styling_notes
+    type: text
+    label: "Notas de styling"
+    placeholder: "ex: adicionar cinto, sapatos neutros, cabelo solto"
+    required: false
+    max_length: 300
+
+prompt_template: |
+  Fashion model wearing the garment from the product reference image.
+  Pose: {{pose}}. Setting: {{setting}}.
+  {{#if model_reference}}Maintain the model appearance and character from the provided reference.{{/if}}
+  The garment must drape and fit naturally, preserving all design details, prints, and colorway from the product image.
+  {{#if setting == "studio-white"}}Clean white studio background, professional product photography lighting.{{/if}}
+  {{#if setting == "store"}}Upscale fashion retail store environment, warm ambient lighting.{{/if}}
+  {{#if setting == "outdoor"}}Natural outdoor setting, soft natural daylight.{{/if}}
+  {{#if setting == "editorial"}}High-fashion editorial environment, dramatic expressive lighting.{{/if}}
+  {{#if styling_notes}}Styling: {{styling_notes}}.{{/if}}
+  Full body or three-quarter shot showing the complete garment.
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - check: garment_fidelity
+    description: "Garment design, print, and colorway match input product image"
+  - check: natural_fit
+    description: "Garment drapes and fits realistically on the model figure"
+  - check: pose_match
+    description: "Model pose matches selected option"
+  - check: setting_match
+    description: "Background and environment match selected setting"

@@ -47,6 +47,8 @@ export * from './prompts';
 export * from './endpoints';
 /* Files */
 export * from './files';
+/* Studio */
+export * from './studio';
 /* Storage */
 export * from './storage';
 /* Tools */

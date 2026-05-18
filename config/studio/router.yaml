@@ -1,0 +1,49 @@
+version: 1.0.0
+description: |
+  Model routing rules for Studio use cases.
+  Rules are evaluated in priority order — first match wins and overrides the UC default_model.
+  If no rule matches, use the UC's default_model. On error, use the UC's fallback_model.
+
+models:
+  flux-kontext:
+    description: "Fast local-edit model. Optimized for colorway changes on existing products."
+    max_refs: 2
+    strengths: [color-editing, local-edit, fast-turnaround]
+
+  nano-banana-2:
+    description: "Standard multi-reference model. Good throughput for batch generation."
+    max_refs: 14
+    strengths: [multi-ref, pattern-surface, speed]
+
+  nano-banana-pro:
+    description: "High-fidelity multi-reference model. Best for garment fidelity and complex compositions."
+    max_refs: 14
+    strengths: [garment-fidelity, complex-composition, high-resolution, try-on]
+
+# Rules are evaluated in the order listed. First match wins.
+rules:
+  - id: resolution_pro_upgrade
+    priority: 1
+    condition: "output_resolution >= 2048 AND resolved_model != nano-banana-pro"
+    override_model: nano-banana-pro
+    reason: "Resolution ≥2K requires Pro model for output quality"
+
+  - id: high_ref_count_upgrade
+    priority: 2
+    condition: "image_ref_count > 8"
+    override_model: nano-banana-pro
+    reason: "Multi-ref conditioning >8 images requires Pro"
+
+  - id: pattern_application_pro
+    priority: 3
+    condition: "use_case == pattern_application AND (intensity == full OR scale == extra-large)"
+    override_model: nano-banana-pro
+    reason: "Full-intensity or extra-large print application requires Pro surface fidelity"
+
+  # UC defaults applied when no rule matches (from each use_case YAML default_model field)
+
+fallback:
+  strategy: use_uc_fallback_model
+  on_error: [model_unavailable, timeout, content_policy]
+  max_retries: 1
+  degrade_gracefully: true

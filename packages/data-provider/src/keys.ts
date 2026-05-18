@@ -81,6 +81,9 @@ export enum QueryKeys {
   adminEffectiveBalance = 'adminEffectiveBalance',
   adminAnalytics = 'adminAnalytics',
   adminAnalyticsModels = 'adminAnalyticsModels',
+  /* Studio */
+  studioCreations = 'studioCreations',
+  studioCreation = 'studioCreation',
   adminFeedbacks = 'adminFeedbacks',
 }
 
@@ -133,6 +136,9 @@ export enum MutationKeys {
   deleteAdminConfig = 'deleteAdminConfig',
   toggleAdminConfig = 'toggleAdminConfig',
   adjustAdminUserBalance = 'adjustAdminUserBalance',
+  /* Studio */
+  studioGenerate = 'studioGenerate',
+  studioEdit = 'studioEdit',
   createFeedbackEntry = 'createFeedbackEntry',
   /* Agent Studio flows */
   createFlow = 'createFlow',

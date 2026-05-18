@@ -26,6 +26,7 @@ export { default as memorySchema } from './memory';
 export { default as groupSchema } from './group';
 export { default as systemGrantSchema } from './systemGrant';
 export { default as configSchema } from './config';
+export { default as studioCreationSchema } from './studio';
 export { default as feedbackSchema } from './feedback';
 export { default as agentFlowSchema } from './agentFlow';
 export { default as agentFlowRunSchema } from './agentFlowRun';
