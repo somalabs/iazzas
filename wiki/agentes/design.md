@@ -2,7 +2,18 @@
 
 ## Princípios de design ratificados
 
-*(ainda sem ratificação do Artur — primeira entrega)*
+### Ratificados em LEM-52 (aguardando merge)
+
+1. **Destinos de trabalho nunca ficam no menu de conta.** Menu de conta é exclusivo para
+   operações sobre o perfil (Settings, Ajuda, Logout). Studios/Flows/Automações são ícones
+   primários na sidebar.
+2. **Raciocínio expandido = estado transitório.** Durante streaming o bloco está expandido
+   (feedback de progresso); ao completar, colapsa automaticamente. Toggle global em Settings
+   é anti-padrão — estado contextual por mensagem.
+3. **Nomenclatura resolve hierarquia.** Agente = assistente individual (AgentPanel). Flow =
+   pipeline visual (AgentStudio). Automação = flow agendado. Nunca intercambiar os termos.
+4. **Degradação graciosa em dados opcionais.** Quando `refillAmount` ou `autoRefillEnabled`
+   não disponíveis, widget exibe apenas saldo — sem erro, sem barra incompleta.
 
 ## Padrões visuais por projeto
 
@@ -179,6 +190,34 @@ type ValidationError = { key: string; label?: string; nodeId?: string; severity:
 | `ApprovalInspector.tsx` role dropdown | Substituir input por dropdown com roles do tenant |
 
 ---
+
+## Arquitetura NavLink (LEM-52)
+
+`NavLink` em `client/src/common/types.ts` foi estendido com:
+- `href?: string` — presente → nav link (navigate + route-based active); ausente → panel link
+- `separator?: true` — render como `<div role="separator">`, ignorado por SidePanelNav
+- `adminOnly?: boolean` — filtrado por `isAdmin` no ExpandedPanel
+
+`SidePanelNav` filtra: `links.filter(l => !l.href && !l.separator)` antes de renderizar painéis.
+
+## Ícones dos destinos primários (iazzas sidebar)
+
+| Destino | Ícone Lucide | Rota |
+|---|---|---|
+| Studio de Imagens | `Image` | `/d/studio` |
+| Flows (AgentStudio) | `GitFork` | `/d/agent-studio` |
+| Automações | `CalendarClock` | `/d/automacoes` |
+| Admin | `ShieldCheck` | `/d/admin` |
+
+## Padrão de cor semântica — BalanceWidget
+
+| Estado | Threshold | Token Tailwind |
+|---|---|---|
+| Safe | < 70% consumido | `text-text-secondary` / `bg-green-500` |
+| Warning | 70–90% consumido | `text-yellow-500` / `bg-yellow-500` |
+| Danger | > 90% consumido | `text-red-500` / `bg-red-500` |
+
+Ring SVG colapsado: dois círculos sobrepostos — track (opacity-20) + progress (dashoffset calculado).
 
 ## Decisões pendentes recorrentes
 
