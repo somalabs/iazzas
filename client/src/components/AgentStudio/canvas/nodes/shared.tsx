@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react';
+import { Trash2, AlertTriangle } from 'lucide-react';
 import { useFlowContext } from '../../context';
 import { cn } from '~/utils';
 
@@ -54,8 +54,12 @@ type BaseNodeProps = {
 };
 
 export function BaseNode({ id, selected, accent, icon, label, children, className }: BaseNodeProps) {
-  const { dispatch } = useFlowContext();
+  const { state, dispatch } = useFlowContext();
   const a = accentClasses[accent];
+
+  const hasError = state.validationErrors.some(
+    (e) => e.nodeId === id && e.severity === 'error',
+  );
 
   return (
     <div
@@ -64,17 +68,26 @@ export function BaseNode({ id, selected, accent, icon, label, children, classNam
       className={cn(
         'min-w-[200px] max-w-[260px] rounded-xl border shadow-sm',
         'bg-surface-primary transition-shadow',
-        a.border,
-        selected && 'ring-2 ring-ring-primary ring-offset-1 ring-offset-surface-primary',
+        hasError ? 'border-red-500/60' : a.border,
+        selected && !hasError && 'ring-2 ring-ring-primary ring-offset-1 ring-offset-surface-primary',
+        hasError && 'ring-2 ring-red-500/50 ring-offset-1 ring-offset-surface-primary',
         className,
       )}
     >
-      <div className={cn('flex items-center justify-between rounded-t-xl px-3 py-2', a.header)}>
+      <div
+        className={cn(
+          'flex items-center justify-between rounded-t-xl px-3 py-2',
+          hasError ? 'border-b border-red-500/20 bg-red-500/10' : a.header,
+        )}
+      >
         <div className="flex items-center gap-2">
-          <span className={cn('flex-shrink-0', a.icon)} aria-hidden="true">
+          <span className={cn('flex-shrink-0', hasError ? 'text-red-400' : a.icon)} aria-hidden="true">
             {icon}
           </span>
           <span className="text-xs font-semibold text-text-primary">{label}</span>
+          {hasError && (
+            <AlertTriangle className="h-3 w-3 flex-shrink-0 text-red-400" aria-label="Nó com erro" />
+          )}
         </div>
         <button
           type="button"

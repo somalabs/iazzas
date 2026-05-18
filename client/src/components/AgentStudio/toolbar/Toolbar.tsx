@@ -17,8 +17,9 @@ export default function Toolbar() {
   const createFlow = useCreateFlowMutation();
   const updateFlow = useUpdateFlowMutation();
 
-  const canRun = !hasBlockingErrors(state.validationErrors) && !!state.flowId;
-  const canSave = !state.saving;
+  const validationBlocked = hasBlockingErrors(state.validationErrors);
+  const canRun = !validationBlocked && !!state.flowId;
+  const canSave = !state.saving && !validationBlocked;
 
   const handleSave = () => {
     if (!canSave) {
@@ -97,8 +98,10 @@ export default function Toolbar() {
           type="button"
           onClick={handleSave}
           disabled={!canSave}
+          title={validationBlocked ? localize('com_studio_flow_error_save_blocked') : undefined}
           className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
           aria-label={localize('com_studio_flow_save_button')}
+          aria-disabled={!canSave}
         >
           {state.saving ? (
             <Loader className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />

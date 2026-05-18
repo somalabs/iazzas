@@ -47,15 +47,6 @@ StudioScreen                              # entry: envolve com StudioProvider
         └── View.tsx                      # split-pane, mobile drawer
               ├── [left] Creations.tsx    # F5: histórico + busca
               └── [right] Workspace.tsx ou ImageDetail.tsx
-                    Workspace.tsx
-                      ├── UseCaseSelector     # UC chips (5) + Advanced toggle
-                      ├── GuidedForm          # schema renderer genérico
-                      ├── AdvancedMode        # F13 model override (stub)
-                      ├── PromptInput         # F2 @-autocomplete
-                      ├── ReferencesPanel     # F1 slots Style/Character/@imgN
-                      └── toolbar: ImageCount(F3) + AspectRatio(F4) + Resolution(F6) + Generate
-                    ImageDetail.tsx       # F7: detalhe + "Use image" menu
-                      └── InlineEditor.tsx    # F8: prompt-only editor
 ```
 
 ### Tipos compartilhados (Studio de imagens)
@@ -79,44 +70,28 @@ Auth-gated via `PermissionTypes.AGENTS` + `Permissions.USE` (redireciona para `/
 ```
 AgentStudio/
   index.ts
-  context.tsx                        # FlowProvider + useReducer
+  context.tsx                        # FlowProvider + useReducer (importa ValidationError de canvas/validation)
   canvas/
-    Canvas.tsx                       # ReactFlow wrapper + validação + drop zone
-    validation.ts                    # validateFlow(), hasBlockingErrors()
+    Canvas.tsx                       # ReactFlow wrapper + banner completo de validação
+    validation.ts                    # validateFlow(), hasBlockingErrors(), ValidationError type
     nodes/
-      shared.tsx                     # BaseNode (shell + accent colors)
-      TriggerNode.tsx                # violet
-      AgentNode.tsx                  # blue
-      ConditionNode.tsx              # amber — 2 handles: true (75%) / false (25%)
-      HttpNode.tsx                   # sky
-      ApprovalNode.tsx               # orange — 2 handles: approved (75%) / rejected (25%)
-      OutputNode.tsx                 # emerald
-      index.ts                       # nodeTypes map
+      shared.tsx                     # BaseNode: accent + error ring via context
+      TriggerNode.tsx / AgentNode.tsx / ConditionNode.tsx / HttpNode.tsx
+      ApprovalNode.tsx / OutputNode.tsx / index.ts
     edges/
-      LabeledEdge.tsx                # edge colorida por handle (true=green, false=red)
-      index.ts                       # edgeTypes map
+      LabeledEdge.tsx / index.ts
   palette/
-    Palette.tsx                      # sidebar 220px, itens arrastáveis
-    PaletteCard.tsx                  # draggable card com accent + icon
+    Palette.tsx + PaletteCard.tsx
   inspector/
-    Inspector.tsx                    # shell que despacha para sub-inspetor
-    TriggerInspector.tsx
-    AgentInspector.tsx
-    ConditionInspector.tsx
-    HttpInspector.tsx
-    ApprovalInspector.tsx
-    OutputInspector.tsx
-    shared.tsx                       # FieldLabel, FieldHint, InspectorInput, InspectorTextarea, InspectorSelect
+    Inspector.tsx + 6 sub-inspetores tipados + shared.tsx
   runs/
-    RunsDrawer.tsx                   # slide-in-right, toggle via Toolbar
-    RunCard.tsx                      # expand/collapse + approve/reject com confirmação 2-step
-    NodeStatusRow.tsx                # ícone + label de status por nó
+    RunsDrawer.tsx + RunCard.tsx + NodeStatusRow.tsx
   toolbar/
-    Toolbar.tsx                      # nome do flow editável + Salvar + Histórico + Executar
+    Toolbar.tsx                      # bloqueia salvar quando hasBlockingErrors
   dialogs/
-    RunModal.tsx                     # modal Radix para input do disparo
+    RunModal.tsx                     # parseia 422 details → mensagem específica
   layouts/
-    AgentStudioView.tsx              # FlowProvider > ReactFlowProvider > layout 3 zonas
+    AgentStudioView.tsx
 ```
 
 ### Linguagem visual dos nós
@@ -132,6 +107,7 @@ AgentStudio/
 
 - Handles coloridos: true/approved = `border-emerald-400`, false/rejected = `border-red-400`, default = cor do tipo
 - `BaseNode` (shared.tsx): 200-260px, header com accent stripe, botão delete visível no hover
+- **Estado de erro**: nó com `nodeId` em `validationErrors` (severity=error) → `border-red-500/60` + `ring-red-500/50` + badge `AlertTriangle` no header
 
 ### Tipos — data-provider
 
@@ -146,23 +122,52 @@ AgentStudio/
 
 ### i18n (Agent Studio)
 
-92 chaves `com_studio_flow_*` adicionadas em `client/src/locales/en/translation.json`.
-Valores em **PT-BR** (padrão do projeto para cliente Azzas).
+108 chaves `com_studio_flow_*` em `client/src/locales/en/translation.json` (PT-BR).
+Inclui chaves de erro de grafo (banner) e `com_studio_flow_run_error_{code}` (toast de 422).
 
 ### Estado do FlowContext (context.tsx)
 
 ```typescript
 type FlowState = {
   flowId: string | null; flowName: string;
-  nodes: Node[]; edges: Edge[];  // tipos do @xyflow/react
+  nodes: Node[]; edges: Edge[];
   selectedNodeId: string | null;
-  validationErrors: ValidationError[];
+  validationErrors: ValidationError[];  // importado de canvas/validation
   runsOpen: boolean; runs: FlowRun[];
   runModalOpen: boolean; saving: boolean;
 };
 ```
 
-### Pontos de extensão marcados para o stream tech
+`ValidationError` exportado de `canvas/validation.ts`:
+```typescript
+type ValidationError = { key: string; label?: string; nodeId?: string; severity: 'error' | 'warning' };
+```
+
+### Validações implementadas (canvas/validation.ts) — LEM-39
+
+**Detecção client-side completa** (espelha o backend `validateGraph`):
+
+| Código | Detectado | Severity | Bloqueia salvar |
+|--------|-----------|----------|-----------------|
+| `no_trigger` | ✅ | error | sim |
+| `no_output` | ✅ | error | sim |
+| `multiple_triggers` | ✅ | error | sim |
+| `cycle` | ✅ (Kahn) | error | sim |
+| `path_without_output` | ✅ | error | sim |
+| `disconnected_node` | ✅ (reachability) | warning | não |
+
+**`hasBlockingErrors()`**: cobre os 5 códigos de severity=error → bloqueia `canSave` e `canRun`.
+
+**Canvas banner** (bottom, scrollável, max-h-40):
+- Todos os erros aparecem (red = blocking, amber = warning)
+- Linhas com `nodeId` são clicáveis → seleciona o nó problemático no canvas
+
+**Run 422** (RunModal.tsx `onError`):
+- Parseia `error.response.data.details[0].code`
+- Mapeia para chave `com_studio_flow_run_error_{code}`
+- Fallback genérico se parsing falhar
+
+### Pontos de extensão para o stream tech
 
 | Local | O que fazer |
 |-------|-------------|
@@ -172,14 +177,6 @@ type FlowState = {
 | `AgentStudioView.tsx` | Carregar flow por param de rota + usar React Query |
 | `AgentInspector.tsx` agent dropdown | Substituir input por dropdown com agentes do tenant |
 | `ApprovalInspector.tsx` role dropdown | Substituir input por dropdown com roles do tenant |
-| `Toolbar.tsx` history button | Wire React Query para puxar runs do servidor |
-
-### Validações implementadas (canvas/validation.ts)
-
-- `validateFlow()`: retorna array de erros — sem trigger, sem output, nó desconectado
-- `hasBlockingErrors()`: true se `no_trigger` ou `no_output` presentes
-- Toolbar bloqueia "Executar" se `hasBlockingErrors` — apenas aviso visual para nós desconectados (não bloqueia salvar)
-- Validation banner no bottom do canvas mostra erros de trigger/output em tempo real
 
 ---
 

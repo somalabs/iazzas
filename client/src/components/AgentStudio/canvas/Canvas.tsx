@@ -19,6 +19,7 @@ import {
 import { AlertTriangle } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { useFlowContext } from '../context';
+import { cn } from '~/utils';
 import { nodeTypes } from './nodes';
 import { edgeTypes } from './edges';
 import { validateFlow } from './validation';
@@ -102,9 +103,7 @@ export default function Canvas() {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const errors = state.validationErrors.filter(
-    (e) => e.key === 'com_studio_flow_error_no_trigger' || e.key === 'com_studio_flow_error_no_output',
-  );
+  const errors = state.validationErrors;
 
   return (
     <div
@@ -159,17 +158,46 @@ export default function Canvas() {
         <div
           role="alert"
           aria-live="polite"
-          className="absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col gap-1"
+          className="absolute bottom-4 left-1/2 z-10 flex max-h-40 -translate-x-1/2 flex-col gap-1 overflow-y-auto"
         >
-          {errors.map((err) => (
-            <div
-              key={err.key}
-              className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400 shadow"
-            >
-              <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
-              {localize(err.key as TranslationKeys)}
-            </div>
-          ))}
+          {errors.map((err, i) => {
+            const isError = err.severity === 'error';
+            const msg = err.label
+              ? localize(err.key as TranslationKeys).replace('{{label}}', err.label)
+              : localize(err.key as TranslationKeys);
+            const clickable = !!err.nodeId;
+            return (
+              <div
+                key={`${err.key}-${err.nodeId ?? i}`}
+                role={clickable ? 'button' : undefined}
+                tabIndex={clickable ? 0 : undefined}
+                aria-label={clickable ? `Ir para nó com erro: ${msg}` : undefined}
+                onClick={clickable ? () => dispatch({ type: 'SELECT_NODE', payload: err.nodeId ?? null }) : undefined}
+                onKeyDown={
+                  clickable
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          dispatch({ type: 'SELECT_NODE', payload: err.nodeId ?? null });
+                        }
+                      }
+                    : undefined
+                }
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border px-3 py-2 text-xs shadow',
+                  isError
+                    ? 'border-red-500/30 bg-red-500/10 text-red-400'
+                    : 'border-amber-500/30 bg-amber-500/10 text-amber-400',
+                  clickable && 'cursor-pointer hover:brightness-110',
+                )}
+              >
+                <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+                <span>{msg}</span>
+                {clickable && (
+                  <span className="ml-auto text-[10px] opacity-60">↗</span>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

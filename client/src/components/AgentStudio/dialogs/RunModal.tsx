@@ -2,6 +2,7 @@ import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Play } from 'lucide-react';
 import { useToastContext } from '@librechat/client';
+import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
 import { useRunFlowMutation } from '~/data-provider';
 import { useFlowContext } from '../context';
@@ -22,8 +23,19 @@ export default function RunModal() {
       {
         onSuccess: () =>
           showToast({ message: localize('com_studio_flow_run_started'), status: 'success' }),
-        onError: () =>
-          showToast({ message: localize('com_studio_flow_run_error'), status: 'error' }),
+        onError: (error: unknown) => {
+          const details = (
+            error as { response?: { data?: { details?: Array<{ code: string }> } } }
+          )?.response?.data?.details;
+          const firstCode = Array.isArray(details) && details.length > 0 ? details[0].code : null;
+          const msgKey = firstCode ? `com_studio_flow_run_error_${firstCode}` : null;
+          showToast({
+            message: msgKey
+              ? localize(msgKey as TranslationKeys)
+              : localize('com_studio_flow_run_error'),
+            status: 'error',
+          });
+        },
       },
     );
     dispatch({ type: 'TOGGLE_RUN_MODAL' });

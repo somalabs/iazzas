@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useReducer } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import type { FlowRun, FlowNodeData, FlowNodeType } from 'librechat-data-provider';
-
-type ValidationError = { key: string; label?: string };
+import type { ValidationError } from './canvas/validation';
 
 type FlowState = {
   flowId: string | null;
