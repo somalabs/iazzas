@@ -11,6 +11,7 @@
 - Shell: React SPA, sidebar esquerda de conversas, header com model selector
 - Identidade visual: fontes definidas em `client/tailwind.config.cjs` — `font-editorial` (Playfair Display) para títulos/headings editoriais, `font-sans` (Red Hat Display) para UI, `font-mono` (Roboto Mono) para código
 - Design tokens: usar `surface-*`, `text-*`, `border-*`, `ring-primary`, `surface-submit` — nenhuma cor hardcoded
+- Exceção ratificada: accent de status (vermelho/verde/âmbar) usa Tailwind palette com opacity modifier (ex: `border-red-500/40 bg-red-500/10`) — não quebra regra dos tokens, são estados semânticos
 - Padrão de split-pane: seguir `PromptsView` — painel esquerdo colapsável em mobile (drawer por cima), conteúdo principal à direita
 - Estado mobile: o workspace é primário; histórico/lista colapsa e abre por drawer
 - Rota `/d/studio`: standalone, bookmarkável, layout próprio (não usa o chat)
@@ -29,11 +30,11 @@
 
 ## Vocabulário de presets fashion-specific (Azzas)
 
-Presets implementados em `usecase/schemas.ts` (5 UCs v1):
+5 UCs v1 implementados em `client/src/components/Studio/schemas.ts`:
 - **Color Variants** — recolorir peça mantendo silhueta, textura e construção
 - **Aplicar Estampa** — aplicar arte/print na superfície (all-over, placement, panel, engineered)
-- **Produto em Modelo** — virtual try-on (requer human review gate)
-- **Múltiplas Referências** — composição lookbook/editorial com até 14 refs (requer human review gate)
+- **Produto em Modelo** — virtual try-on (human review gate obrigatório)
+- **Múltiplas Referências** — composição lookbook/editorial até 14 refs (human review gate)
 - **Sketch-to-Render** — sketch/flat/CAD → render fotorrealista ou editorial
 
 ## Arquitetura Studio (`/d/studio`)
@@ -44,88 +45,143 @@ Rota registrada em `client/src/routes/Dashboard.tsx` como filho de `DashboardRou
 StudioScreen                              # entry: envolve com StudioProvider
   └── StudioProvider (context.tsx)
         └── View.tsx                      # split-pane, mobile drawer
-              ├── [left] Creations.tsx    # histórico F5 + busca + filtro
-              └── [right] workspace ou detail
-                    Workspace.tsx         # workspace padrão
-                      ├── UseCaseSelector     # UC chips (5 UCs) + Advanced toggle
-                      ├── GuidedForm          # schema renderer (genérico)
-                      ├── AdvancedMode        # F13 model override (TODO tech)
-                      ├── PromptInput         # F2 @-autocomplete
-                      ├── ReferencesPanel     # F1 8 slots (Style, Character, @imgN)
-                      └── toolbar: ImageCount(F3) + AspectRatio(F4) + Resolution(F6) + Generate
-                    ImageDetail.tsx       # F7 detalhe, substitui workspace quando criação selecionada
-                      └── InlineEditor.tsx    # F8 prompt-only + extensão visual (roadmap)
+              ├── [left] Creations.tsx    # F5: histórico + busca
+              └── [right] Workspace.tsx ou ImageDetail.tsx
 ```
 
-### Schema de UC (contrato frontend)
+### Tipos compartilhados (Studio de imagens)
+
+`packages/data-provider/src/types/studio.ts` — `StudioUseCase`, `AspectRatio`, `Resolution`, `StudioReference`, `StudioCreation`, `StudioUseCaseSchema`, `StudioFormField`, `StudioImageSlot`.
+
+---
+
+## Arquitetura Agent Studio (`/d/agent-studio`)
+
+### Rota
+
+Registrada em `client/src/routes/Dashboard.tsx`:
+```tsx
+{ path: 'agent-studio', element: <AgentStudioView /> }
+```
+Auth-gated via `PermissionTypes.AGENTS` + `Permissions.USE` (redireciona para `/c/new` sem acesso).
+
+### Estrutura de componentes
+
+```
+AgentStudio/
+  index.ts
+  context.tsx                        # FlowProvider + useReducer (importa ValidationError de canvas/validation)
+  canvas/
+    Canvas.tsx                       # ReactFlow wrapper + banner completo de validação
+    validation.ts                    # validateFlow(), hasBlockingErrors(), ValidationError type
+    nodes/
+      shared.tsx                     # BaseNode: accent + error ring via context
+      TriggerNode.tsx / AgentNode.tsx / ConditionNode.tsx / HttpNode.tsx
+      ApprovalNode.tsx / OutputNode.tsx / index.ts
+    edges/
+      LabeledEdge.tsx / index.ts
+  palette/
+    Palette.tsx + PaletteCard.tsx
+  inspector/
+    Inspector.tsx + 6 sub-inspetores tipados + shared.tsx
+  runs/
+    RunsDrawer.tsx + RunCard.tsx + NodeStatusRow.tsx
+  toolbar/
+    Toolbar.tsx                      # bloqueia salvar quando hasBlockingErrors
+  dialogs/
+    RunModal.tsx                     # parseia 422 details → mensagem específica
+  layouts/
+    AgentStudioView.tsx
+```
+
+### Linguagem visual dos nós
+
+| Nó | Ícone | Accent | Handles saída |
+|----|-------|--------|---------------|
+| Trigger | `Zap` | violet | 1: default (bottom) |
+| Agente | `Bot` | blue | 1: default (bottom) |
+| Condição | `GitBranch` | amber | 2: true (75%) / false (25%) bottom |
+| HTTP | `Globe` | sky | 1: default (bottom) |
+| Aprovação | `UserCheck` | orange | 2: approved (75%) / rejected (25%) bottom |
+| Saída | `Flag` | emerald | 0 (terminal) |
+
+- Handles coloridos: true/approved = `border-emerald-400`, false/rejected = `border-red-400`, default = cor do tipo
+- `BaseNode` (shared.tsx): 200-260px, header com accent stripe, botão delete visível no hover
+- **Estado de erro**: nó com `nodeId` em `validationErrors` (severity=error) → `border-red-500/60` + `ring-red-500/50` + badge `AlertTriangle` no header
+
+### Tipos — data-provider
+
+`packages/data-provider/src/types/flow.ts` — exportado em `src/index.ts`:
+- `FlowNodeType`, `FlowRunStatus`, `FlowNodeRunStatus`, `HttpMethod`, `ConditionOperator`
+- `TriggerNodeData`, `AgentNodeData`, `ConditionNodeData`, `HttpNodeData`, `HumanApprovalNodeData`, `OutputNodeData`, `FlowNodeData` (union)
+- `FlowNode`, `FlowEdge`, `Flow`, `FlowNodeRun`, `FlowRun`
+
+### Dependência adicionada
+
+`@xyflow/react: "^12.3.6"` em `client/package.json` (canvas visual).
+
+### i18n (Agent Studio)
+
+108 chaves `com_studio_flow_*` em `client/src/locales/en/translation.json` (PT-BR).
+Inclui chaves de erro de grafo (banner) e `com_studio_flow_run_error_{code}` (toast de 422).
+
+### Estado do FlowContext (context.tsx)
 
 ```typescript
-// packages/data-provider/src/types/studio.ts
-type StudioUseCaseSchema = {
-  id: StudioUseCase;
-  displayName: string;
-  formFields: StudioFormField[];  // text | select | toggle | boolean | textarea
-  imageSlots: StudioImageSlot[];  // slots tipados required/optional
-  uiDefaults: { aspectRatio, imageCount, resolution };
-  compliance?: { requiresHumanReview, reviewReason };
+type FlowState = {
+  flowId: string | null; flowName: string;
+  nodes: Node[]; edges: Edge[];
+  selectedNodeId: string | null;
+  validationErrors: ValidationError[];  // importado de canvas/validation
+  runsOpen: boolean; runs: FlowRun[];
+  runModalOpen: boolean; saving: boolean;
 };
 ```
 
-Schemas hardcoded em `client/src/components/Studio/schemas.ts` — stream tech substitui por YAML parsing quando backend estiver pronto.
+`ValidationError` exportado de `canvas/validation.ts`:
+```typescript
+type ValidationError = { key: string; label?: string; nodeId?: string; severity: 'error' | 'warning' };
+```
 
-### Estado do Studio (`context.tsx`)
+### Validações implementadas (canvas/validation.ts) — LEM-39
 
-- `StudioProvider` + `useReducer` — sem Redux, estado local simples
-- `useGenerateImages()` — cria `StudioCreation` com status `'generating'`, TODO: wire API
-- Referências: local `File` + `URL.createObjectURL()` — stream tech wira upload real
-- `Creations`: array de `StudioCreation` no estado local — stream tech wira React Query
+**Detecção client-side completa** (espelha o backend `validateGraph`):
+
+| Código | Detectado | Severity | Bloqueia salvar |
+|--------|-----------|----------|-----------------|
+| `no_trigger` | ✅ | error | sim |
+| `no_output` | ✅ | error | sim |
+| `multiple_triggers` | ✅ | error | sim |
+| `cycle` | ✅ (Kahn) | error | sim |
+| `path_without_output` | ✅ | error | sim |
+| `disconnected_node` | ✅ (reachability) | warning | não |
+
+**`hasBlockingErrors()`**: cobre os 5 códigos de severity=error → bloqueia `canSave` e `canRun`.
+
+**Canvas banner** (bottom, scrollável, max-h-40):
+- Todos os erros aparecem (red = blocking, amber = warning)
+- Linhas com `nodeId` são clicáveis → seleciona o nó problemático no canvas
+
+**Run 422** (RunModal.tsx `onError`):
+- Parseia `error.response.data.details[0].code`
+- Mapeia para chave `com_studio_flow_run_error_{code}`
+- Fallback genérico se parsing falhar
 
 ### Pontos de extensão para o stream tech
 
 | Local | O que fazer |
 |-------|-------------|
-| `useGenerateImages()` em `context.tsx` | Wira chamada real de geração via React Query |
-| `ReferencesPanel.tsx` upload | Usar `UploadMutationOptions` / data-provider file upload |
-| `AdvancedMode.tsx` model select | Habilitar override via router do stream produto |
-| `ImageDetail.tsx` Comments tab | Wira endpoint de comentários |
-| `Creations.tsx` | Wira React Query para buscar histórico do servidor |
-| `InlineEditor.tsx` | Wira image edit API quando disponível |
+| `Toolbar.tsx` `handleSave` | Wire `PUT /flows/:flowId` |
+| `RunModal.tsx` `handleRun` | Wire `POST /flows/:flowId/run` |
+| `RunsDrawer.tsx` `handleApprove/Reject` | Wire `POST /runs/:runId/resume` |
+| `AgentStudioView.tsx` | Carregar flow por param de rota + usar React Query |
+| `AgentInspector.tsx` agent dropdown | Substituir input por dropdown com agentes do tenant |
+| `ApprovalInspector.tsx` role dropdown | Substituir input por dropdown com roles do tenant |
 
-### Chaves i18n adicionadas
-
-Prefixo: `com_studio_` — ~54 chaves em `client/src/locales/en/translation.json`.
-Valores em **PT-BR** (decisão de produto confirmada pelo Artur para cliente Azzas/Brasil).
-EN é apenas fallback técnico — outras línguas são automatizadas externamente.
-
-Chaves criadas para consumo do stream tech:
-- `com_studio_error_toast` — mensagem do toast de erro de geração (stream 3a)
-- `com_studio_model_override_help` — label de ajuda do model override (stream F13/defeito 2)
-
-Chaves criadas para consumo do design (LEM-28):
-- `com_studio_error_status` — texto do card em estado de erro
-- `com_studio_retry` — label do botão de retry no card de erro
-
-### Padrão de estado de erro em cards (`Creations.tsx`)
-
-Card de erro visual distinto de placeholder e loading:
-- Thumbnail: `border-red-500/40 bg-red-500/10` + `AlertCircle` vermelho (não `ImageIcon`)
-- Texto: `text-red-400` + mensagem `com_studio_error_status`
-- Retry: botão `RotateCcw` alinhado à direita do card — chama `onRetry(creation)`
-- `onRetry` em `Creations.tsx` faz `dispatch UPDATE_CREATION status:'generating'` + `// TODO(tech-stream-3a)` para o tech completar o wiring da mutation real
-
-### Fix do drawer mobile (`View.tsx`)
-
-Causa-raiz: `useState(!isMobile)` roda uma única vez no mount com `isMobile=false` (useMediaQuery retorna false antes de resolver), deixando o painel aberto no mobile.
-
-Solução: `useState(false)` + `useEffect([isMobile])` com `panelInitialized` ref:
-- Primeira resolução: `setPanelOpen(!isMobile)` — desktop abre, mobile fica fechado
-- Mudança posterior para mobile (resize): `setPanelOpen(false)`
-- Mudança posterior para desktop: não força abertura — respeita escolha explícita do usuário
+---
 
 ## Decisões pendentes recorrentes
 
-- Storage de assets: plataforma vs. download local → afeta toda spec de galeria
-- Confidencialidade de processing: on-prem/VPC vs. APIs externas → pode bloquear o caso de uso principal em marcas de moda
-- Curadoria de presets: precisa de sign-off do time criativo interno para cada marca (Farm ≠ Animale ≠ Cris Barros)
-- Schema definitivo dos UCs do stream `produto` → consumido agora via `schemas.ts` (pode substituir)
-- `tsc --noEmit` não pode ser rodado no ambiente CI atual (sem node_modules) — tech deve verificar no build
+- Storage de assets: plataforma vs. download local → afeta spec de galeria
+- Confidencialidade de processing: on-prem/VPC vs. APIs externas
+- Curadoria de presets: sign-off do time criativo por marca (Farm ≠ Animale ≠ Cris Barros)

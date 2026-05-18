@@ -13,8 +13,10 @@ import {
   GrantsView,
   ConfigsView,
   AnalyticsView,
+  FeedbacksView,
 } from '~/components/Admin';
 import StudioScreen from '~/components/Studio/StudioScreen';
+import { AgentStudioView } from '~/components/AgentStudio';
 import DashboardRoute from './Layouts/Dashboard';
 
 const dashboardRoutes = {
@@ -87,6 +89,10 @@ const dashboardRoutes = {
       ],
     },
     {
+      path: 'agent-studio',
+      element: <AgentStudioView />,
+    },
+    {
       path: 'admin',
       element: <AdminLayout />,
       children: [
@@ -99,6 +105,7 @@ const dashboardRoutes = {
         { path: 'grants', element: <GrantsView /> },
         { path: 'configs', element: <ConfigsView /> },
         { path: 'analytics', element: <AnalyticsView /> },
+        { path: 'feedbacks', element: <FeedbacksView /> },
       ],
     },
     {

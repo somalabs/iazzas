@@ -53,6 +53,10 @@ export enum QueryKeys {
   banner = 'banner',
   /* Memories */
   memories = 'memories',
+  /* Agent Studio flows */
+  flows = 'flows',
+  flow = 'flow',
+  flowRuns = 'flowRuns',
   principalSearch = 'principalSearch',
   accessRoles = 'accessRoles',
   resourcePermissions = 'resourcePermissions',
@@ -80,6 +84,7 @@ export enum QueryKeys {
   /* Studio */
   studioCreations = 'studioCreations',
   studioCreation = 'studioCreation',
+  adminFeedbacks = 'adminFeedbacks',
 }
 
 // Dynamic query keys that require parameters
@@ -134,4 +139,11 @@ export enum MutationKeys {
   /* Studio */
   studioGenerate = 'studioGenerate',
   studioEdit = 'studioEdit',
+  createFeedbackEntry = 'createFeedbackEntry',
+  /* Agent Studio flows */
+  createFlow = 'createFlow',
+  updateFlow = 'updateFlow',
+  deleteFlow = 'deleteFlow',
+  runFlow = 'runFlow',
+  resumeFlowRun = 'resumeFlowRun',
 }

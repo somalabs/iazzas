@@ -1,0 +1,48 @@
+node_type: trigger
+version: "1.0.0"
+display_name: "Trigger"
+display_name_pt: "Trigger"
+description: "Ponto de entrada único do flow. Todo flow tem exatamente um nó Trigger."
+
+# Restrições estruturais
+constraints:
+  max_per_flow: 1
+  min_per_flow: 1
+  incoming_edges: 0   # sem edges de entrada
+  outgoing_edges: 1   # exatamente 1 edge de saída (handle: "default")
+
+# Campos de configuração
+fields:
+  - id: input
+    label_pt: "Input"
+    hint_pt: "Texto recebido ao disparar o flow. Preenchido pelo usuário no modal de execução, não configurável aqui."
+    type: string
+    required: true
+    editable_in_inspector: false   # read-only no inspetor; editável no modal de run
+    interpolation: false
+
+# Output produzido por este nó
+output_shape:
+  type: string
+  description: "O texto de input fornecido pelo usuário no disparo."
+  reference: "{{trigger.input}}"
+
+# Handles de saída
+handles:
+  out:
+    - id: default
+      label_pt: ""
+
+# i18n
+i18n_keys:
+  - com_studio_flow_node_trigger
+  - com_studio_flow_node_trigger_desc
+  - com_studio_flow_trigger_input_label
+  - com_studio_flow_trigger_input_hint
+
+# Critérios de aceite específicos
+acceptance_criteria:
+  - "Apenas um nó Trigger por flow; arrastar segundo Trigger mostra erro 'O flow precisa de um nó Trigger único'."
+  - "Inspetor exibe o campo 'Input' como read-only, com hint sobre modal de execução."
+  - "Modal de execução tem campo de texto obrigatório para o input antes de disparar o run."
+  - "{{trigger.input}} está disponível no RunContext imediatamente após o Trigger ser processado."

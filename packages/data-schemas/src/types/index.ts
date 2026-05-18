@@ -23,6 +23,8 @@ export * from './pluginAuth';
 export * from './memory';
 /* Studio */
 export * from './studio';
+/* Agent Flows (Agent Studio) */
+export * from './agentFlow';
 /* Prompts */
 export * from './prompts';
 /* Access Control */
@@ -38,3 +40,5 @@ export * from './admin';
 export * from './web';
 /* MCP Servers */
 export * from './mcp';
+/* Feedback */
+export * from './feedback';

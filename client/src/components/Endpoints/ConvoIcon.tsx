@@ -49,9 +49,11 @@ export default function ConvoIcon({
   const iconKey = getIconKey({ endpoint, endpointsConfig, endpointIconURL });
   const Icon = icons[iconKey] ?? null;
 
+  const isImageUrl = iconURL && (iconURL.includes('http') || iconURL.startsWith('/'));
+
   return (
     <>
-      {iconURL && iconURL.includes('http') ? (
+      {isImageUrl ? (
         <ConvoIconURL
           iconURL={iconURL}
           modelLabel={conversation?.chatGptLabel ?? conversation?.modelLabel ?? ''}

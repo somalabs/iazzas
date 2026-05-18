@@ -434,6 +434,14 @@ export const memories = () => `${BASE_URL}/api/memories`;
 export const memory = (key: string) => `${memories()}/${encodeURIComponent(key)}`;
 export const memoryPreferences = () => `${memories()}/preferences`;
 
+/* Agent Studio flows */
+export const flows = () => `${BASE_URL}/api/flows`;
+export const flow = (id: string) => `${flows()}/${encodeURIComponent(id)}`;
+export const flowRuns = (id: string) => `${flow(id)}/runs`;
+export const runFlow = (id: string) => `${flow(id)}/run`;
+export const resumeFlowRun = (runId: string) =>
+  `${flows()}/runs/${encodeURIComponent(runId)}/resume`;
+
 export const searchPrincipals = (params: q.PrincipalSearchParams) => {
   const { q: query, limit, types } = params;
   let url = `${BASE_URL}/api/permissions/search-principals?q=${encodeURIComponent(query)}`;
@@ -479,3 +487,10 @@ export const studioCreation = (id: string) => `${studioRoot}/creations/${encodeU
 
 export const studioCreations = (params: { cursor?: string | null; limit?: number } = {}) =>
   `${studioRoot}/creations${buildQuery({ cursor: params.cursor, limit: params.limit })}`;
+
+// Feedbacks (cannot_answer + thumbs down)
+export const feedbackEntries = () => `${BASE_URL}/api/feedbacks`;
+export const adminFeedbackEntries = (query?: string) =>
+  `${BASE_URL}/api/admin/feedbacks${query ? `?${query}` : ''}`;
+export const adminFeedbackExport = (format: 'csv' | 'json', query?: string) =>
+  `${BASE_URL}/api/admin/feedbacks/export?format=${format}${query ? `&${query}` : ''}`;

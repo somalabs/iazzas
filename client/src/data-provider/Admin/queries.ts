@@ -17,6 +17,8 @@ import type {
   AdminAnalyticsResponse,
   AdminAnalyticsModelsResponse,
   AdminAnalyticsParams,
+  TListFeedbackEntriesParams,
+  TListFeedbackEntriesResponse,
 } from 'librechat-data-provider';
 
 const queryDefaults = {
@@ -199,5 +201,26 @@ export const useGetAdminAnalyticsModelsQuery = (
     [QueryKeys.adminAnalyticsModels],
     () => dataService.getAdminAnalyticsModels(),
     { ...queryDefaults, staleTime: 5 * 60 * 1000, ...config },
+  );
+};
+
+export const useListAdminFeedbacksQuery = (
+  params: TListFeedbackEntriesParams,
+  config?: UseQueryOptions<TListFeedbackEntriesResponse>,
+): QueryObserverResult<TListFeedbackEntriesResponse> => {
+  return useQuery<TListFeedbackEntriesResponse>(
+    [
+      QueryKeys.adminFeedbacks,
+      params.limit,
+      params.offset,
+      params.category,
+      params.trigger,
+      params.modelName,
+      params.userEmail,
+      params.from,
+      params.to,
+    ],
+    () => dataService.listAdminFeedbacks(params),
+    { ...queryDefaults, ...config },
   );
 };

@@ -7,6 +7,8 @@ export * from './Files';
 export * from './Memories';
 /* Studio */
 export * from './Studio';
+/* Agent Studio flows */
+export * from './Flows';
 export * from './Messages';
 export * from './Misc';
 export * from './Tools';

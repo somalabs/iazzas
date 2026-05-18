@@ -1,0 +1,69 @@
+node_type: output
+version: "1.0.0"
+display_name: "Saída"
+display_name_pt: "Saída"
+description: >
+  Nó terminal do flow. Consolida o resultado final da execução.
+  Todo flow precisa de ao menos um nó Saída.
+  Ao ser alcançado, encerra a execução com status "success".
+
+constraints:
+  max_per_flow: null   # múltiplas saídas são válidas (ex: após branches de Condição)
+  min_per_flow: 1
+  incoming_edges: 1+
+  outgoing_edges: 0    # sem edges de saída — nó terminal
+
+fields:
+  - id: template
+    label_pt: "Template de resultado (opcional)"
+    hint_pt: "Suporta {{nodeId.output}}. Se vazio, usa o output do nó imediatamente anterior."
+    type: string
+    required: false
+    editable_in_inspector: true
+    interpolation: true
+    default: null
+
+  - id: label
+    label_pt: "Rótulo"
+    hint_pt: "Nome exibido no histórico de runs para identificar este resultado"
+    type: string
+    required: false
+    editable_in_inspector: true
+    interpolation: false
+    default: "Saída"
+
+output_shape:
+  type: string
+  description: "Resultado final do flow conforme o template."
+  note: >
+    Se 'template' for null/vazio, o output final é o output do nó imediatamente
+    anterior (edge de entrada). Se 'template' for preenchido, é avaliado com
+    interpolação e o resultado é o output final.
+
+handles:
+  out: []   # nó terminal, sem handles de saída
+
+runtime_behavior:
+  - "Quando alcançado: run.status → 'success'."
+  - "Se template preenchido: interpola e usa como resultado final."
+  - "Se template vazio: usa output do nó de origem do edge de entrada."
+  - "O resultado final é persistido em FlowRun.result."
+  - "Em flows com múltiplos nós Saída (por branches de Condição), o primeiro a ser alcançado encerra o run."
+
+i18n_keys:
+  - com_studio_flow_node_output
+  - com_studio_flow_node_output_desc
+  - com_studio_flow_output_template_label
+  - com_studio_flow_output_template_hint
+  - com_studio_flow_output_label_label
+  - com_studio_flow_output_label_hint
+  - com_studio_flow_run_status_success
+
+acceptance_criteria:
+  - "Flow sem nó Saída não pode ser executado (validação impede; mensagem de erro exibida)."
+  - "Alcançar o nó Saída muda run.status para 'success'."
+  - "Com template vazio, o resultado final é o output do nó predecessor."
+  - "Com template preenchido, a interpolação é aplicada e o resultado é exibido no Runs Drawer."
+  - "Label customizado aparece no Runs Drawer como identificador do resultado."
+  - "Múltiplos nós Saída: o primeiro alcançado encerra o run; os demais (em branches não executados) ficam 'skipped'."
+  - "FlowRun.result está disponível via API após status 'success'."

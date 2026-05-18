@@ -7,6 +7,7 @@ import * as m from './types/mutations';
 import * as q from './types/queries';
 import * as f from './types/files';
 import * as mcp from './types/mcpServers';
+import * as fl from './types/flow';
 import * as config from './config';
 import request from './request';
 import * as s from './schemas';
@@ -1390,4 +1391,106 @@ export const getStudioCreations = (params: {
   limit?: number;
 }): Promise<t.TStudioCreationListResponse> => {
   return request.get(endpoints.studioCreations(params));
+};
+
+/* Feedback Entries (cannot_answer + thumbs down) */
+import type {
+  TCreateFeedbackEntry,
+  TFeedbackEntry,
+  TListFeedbackEntriesParams,
+  TListFeedbackEntriesResponse,
+} from './feedbacks';
+
+const buildFeedbackQuery = (params: TListFeedbackEntriesParams = {}): string => {
+  const parts: string[] = [];
+  if (params.limit != null) parts.push(`limit=${params.limit}`);
+  if (params.offset != null) parts.push(`offset=${params.offset}`);
+  if (params.category) parts.push(`category=${encodeURIComponent(params.category)}`);
+  if (params.trigger) parts.push(`trigger=${encodeURIComponent(params.trigger)}`);
+  if (params.modelName) parts.push(`modelName=${encodeURIComponent(params.modelName)}`);
+  if (params.from) parts.push(`from=${encodeURIComponent(params.from)}`);
+  if (params.to) parts.push(`to=${encodeURIComponent(params.to)}`);
+  return parts.join('&');
+};
+
+export function createFeedbackEntry(
+  payload: TCreateFeedbackEntry,
+): Promise<TFeedbackEntry> {
+  return request.post(endpoints.feedbackEntries(), payload);
+}
+
+export function listAdminFeedbacks(
+  params: TListFeedbackEntriesParams = {},
+): Promise<TListFeedbackEntriesResponse> {
+  const query = buildFeedbackQuery(params);
+  return request.get(endpoints.adminFeedbackEntries(query));
+}
+
+export function exportAdminFeedbacksUrl(
+  format: 'csv' | 'json',
+  params: TListFeedbackEntriesParams = {},
+): string {
+  const query = buildFeedbackQuery(params);
+  return endpoints.adminFeedbackExport(format, query);
+}
+
+export function downloadAdminFeedbacksExport(
+  format: 'csv' | 'json',
+  params: TListFeedbackEntriesParams = {},
+): Promise<AxiosResponse> {
+  const query = buildFeedbackQuery(params);
+  return request.getResponse(endpoints.adminFeedbackExport(format, query), {
+    responseType: 'blob',
+  });
+}
+
+/* Agent Studio flows */
+export const getFlows = (cursor?: string): Promise<fl.TFlowListResponse> => {
+  const url = cursor
+    ? `${endpoints.flows()}?cursor=${encodeURIComponent(cursor)}`
+    : endpoints.flows();
+  return request.get(url);
+};
+
+export const getFlow = (id: string): Promise<fl.TFlowResponse> => {
+  return request.get(endpoints.flow(id));
+};
+
+export const createFlow = (data: fl.TFlowMutationRequest): Promise<fl.TFlowResponse> => {
+  return request.post(endpoints.flows(), data);
+};
+
+export const updateFlow = (
+  id: string,
+  data: fl.TFlowMutationRequest,
+): Promise<fl.TFlowResponse> => {
+  return request.put(endpoints.flow(id), data);
+};
+
+export const deleteFlow = (id: string): Promise<{ deleted: boolean }> => {
+  return request.delete(endpoints.flow(id));
+};
+
+export const runFlow = (
+  id: string,
+  data: fl.TRunFlowRequest,
+): Promise<fl.TRunFlowResponse> => {
+  return request.post(endpoints.runFlow(id), data);
+};
+
+export const getFlowRuns = (
+  id: string,
+  cursor?: string,
+): Promise<fl.TFlowRunsResponse> => {
+  const url = cursor
+    ? `${endpoints.flowRuns(id)}?cursor=${encodeURIComponent(cursor)}`
+    : endpoints.flowRuns(id);
+  return request.get(url);
+};
+
+export const resumeFlowRun = (
+  runId: string,
+  data: fl.TResumeRunRequest,
+): Promise<fl.TRunFlowResponse> => {
+  return request.post(endpoints.resumeFlowRun(runId), data);
 };

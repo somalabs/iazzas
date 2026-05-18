@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { getEndpointField } from 'librechat-data-provider';
+import { Constants, EModelEndpoint, getEndpointField } from 'librechat-data-provider';
 import type { TModelSpec, TEndpointsConfig } from 'librechat-data-provider';
 import type { IconMapProps } from '~/common';
 import { getModelSpecIconURL, getIconKey } from '~/utils';
@@ -15,26 +15,37 @@ type IconType = (props: IconMapProps) => React.JSX.Element;
 
 const SpecIcon: React.FC<SpecIconProps> = ({ currentSpec, endpointsConfig }) => {
   const iconURL = getModelSpecIconURL(currentSpec);
-  const { endpoint } = currentSpec.preset;
+  const { endpoint, agent_id, model } = currentSpec.preset;
   const endpointIconURL = getEndpointField(endpointsConfig, endpoint, 'iconURL');
-  const iconKey = getIconKey({ endpoint, endpointsConfig, endpointIconURL });
+  let iconKey = getIconKey({ endpoint, endpointsConfig, endpointIconURL });
+
+  if (
+    endpoint === EModelEndpoint.agents &&
+    agent_id === Constants.EPHEMERAL_AGENT_ID &&
+    typeof model === 'string' &&
+    model.startsWith('gemini-')
+  ) {
+    iconKey = EModelEndpoint.google;
+  }
+
   let Icon: IconType;
 
-  if (!iconURL.includes('http')) {
-    Icon = (icons[iconURL] ?? icons[iconKey] ?? icons.unknown) as IconType;
-  } else if (iconURL) {
+  const isImageUrl = iconURL.includes('http') || iconURL.startsWith('/');
+
+  if (isImageUrl) {
     return (
       <URLIcon
         iconURL={iconURL}
         altName={currentSpec.name}
-        containerStyle={{ width: 20, height: 20 }}
-        className="icon-md shrink-0 overflow-hidden rounded-full"
+        containerStyle={{ width: 24, height: 20 }}
+        imageStyle={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        className="shrink-0 overflow-hidden"
         endpoint={endpoint || undefined}
       />
     );
-  } else {
-    Icon = (icons[endpoint ?? ''] ?? icons[iconKey] ?? icons.unknown) as IconType;
   }
+
+  Icon = (icons[iconURL] ?? icons[iconKey] ?? icons.unknown) as IconType;
 
   return (
     <Icon

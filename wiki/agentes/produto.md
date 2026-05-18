@@ -1,8 +1,8 @@
 # Agente de Produto — Memória de Longo Prazo
 
-> Atualizado em: 2026-05-16
+> Atualizado em: 2026-05-18
 > Escopo: fork LibreChat para Azzas 2154 (varejo de moda, multimarca: Farm, Animale, Cris Barros, etc.)
-> Produto central desta fase: **Studio** — tela de geração de imagens de moda
+> Produto central desta fase: **Studio** (imagens de moda) + **Studio de Agentes** (orquestração visual)
 
 ---
 
@@ -106,7 +106,7 @@ Termos que aparecem nos templates e devem ser preservados em inglês:
 
 ---
 
-## Decisões de Produto Ratificadas
+## Decisões de Produto Ratificadas — Studio de Imagens
 
 ### v1 (LEM-20/LEM-22 — 2026-05-16)
 - **5 UCs canônicos confirmados por Artur** (LEM-20 §7.1): color_variants, pattern_application, virtual_tryon, multi_reference, sketch_to_render.
@@ -116,16 +116,69 @@ Termos que aparecem nos templates e devem ser preservados em inglês:
 - **Compliance**: revisão humana obrigatória antes de uso comercial para UC3 e UC4.
 - **Refinamento**: 1 imagem (non-default) — exploração padrão é 4.
 - **Resolução default**: 2K para todos os UCs.
-- **Artefatos criados (LEM-22, 2026-05-16)**:
-  - 5 YAMLs em `config/studio/usecases/` (templates + form schemas + defaults)
-  - `config/studio/router.yaml` (lógica do Model Router)
-  - `config/studio/CONTRACT.md` (contrato design+tech)
 
-### Pendências resolvidas
-- ~~Model IDs pendentes~~ — **confirmados** contra PRD §2.2: Flux Kontext, Nano Banana 2, Nano Banana Pro.
-
-### Pendências abertas
+### Pendências abertas — Studio de Imagens
 - **UC3 (virtual try-on)**: tech stream deve avaliar se há serviço dedicado (IDM-VTON, OOTDiffusion) antes de usar nano-banana-pro.
+
+---
+
+## Domínio: Studio de Agentes
+
+### O que é o Agent Studio
+
+Aba full-page `/d/agent-studio` onde o usuário desenha visualmente (React Flow) um flow
+encadeando agentes existentes. O flow é executado manualmente; histórico de runs fica em
+drawer lateral. O Studio **não cria nem edita agentes** — apenas os orquestra.
+
+### Artefatos de Spec (LEM-33 — 2026-05-18)
+
+Criados em `config/agent-studio/`:
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| `CONTRACT.md` | Contrato autoritativo completo (nós, interpolação, RBAC, estados, i18n, ACs) |
+| `nodes/01-trigger.yaml` | Contrato do nó Trigger |
+| `nodes/02-agent.yaml` | Contrato do nó Agente |
+| `nodes/03-condition.yaml` | Contrato do nó Condição |
+| `nodes/04-http.yaml` | Contrato do nó HTTP |
+| `nodes/05-human-approval.yaml` | Contrato do nó Aprovação Humana |
+| `nodes/06-output.yaml` | Contrato do nó Saída |
+
+### Decisões de Produto Ratificadas — Agent Studio (LEM-33)
+
+#### Nós v1
+- **6 tipos de nó**: Trigger (1 por flow), Agente, Condição, HTTP, Aprovação Humana, Saída (≥1 por flow).
+- **Nó Agente**: referencia `agentId` (não duplica); handoffs do agente são suprimidos ao rodar como nó de flow.
+- **Nó Condição**: SOMENTE operadores determinísticos (`equals`, `contains`, `regex`, `jsonpath_exists`). LLM-classifier = v2.
+- **Nó HTTP**: requer allowlist via `FLOW_HTTP_ALLOWED_HOSTS`; verificação ANTES da request; erro não-retryável.
+- **Nó Aprovação Humana**: pausa run (`paused`), cria inbox, encerra processamento; retomável via `POST /runs/:runId/resume`.
+- **Nó Saída**: terminal; run → `success` ao ser alcançado; múltiplos nós Saída válidos (branches).
+
+#### RBAC
+- **Reutilizar `PermissionTypes.AGENTS`** — não criar novo PermissionType (lição LEM-31).
+- CRUD de flows: `AGENTS.USE` + `AGENTS.CREATE/UPDATE/READ`; run/resume: `AGENTS.USE`.
+- Multi-tenant: todo query filtra `tenantId`; cross-tenant → 404.
+
+#### Interpolação
+- Sintaxe: `{{trigger.input}}` e `{{nodeId.output}}`.
+- Escopo: somente RunContext; nunca `process.env`.
+- Placeholder ausente → string vazia + `logger.warn` (não erro fatal).
+
+#### Estados de Run
+- `running`, `paused`, `success`, `failed`, `skipped` (dead-end por Condição sem edge conectada).
+- Snapshot do flow no disparo: `FlowRun.flowSnapshot`.
+
+#### Restrições inegociáveis para code review/QA
+1. Edge existente (`GraphEdge`) estendido, não duplicado.
+2. Condição zero-LLM.
+3. HTTP allowlist antes da request.
+4. Erros scrubbed (sem vazar secrets).
+5. Multi-tenant em todo query.
+6. Snapshot no disparo.
+7. Interpolação sem `process.env`.
+
+#### Fora de escopo v1
+- Condição LLM-classifier, agendamento (cron), versionamento de flows, nós custom, compartilhamento cross-tenant, execução paralela de branches, loops/recursão.
 
 ---
 
@@ -135,6 +188,7 @@ Termos que aparecem nos templates e devem ser preservados em inglês:
 - **Não inventar compliance além do PRD**: watermark C2PA e revisão humana obrigatória já estão no PRD. Não criar restrições adicionais sem base.
 - **UC como "unidade fundamental"**: cada UC mapeia a um workflow completo com form schema, routing, prompt e QA. Não misturar UCs ou criar "modo avançado" que contorna os templates.
 - **O Studio é a versão guiada do Freepik**: o time já usa Freepik com @img1..N e prompts livres. O Studio estrutura isso em UCs tipados. A intuição de produto sempre parte do que o time já faz na ferramenta de referência.
+- **Reutilizar permissões existentes, não inventar**: `PermissionTypes.AGENTS` cobre flows de agentes. Criar novos PermissionTypes tem custo de migração e manutenção — evitar (lição LEM-31).
 
 ---
 
@@ -142,8 +196,8 @@ Termos que aparecem nos templates e devem ser preservados em inglês:
 
 ```
 /repos/iazzas/
-├── config/studio/                   # Fonte única de verdade dos UCs
-│   ├── CONTRACT.md                  # Contrato design+tech
+├── config/studio/                   # Studio de Imagens — fonte única de verdade dos UCs
+│   ├── CONTRACT.md                  # Contrato design+tech (imagens)
 │   ├── router.yaml                  # Lógica do Model Router
 │   └── usecases/
 │       ├── 01-color-variants.yaml
@@ -151,10 +205,17 @@ Termos que aparecem nos templates e devem ser preservados em inglês:
 │       ├── 03-virtual-tryon.yaml
 │       ├── 04-multi-reference.yaml
 │       └── 05-sketch-to-render.yaml
-├── client/src/components/Studio/    # UI do Studio (componentes React — ainda não criados na branch)
-│   ├── types.ts                     # ATENÇÃO: UseCase type é placeholder — substituir pelos 5 UCs v1
-│   └── sidebar/
-│       ├── UCSelector.tsx           # Seletor de UC (precisa refatorar para consumir YAMLs)
-│       └── UCForm.tsx               # Form do UC (precisa suporte a image_slots)
-└── wiki/agentes/produto.md          # Este arquivo
+├── config/agent-studio/             # Agent Studio — spec e contrato de produto (LEM-33)
+│   ├── CONTRACT.md                  # Contrato autoritativo (RATIFICADO)
+│   └── nodes/
+│       ├── 01-trigger.yaml
+│       ├── 02-agent.yaml
+│       ├── 03-condition.yaml
+│       ├── 04-http.yaml
+│       ├── 05-human-approval.yaml
+│       └── 06-output.yaml
+├── packages/data-provider/src/permissions.ts  # PermissionTypes e Permissions (RBAC)
+├── packages/api/src/middleware/access.ts      # generateCheckAccess (RBAC)
+├── api/server/routes/memories.js             # Padrão de rota com RBAC (referência)
+└── client/src/components/Studio/             # UI do Studio de Imagens (em desenvolvimento)
 ```

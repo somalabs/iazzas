@@ -1,0 +1,111 @@
+node_type: human_approval
+version: "1.0.0"
+display_name: "Aprovação Humana"
+display_name_pt: "Aprovação Humana"
+description: >
+  Pausa a execução do flow e cria uma notificação de inbox para o aprovador.
+  O processamento cessa completamente até que um humano autorizado retome o run.
+
+constraints:
+  max_per_flow: null
+  incoming_edges: 1+
+  outgoing_edges: 2   # handle "approved" e handle "rejected"
+  note: >
+    Se handle "rejected" não tiver edge conectada e o run for rejeitado,
+    o run encerra com status "failed" (rejeição = encerramento de negócio).
+
+fields:
+  - id: prompt
+    label_pt: "Mensagem para o aprovador"
+    hint_pt: "Contexto exibido ao aprovador na notificação e no Runs Drawer. Suporta {{nodeId.output}}."
+    type: string
+    required: true
+    editable_in_inspector: true
+    interpolation: true
+
+  - id: assignee_role
+    label_pt: "Papel que pode aprovar (opcional)"
+    hint_pt: "Deixe em branco para qualquer usuário autenticado do tenant"
+    type: string        # nome do role (e.g., "admin", "manager")
+    required: false
+    editable_in_inspector: true
+    interpolation: false
+    ui_widget: role_picker
+    default: null
+
+  - id: timeout_hours
+    label_pt: "Timeout (horas, opcional)"
+    hint_pt: "Se não aprovado/rejeitado neste prazo, o run encerra com status 'failed'. Vazio = sem timeout."
+    type: integer
+    required: false
+    editable_in_inspector: true
+    interpolation: false
+    default: null
+    validation:
+      min: 1
+
+output_shape:
+  type: object
+  description: "Resultado da decisão humana."
+  properties:
+    approved:
+      type: boolean
+      description: "true se aprovado, false se rejeitado"
+    approver_id:
+      type: string
+      description: "userId do aprovador"
+    decided_at:
+      type: string
+      description: "ISO 8601 timestamp da decisão"
+  reference: "{{nodeId.output}}"
+
+handles:
+  out:
+    - id: approved
+      label_pt: "Aprovado"
+    - id: rejected
+      label_pt: "Rejeitado"
+
+runtime_behavior:
+  - "Quando o nó é alcançado: run.status → 'paused', node.status → 'waiting'."
+  - "Uma notificação de inbox é criada para o(s) usuário(s) com o role configurado (ou todos se null)."
+  - "O processamento do flow cessa completamente — nenhum nó posterior é executado."
+  - "Para retomar: chamar POST /runs/:runId/resume com { approved: boolean }."
+  - "Apenas usuários do mesmo tenant com o role configurado podem resumir."
+  - "Ao resumir: node.status → 'completed', output populado, run.status → 'running', próximo nó executado."
+  - "Rejeição sem handle 'rejected' conectado → run.status → 'failed'."
+  - "Timeout expirado (se configurado) → run.status → 'failed', node.status → 'failed'."
+
+resume_api:
+  endpoint: "POST /api/runs/:runId/resume"
+  auth: "requireJwtAuth + checkBan + checkFlowRun (verifica tenantId e role)"
+  body:
+    approved:
+      type: boolean
+      required: true
+
+i18n_keys:
+  - com_studio_flow_node_human_approval
+  - com_studio_flow_node_human_approval_desc
+  - com_studio_flow_approval_prompt_label
+  - com_studio_flow_approval_prompt_hint
+  - com_studio_flow_approval_role_label
+  - com_studio_flow_approval_role_hint
+  - com_studio_flow_approval_timeout_label
+  - com_studio_flow_run_status_paused
+  - com_studio_flow_run_approve_btn
+  - com_studio_flow_run_reject_btn
+  - com_studio_flow_run_approve_confirm
+  - com_studio_flow_run_reject_confirm
+
+acceptance_criteria:
+  - "Ao alcançar o nó: run.status muda para 'paused' e o Runs Drawer exibe botões 'Aprovar' e 'Rejeitar'."
+  - "Notificação de inbox criada para o role configurado (ou todos se vazio)."
+  - "Usuário de outro tenant não consegue aprovar/rejeitar (404)."
+  - "Usuário sem o role configurado não consegue aprovar/rejeitar (403)."
+  - "Aprovação retoma o run e segue handle 'approved'."
+  - "Rejeição com handle 'rejected' conectado retoma e segue handle 'rejected'."
+  - "Rejeição sem handle 'rejected' conectado encerra run como 'failed'."
+  - "Timeout expirado (se configurado) encerra run como 'failed'."
+  - "Campo 'prompt' é obrigatório; salvar sem prompt exibe erro de validação."
+  - "Output do nó (JSON com approved, approver_id, decided_at) disponível via {{nodeId.output}}."

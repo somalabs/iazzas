@@ -29,6 +29,9 @@ import { createSystemGrantModel } from './systemGrant';
 import { createGroupModel } from './group';
 import { createConfigModel } from './config';
 import { createStudioCreationModel } from './studio';
+import { createFeedbackModel } from './feedback';
+import { createAgentFlowModel } from './agentFlow';
+import { createAgentFlowRunModel } from './agentFlowRun';
 
 /**
  * Creates all database models for all collections
@@ -66,5 +69,8 @@ export function createModels(mongoose: typeof import('mongoose')) {
     Group: createGroupModel(mongoose),
     Config: createConfigModel(mongoose),
     StudioCreation: createStudioCreationModel(mongoose),
+    Feedback: createFeedbackModel(mongoose),
+    AgentFlow: createAgentFlowModel(mongoose),
+    AgentFlowRun: createAgentFlowRunModel(mongoose),
   };
 }

@@ -1,0 +1,71 @@
+node_type: agent
+version: "1.0.0"
+display_name: "Agente"
+display_name_pt: "Agente"
+description: "Executa um agente existente da plataforma por referência. Não duplica a definição do agente."
+
+constraints:
+  max_per_flow: null   # sem limite
+  incoming_edges: 1+   # ao menos 1 edge de entrada
+  outgoing_edges: 1    # exatamente 1 edge de saída (handle: "default")
+  note: >
+    Os handoffs e edges internos do agente (configurados no próprio agente) são
+    SUPRIMIDOS quando o agente roda como nó de flow. O fluxo de controle pertence
+    ao flow, não ao agente.
+
+fields:
+  - id: agentId
+    label_pt: "Agente"
+    hint_pt: "Selecione um agente existente no tenant"
+    type: string          # agentId (UUID ou slug — a confirmar com tech)
+    required: true
+    editable_in_inspector: true
+    interpolation: false  # campo estrutural; não interpola
+    ui_widget: agent_picker   # dropdown com busca, filtra por tenantId
+
+  - id: instructionsOverride
+    label_pt: "Instrução adicional (opcional)"
+    hint_pt: "Sobrescreve as instruções do agente apenas nesta execução. Suporta {{nodeId.output}}."
+    type: string
+    required: false
+    editable_in_inspector: true
+    interpolation: true
+    default: null
+
+  - id: modelOverride
+    label_pt: "Modelo (opcional)"
+    hint_pt: "Deixe em branco para usar o modelo padrão do agente"
+    type: string
+    required: false
+    editable_in_inspector: true
+    interpolation: false
+    default: null
+
+output_shape:
+  type: string
+  description: "Resposta em texto produzida pelo agente."
+  reference: "{{nodeId.output}}"
+
+handles:
+  out:
+    - id: default
+      label_pt: ""
+
+i18n_keys:
+  - com_studio_flow_node_agent
+  - com_studio_flow_node_agent_desc
+  - com_studio_flow_agent_id_label
+  - com_studio_flow_agent_id_placeholder
+  - com_studio_flow_agent_instructions_label
+  - com_studio_flow_agent_instructions_hint
+  - com_studio_flow_agent_model_label
+  - com_studio_flow_agent_model_hint
+
+acceptance_criteria:
+  - "Campo agentId é obrigatório; salvar sem selecionar agente exibe erro de validação."
+  - "Dropdown de agente lista apenas agentes do tenant do usuário autenticado."
+  - "Ao selecionar agente, inspetor exibe nome e avatar do agente."
+  - "instructionsOverride aceita texto livre com interpolação; hint de exemplo visível."
+  - "modelOverride oferece as mesmas opções de modelo disponíveis para o agente selecionado."
+  - "Handoffs configurados no agente não criam edges adicionais no canvas do flow."
+  - "Output do nó (texto) disponível como {{nodeId.output}} para nós posteriores."

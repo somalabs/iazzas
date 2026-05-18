@@ -31,12 +31,16 @@ export * from './mcp/oauth/OAuthReconnectionManager';
 export * from './crypto';
 /* Flow */
 export * from './flow/manager';
+/* Balance */
+export * from './balance';
 /* Middleware */
 export * from './middleware';
 /* Memory */
 export * from './memory';
 /* Agents */
 export * from './agents';
+/* Agent Studio flows */
+export * from './flows';
 /* Prompts */
 export * from './prompts';
 /* Endpoints */

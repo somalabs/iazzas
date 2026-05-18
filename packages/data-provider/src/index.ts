@@ -27,6 +27,7 @@ export * from './types/mutations';
 export * from './types/queries';
 export * from './types/runs';
 export * from './types/web';
+export * from './types/flow';
 export * from './types/graph';
 /* access permissions */
 export * from './accessPermissions';
@@ -46,4 +47,5 @@ export { default as createPayload } from './createPayload';
 // export * from './react-query/react-query-service';
 /* feedback */
 export * from './feedback';
+export * from './feedbacks';
 export * from './parameterSettings';

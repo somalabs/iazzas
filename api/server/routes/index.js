@@ -13,12 +13,14 @@ const staticRoute = require('./static');
 const messages = require('./messages');
 const memories = require('./memories');
 const studio = require('./studio');
+const flows = require('./flows');
 const presets = require('./presets');
 const prompts = require('./prompts');
 const balance = require('./balance');
 const actions = require('./actions');
 const apiKeys = require('./apiKeys');
 const banner = require('./banner');
+const feedbacks = require('./feedbacks');
 const search = require('./search');
 const models = require('./models');
 const convos = require('./convos');
@@ -53,6 +55,7 @@ module.exports = {
   files,
   share,
   banner,
+  feedbacks,
   agents,
   convos,
   search,
@@ -65,6 +68,7 @@ module.exports = {
   messages,
   memories,
   studio,
+  flows,
   endpoints,
   assistants,
   categories,
