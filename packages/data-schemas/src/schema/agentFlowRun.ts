@@ -59,9 +59,18 @@ const agentFlowRunSchema = new Schema<IAgentFlowRun>(
 
 agentFlowRunSchema.index({ tenantId: 1, flowId: 1, startedAt: -1 });
 agentFlowRunSchema.index({ tenantId: 1, automationId: 1, _id: -1 });
+/**
+ * At most one active (`running`|`paused`) run per (tenant, flow). `unique`
+ * makes the {@link claimRun} upsert atomic: concurrent dispatches race to
+ * insert and the loser gets a duplicate-key error (handled as a skip),
+ * instead of both silently inserting.
+ */
 agentFlowRunSchema.index(
   { tenantId: 1, flowId: 1 },
-  { partialFilterExpression: { status: { $in: ['running', 'paused'] } } },
+  {
+    unique: true,
+    partialFilterExpression: { status: { $in: ['running', 'paused'] } },
+  },
 );
 
 export default agentFlowRunSchema;

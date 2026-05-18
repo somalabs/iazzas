@@ -63,9 +63,7 @@ function validateBody(body, { partial }) {
 }
 
 function hasApprovalNode(flow) {
-  return (
-    Array.isArray(flow.nodes) && flow.nodes.some((n) => n && n.type === 'human_approval')
-  );
+  return Array.isArray(flow.nodes) && flow.nodes.some((n) => n && n.type === 'human_approval');
 }
 
 function enrich(automation, flow) {
@@ -199,6 +197,9 @@ const updateAutomation = async (req, res) => {
       patch.triggerInput = req.body.triggerInput;
     }
     const updated = await repo.updateAutomation({ tenantId, id: req.params.id, patch });
+    if (!updated) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
     if (updated.enabled) {
       await registerAutomation(updated);
     }
@@ -259,12 +260,16 @@ const toggleEnabled = async (req, res) => {
       id: req.params.id,
       patch: { enabled, nextRunAt },
     });
+    if (!updated) {
+      return res.status(404).json({ error: 'Automation not found' });
+    }
     if (enabled) {
       await registerAutomation(updated);
     } else {
       unregisterAutomation(req.params.id);
     }
-    res.json({ automation: updated });
+    const flow = await repo.getFlow({ tenantId, id: updated.flowId });
+    res.json({ automation: enrich(updated, flow) });
   } catch (error) {
     logger.error('[Automations.toggle]', error);
     res.status(500).json({ error: 'Failed to toggle automation' });

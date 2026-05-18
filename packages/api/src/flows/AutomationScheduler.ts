@@ -125,8 +125,7 @@ export class AutomationScheduler {
   }
 
   private async fire(id: string): Promise<void> {
-    const entry = this.entries.get(id);
-    if (!entry) {
+    if (!this.entries.has(id)) {
       return;
     }
     try {
@@ -136,9 +135,12 @@ export class AutomationScheduler {
         `[Automations] onFire threw (will keep schedule) ${JSON.stringify({ automationId: id })}`,
       );
     }
-    // Re-arm for the next cron window regardless of run outcome.
-    if (this.entries.has(id)) {
-      await this.register(entry.automation);
+    // Re-arm for the next cron window regardless of run outcome. Re-read the
+    // live entry: a long-running onFire may have been concurrently
+    // re-registered (new cron) — never resurrect the stale snapshot.
+    const current = this.entries.get(id);
+    if (current) {
+      await this.register(current.automation);
     }
   }
 }

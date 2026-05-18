@@ -130,4 +130,37 @@ describe('Automation / Notification models', () => {
     );
     expect(byAutomation).toBeDefined();
   });
+
+  it('enforces at most one active run per (tenant, flow) via a unique partial index', async () => {
+    const indexes = await AgentFlowRun.collection.indexes();
+    const partial = indexes.find(
+      (i) => i.key.tenantId === 1 && i.key.flowId === 1 && i.partialFilterExpression,
+    );
+    expect(partial).toBeDefined();
+    expect(partial?.unique).toBe(true);
+
+    const flowId = new mongoose.Types.ObjectId();
+    const base = {
+      tenantId: 't1',
+      flowId,
+      nodeRuns: [],
+      context: {},
+      flowSnapshot: { name: 'F', nodes: [], edges: [] },
+      flowVersion: 1,
+      startedAt: new Date(),
+    };
+
+    const results = await Promise.allSettled([
+      AgentFlowRun.create({ ...base, status: 'running', input: 'a' }),
+      AgentFlowRun.create({ ...base, status: 'running', input: 'b' }),
+    ]);
+    const fulfilled = results.filter((r) => r.status === 'fulfilled');
+    const rejected = results.filter((r) => r.status === 'rejected');
+    expect(fulfilled).toHaveLength(1);
+    expect(rejected).toHaveLength(1);
+    expect((rejected[0] as PromiseRejectedResult).reason?.code).toBe(11000);
+
+    const completed = await AgentFlowRun.create({ ...base, status: 'success', input: 'c' });
+    expect(completed).toBeDefined();
+  });
 });

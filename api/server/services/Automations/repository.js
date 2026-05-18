@@ -21,8 +21,7 @@ const listAutomations = ({ tenantId, cursor, limit }) => {
     .lean();
 };
 
-const getAutomation = ({ tenantId, id }) =>
-  Automation.findOne({ _id: id, tenantId }).lean();
+const getAutomation = ({ tenantId, id }) => Automation.findOne({ _id: id, tenantId }).lean();
 
 const createAutomation = (data) => Automation.create(data);
 
@@ -34,45 +33,53 @@ const deleteAutomation = async ({ tenantId, id }) => {
   return res.deletedCount > 0;
 };
 
-const countEnabled = ({ tenantId }) =>
-  Automation.countDocuments({ tenantId, enabled: true });
+const countEnabled = ({ tenantId }) => Automation.countDocuments({ tenantId, enabled: true });
 
-const getFlow = ({ tenantId, id }) =>
-  AgentFlow.findOne({ _id: id, tenantId }).lean();
+const getFlow = ({ tenantId, id }) => AgentFlow.findOne({ _id: id, tenantId }).lean();
 
 /**
  * Atomically claims a run for `flowId`. Returns `{ skipped: true }` when an
- * active (`running`|`paused`) run already exists for the flow — the upsert
- * filter is exactly the partial-index predicate from Épico 1, so two
- * concurrent dispatches resolve to one inserted run and one skip without a
- * read-then-check window.
+ * active (`running`|`paused`) run already exists for the flow.
+ *
+ * Two layers guarantee atomicity without a read-then-check window:
+ * 1. The upsert filter is the partial-index predicate, so a matching active
+ *    run short-circuits to `updatedExisting`.
+ * 2. The partial index is `unique`, so when two dispatches race past (1) only
+ *    one insert wins; the loser throws E11000, caught here as a skip.
  */
 const claimRun = async ({ flowId, automationId, input, flowSnapshot, flowVersion }) => {
-  const res = await AgentFlowRun.findOneAndUpdate(
-    { flowId, status: { $in: ['running', 'paused'] } },
-    {
-      $setOnInsert: {
-        flowId,
-        automationId,
-        input,
-        status: 'running',
-        nodeRuns: [],
-        context: {},
-        flowSnapshot,
-        flowVersion,
-        startedAt: new Date(),
+  let res;
+  try {
+    res = await AgentFlowRun.findOneAndUpdate(
+      { flowId, status: { $in: ['running', 'paused'] } },
+      {
+        $setOnInsert: {
+          flowId,
+          automationId,
+          input,
+          status: 'running',
+          nodeRuns: [],
+          context: {},
+          flowSnapshot,
+          flowVersion,
+          startedAt: new Date(),
+        },
       },
-    },
-    { upsert: true, new: true, includeResultMetadata: true, setDefaultsOnInsert: true },
-  );
+      { upsert: true, new: true, includeResultMetadata: true, setDefaultsOnInsert: true },
+    );
+  } catch (error) {
+    if (error && error.code === 11000) {
+      return { skipped: true };
+    }
+    throw error;
+  }
   if (res.lastErrorObject && res.lastErrorObject.updatedExisting) {
     return { skipped: true };
   }
   return { run: res.value };
 };
 
-const getRun = ({ tenantId, runId }) =>
-  AgentFlowRun.findOne({ _id: runId, tenantId }).lean();
+const getRun = ({ tenantId, runId }) => AgentFlowRun.findOne({ _id: runId, tenantId }).lean();
 
 const saveRunState = ({ tenantId, runId, status, nodeRuns, context, pausedNodeId, completedAt }) =>
   AgentFlowRun.findOneAndUpdate(
@@ -106,10 +113,7 @@ const listEnabledPage = ({ cursor, limit }) => {
   if (cursor) {
     query._id = { $gt: cursor };
   }
-  return Automation.find(query)
-    .sort({ _id: 1 })
-    .limit(limit)
-    .lean();
+  return Automation.find(query).sort({ _id: 1 }).limit(limit).lean();
 };
 
 module.exports = {

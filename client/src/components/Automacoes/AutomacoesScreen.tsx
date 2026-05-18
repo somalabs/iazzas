@@ -41,7 +41,7 @@ function AutomacoesView() {
   });
 
   const { data: automationsData } = useAutomationsQuery();
-  const automations = (automationsData?.automations ?? []) as unknown as Automation[];
+  const automations: Automation[] = automationsData?.automations ?? [];
 
   const { data: runsData } = useAutomationRunsQuery(state.runsAutomationId ?? '');
   const runs: AutomationRun[] = (runsData?.runs ?? []).map((r) =>
@@ -89,8 +89,7 @@ function AutomacoesView() {
           dispatch({ type: 'CANCEL' });
         }
       },
-      onError: () =>
-        showToast({ message: localize('com_automacoes_save_error'), status: 'error' }),
+      onError: () => showToast({ message: localize('com_automacoes_save_error'), status: 'error' }),
     });
   };
 
@@ -134,10 +133,7 @@ function AutomacoesView() {
         )}
 
         {(!isMobile || showEditor) && (
-          <main
-            className="flex flex-1 flex-col overflow-hidden"
-            aria-label="Editor de automação"
-          >
+          <main className="flex flex-1 flex-col overflow-hidden" aria-label="Editor de automação">
             {showEditor ? (
               <AutomationEditor
                 automation={selectedAutomation}

@@ -73,8 +73,21 @@ function extractResult(run) {
     const failed = nodeRuns.find((n) => n.status === 'failed' && n.error);
     return { output: '', errorReason: failed?.error || 'agent_runtime_error' };
   }
-  const out = [...nodeRuns].reverse().find((n) => n.nodeType === 'output' && n.output != null);
-  const last = [...nodeRuns].reverse().find((n) => n.output != null);
+  let out;
+  let last;
+  for (let i = nodeRuns.length - 1; i >= 0; i--) {
+    const n = nodeRuns[i];
+    if (n.output == null) {
+      continue;
+    }
+    if (last === undefined) {
+      last = n;
+    }
+    if (n.nodeType === 'output') {
+      out = n;
+      break;
+    }
+  }
   return { output: (out || last)?.output || '', errorReason: undefined };
 }
 
