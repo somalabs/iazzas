@@ -1,7 +1,7 @@
 import { useState, memo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Menu from '@ariakit/react/menu';
-import { FileText, LogOut, ShieldCheck, Workflow } from 'lucide-react';
+import { FileText, Image, LogOut, ShieldCheck, Workflow } from 'lucide-react';
 import { SystemRoles, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { LinkIcon, GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
 import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
@@ -103,6 +103,10 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             {localize('com_studio_flow_nav')}
           </Menu.MenuItem>
         )}
+        <Menu.MenuItem onClick={() => navigate('/d/studio')} className="select-item text-sm">
+          <Image className="icon-md" aria-hidden="true" />
+          {localize('com_studio_image_nav')}
+        </Menu.MenuItem>
         {isAdmin && (
           <Menu.MenuItem onClick={() => navigate('/d/admin')} className="select-item text-sm">
             <ShieldCheck className="icon-md" aria-hidden="true" />
