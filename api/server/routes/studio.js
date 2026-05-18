@@ -8,6 +8,7 @@ const {
   edit,
   getCreation,
   listCreations,
+  deleteCreation,
   getModels,
 } = require('~/server/controllers/studio');
 
@@ -37,5 +38,6 @@ router.post('/edit', checkStudioAccess, studioPayloadLimit, edit);
 router.get('/models', checkStudioAccess, getModels);
 router.get('/creations', listCreations);
 router.get('/creations/:id', getCreation);
+router.delete('/creations/:id', checkStudioAccess, deleteCreation);
 
 module.exports = router;

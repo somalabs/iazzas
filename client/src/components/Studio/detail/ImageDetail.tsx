@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Trash2, Heart, FolderOpen, Download, X, Pencil, AlertCircle } from 'lucide-react';
+import { useToastContext } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
+import { useStudioDeleteMutation } from '~/data-provider';
 import { useStudio, useStudioDispatch } from '../context';
 import { MODEL_DISPLAY_NAMES } from '../schemas';
 import { formatStudioDate } from '../date';
@@ -13,6 +15,8 @@ export default function ImageDetail() {
   const localize = useLocalize();
   const { selectedCreation, mode } = useStudio();
   const dispatch = useStudioDispatch();
+  const { showToast } = useToastContext();
+  const deleteMutation = useStudioDeleteMutation();
   const [tab, setTab] = useState<DetailTab>('details');
   const [promptExpanded, setPromptExpanded] = useState(false);
   const [imageIdx, setImageIdx] = useState(0);
@@ -34,6 +38,25 @@ export default function ImageDetail() {
 
   function startEditing() {
     dispatch({ type: 'SET_MODE', payload: 'editing' });
+  }
+
+  function handleDelete() {
+    if (deleteMutation.isLoading) {
+      return;
+    }
+    const id = selectedCreation.id;
+    if (!window.confirm(localize('com_studio_delete_confirm'))) {
+      return;
+    }
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        dispatch({ type: 'REMOVE_CREATION', payload: id });
+        showToast({ status: 'success', message: localize('com_studio_deleted') });
+      },
+      onError: () => {
+        showToast({ status: 'error', message: localize('com_studio_delete_failed') });
+      },
+    });
   }
 
   async function handleDownload() {
@@ -135,10 +158,11 @@ export default function ImageDetail() {
         <div className="flex items-center gap-1.5 border-b border-border-medium p-3">
           <button
             type="button"
-            disabled
-            title={`${localize('com_studio_delete_creation')} · ${comingSoon}`}
-            className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-border-medium text-text-secondary opacity-40"
-            aria-label={`${localize('com_studio_delete_creation')} (${comingSoon})`}
+            onClick={handleDelete}
+            disabled={deleteMutation.isLoading}
+            title={localize('com_studio_delete_creation')}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label={localize('com_studio_delete_creation')}
           >
             <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
           </button>

@@ -307,8 +307,26 @@ const listCreations = async (req, res) => {
   }
 };
 
+const deleteCreation = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ error: 'Creation not found' });
+    }
+    const doc = await StudioCreation.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    if (!doc) {
+      return res.status(404).json({ error: 'Creation not found' });
+    }
+    res.status(204).end();
+  } catch (err) {
+    handleError(res, err);
+  }
+};
+
 const getModels = (req, res) => {
   res.json({ available: getStudioModelAvailability() });
 };
 
-module.exports = { generate, edit, getCreation, listCreations, getModels };
+module.exports = { generate, edit, getCreation, listCreations, deleteCreation, getModels };

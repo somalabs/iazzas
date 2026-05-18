@@ -1397,6 +1397,10 @@ export const getStudioCreations = (params: {
   return request.get(endpoints.studioCreations(params));
 };
 
+export const deleteStudioCreation = (id: string): Promise<void> => {
+  return request.delete(endpoints.studioCreation(id));
+};
+
 /* Feedback Entries (cannot_answer + thumbs down) */
 import type {
   TCreateFeedbackEntry,

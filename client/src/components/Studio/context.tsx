@@ -47,6 +47,7 @@ type StudioAction =
   | { type: 'SET_MODE'; payload: StudioMode }
   | { type: 'ADD_CREATION'; payload: StudioCreation }
   | { type: 'UPDATE_CREATION'; payload: { id: string; creation: StudioCreation } }
+  | { type: 'REMOVE_CREATION'; payload: string }
   | { type: 'HYDRATE_CREATIONS'; payload: StudioCreation[] };
 
 function buildDefaultFormValues(useCaseId: StudioUseCase): Record<string, string | boolean> {
@@ -163,6 +164,15 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
           c.id === action.payload.id ? action.payload.creation : c,
         ),
       };
+    case 'REMOVE_CREATION': {
+      const removedSelected = state.selectedCreation?.id === action.payload;
+      return {
+        ...state,
+        creations: state.creations.filter((c) => c.id !== action.payload),
+        selectedCreation: removedSelected ? null : state.selectedCreation,
+        mode: removedSelected ? 'workspace' : state.mode,
+      };
+    }
     case 'HYDRATE_CREATIONS': {
       const serverIds = new Set(action.payload.map((c) => c.id));
       // Once the server has its own generating row (it persists one up
