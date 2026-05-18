@@ -3,6 +3,7 @@ import { useRecoilValue } from 'recoil';
 import { useUpdateFeedbackMutation } from 'librechat-data-provider/react-query';
 import {
   TFeedback,
+  dataService,
   getTagByKey,
   isAgentsEndpoint,
   SearchResultData,
@@ -126,6 +127,8 @@ export default function useMessageActions(props: TMessageActions) {
   const messageLabel = useMemo(() => {
     if (message?.isCreatedByUser === true) {
       return UsernameDisplay ? (user?.name ?? '') || user?.username : localize('com_user_message');
+    } else if (conversation?.modelLabel) {
+      return conversation.modelLabel;
     } else if (agent) {
       return agent.name ?? 'Assistant';
     } else if (assistant) {
@@ -133,7 +136,7 @@ export default function useMessageActions(props: TMessageActions) {
     } else {
       return message?.sender;
     }
-  }, [message, agent, assistant, UsernameDisplay, user, localize]);
+  }, [message, agent, assistant, conversation?.modelLabel, UsernameDisplay, user, localize]);
 
   const feedbackMutation = useUpdateFeedbackMutation(
     conversation?.conversationId || '',
@@ -163,8 +166,34 @@ export default function useMessageActions(props: TMessageActions) {
           console.error('Failed to update feedback:', error);
         },
       });
+
+      if (newFeedback?.rating === 'thumbsDown') {
+        const assistantText =
+          typeof text === 'string'
+            ? text
+            : Array.isArray(content)
+              ? content
+                  .map((part) =>
+                    part && typeof part === 'object' && 'text' in part && typeof part.text === 'string'
+                      ? part.text
+                      : '',
+                  )
+                  .join('\n')
+              : '';
+        const reasonParts = [newFeedback.tag?.key, newFeedback.text].filter(Boolean);
+        dataService
+          .createFeedbackEntry({
+            conversationId: conversation?.conversationId ?? undefined,
+            messageId: messageId ?? undefined,
+            assistantMessage: assistantText,
+            trigger: 'user_thumbs_down',
+            reason: reasonParts.join(' — ') || undefined,
+            modelName: conversation?.model ?? undefined,
+          })
+          .catch((err) => console.error('Failed to log feedback entry:', err));
+      }
     },
-    [feedbackMutation],
+    [feedbackMutation, text, content, messageId, conversation?.conversationId, conversation?.model],
   );
 
   return {

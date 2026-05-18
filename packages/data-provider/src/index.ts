@@ -47,4 +47,5 @@ export { default as createPayload } from './createPayload';
 // export * from './react-query/react-query-service';
 /* feedback */
 export * from './feedback';
+export * from './feedbacks';
 export * from './parameterSettings';

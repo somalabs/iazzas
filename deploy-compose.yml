@@ -4,7 +4,7 @@ services:
     #   context: .
     #   dockerfile: Dockerfile.multi
     #   target: api-build
-    image: registry.librechat.ai/danny-avila/librechat-dev-api:latest
+    image: ghcr.io/somalabs/iazzas-api:latest
     container_name: LibreChat-API
     ports:
       - 3080:3080
@@ -29,13 +29,15 @@ services:
       - type: bind
         source: ./librechat.yaml
         target: /app/librechat.yaml
+      - ./mcp/azzas:/opt/azzas-mcp:ro
+      - /home/correa/azzas-mcp-creds:/root/.mcp
       - ./images:/app/client/public/images
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
 
   code-gateway:
     container_name: code-gateway
-    build: ./code-interpreter-gateway
+    image: ghcr.io/somalabs/iazzas-code-gateway:latest
     environment:
       - USE_LOCAL_EXEC=true
       - GATEWAY_API_KEY=${LIBRECHAT_CODE_API_KEY}

@@ -1373,6 +1373,57 @@ export const getActiveJobs = (): Promise<ActiveJobsResponse> => {
   return request.get(endpoints.activeJobs());
 };
 
+/* Feedback Entries (cannot_answer + thumbs down) */
+import type {
+  TCreateFeedbackEntry,
+  TFeedbackEntry,
+  TListFeedbackEntriesParams,
+  TListFeedbackEntriesResponse,
+} from './feedbacks';
+
+const buildFeedbackQuery = (params: TListFeedbackEntriesParams = {}): string => {
+  const parts: string[] = [];
+  if (params.limit != null) parts.push(`limit=${params.limit}`);
+  if (params.offset != null) parts.push(`offset=${params.offset}`);
+  if (params.category) parts.push(`category=${encodeURIComponent(params.category)}`);
+  if (params.trigger) parts.push(`trigger=${encodeURIComponent(params.trigger)}`);
+  if (params.modelName) parts.push(`modelName=${encodeURIComponent(params.modelName)}`);
+  if (params.from) parts.push(`from=${encodeURIComponent(params.from)}`);
+  if (params.to) parts.push(`to=${encodeURIComponent(params.to)}`);
+  return parts.join('&');
+};
+
+export function createFeedbackEntry(
+  payload: TCreateFeedbackEntry,
+): Promise<TFeedbackEntry> {
+  return request.post(endpoints.feedbackEntries(), payload);
+}
+
+export function listAdminFeedbacks(
+  params: TListFeedbackEntriesParams = {},
+): Promise<TListFeedbackEntriesResponse> {
+  const query = buildFeedbackQuery(params);
+  return request.get(endpoints.adminFeedbackEntries(query));
+}
+
+export function exportAdminFeedbacksUrl(
+  format: 'csv' | 'json',
+  params: TListFeedbackEntriesParams = {},
+): string {
+  const query = buildFeedbackQuery(params);
+  return endpoints.adminFeedbackExport(format, query);
+}
+
+export function downloadAdminFeedbacksExport(
+  format: 'csv' | 'json',
+  params: TListFeedbackEntriesParams = {},
+): Promise<AxiosResponse> {
+  const query = buildFeedbackQuery(params);
+  return request.getResponse(endpoints.adminFeedbackExport(format, query), {
+    responseType: 'blob',
+  });
+}
+
 /* Agent Studio flows */
 export const getFlows = (cursor?: string): Promise<fl.TFlowListResponse> => {
   const url = cursor

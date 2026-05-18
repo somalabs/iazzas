@@ -13,6 +13,7 @@ const { disposeClient, clientRegistry, requestDataMap } = require('~/server/clea
 const { handleAbortError } = require('~/server/middleware');
 const { logViolation } = require('~/cache');
 const { saveMessage } = require('~/models');
+const { logCannotAnswerFeedback } = require('~/server/utils/cannotAnswerParser');
 
 function createCloseHandler(abortController) {
   return function (manual) {
@@ -660,6 +661,15 @@ const _LegacyAgentController = async (req, res, next, initializeClient, addTitle
     if (!job.abortController.signal.aborted) {
       // Create a new response object with minimal copies
       const finalResponse = { ...response };
+
+      await logCannotAnswerFeedback({
+        responseMessage: finalResponse,
+        options: {
+          req,
+          modelOptions: { model: client?.options?.agent?.model || client?.modelOptions?.model },
+        },
+        user: userId,
+      });
 
       sendEvent(res, {
         final: true,

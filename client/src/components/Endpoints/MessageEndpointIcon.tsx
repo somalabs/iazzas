@@ -174,6 +174,17 @@ const MessageEndpointIcon: React.FC<IconProps> = (props) => {
       ? (endpointIcons[endpoint] ?? {})
       : (endpointIcons.default as EndpointIcon);
 
+  if (
+    endpoint === EModelEndpoint.agents &&
+    typeof model === 'string' &&
+    model.startsWith('gemini-')
+  ) {
+    const googleIcon = endpointIcons[EModelEndpoint.google];
+    if (googleIcon) {
+      ({ icon, bg, name } = googleIcon);
+    }
+  }
+
   if (iconURL && endpointIcons[iconURL]) {
     ({ icon, bg, name } = endpointIcons[iconURL]);
   }

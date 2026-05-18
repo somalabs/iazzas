@@ -1,6 +1,11 @@
 import debounce from 'lodash/debounce';
 import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import { EModelEndpoint, isAgentsEndpoint, isAssistantsEndpoint } from 'librechat-data-provider';
+import {
+  Constants,
+  EModelEndpoint,
+  isAgentsEndpoint,
+  isAssistantsEndpoint,
+} from 'librechat-data-provider';
 import type * as t from 'librechat-data-provider';
 import type { Endpoint, SelectedValues } from '~/common';
 import {
@@ -74,6 +79,9 @@ export function ModelSelectorProvider({ children, startupConfig }: ModelSelector
      */
     return specs.filter((spec) => {
       if (spec.preset?.endpoint === EModelEndpoint.agents && spec.preset?.agent_id) {
+        if (spec.preset.agent_id === Constants.EPHEMERAL_AGENT_ID) {
+          return true;
+        }
         return spec.preset.agent_id in agentsMap;
       }
       /** Keep non-agent modelSpecs */

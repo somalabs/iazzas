@@ -101,8 +101,8 @@ const errorMessages = {
     }.`;
   },
   token_balance: (json: TTokenBalance) => {
-    const { balance, tokenCost, promptTokens, generations } = json;
-    const message = `Insufficient Funds! Balance: ${balance}. Prompt tokens: ${promptTokens}. Cost: ${tokenCost}.`;
+    const { generations } = json;
+    const message = 'Seus créditos do dia acabaram. Eles serão renovados automaticamente à meia-noite.';
     return (
       <>
         {message}

@@ -475,3 +475,10 @@ export const getAllEffectivePermissions = (resourceType: ResourceType) =>
 // SharePoint Graph API Token
 export const graphToken = (scopes: string) =>
   `${BASE_URL}/api/auth/graph-token?scopes=${encodeURIComponent(scopes)}`;
+
+// Feedbacks (cannot_answer + thumbs down)
+export const feedbackEntries = () => `${BASE_URL}/api/feedbacks`;
+export const adminFeedbackEntries = (query?: string) =>
+  `${BASE_URL}/api/admin/feedbacks${query ? `?${query}` : ''}`;
+export const adminFeedbackExport = (format: 'csv' | 'json', query?: string) =>
+  `${BASE_URL}/api/admin/feedbacks/export?format=${format}${query ? `&${query}` : ''}`;

@@ -17,6 +17,45 @@ import { getCustomEndpointConfig } from '~/app/config';
 
 const { mcp_all, mcp_delimiter } = Constants;
 
+const MODEL_PREFIX_TO_PROVIDER: Array<[string, string]> = [
+  ['gemini', 'google'],
+  ['gpt', 'openAI'],
+  ['o1', 'openAI'],
+  ['o3', 'openAI'],
+  ['o4', 'openAI'],
+  ['claude', 'anthropic'],
+  ['mistral', 'mistral'],
+];
+
+function resolveAgentProvider({
+  endpoint,
+  model,
+  modelSpec,
+}: {
+  endpoint: string;
+  model?: string;
+  modelSpec: TModelSpec | null;
+}): string {
+  if (!isAgentsEndpoint(endpoint)) {
+    return endpoint;
+  }
+  const presetProvider = (
+    modelSpec?.preset as { agentProvider?: string; provider?: string } | undefined
+  )?.agentProvider;
+  if (presetProvider) {
+    return presetProvider;
+  }
+  if (model) {
+    const lower = model.toLowerCase();
+    for (const [prefix, provider] of MODEL_PREFIX_TO_PROVIDER) {
+      if (lower.startsWith(prefix)) {
+        return provider;
+      }
+    }
+  }
+  return endpoint;
+}
+
 export interface LoadAgentDeps {
   getAgent: (searchParameter: { id: string }) => Promise<Agent | null>;
   getMCPServerTools: (
@@ -47,12 +86,15 @@ export async function loadEphemeralAgent(
   { req, spec, endpoint, model_parameters: _m }: Omit<LoadAgentParams, 'agent_id'>,
   deps: LoadAgentDeps,
 ): Promise<Agent | null> {
-  const { model, ...model_parameters } = _m ?? ({} as unknown as AgentModelParameters);
+  const { model: rawModel, ...model_parameters } =
+    _m ?? ({} as unknown as AgentModelParameters);
   const modelSpecs = req.config?.modelSpecs as { list?: TModelSpec[] } | undefined;
   let modelSpec: TModelSpec | null = null;
   if (spec != null && spec !== '') {
     modelSpec = modelSpecs?.list?.find((s) => s.name === spec) ?? null;
   }
+  const model =
+    rawModel ?? (modelSpec?.preset as { model?: string } | undefined)?.model ?? undefined;
   const ephemeralAgent: TEphemeralAgent | undefined = req.body?.ephemeralAgent;
   const mcpServers = new Set<string>(ephemeralAgent?.mcp);
   const userId = req.user?.id ?? '';
@@ -70,6 +112,13 @@ export async function loadEphemeralAgent(
   }
   if (ephemeralAgent?.web_search === true || modelSpec?.webSearch === true) {
     tools.push(Tools.web_search);
+  }
+  if (modelSpec?.tools?.length) {
+    for (const tool of modelSpec.tools) {
+      if (!tools.includes(tool)) {
+        tools.push(tool);
+      }
+    }
   }
 
   const addedServers = new Set<string>();
@@ -89,7 +138,9 @@ export async function loadEphemeralAgent(
     }
   }
 
-  const instructions = req.body?.promptPrefix;
+  const instructions =
+    req.body?.promptPrefix ??
+    (modelSpec?.preset as { promptPrefix?: string } | undefined)?.promptPrefix;
 
   // Get endpoint config for modelDisplayLabel fallback
   const appConfig = req.config;
@@ -118,10 +169,13 @@ export async function loadEphemeralAgent(
     sender: sender as string,
   });
 
+  const resolvedProvider = resolveAgentProvider({ endpoint, model, modelSpec });
+
   const result: Partial<Agent> = {
     id: ephemeralId,
+    name: sender as string,
     instructions,
-    provider: endpoint,
+    provider: resolvedProvider,
     model_parameters,
     model,
     tools,

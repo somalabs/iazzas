@@ -29,9 +29,6 @@ interface TxData {
 export interface CheckBalanceDeps {
   findBalanceByUser: (user: string) => Promise<BalanceRecord | null>;
   getMultiplier: (params: Record<string, unknown>) => number;
-  createAutoRefillTransaction: (
-    data: Record<string, unknown>,
-  ) => Promise<{ balance: number } | undefined>;
   logViolation: (
     req: unknown,
     res: unknown,
@@ -45,34 +42,7 @@ export interface CheckBalanceDeps {
   upsertBalanceFields?: (userId: string, fields: IBalanceUpdate) => Promise<BalanceRecord | null>;
 }
 
-function addIntervalToDate(date: Date, value: number, unit: TimeUnit): Date {
-  const result = new Date(date);
-  switch (unit) {
-    case 'seconds':
-      result.setSeconds(result.getSeconds() + value);
-      break;
-    case 'minutes':
-      result.setMinutes(result.getMinutes() + value);
-      break;
-    case 'hours':
-      result.setHours(result.getHours() + value);
-      break;
-    case 'days':
-      result.setDate(result.getDate() + value);
-      break;
-    case 'weeks':
-      result.setDate(result.getDate() + value * 7);
-      break;
-    case 'months':
-      result.setMonth(result.getMonth() + value);
-      break;
-    default:
-      break;
-  }
-  return result;
-}
-
-/** Checks a user's balance record and handles auto-refill if needed. */
+/** Checks a user's balance record. Global daily reset is handled by the balance scheduler. */
 async function checkBalanceRecord(
   txData: TxData,
   deps: CheckBalanceDeps,
@@ -123,7 +93,7 @@ async function checkBalanceRecord(
     logger.debug('[Balance.check] No balance record found for user', { user });
     return { canSpend: false, balance: 0, tokenCost };
   }
-  let balance = record.tokenCredits;
+  const balance = record.tokenCredits;
 
   logger.debug('[Balance.check] Initial state', {
     user,
@@ -136,39 +106,6 @@ async function checkBalanceRecord(
     multiplier,
     endpointTokenConfig: !!endpointTokenConfig,
   });
-
-  if (
-    balance - tokenCost <= 0 &&
-    record.autoRefillEnabled &&
-    record.refillAmount &&
-    record.refillAmount > 0
-  ) {
-    const lastRefillDate = new Date(record.lastRefill ?? 0);
-    const now = new Date();
-    if (
-      isNaN(lastRefillDate.getTime()) ||
-      now >=
-        addIntervalToDate(
-          lastRefillDate,
-          record.refillIntervalValue ?? 0,
-          record.refillIntervalUnit ?? 'days',
-        )
-    ) {
-      try {
-        const result = await deps.createAutoRefillTransaction({
-          user,
-          tokenType: 'credits',
-          context: 'autoRefill',
-          rawAmount: record.refillAmount,
-        });
-        if (result) {
-          balance = result.balance;
-        }
-      } catch (error) {
-        logger.error('[Balance.check] Failed to record transaction for auto-refill', error);
-      }
-    }
-  }
 
   logger.debug('[Balance.check] Token cost', { tokenCost });
   return { canSpend: balance >= tokenCost, balance, tokenCost };
