@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
-import { useToastContext } from '@librechat/client';
+import { useToastContext, useMediaQuery } from '@librechat/client';
 import {
   useAutomationsQuery,
   useAutomationRunsQuery,
@@ -11,6 +11,7 @@ import {
   useDeleteAutomationMutation,
 } from '~/data-provider';
 import { useHasAccess, useLocalize } from '~/hooks';
+import { cn } from '~/utils';
 import { AutomacoesProvider, useAutomacoesContext } from './context';
 import AutomationList from './AutomationList';
 import AutomationEditor from './AutomationEditor';
@@ -22,7 +23,7 @@ function EmptyEditorState() {
   const localize = useLocalize();
   return (
     <div className="flex flex-1 flex-col items-center justify-center text-center">
-      <p className="text-sm text-text-tertiary">{localize('com_automacoes_empty_state')}</p>
+      <p className="text-sm text-text-tertiary">{localize('com_automacoes_select_or_create')}</p>
     </div>
   );
 }
@@ -32,6 +33,7 @@ function AutomacoesView() {
   const navigate = useNavigate();
   const { showToast } = useToastContext();
   const { state, dispatch } = useAutomacoesContext();
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const canCreate = useHasAccess({
     permissionType: PermissionTypes.AUTOMATIONS,
@@ -94,6 +96,8 @@ function AutomacoesView() {
 
   const showEditor = state.isCreating || !!state.selectedId;
 
+  const backToList = isMobile && showEditor;
+
   return (
     <div className="flex h-full flex-col">
       <header
@@ -102,9 +106,9 @@ function AutomacoesView() {
       >
         <button
           type="button"
-          onClick={() => navigate('/c/new')}
+          onClick={() => (backToList ? dispatch({ type: 'CANCEL' }) : navigate('/c/new'))}
           className="rounded-lg p-1.5 text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-          aria-label="Voltar ao chat"
+          aria-label={backToList ? localize('com_automacoes_back_to_list') : 'Voltar ao chat'}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -114,32 +118,37 @@ function AutomacoesView() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <AutomationList
-          automations={automations}
-          selectedId={state.selectedId}
-          canCreate={canCreate}
-          onSelect={(id) => dispatch({ type: 'SELECT', payload: id })}
-          onCreate={() => dispatch({ type: 'CREATE' })}
-          onToggleEnabled={handleToggleEnabled}
-          onRunNow={handleRunNow}
-          onDelete={handleDelete}
-          onOpenRuns={(id) => dispatch({ type: 'OPEN_RUNS', payload: id })}
-        />
+        {(!isMobile || !showEditor) && (
+          <AutomationList
+            automations={automations}
+            selectedId={state.selectedId}
+            canCreate={canCreate}
+            onSelect={(id) => dispatch({ type: 'SELECT', payload: id })}
+            onCreate={() => dispatch({ type: 'CREATE' })}
+            onToggleEnabled={handleToggleEnabled}
+            onRunNow={handleRunNow}
+            onDelete={handleDelete}
+            onOpenRuns={(id) => dispatch({ type: 'OPEN_RUNS', payload: id })}
+            className={cn(isMobile && 'w-full flex-1 border-r-0')}
+          />
+        )}
 
-        <main
-          className="flex flex-1 flex-col overflow-hidden"
-          aria-label="Editor de automação"
-        >
-          {showEditor ? (
-            <AutomationEditor
-              automation={selectedAutomation}
-              onSaved={handleSaved}
-              onCancel={() => dispatch({ type: 'CANCEL' })}
-            />
-          ) : (
-            <EmptyEditorState />
-          )}
-        </main>
+        {(!isMobile || showEditor) && (
+          <main
+            className="flex flex-1 flex-col overflow-hidden"
+            aria-label="Editor de automação"
+          >
+            {showEditor ? (
+              <AutomationEditor
+                automation={selectedAutomation}
+                onSaved={handleSaved}
+                onCancel={() => dispatch({ type: 'CANCEL' })}
+              />
+            ) : (
+              <EmptyEditorState />
+            )}
+          </main>
+        )}
 
         {state.runsAutomationId && (
           <RunsDrawer

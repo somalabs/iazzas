@@ -241,6 +241,7 @@ type AutomationListProps = {
   onRunNow: (id: string) => void;
   onDelete: (id: string) => void;
   onOpenRuns: (id: string) => void;
+  className?: string;
 };
 
 export default function AutomationList({
@@ -253,13 +254,17 @@ export default function AutomationList({
   onRunNow,
   onDelete,
   onOpenRuns,
+  className,
 }: AutomationListProps) {
   const localize = useLocalize();
 
   return (
     <aside
       aria-label={localize('com_automacoes_page_title')}
-      className="flex h-full w-[300px] flex-shrink-0 flex-col border-r border-border-light bg-surface-primary"
+      className={cn(
+        'flex h-full w-[300px] flex-shrink-0 flex-col border-r border-border-light bg-surface-primary',
+        className,
+      )}
     >
       <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
         <div className="min-w-0">

@@ -1809,6 +1809,8 @@
   "com_automacoes_page_title": "Automações",
   "com_automacoes_page_subtitle": "Agende flows do Studio de Agentes para rodar automaticamente",
   "com_automacoes_empty_state": "Nenhuma automação ainda. Crie uma para começar.",
+  "com_automacoes_select_or_create": "Selecione uma automação ou crie uma nova.",
+  "com_automacoes_back_to_list": "Voltar à lista",
   "com_automacoes_create_btn": "Nova automação",
 
   "com_automacoes_form_name_label": "Nome",
