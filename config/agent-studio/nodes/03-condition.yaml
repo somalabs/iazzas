@@ -1,0 +1,94 @@
+node_type: condition
+version: "1.0.0"
+display_name: "Condição"
+display_name_pt: "Condição"
+description: >
+  Roteamento determinístico baseado no output do nó anterior.
+  SOMENTE operadores determinísticos. LLM-classifier é v2 — fora de escopo.
+
+constraints:
+  max_per_flow: null
+  incoming_edges: 1+
+  outgoing_edges: 2   # exatamente 2: handle "true" e handle "false"
+  note: >
+    Se o handle "false" não tiver edge conectada e a condição avaliar como falso,
+    o run encerra com status "skipped" (não é erro).
+
+fields:
+  - id: operator
+    label_pt: "Operador"
+    hint_pt: ""
+    type: enum
+    required: true
+    editable_in_inspector: true
+    interpolation: false
+    options:
+      - value: equals
+        label_pt: "igual a"
+        description: "Comparação exata de string (case-sensitive)"
+      - value: contains
+        label_pt: "contém"
+        description: "Substring match (case-sensitive)"
+      - value: regex
+        label_pt: "regex"
+        description: "Avalia o output contra expressão regular (sintaxe JS/ECMAScript)"
+      - value: jsonpath_exists
+        label_pt: "jsonpath existe"
+        description: "Verifica se o JSONPath existe e tem valor não-nulo no output (parse JSON antes)"
+
+  - id: value
+    label_pt: "Valor"
+    hint_pt: "Suporta {{nodeId.output}}. Para regex, informe a expressão sem delimitadores."
+    type: string
+    required: true
+    editable_in_inspector: true
+    interpolation: true
+
+# O "source" da avaliação é sempre o output do nó imediatamente anterior
+# (último nó conectado a este pelo edge de entrada).
+# Não há campo "source" configurável — é sempre o nó de origem do edge.
+
+output_shape:
+  description: "Não produz output próprio — roteia para handle 'true' ou 'false'."
+  type: null
+
+handles:
+  out:
+    - id: "true"
+      label_pt: "Verdadeiro"
+      description: "Condição avaliou como verdadeira"
+    - id: "false"
+      label_pt: "Falso"
+      description: "Condição avaliou como falsa"
+
+runtime_behavior:
+  - "O operador é aplicado sobre o output (string) do nó de origem do edge de entrada."
+  - "Para jsonpath_exists: o output é parseado como JSON antes da avaliação. Se não for JSON válido → false."
+  - "Para regex: flag 'g' não é aplicada; apenas testa match (boolean)."
+  - "Resultado true → segue handle 'true'; resultado false → segue handle 'false'."
+  - "Se handle 'false' não tiver edge e condição for false → run do flow termina como 'skipped'."
+  - "NUNCA chamar LLM para avaliar condição."
+
+i18n_keys:
+  - com_studio_flow_node_condition
+  - com_studio_flow_node_condition_desc
+  - com_studio_flow_condition_operator_label
+  - com_studio_flow_condition_op_equals
+  - com_studio_flow_condition_op_contains
+  - com_studio_flow_condition_op_regex
+  - com_studio_flow_condition_op_jsonpath
+  - com_studio_flow_condition_value_label
+  - com_studio_flow_condition_value_hint
+  - com_studio_flow_condition_edge_true
+  - com_studio_flow_condition_edge_false
+
+acceptance_criteria:
+  - "Nó exibe visualmente duas portas de saída distintas rotuladas 'Verdadeiro' e 'Falso'."
+  - "Select de operador exibe exatamente as 4 opções definidas acima."
+  - "Campo 'value' é obrigatório; salvar sem valor exibe erro de validação."
+  - "Durante run: operator 'equals' com strings idênticas → segue 'true'."
+  - "Durante run: operator 'contains' com substring presente → segue 'true'."
+  - "Durante run: operator 'regex' com expressão inválida → node status 'failed', run status 'failed'."
+  - "Durante run: operator 'jsonpath_exists' em output não-JSON → avalia como false (não 'failed')."
+  - "Run com handle 'false' desconectado e condição false → run status 'skipped'."
+  - "Nenhuma chamada a LLM ocorre na avaliação da condição (verificável por log/trace)."
