@@ -6,7 +6,7 @@ import type { HumanApprovalNodeData } from 'librechat-data-provider';
 
 export default function ApprovalNode({ id, selected, data }: NodeProps) {
   const localize = useLocalize();
-  const d = data as HumanApprovalNodeData;
+  const d = (data ?? {}) as HumanApprovalNodeData;
 
   return (
     <div className="group">

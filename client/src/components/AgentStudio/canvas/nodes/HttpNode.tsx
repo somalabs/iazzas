@@ -6,7 +6,7 @@ import type { HttpNodeData } from 'librechat-data-provider';
 
 export default function HttpNode({ id, selected, data }: NodeProps) {
   const localize = useLocalize();
-  const d = data as HttpNodeData;
+  const d = (data ?? {}) as HttpNodeData;
 
   return (
     <div className="group">

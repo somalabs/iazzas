@@ -6,7 +6,7 @@ import type { TriggerNodeData } from 'librechat-data-provider';
 
 export default function TriggerNode({ id, selected, data }: NodeProps) {
   const localize = useLocalize();
-  const d = data as TriggerNodeData;
+  const d = (data ?? {}) as TriggerNodeData;
 
   return (
     <div className="group">

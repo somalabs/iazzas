@@ -6,7 +6,7 @@ import type { OutputNodeData } from 'librechat-data-provider';
 
 export default function OutputNode({ id, selected, data }: NodeProps) {
   const localize = useLocalize();
-  const d = data as OutputNodeData;
+  const d = (data ?? {}) as OutputNodeData;
 
   return (
     <div className="group">

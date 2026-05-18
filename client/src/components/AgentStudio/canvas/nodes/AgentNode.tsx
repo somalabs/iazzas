@@ -6,7 +6,7 @@ import type { AgentNodeData } from 'librechat-data-provider';
 
 export default function AgentNode({ id, selected, data }: NodeProps) {
   const localize = useLocalize();
-  const d = data as AgentNodeData;
+  const d = (data ?? {}) as AgentNodeData;
 
   return (
     <div className="group">

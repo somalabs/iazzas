@@ -22,6 +22,7 @@ const agentFlowSchema = new Schema<IAgentFlow>(
   },
   {
     timestamps: true,
+    minimize: false,
   },
 );
 

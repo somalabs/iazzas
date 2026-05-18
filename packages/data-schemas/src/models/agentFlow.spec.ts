@@ -59,6 +59,26 @@ describe('AgentFlow / AgentFlowRun models', () => {
     expect((doc.edges as Array<{ sourceHandle?: string }>)[0].sourceHandle).toBe('default');
   });
 
+  it('preserves an empty node data object on reload (no Mongoose minimize)', async () => {
+    const created = await AgentFlow.create({
+      tenantId: 't1',
+      name: 'Empty data flow',
+      nodes: [
+        { id: 't1', type: 'trigger', position: { x: 0, y: 0 }, data: {} },
+        { id: 'o1', type: 'output', position: { x: 0, y: 200 }, data: {} },
+      ],
+      edges: [{ id: 'e1', source: 't1', target: 'o1', sourceHandle: 'default' }],
+    });
+    const reloaded = (await AgentFlow.findById(
+      (created as { _id: mongoose.Types.ObjectId })._id,
+    ).lean()) as unknown as { nodes: Array<{ data?: unknown }> };
+    expect(reloaded.nodes).toHaveLength(2);
+    for (const node of reloaded.nodes) {
+      expect(node.data).toBeDefined();
+      expect(typeof node.data).toBe('object');
+    }
+  });
+
   it('persists a run with snapshot, version and context', async () => {
     const flow = await AgentFlow.create({ tenantId: 't1', name: 'F', nodes: [], edges: [] });
     const run = await AgentFlowRun.create({

@@ -59,6 +59,19 @@ function validateFlowBody(body) {
   return null;
 }
 
+/**
+ * Guarantees every persisted node carries a `data` object. The client renders
+ * `node.data.label` and friends without a null-guard fallback for the missing
+ * key; an absent `data` (e.g. a programmatic client posting `data:{}`, which
+ * Mongoose used to drop) crashes the whole canvas on reload.
+ * @returns {Array} nodes with a guaranteed `data` object
+ */
+function normalizeNodes(nodes) {
+  return nodes.map((n) =>
+    n && typeof n.data === 'object' && n.data !== null ? n : { ...n, data: {} },
+  );
+}
+
 function castCursor(raw, res) {
   if (raw == null || raw === '') {
     return { ok: true, value: null };
@@ -172,7 +185,7 @@ const createFlow = async (req, res) => {
     const flow = await repo.createFlow({
       tenantId: req.user.tenantId,
       name: req.body.name.trim(),
-      nodes: req.body.nodes,
+      nodes: normalizeNodes(req.body.nodes),
       edges: req.body.edges,
     });
     res.status(201).json({ flow });
@@ -196,7 +209,7 @@ const updateFlow = async (req, res) => {
       tenantId: req.user.tenantId,
       id: req.params.id,
       name: req.body.name.trim(),
-      nodes: req.body.nodes,
+      nodes: normalizeNodes(req.body.nodes),
       edges: req.body.edges,
     });
     if (!flow) {

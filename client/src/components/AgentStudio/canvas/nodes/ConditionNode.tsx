@@ -6,7 +6,7 @@ import type { ConditionNodeData } from 'librechat-data-provider';
 
 export default function ConditionNode({ id, selected, data }: NodeProps) {
   const localize = useLocalize();
-  const d = data as ConditionNodeData;
+  const d = (data ?? {}) as ConditionNodeData;
 
   return (
     <div className="group">

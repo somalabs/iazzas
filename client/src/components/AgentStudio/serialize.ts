@@ -27,7 +27,7 @@ export function deserializeNodes(nodes: FlowNode[]): Node[] {
     id: n.id,
     type: n.type,
     position: n.position,
-    data: n.data as unknown as Record<string, unknown>,
+    data: (n.data ?? {}) as unknown as Record<string, unknown>,
   }));
 }
 

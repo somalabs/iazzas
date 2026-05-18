@@ -10,7 +10,7 @@ export type ValidationError = {
 };
 
 function getNodeLabel(n: Node): string {
-  const d = n.data as { label?: string; agentName?: string; url?: string };
+  const d = (n.data ?? {}) as { label?: string; agentName?: string; url?: string };
   return d.label ?? d.agentName ?? d.url ?? n.type ?? n.id;
 }
 
