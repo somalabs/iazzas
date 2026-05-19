@@ -70,7 +70,7 @@ export default function AgentFooter({
       return localize('com_ui_save');
     }
 
-    return localize('com_ui_create');
+    return localize('com_ui_ux_publicar_agente');
   };
 
   const showButtons = activePanel === Panel.builder;
