@@ -125,6 +125,8 @@ export type AgentIconMapProps = IconMapProps & { agentName?: string };
 export type NavLink = {
   /** Optional: separators carry no title (they render no label). */
   title?: TranslationKeys;
+  /** Short explanatory text shown beside the icon when the rail is expanded. */
+  description?: TranslationKeys;
   label?: string;
   icon?: LucideIcon | React.FC;
   Component?: React.ComponentType;
