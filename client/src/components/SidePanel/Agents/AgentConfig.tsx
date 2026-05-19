@@ -422,7 +422,7 @@ export default function AgentConfig() {
                         id="support-contact-name"
                         type="text"
                         placeholder={localize('com_ui_support_contact_name_placeholder')}
-                        aria-label="Support contact name"
+                        aria-label={localize('com_ui_support_contact_name')}
                         aria-invalid={error ? 'true' : 'false'}
                         aria-describedby={error ? 'support-contact-name-error' : undefined}
                       />
@@ -463,7 +463,7 @@ export default function AgentConfig() {
                         id="support-contact-email"
                         type="email"
                         placeholder={localize('com_ui_support_contact_email_placeholder')}
-                        aria-label="Support contact email"
+                        aria-label={localize('com_ui_support_contact_email')}
                         aria-invalid={error ? 'true' : 'false'}
                         aria-describedby={error ? 'support-contact-email-error' : undefined}
                       />

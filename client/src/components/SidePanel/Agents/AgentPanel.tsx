@@ -502,7 +502,7 @@ export default function AgentPanel() {
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="scrollbar-gutter-stable h-auto w-full flex-shrink-0 px-3 pb-3"
-        aria-label="Agent configuration form"
+        aria-label={localize('com_ui_ux_agent_form')}
       >
         <div className="flex w-full flex-wrap gap-2">
           <div className="w-full">

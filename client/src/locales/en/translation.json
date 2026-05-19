@@ -1791,6 +1791,8 @@
   "com_ui_ux_agent_o_que_faz_ph": "Descreva em linguagem natural: o que ele deve fazer, como responder e o que evitar.",
   "com_ui_ux_agent_capacidades": "O que ele pode fazer",
   "com_ui_ux_agent_avancado": "Ajustes avançados",
+  "com_ui_ux_agent_form": "Formulário de configuração do agente",
+  "com_ui_ux_flows_canvas": "Canvas do flow de agentes",
   "com_ui_ux_balance_cycle": "Uso de hoje",
   "com_ui_ux_balance_renova": "Renova hoje 00:00",
   "com_ui_ux_balance_renova_em": "em",

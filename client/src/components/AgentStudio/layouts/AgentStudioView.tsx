@@ -1,6 +1,7 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEffect } from 'react';
 import { useAgentsAccessRedirect } from '~/hooks/Agents';
+import { useLocalize } from '~/hooks';
 import { useFlowsQuery, useFlowRunsQuery, useGetEndpointsQuery } from '~/data-provider';
 import { FlowProvider, useFlowContext } from '../context';
 import { deserializeNodes, deserializeEdges } from '../serialize';
@@ -43,12 +44,16 @@ function FlowLoader() {
 }
 
 function StudioLayout() {
+  const localize = useLocalize();
   return (
     <div className="flex h-full flex-col">
       <Toolbar />
       <div className="flex flex-1 overflow-hidden">
         <Palette />
-        <main className="relative flex-1 overflow-hidden" aria-label="Canvas do flow de agentes">
+        <main
+          className="relative flex-1 overflow-hidden"
+          aria-label={localize('com_ui_ux_flows_canvas')}
+        >
           <Canvas />
         </main>
         <Inspector />
