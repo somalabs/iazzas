@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { PermissionBits } from 'librechat-data-provider';
 import { useLocalize } from '~/hooks';
 import { useListAgentsQuery } from '~/data-provider';
@@ -14,6 +15,7 @@ import type { AgentNodeData } from 'librechat-data-provider';
 
 export default function AgentInspector({ nodeId, data }: { nodeId: string; data: AgentNodeData }) {
   const localize = useLocalize();
+  const navigate = useNavigate();
   const { dispatch } = useFlowContext();
   const { data: agentsList } = useListAgentsQuery({
     limit: 100,
@@ -30,20 +32,35 @@ export default function AgentInspector({ nodeId, data }: { nodeId: string; data:
         <FieldLabel htmlFor={`agent-id-${nodeId}`}>
           {localize('com_studio_flow_agent_id_label')}
         </FieldLabel>
-        <InspectorSelect
-          id={`agent-id-${nodeId}`}
-          value={data.agentId}
-          onChange={(v) => {
-            const picked = agents.find((a) => a.id === v);
-            update({ agentId: v, agentName: picked?.name ?? undefined });
-          }}
-          options={[
-            { value: '', label: localize('com_studio_flow_agent_id_placeholder') },
-            ...agents.map((a) => ({ value: a.id, label: a.name || a.id })),
-          ]}
-        />
-        {data.agentName && (
-          <p className="mt-1 text-xs font-medium text-text-primary">{data.agentName}</p>
+        {agents.length === 0 ? (
+          <div className="rounded-lg border border-border-light bg-surface-secondary px-3 py-4 text-center">
+            <p className="text-sm text-text-secondary">{localize('com_studio_flow_agent_empty')}</p>
+            <button
+              type="button"
+              onClick={() => navigate('/c/new')}
+              className="mt-1 text-sm font-medium text-text-primary underline hover:text-text-secondary"
+            >
+              {localize('com_studio_flow_agent_empty_cta')}
+            </button>
+          </div>
+        ) : (
+          <>
+            <InspectorSelect
+              id={`agent-id-${nodeId}`}
+              value={data.agentId}
+              onChange={(v) => {
+                const picked = agents.find((a) => a.id === v);
+                update({ agentId: v, agentName: picked?.name ?? undefined });
+              }}
+              options={[
+                { value: '', label: localize('com_studio_flow_agent_id_placeholder') },
+                ...agents.map((a) => ({ value: a.id, label: a.name || a.id })),
+              ]}
+            />
+            {data.agentName && (
+              <p className="mt-1 text-xs font-medium text-text-primary">{data.agentName}</p>
+            )}
+          </>
         )}
       </FieldGroup>
 
