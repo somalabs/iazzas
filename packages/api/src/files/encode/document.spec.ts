@@ -859,12 +859,35 @@ describe('encodeAndFormatDocuments - fileConfig integration', () => {
       expect(result.files).toHaveLength(1);
     });
 
-    it('should format XLSX for Google/VertexAI as media block', async () => {
+    it('should strip CI-only XLSX from the Google/VertexAI document path', async () => {
       const req = createMockRequest(25) as ServerRequest;
       const mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
       const file = createMockDocFile(2, mimeType, 'report.xlsx');
 
       const mockContent = Buffer.from('xlsx-binary').toString('base64');
+      mockedGetFileStream.mockResolvedValue({
+        file,
+        content: mockContent,
+        metadata: file,
+      });
+
+      const result = await encodeAndFormatDocuments(
+        req,
+        [file],
+        { provider: Providers.GOOGLE },
+        mockStrategyFunctions,
+      );
+
+      expect(result.documents).toHaveLength(0);
+      expect(result.files).toHaveLength(0);
+    });
+
+    it('should format a non-CI document for Google/VertexAI as media block', async () => {
+      const req = createMockRequest(25) as ServerRequest;
+      const mimeType = 'text/plain';
+      const file = createMockDocFile(2, mimeType, 'notes.txt');
+
+      const mockContent = Buffer.from('plain notes').toString('base64');
       mockedGetFileStream.mockResolvedValue({
         file,
         content: mockContent,

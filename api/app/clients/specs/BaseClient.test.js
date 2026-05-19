@@ -780,6 +780,7 @@ describe('BaseClient', () => {
         expect.any(Object),
       );
 
+      await response.databasePromise;
       expect(saveConvo).toHaveBeenCalledTimes(2);
       expect(saveConvo).toHaveBeenCalledWith(
         expect.any(Object),
@@ -833,10 +834,11 @@ describe('BaseClient', () => {
       );
 
       const newMessage = 'New message in existing conversation';
-      await TestClient.sendMessage(newMessage, {
+      const response = await TestClient.sendMessage(newMessage, {
         conversationId: existingConvo.conversationId,
       });
 
+      await response.databasePromise;
       expect(saveConvo).toHaveBeenCalledTimes(2);
 
       const saveConvoCall = saveConvo.mock.calls[0];
