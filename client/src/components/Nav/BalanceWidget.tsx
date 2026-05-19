@@ -135,7 +135,6 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <button
       type="button"
-      role="status"
       onClick={() => openSettingsTab(SettingsTabValues.BALANCE)}
       className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-xs hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
       aria-label={ariaLabel}
@@ -161,10 +160,7 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
             </div>
             {renewalText && (
               <span
-                className={cn(
-                  'truncate text-text-tertiary',
-                  colorState !== 'safe' && iconColor,
-                )}
+                className={cn('truncate text-text-tertiary', colorState !== 'safe' && iconColor)}
               >
                 {renewalText}
               </span>

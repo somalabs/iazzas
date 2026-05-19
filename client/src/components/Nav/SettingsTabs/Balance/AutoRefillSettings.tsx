@@ -77,8 +77,7 @@ const AutoRefillSettings: React.FC<AutoRefillSettingsProps> = ({
 
         {/* Right Section: daily renewal countdown */}
         <span className="text-sm font-medium text-gray-800 dark:text-gray-200" role="note">
-          {localize('com_ui_ux_balance_renova')} ({localize('com_ui_ux_balance_renova_em')}{' '}
-          {hoursUntilRenewal}h)
+          {localize('com_ui_ux_balance_renova_full', { hours: hoursUntilRenewal })}
         </span>
       </div>
     </div>

@@ -69,8 +69,7 @@ export function hoursUntilSaoPauloMidnight(now: Date = new Date()): number {
     second: '2-digit',
   }).formatToParts(now);
 
-  const part = (type: string): number =>
-    Number(parts.find((p) => p.type === type)?.value ?? 0);
+  const part = (type: string): number => Number(parts.find((p) => p.type === type)?.value ?? 0);
 
   let hour = part('hour');
   if (hour === 24) {
@@ -95,23 +94,19 @@ type CycleInput = {
 export function getCycleInfo(balance: CycleInput): CycleInfo {
   const { tokenCredits, autoRefillEnabled, refillAmount } = balance;
 
-  const hasCycle =
-    !!autoRefillEnabled && refillAmount !== undefined && refillAmount > 0;
+  const hasCycle = !!autoRefillEnabled && refillAmount !== undefined && refillAmount > 0;
 
   const pct = hasCycle
     ? Math.min(
         100,
         Math.max(
           0,
-          Math.round(
-            ((refillAmount! - toDisplayCredits(tokenCredits)) / refillAmount!) * 100,
-          ),
+          Math.round(((refillAmount! - toDisplayCredits(tokenCredits)) / refillAmount!) * 100),
         ),
       )
     : 0;
 
-  const colorState: CycleColorState =
-    pct >= 90 ? 'danger' : pct >= 70 ? 'warning' : 'safe';
+  const colorState: CycleColorState = pct >= 90 ? 'danger' : pct >= 70 ? 'warning' : 'safe';
 
   return {
     pct,
@@ -122,10 +117,4 @@ export function getCycleInfo(balance: CycleInput): CycleInfo {
   };
 }
 
-export type RefillIntervalUnit =
-  | 'seconds'
-  | 'minutes'
-  | 'hours'
-  | 'days'
-  | 'weeks'
-  | 'months';
+export type RefillIntervalUnit = 'seconds' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months';
