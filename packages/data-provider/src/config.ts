@@ -1833,6 +1833,10 @@ export enum SettingsTabValues {
    * Tab for Personalization Settings
    */
   PERSONALIZATION = 'personalization',
+  /**
+   * Tab for MCP server management
+   */
+  MCP = 'mcp',
 }
 
 export enum STTProviders {

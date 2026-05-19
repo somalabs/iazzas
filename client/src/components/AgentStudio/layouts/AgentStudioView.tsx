@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHasAccess } from '~/hooks';
 import { useFlowsQuery, useFlowRunsQuery, useGetEndpointsQuery } from '~/data-provider';
+import AgentPanelSwitch from '~/components/SidePanel/Agents/AgentPanelSwitch';
 import { FlowProvider, useFlowContext } from '../context';
 import { deserializeNodes, deserializeEdges } from '../serialize';
 import { Toolbar } from '../toolbar';
@@ -49,11 +50,14 @@ function StudioLayout() {
     <div className="flex h-full flex-col">
       <Toolbar />
       <div className="flex flex-1 overflow-hidden">
-        <Palette />
-        <main
-          className="relative flex-1 overflow-hidden"
-          aria-label="Canvas do flow de agentes"
+        <div
+          className="w-[360px] flex-shrink-0 overflow-y-auto border-r border-border-light bg-surface-primary-alt"
+          aria-label="Criação de agentes"
         >
+          <AgentPanelSwitch />
+        </div>
+        <Palette />
+        <main className="relative flex-1 overflow-hidden" aria-label="Canvas do flow de agentes">
           <Canvas />
         </main>
         <Inspector />

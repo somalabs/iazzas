@@ -1,12 +1,13 @@
 import React, { useState, useRef } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
-import { SettingsTabValues } from 'librechat-data-provider';
+import { SettingsTabValues, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { MessageSquare, DollarSign } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { GearIcon, DataIcon, UserIcon, useMediaQuery } from '@librechat/client';
+import { GearIcon, DataIcon, UserIcon, MCPIcon, useMediaQuery } from '@librechat/client';
 import type { TDialogProps } from '~/common';
+import MCPBuilderPanel from '~/components/SidePanel/MCPBuilder/MCPBuilderPanel';
 import { General, Chat, Data, Balance, Account } from './SettingsTabs';
-import { useLocalize, TranslationKeys } from '~/hooks';
+import { useLocalize, useHasAccess, TranslationKeys } from '~/hooks';
 import { useGetStartupConfig } from '~/data-provider';
 import { cn } from '~/utils';
 
@@ -20,6 +21,15 @@ export default function Settings({
   const localize = useLocalize();
   const [activeTab, setActiveTab] = useState(initialTab ?? SettingsTabValues.GENERAL);
   const tabRefs = useRef({});
+  const hasAccessToUseMCP = useHasAccess({
+    permissionType: PermissionTypes.MCP_SERVERS,
+    permission: Permissions.USE,
+  });
+  const hasAccessToCreateMCP = useHasAccess({
+    permissionType: PermissionTypes.MCP_SERVERS,
+    permission: Permissions.CREATE,
+  });
+  const showMCP = hasAccessToUseMCP || hasAccessToCreateMCP;
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const tabs: SettingsTabValues[] = [
@@ -27,6 +37,7 @@ export default function Settings({
       SettingsTabValues.CHAT,
       SettingsTabValues.DATA,
       ...(startupConfig?.balance?.enabled ? [SettingsTabValues.BALANCE] : []),
+      ...(showMCP ? [SettingsTabValues.MCP] : []),
       SettingsTabValues.ACCOUNT,
     ];
     const currentIndex = tabs.indexOf(activeTab);
@@ -77,6 +88,15 @@ export default function Settings({
             value: SettingsTabValues.BALANCE,
             icon: <DollarSign size={18} />,
             label: 'com_nav_setting_balance' as TranslationKeys,
+          },
+        ]
+      : ([] as { value: SettingsTabValues; icon: React.JSX.Element; label: TranslationKeys }[])),
+    ...(showMCP
+      ? [
+          {
+            value: SettingsTabValues.MCP,
+            icon: <MCPIcon className="icon-sm" aria-hidden="true" />,
+            label: 'com_nav_setting_mcp' as TranslationKeys,
           },
         ]
       : ([] as { value: SettingsTabValues; icon: React.JSX.Element; label: TranslationKeys }[])),
@@ -196,6 +216,11 @@ export default function Settings({
                     {startupConfig?.balance?.enabled && (
                       <Tabs.Content value={SettingsTabValues.BALANCE} tabIndex={-1}>
                         <Balance />
+                      </Tabs.Content>
+                    )}
+                    {showMCP && (
+                      <Tabs.Content value={SettingsTabValues.MCP} tabIndex={-1}>
+                        <MCPBuilderPanel />
                       </Tabs.Content>
                     )}
                     <Tabs.Content value={SettingsTabValues.ACCOUNT} tabIndex={-1}>
