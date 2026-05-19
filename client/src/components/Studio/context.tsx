@@ -41,11 +41,13 @@ type StudioAction =
   | { type: 'SET_ASPECT_RATIO'; payload: AspectRatio }
   | { type: 'SET_RESOLUTION'; payload: Resolution }
   | { type: 'ADD_REFERENCE'; payload: StudioReference }
+  | { type: 'UPDATE_REFERENCE'; payload: { id: string; patch: Partial<StudioReference> } }
   | { type: 'REMOVE_REFERENCE'; payload: string }
   | { type: 'SELECT_CREATION'; payload: StudioCreation | null }
   | { type: 'SET_MODE'; payload: StudioMode }
   | { type: 'ADD_CREATION'; payload: StudioCreation }
   | { type: 'UPDATE_CREATION'; payload: { id: string; creation: StudioCreation } }
+  | { type: 'REMOVE_CREATION'; payload: string }
   | { type: 'HYDRATE_CREATIONS'; payload: StudioCreation[] };
 
 function buildDefaultFormValues(useCaseId: StudioUseCase): Record<string, string | boolean> {
@@ -133,6 +135,14 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
       const updated = assignRefLabels([...state.references, action.payload]);
       return { ...state, references: updated };
     }
+    case 'UPDATE_REFERENCE': {
+      return {
+        ...state,
+        references: state.references.map((r) =>
+          r.id === action.payload.id ? { ...r, ...action.payload.patch } : r,
+        ),
+      };
+    }
     case 'REMOVE_REFERENCE': {
       const filtered = state.references.filter((r) => r.id !== action.payload);
       return { ...state, references: assignRefLabels(filtered) };
@@ -154,15 +164,31 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
           c.id === action.payload.id ? action.payload.creation : c,
         ),
       };
-    case 'HYDRATE_CREATIONS': {
-      const localOnly = state.creations.filter((c) => c.status === 'generating');
-      const serverIds = new Set(action.payload.map((c) => c.id));
+    case 'REMOVE_CREATION': {
+      const removedSelected = state.selectedCreation?.id === action.payload;
       return {
         ...state,
-        creations: [
-          ...localOnly.filter((c) => !serverIds.has(c.id)),
-          ...action.payload,
-        ],
+        creations: state.creations.filter((c) => c.id !== action.payload),
+        selectedCreation: removedSelected ? null : state.selectedCreation,
+        mode: removedSelected ? 'workspace' : state.mode,
+      };
+    }
+    case 'HYDRATE_CREATIONS': {
+      const serverIds = new Set(action.payload.map((c) => c.id));
+      // Once the server has its own generating row (it persists one up
+      // front now), it's the source of truth — drop client-only optimistic
+      // generating items so they don't show up twice.
+      const serverHasGenerating = action.payload.some(
+        (c) => c.status === 'generating',
+      );
+      const localOnly = serverHasGenerating
+        ? []
+        : state.creations.filter(
+            (c) => c.status === 'generating' && !serverIds.has(c.id),
+          );
+      return {
+        ...state,
+        creations: [...localOnly, ...action.payload],
       };
     }
     default:
@@ -216,7 +242,15 @@ export function useStudioDispatch() {
 
 export function useStudioHistory() {
   const dispatch = useStudioDispatch();
-  const { data } = useStudioCreationsQuery({ limit: 30 });
+  const { data } = useStudioCreationsQuery(
+    { limit: 30 },
+    {
+      // While a project is still generating (e.g. after a page refresh
+      // mid-generation), poll so it flips to done/error on its own.
+      refetchInterval: (d) =>
+        d?.items?.some((i) => i.status === 'generating') ? 4000 : false,
+    },
+  );
   useEffect(() => {
     if (data?.items) {
       dispatch({ type: 'HYDRATE_CREATIONS', payload: data.items });
@@ -242,6 +276,23 @@ export function useGenerateImages() {
   const localize = useLocalize();
 
   return useCallback(() => {
+    // A reference only reaches the backend once its upload finished and
+    // `fileId` is set. Guarding here turns the old silent-drop bug (refs=0
+    // sent while the user clearly attached an image) into actionable
+    // feedback instead of a broken generation.
+    const stillUploading = references.some(
+      (r) => r.previewUrl != null && !r.fileId && r.uploadStatus !== 'error',
+    );
+    const failedUploads = references.some((r) => r.uploadStatus === 'error');
+    if (stillUploading) {
+      showToast({ status: 'warning', message: localize('com_studio_refs_uploading') });
+      return;
+    }
+    if (failedUploads) {
+      showToast({ status: 'error', message: localize('com_studio_ref_upload_failed') });
+      return;
+    }
+
     const optimisticId = crypto.randomUUID();
     const optimistic: StudioCreation = {
       id: optimisticId,
@@ -258,6 +309,8 @@ export function useGenerateImages() {
       status: 'generating',
     };
     dispatch({ type: 'ADD_CREATION', payload: optimistic });
+    // Take the user to the in-progress project right away.
+    dispatch({ type: 'SELECT_CREATION', payload: optimistic });
 
     const referenceInputs: StudioReferenceInput[] = references
       .filter((r) => !!r.fileId)
@@ -282,12 +335,15 @@ export function useGenerateImages() {
       {
         onSuccess: (creation) => {
           dispatch({ type: 'UPDATE_CREATION', payload: { id: optimisticId, creation } });
+          dispatch({ type: 'SELECT_CREATION', payload: creation });
         },
         onError: () => {
+          const errored = { ...optimistic, status: 'error' as const };
           dispatch({
             type: 'UPDATE_CREATION',
-            payload: { id: optimisticId, creation: { ...optimistic, status: 'error' } },
+            payload: { id: optimisticId, creation: errored },
           });
+          dispatch({ type: 'SELECT_CREATION', payload: errored });
           showToast({ status: 'error', message: localize('com_studio_error_toast') });
         },
       },

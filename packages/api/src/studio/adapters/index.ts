@@ -41,11 +41,31 @@ const resolveKey = (explicit: string | undefined, ...envKeys: string[]): string 
   return '';
 };
 
+const resolveStudioKeys = (config: StudioAdaptersConfig) => ({
+  googleKey: resolveKey(config.googleApiKey, 'GEMINI_KEY', 'GOOGLE_KEY', 'GOOGLE_API_KEY'),
+  fluxKey: resolveKey(config.fluxApiKey, 'FLUX_API_KEY', 'BFL_API_KEY'),
+});
+
+/**
+ * Which models have a usable API key configured. The selector UI uses this so
+ * a model with no key is shown as unavailable instead of failing only at
+ * generation time (keys resolve to '' when unset — see resolveKey).
+ */
+export const getStudioModelAvailability = (
+  config: StudioAdaptersConfig = {},
+): Record<StudioModelId, boolean> => {
+  const { googleKey, fluxKey } = resolveStudioKeys(config);
+  return {
+    'flux-kontext': fluxKey !== '',
+    'nano-banana-2': googleKey !== '',
+    'nano-banana-pro': googleKey !== '',
+  };
+};
+
 export const createStudioAdapters = (
   config: StudioAdaptersConfig = {},
 ): Map<StudioModelId, StudioAdapter> => {
-  const googleKey = resolveKey(config.googleApiKey, 'GEMINI_KEY', 'GOOGLE_KEY', 'GOOGLE_API_KEY');
-  const fluxKey = resolveKey(config.fluxApiKey, 'FLUX_API_KEY', 'BFL_API_KEY');
+  const { googleKey, fluxKey } = resolveStudioKeys(config);
 
   const map = new Map<StudioModelId, StudioAdapter>();
   map.set('flux-kontext', new FluxKontextAdapter({ apiKey: fluxKey }));

@@ -1383,6 +1383,10 @@ export const studioEdit = (payload: t.TStudioEditRequest): Promise<t.StudioCreat
   return request.post(endpoints.studioEdit(), payload);
 };
 
+export const getStudioModels = (): Promise<t.TStudioModelsResponse> => {
+  return request.get(endpoints.studioModels());
+};
+
 export const getStudioCreation = (id: string): Promise<t.StudioCreation> => {
   return request.get(endpoints.studioCreation(id));
 };
@@ -1392,6 +1396,10 @@ export const getStudioCreations = (params: {
   limit?: number;
 }): Promise<t.TStudioCreationListResponse> => {
   return request.get(endpoints.studioCreations(params));
+};
+
+export const deleteStudioCreation = (id: string): Promise<void> => {
+  return request.delete(endpoints.studioCreation(id));
 };
 
 /* Feedback Entries (cannot_answer + thumbs down) */

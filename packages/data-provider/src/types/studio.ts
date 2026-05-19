@@ -23,6 +23,10 @@ export type ReferenceSlotType = 'style' | 'character' | 'image';
 
 export type StudioModel = 'flux-kontext' | 'nano-banana-2' | 'nano-banana-pro';
 
+export type TStudioModelsResponse = {
+  available: Record<StudioModel, boolean>;
+};
+
 export type StudioReference = {
   id: string;
   slotType: ReferenceSlotType;
@@ -31,6 +35,9 @@ export type StudioReference = {
   fileName: string | null;
   fileId?: string | null;
   slotId?: string;
+  /** Client-only: upload lifecycle of the reference image. The backend
+   * never sees this — a ref only reaches generate once `fileId` is set. */
+  uploadStatus?: 'uploading' | 'error';
 };
 
 export type StudioImageResult = {
@@ -124,6 +131,7 @@ export type TStudioEditRequest = {
   imageId: string;
   prompt: string;
   modelOverride?: StudioModel | null;
+  referenceFileIds?: string[];
 };
 
 export type TStudioCreationListResponse = {

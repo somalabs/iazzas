@@ -6,7 +6,7 @@ export interface IStudioImage {
   thumbnailUrl: string;
 }
 
-export interface IStudioCreation extends Omit<Document, 'model'> {
+export interface IStudioCreation extends Document {
   userId: Types.ObjectId;
   useCase: string;
   prompt: string;

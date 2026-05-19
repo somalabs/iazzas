@@ -1,7 +1,14 @@
 import { useState, memo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Menu from '@ariakit/react/menu';
-import { FileText, Image, LogOut, ShieldCheck, Workflow, CalendarClock } from 'lucide-react';
+import {
+  FileText,
+  LogOut,
+  ShieldCheck,
+  Workflow,
+  CalendarClock,
+  Image as ImageIcon,
+} from 'lucide-react';
 import { SystemRoles, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { LinkIcon, GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
 import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
@@ -98,6 +105,12 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           {localize('com_nav_settings')}
         </Menu.MenuItem>
         {canUseAgentStudio && (
+          <Menu.MenuItem onClick={() => navigate('/d/studio')} className="select-item text-sm">
+            <ImageIcon className="icon-md" aria-hidden="true" />
+            {localize('com_studio_image_nav')}
+          </Menu.MenuItem>
+        )}
+        {canUseAgentStudio && (
           <Menu.MenuItem
             onClick={() => navigate('/d/agent-studio')}
             className="select-item text-sm"
@@ -106,10 +119,6 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             {localize('com_studio_flow_nav')}
           </Menu.MenuItem>
         )}
-        <Menu.MenuItem onClick={() => navigate('/d/studio')} className="select-item text-sm">
-          <Image className="icon-md" aria-hidden="true" />
-          {localize('com_studio_image_nav')}
-        </Menu.MenuItem>
         {canUseAutomacoes && (
           <Menu.MenuItem onClick={() => navigate('/d/automacoes')} className="select-item text-sm">
             <CalendarClock className="icon-md" aria-hidden="true" />

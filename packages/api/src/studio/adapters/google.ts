@@ -8,6 +8,7 @@ import type {
   StudioModelId,
 } from '../types';
 import { AdapterRequestError } from '../types';
+import { generateConcurrently } from './runConcurrent';
 
 const PROXY_HOSTS = ['googleapis.com'];
 let proxyPatched = false;
@@ -85,6 +86,40 @@ export class GoogleImageAdapter implements StudioAdapter {
     return { responseModalities: ['TEXT', 'IMAGE'], imageConfig };
   }
 
+  private async generateSingle(
+    client: GeminiClient,
+    contents: unknown[],
+    config: Record<string, unknown>,
+  ): Promise<{ base64: string; mimeType: string }> {
+    let response: GeminiResponse;
+    try {
+      response = await client.models.generateContent({
+        model: this.modelName,
+        contents,
+        config,
+      });
+    } catch (err) {
+      throw new AdapterRequestError(this.model, `Gemini request failed: ${(err as Error).message}`);
+    }
+    const candidate = response.candidates?.[0];
+    if (candidate?.finishReason && BLOCKING_FINISH.has(candidate.finishReason)) {
+      // Deterministic content block — not worth a retry.
+      throw new AdapterRequestError(
+        this.model,
+        `Gemini blocked generation: ${candidate.finishReason}`,
+        false,
+      );
+    }
+    const part = candidate?.content?.parts?.find((p) => p.inlineData?.data);
+    if (!part?.inlineData?.data) {
+      throw new AdapterRequestError(this.model, 'Gemini returned no image data');
+    }
+    return {
+      base64: part.inlineData.data,
+      mimeType: part.inlineData.mimeType ?? 'image/png',
+    };
+  }
+
   async generate(input: AdapterGenerateInput): Promise<AdapterGenerateOutput> {
     ensureProxyPatch();
     const client = this.clientFactory(this.apiKey);
@@ -96,34 +131,9 @@ export class GoogleImageAdapter implements StudioAdapter {
     ];
     const config = this.buildConfig(input);
 
-    const images: { base64: string; mimeType: string }[] = [];
-    for (let i = 0; i < input.count; i++) {
-      let response: GeminiResponse;
-      try {
-        response = await client.models.generateContent({
-          model: this.modelName,
-          contents,
-          config,
-        });
-      } catch (err) {
-        throw new AdapterRequestError(this.model, `Gemini request failed: ${(err as Error).message}`);
-      }
-      const candidate = response.candidates?.[0];
-      if (candidate?.finishReason && BLOCKING_FINISH.has(candidate.finishReason)) {
-        throw new AdapterRequestError(
-          this.model,
-          `Gemini blocked generation: ${candidate.finishReason}`,
-        );
-      }
-      const part = candidate?.content?.parts?.find((p) => p.inlineData?.data);
-      if (!part?.inlineData?.data) {
-        throw new AdapterRequestError(this.model, 'Gemini returned no image data');
-      }
-      images.push({
-        base64: part.inlineData.data,
-        mimeType: part.inlineData.mimeType ?? 'image/png',
-      });
-    }
+    const images = await generateConcurrently(this.model, input.count, () =>
+      this.generateSingle(client, contents, config),
+    );
     return { images };
   }
 }
