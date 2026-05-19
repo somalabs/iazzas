@@ -51,12 +51,12 @@ export const createProviderOption = (provider: string) => ({
  */
 export const resolveDefaultProviderModel = (
   providers: Array<{ value: string }>,
-  models: Record<string, unknown>,
+  models: Record<string, string[] | boolean | undefined>,
 ): { provider: string; model: string } | null => {
   for (const { value } of providers) {
     const list = models[value];
     if (Array.isArray(list) && list.length > 0) {
-      return { provider: value, model: list[0] as string };
+      return { provider: value, model: list[0] };
     }
   }
   return null;
