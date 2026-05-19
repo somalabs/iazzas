@@ -15,7 +15,7 @@ import store from '~/store';
 const BalanceWidget = lazy(() => import('~/components/Nav/BalanceWidget'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
-const NewChatButton = memo(function NewChatButton() {
+const NewChatButton = memo(function NewChatButton({ onCollapse }: { onCollapse?: () => void }) {
   const localize = useLocalize();
   const queryClient = useQueryClient();
   const { newConversation } = useNewConvo();
@@ -30,8 +30,9 @@ const NewChatButton = memo(function NewChatButton() {
       clearMessagesCache(queryClient, conversation?.conversationId);
       queryClient.invalidateQueries([QueryKeys.messages]);
       newConversation();
+      onCollapse?.();
     },
-    [queryClient, conversation?.conversationId, newConversation],
+    [queryClient, conversation?.conversationId, newConversation, onCollapse],
   );
 
   return (
@@ -88,13 +89,13 @@ const NavIconButton = memo(function NavIconButton({
 
   return (
     <TooltipAnchor
-      description={(link.title ? localize(link.title) : '')}
+      description={link.title ? localize(link.title) : ''}
       side="right"
       render={
         <Button
           size="icon"
           variant="ghost"
-          aria-label={(link.title ? localize(link.title) : '')}
+          aria-label={link.title ? localize(link.title) : ''}
           aria-pressed={isActive}
           className={cn(
             'h-9 w-9 rounded-lg',
@@ -109,7 +110,13 @@ const NavIconButton = memo(function NavIconButton({
   );
 });
 
-const NavRouteButton = memo(function NavRouteButton({ link }: { link: NavLink }) {
+const NavRouteButton = memo(function NavRouteButton({
+  link,
+  onCollapse,
+}: {
+  link: NavLink;
+  onCollapse?: () => void;
+}) {
   const localize = useLocalize();
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,13 +124,13 @@ const NavRouteButton = memo(function NavRouteButton({ link }: { link: NavLink })
 
   return (
     <TooltipAnchor
-      description={(link.title ? localize(link.title) : '')}
+      description={link.title ? localize(link.title) : ''}
       side="right"
       render={
         <Button
           size="icon"
           variant="ghost"
-          aria-label={(link.title ? localize(link.title) : '')}
+          aria-label={link.title ? localize(link.title) : ''}
           aria-current={isNavActive ? 'page' : undefined}
           className={cn(
             'h-9 w-9 rounded-lg',
@@ -131,7 +138,10 @@ const NavRouteButton = memo(function NavRouteButton({ link }: { link: NavLink })
               ? 'bg-surface-active-alt text-text-primary'
               : 'text-text-secondary hover:bg-surface-hover',
           )}
-          onClick={() => navigate(link.href!)}
+          onClick={() => {
+            navigate(link.href!);
+            onCollapse?.();
+          }}
         >
           {link.icon && <link.icon className="h-4 w-4" aria-hidden="true" />}
         </Button>
@@ -181,7 +191,7 @@ function ExpandedPanel({
           </Button>
         }
       />
-      <NewChatButton />
+      <NewChatButton onCollapse={onCollapse} />
       <div className="flex flex-col gap-1 overflow-y-auto">
         {links.map((link) => {
           if (link.adminOnly && !isAdmin) {
@@ -198,7 +208,7 @@ function ExpandedPanel({
             );
           }
           if (link.href) {
-            return <NavRouteButton key={link.id} link={link} />;
+            return <NavRouteButton key={link.id} link={link} onCollapse={onCollapse} />;
           }
           return (
             <NavIconButton

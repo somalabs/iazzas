@@ -94,11 +94,11 @@ export const router = createBrowserRouter(
             },
           ],
         },
-        dashboardRoutes,
         {
           path: '/',
           element: <Root />,
           children: [
+            dashboardRoutes,
             {
               index: true,
               element: <Navigate to="/c/new" replace={true} />,

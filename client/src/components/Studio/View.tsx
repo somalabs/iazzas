@@ -37,7 +37,7 @@ export default function StudioView() {
   const isDetail = mode === 'detail' || mode === 'editing';
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-surface-primary">
+    <div className="flex h-full w-full overflow-hidden bg-surface-primary">
       {/* Overlay for mobile */}
       {isMobile && panelOpen && (
         <div
@@ -80,11 +80,15 @@ export default function StudioView() {
             type="button"
             onClick={togglePanel}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover"
-            aria-label={panelOpen ? localize('com_studio_close_sidebar') : localize('com_studio_open_sidebar')}
+            aria-label={
+              panelOpen ? localize('com_studio_close_sidebar') : localize('com_studio_open_sidebar')
+            }
             aria-expanded={panelOpen}
             aria-controls="studio-panel"
           >
-            <PanelLeftOpen className={cn('h-4 w-4 transition-transform', panelOpen && 'rotate-180')} />
+            <PanelLeftOpen
+              className={cn('h-4 w-4 transition-transform', panelOpen && 'rotate-180')}
+            />
           </button>
           <h1 className="font-editorial text-sm font-semibold text-text-primary">
             {localize('com_studio_title')}
@@ -92,9 +96,7 @@ export default function StudioView() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          {isDetail ? <ImageDetail /> : <Workspace />}
-        </div>
+        <div className="flex-1 overflow-hidden">{isDetail ? <ImageDetail /> : <Workspace />}</div>
       </div>
     </div>
   );
