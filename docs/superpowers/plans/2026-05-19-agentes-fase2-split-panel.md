@@ -56,11 +56,11 @@
 **Files:**
 - Modify: `client/src/locales/en/translation.json` (after line 1795, after `"com_ui_ux_flows_canvas"`)
 
-> CI validates that every key in the JSON is referenced in code. These 8 keys will be referenced in Tasks 3–9. Add them all now so you don't have to touch this file again.
+> **CI constraint:** a key committed to the JSON without a code reference causes CI to fail immediately. **Do NOT commit this file alone.** The commit for this task must be folded into the first task that references the keys — which is Task 3 (DragHandle references `com_ui_ux_resize_panels`). Commit `translation.json` together with `DragHandle.tsx` in Task 3's commit. The remaining keys will be referenced in Tasks 4, 5, 7, and 9 — all committed in the same task as the component that references them.
 
 - [ ] **Step 1: Open the file and find insertion point**
 
-Search for `"com_ui_ux_flows_canvas"` — it's the last `com_ui_ux_` key (~line 1795). Insert the 8 new keys immediately after it, preserving JSON comma syntax.
+Search for `"com_ui_ux_flows_canvas"` — it's the last `com_ui_ux_` key (~line 1795). Insert the 9 new keys immediately after it, preserving JSON comma syntax.
 
 - [ ] **Step 2: Add keys**
 
@@ -69,11 +69,14 @@ Search for `"com_ui_ux_flows_canvas"` — it's the last `com_ui_ux_` key (~line 
 "com_ui_ux_construir_agente": "🛠 Construir",
 "com_ui_ux_conversar_tab": "Conversar",
 "com_ui_ux_fase3_badge": "Fase 3",
+"com_ui_ux_nav_agentes": "Agentes",
 "com_ui_ux_publicar_agente": "Publicar",
 "com_ui_ux_rascunho_efemero": "Rascunho efêmero — não salvo",
 "com_ui_ux_resize_panels": "Redimensionar painéis",
 "com_ui_ux_testar_rascunho": "💬 Testar",
 ```
+
+> `com_ui_ux_nav_agentes` is used by `AgentesView` (Task 9). It was missing from the original list.
 
 - [ ] **Step 3: Verify JSON is valid**
 
@@ -83,11 +86,12 @@ node -e "require('./client/src/locales/en/translation.json')" && echo "JSON OK"
 
 Expected: `JSON OK`
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Do NOT commit yet**
+
+Stage the file but do not commit. Task 3 will commit it together with `DragHandle.tsx`:
 
 ```bash
 git add client/src/locales/en/translation.json
-git commit -m "feat(agentes-fase2): i18n keys — split panel, testar, publicar"
 ```
 
 ---
@@ -384,11 +388,11 @@ npx jest --config client/jest.config.cjs client/src/components/Agentes/__tests__
 
 Expected: 3 tests pass.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Commit (includes translation.json staged in Task 1)**
 
 ```bash
 git add client/src/components/Agentes/DragHandle.tsx client/src/components/Agentes/__tests__/DragHandle.spec.tsx
-git commit -m "feat(agentes-fase2): DragHandle — divisor arrastável com mouse events"
+git commit -m "feat(agentes-fase2): DragHandle + i18n keys — divisor arrastável com mouse events"
 ```
 
 ---
@@ -477,7 +481,7 @@ Expected: FAIL — `../AgentesLayout` not found.
 Create `client/src/components/Agentes/AgentesLayout.tsx`:
 
 ```tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import DragHandle from './DragHandle';
@@ -491,7 +495,15 @@ export default function AgentesLayout({ left, right }: AgentesLayoutProps) {
   const localize = useLocalize();
   const [leftPct, setLeftPct] = useState(40);
   const [activeTab, setActiveTab] = useState<'config' | 'chat'>('config');
-  const isDesktop = window.innerWidth >= 768;
+  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 768);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsDesktop(window.innerWidth >= 768);
+    }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   function onDrag(clientX: number) {
     const pct = (clientX / window.innerWidth) * 100;
@@ -1043,6 +1055,16 @@ This is the most complex task. `PreviewChatView` adapts `ChatView` to:
 - `client/src/components/Chat/ChatView.tsx` — the original (80 lines visible earlier; read the rest with `Read` from line 80)
 - `client/src/hooks/Chat/useChatHelpers.ts` — understand the `paramId` + `conversationId` interplay
 
+- [ ] **Step 0: Validate PREVIEW_CHAT_INDEX = 1 is free**
+
+Before assuming index 1 is available, verify no other component claims it:
+
+```bash
+grep -rn "index.*[^0-9]1[^0-9]\|paramId.*1\b\|chatIndex.*1\b\|CHAT_INDEX" client/src --include="*.tsx" --include="*.ts" | grep -v "test\|spec\|__tests__" | grep -v "node_modules"
+```
+
+Look for any `useChatHelpers(1, ...)` or `submissionByIndex(1)` calls outside this file. If any exist, change `PREVIEW_CHAT_INDEX` to `2` (or higher) to avoid collision.
+
 - [ ] **Step 1: Read the rest of ChatView.tsx**
 
 ```bash
@@ -1128,6 +1150,52 @@ describe('PreviewChatView', () => {
       ),
     ).not.toThrow();
   });
+
+  it('calls onConversationCreated when recoil conversation transitions from "new" to a real id', async () => {
+    // Simulate the hook returning a real convo id after first message
+    let simulatedConvoId = 'new';
+    const mockSetConversation = jest.fn();
+
+    // Override the mock to return a dynamic conversationId
+    jest.mocked(
+      (await import('~/hooks/Chat/useChatHelpers')).default,
+    ).mockImplementation(() => ({
+      conversation: { conversationId: simulatedConvoId, endpoint: null, model: null },
+      setConversation: mockSetConversation,
+      getMessages: jest.fn(),
+      setMessages: jest.fn(),
+      isSubmitting: false,
+      ask: jest.fn(),
+      regenerate: jest.fn(),
+      stopGenerating: jest.fn(),
+      latestMessage: null,
+      setLatestMessage: jest.fn(),
+    }));
+
+    const onConversationCreated = jest.fn();
+    const { rerender } = render(
+      <PreviewChatView
+        conversationId={null}
+        draftParams={draftParams}
+        onConversationCreated={onConversationCreated}
+      />,
+      { wrapper: Wrapper },
+    );
+
+    // Simulate backend assigning a real conversation id
+    simulatedConvoId = 'convo-abc-123';
+    rerender(
+      <PreviewChatView
+        conversationId={null}
+        draftParams={draftParams}
+        onConversationCreated={onConversationCreated}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(onConversationCreated).toHaveBeenCalledWith('convo-abc-123');
+    });
+  });
 });
 ```
 
@@ -1190,9 +1258,12 @@ export default function PreviewChatView({
   const chatHelpers = useChatHelpers(PREVIEW_CHAT_INDEX, activeConvoId);
   const addedChatHelpers = useAddedResponse();
 
+  // Destructure to get stable reference for dep array
+  const { setConversation } = chatHelpers;
+
   // Sync draftParams → conversation atom (ephemeral agent config)
   useEffect(() => {
-    chatHelpers.setConversation((prev) => ({
+    setConversation((prev) => ({
       ...prev,
       endpoint: draftParams.provider || prev?.endpoint,
       model: draftParams.model || prev?.model,
@@ -1213,6 +1284,7 @@ export default function PreviewChatView({
     draftParams.fileSearch,
     draftParams.executeCode,
     draftParams.mcpServers,
+    setConversation,
   ]);
 
   // When a new conversation is created (first message sent), capture the ID
@@ -1226,7 +1298,7 @@ export default function PreviewChatView({
       setActiveConvoId(recoilConvoId);
       onConversationCreated(recoilConvoId);
     }
-  }, [recoilConvoId]);
+  }, [recoilConvoId, activeConvoId, onConversationCreated]);
 
   useAdaptiveSSE(rootSubmission, chatHelpers, false, PREVIEW_CHAT_INDEX);
 
@@ -1321,7 +1393,6 @@ import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('~/hooks', () => ({
   useLocalize: () => (key: string) => key,
-  useAgentsAccessRedirect: () => true,
 }));
 jest.mock('~/hooks/Agents', () => ({
   useAgentsAccessRedirect: () => true,
