@@ -179,11 +179,15 @@ export const tokenValues: Record<string, { prompt: number; completion: number }>
     'gemini-2.5-flash': { prompt: 0.3, completion: 2.5 },
     'gemini-2.5-flash-lite': { prompt: 0.1, completion: 0.4 },
     'gemini-2.5-pro': { prompt: 1.25, completion: 10 },
-    'gemini-2.5-flash-image': { prompt: 0.15, completion: 30 },
-    'gemini-3': { prompt: 2, completion: 12 },
+    'gemini-2.5-flash-image': { prompt: 0.3, completion: 30 },
+    'gemini-3': { prompt: 0.5, completion: 3 },
+    'gemini-3-flash': { prompt: 0.5, completion: 3 },
     'gemini-3-pro-image': { prompt: 2, completion: 120 },
     'gemini-3.1': { prompt: 2, completion: 12 },
+    'gemini-3.1-pro': { prompt: 2, completion: 12 },
     'gemini-3.1-flash-lite': { prompt: 0.25, completion: 1.5 },
+    'gemini-3.1-flash-image': { prompt: 0.5, completion: 60 },
+    'gemini-3.1-flash-live': { prompt: 0.75, completion: 4.5 },
     'gemini-pro-vision': { prompt: 0.5, completion: 1.5 },
     grok: { prompt: 2.0, completion: 10.0 },
     'grok-beta': { prompt: 5.0, completion: 15.0 },
@@ -336,7 +340,9 @@ export const premiumTokenValues: Record<
 > = {
   'claude-opus-4-6': { threshold: 200000, prompt: 10, completion: 37.5 },
   'claude-sonnet-4-6': { threshold: 200000, prompt: 6, completion: 22.5 },
+  'gemini-2.5-pro': { threshold: 200000, prompt: 2.5, completion: 15 },
   'gemini-3.1': { threshold: 200000, prompt: 4, completion: 18 },
+  'gemini-3.1-pro': { threshold: 200000, prompt: 4, completion: 18 },
 };
 
 export function createTxMethods(_mongoose: typeof import('mongoose'), txDeps: TxDeps) {
