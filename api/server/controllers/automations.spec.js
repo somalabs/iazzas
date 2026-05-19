@@ -121,4 +121,46 @@ describe('automations controller', () => {
     await ctrl.listAutomations(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
   });
+
+  describe('owner isolation (bug #2 — cross-user leak / IDOR)', () => {
+    it('list: scopes the query by the requester as createdBy', async () => {
+      repo.listAutomations.mockResolvedValue([]);
+      const req = { user, query: {} };
+      await ctrl.listAutomations(req, mockRes());
+      expect(repo.listAutomations).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantId: 't1', createdBy: 'u1' }),
+      );
+    });
+
+    it('get: scopes the lookup by createdBy (other user → 404)', async () => {
+      repo.getAutomation.mockResolvedValue(null);
+      const req = { user, params: { id: 'someoneElses' } };
+      const res = mockRes();
+      await ctrl.getAutomation(req, res);
+      expect(repo.getAutomation).toHaveBeenCalledWith(
+        expect.objectContaining({ createdBy: 'u1', id: 'someoneElses' }),
+      );
+      expect(res.status).toHaveBeenCalledWith(404);
+    });
+
+    it('delete: scopes the delete by createdBy (cannot delete others)', async () => {
+      repo.deleteAutomation.mockResolvedValue(false);
+      const req = { user, params: { id: 'someoneElses' } };
+      const res = mockRes();
+      await ctrl.deleteAutomation(req, res);
+      expect(repo.deleteAutomation).toHaveBeenCalledWith(
+        expect.objectContaining({ createdBy: 'u1', id: 'someoneElses' }),
+      );
+      expect(res.status).toHaveBeenCalledWith(404);
+    });
+
+    it('runNow: scopes the lookup by createdBy', async () => {
+      repo.getAutomation.mockResolvedValue(null);
+      const req = { user, params: { id: 'someoneElses' }, body: {} };
+      const res = mockRes();
+      await ctrl.runNow(req, res);
+      expect(repo.getAutomation).toHaveBeenCalledWith(expect.objectContaining({ createdBy: 'u1' }));
+      expect(res.status).toHaveBeenCalledWith(404);
+    });
+  });
 });
