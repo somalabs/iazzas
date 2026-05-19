@@ -90,8 +90,12 @@ const dashboardRoutes = {
       ],
     },
     {
-      path: 'agent-studio',
+      path: 'flows',
       element: <AgentStudioView />,
+    },
+    {
+      path: 'agent-studio',
+      element: <Navigate to="/d/flows" replace={true} />,
     },
     {
       path: 'automacoes',

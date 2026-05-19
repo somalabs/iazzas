@@ -29,7 +29,7 @@ export default function useUnifiedSidebarLinks() {
         description: 'com_ui_ux_rail_flows_desc',
         icon: GitFork,
         id: 'nav-flows',
-        href: '/d/agent-studio',
+        href: '/d/flows',
       },
       {
         title: 'com_ui_ux_nav_automacoes',
