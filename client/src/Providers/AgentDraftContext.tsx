@@ -22,7 +22,7 @@ const defaultDraftParams: AgentDraftParams = {
 
 type AgentDraftContextValue = {
   draftParams: AgentDraftParams;
-  setDraftParams: (params: AgentDraftParams) => void;
+  setDraftParams: React.Dispatch<React.SetStateAction<AgentDraftParams>>;
 };
 
 const AgentDraftContext = createContext<AgentDraftContextValue | null>(null);
