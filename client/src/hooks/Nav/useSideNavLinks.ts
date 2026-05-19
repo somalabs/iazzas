@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Blocks, MCPIcon, AttachmentIcon } from '@librechat/client';
-import { Database, Bookmark, Settings2, ArrowRightToLine, MessageSquareQuote } from 'lucide-react';
+import { Blocks, MCPIcon } from '@librechat/client';
+import { Bookmark, Settings2, ArrowRightToLine } from 'lucide-react';
 import {
   Permissions,
   EModelEndpoint,
@@ -16,10 +16,7 @@ import AgentPanelSwitch from '~/components/SidePanel/Agents/AgentPanelSwitch';
 import BookmarkPanel from '~/components/SidePanel/Bookmarks/BookmarkPanel';
 import PanelSwitch from '~/components/SidePanel/Builder/PanelSwitch';
 import Parameters from '~/components/SidePanel/Parameters/Panel';
-import { MemoryPanel } from '~/components/SidePanel/Memories';
-import FilesPanel from '~/components/SidePanel/Files/Panel';
 import { useHasAccess, useMCPServerManager } from '~/hooks';
-import { PromptsAccordion } from '~/components/Prompts';
 
 export default function useSideNavLinks({
   hidePanel,
@@ -38,21 +35,9 @@ export default function useSideNavLinks({
   endpointsConfig: TEndpointsConfig;
   includeHidePanel?: boolean;
 }) {
-  const hasAccessToPrompts = useHasAccess({
-    permissionType: PermissionTypes.PROMPTS,
-    permission: Permissions.USE,
-  });
   const hasAccessToBookmarks = useHasAccess({
     permissionType: PermissionTypes.BOOKMARKS,
     permission: Permissions.USE,
-  });
-  const hasAccessToMemories = useHasAccess({
-    permissionType: PermissionTypes.MEMORIES,
-    permission: Permissions.USE,
-  });
-  const hasAccessToReadMemories = useHasAccess({
-    permissionType: PermissionTypes.MEMORIES,
-    permission: Permissions.READ,
   });
   const hasAccessToAgents = useHasAccess({
     permissionType: PermissionTypes.AGENTS,
@@ -108,26 +93,6 @@ export default function useSideNavLinks({
       });
     }
 
-    if (hasAccessToPrompts) {
-      links.push({
-        title: 'com_ui_prompts',
-        label: '',
-        icon: MessageSquareQuote,
-        id: 'prompts',
-        Component: PromptsAccordion,
-      });
-    }
-
-    if (hasAccessToMemories && hasAccessToReadMemories) {
-      links.push({
-        title: 'com_ui_memories',
-        label: '',
-        icon: Database,
-        id: 'memories',
-        Component: MemoryPanel,
-      });
-    }
-
     if (
       interfaceConfig.parameters === true &&
       isParamEndpoint(endpoint ?? '', endpointType ?? '') === true &&
@@ -142,14 +107,6 @@ export default function useSideNavLinks({
         Component: Parameters,
       });
     }
-
-    links.push({
-      title: 'com_sidepanel_attach_files',
-      label: '',
-      icon: AttachmentIcon,
-      id: 'files',
-      Component: FilesPanel,
-    });
 
     if (hasAccessToBookmarks) {
       links.push({
@@ -191,9 +148,6 @@ export default function useSideNavLinks({
     keyProvided,
     hasAccessToAgents,
     hasAccessToCreateAgents,
-    hasAccessToPrompts,
-    hasAccessToMemories,
-    hasAccessToReadMemories,
     interfaceConfig.parameters,
     endpointType,
     hasAccessToBookmarks,

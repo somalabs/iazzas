@@ -1,28 +1,11 @@
 import React, { useState, useRef } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { SettingsTabValues } from 'librechat-data-provider';
-import { MessageSquare, Command, DollarSign } from 'lucide-react';
+import { MessageSquare, DollarSign } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import {
-  GearIcon,
-  DataIcon,
-  UserIcon,
-  SpeechIcon,
-  useMediaQuery,
-  PersonalizationIcon,
-} from '@librechat/client';
+import { GearIcon, DataIcon, UserIcon, useMediaQuery } from '@librechat/client';
 import type { TDialogProps } from '~/common';
-import {
-  General,
-  Chat,
-  Commands,
-  Speech,
-  Personalization,
-  Data,
-  Balance,
-  Account,
-} from './SettingsTabs';
-import usePersonalizationAccess from '~/hooks/usePersonalizationAccess';
+import { General, Chat, Data, Balance, Account } from './SettingsTabs';
 import { useLocalize, TranslationKeys } from '~/hooks';
 import { useGetStartupConfig } from '~/data-provider';
 import { cn } from '~/utils';
@@ -37,15 +20,11 @@ export default function Settings({
   const localize = useLocalize();
   const [activeTab, setActiveTab] = useState(initialTab ?? SettingsTabValues.GENERAL);
   const tabRefs = useRef({});
-  const { hasAnyPersonalizationFeature, hasMemoryOptOut } = usePersonalizationAccess();
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const tabs: SettingsTabValues[] = [
       SettingsTabValues.GENERAL,
       SettingsTabValues.CHAT,
-      SettingsTabValues.COMMANDS,
-      SettingsTabValues.SPEECH,
-      ...(hasAnyPersonalizationFeature ? [SettingsTabValues.PERSONALIZATION] : []),
       SettingsTabValues.DATA,
       ...(startupConfig?.balance?.enabled ? [SettingsTabValues.BALANCE] : []),
       SettingsTabValues.ACCOUNT,
@@ -87,25 +66,6 @@ export default function Settings({
       icon: <MessageSquare className="icon-sm" aria-hidden="true" />,
       label: 'com_nav_setting_chat',
     },
-    {
-      value: SettingsTabValues.COMMANDS,
-      icon: <Command className="icon-sm" aria-hidden="true" />,
-      label: 'com_nav_commands',
-    },
-    {
-      value: SettingsTabValues.SPEECH,
-      icon: <SpeechIcon className="icon-sm" aria-hidden="true" />,
-      label: 'com_nav_setting_speech',
-    },
-    ...(hasAnyPersonalizationFeature
-      ? [
-          {
-            value: SettingsTabValues.PERSONALIZATION,
-            icon: <PersonalizationIcon />,
-            label: 'com_nav_setting_personalization' as TranslationKeys,
-          },
-        ]
-      : []),
     {
       value: SettingsTabValues.DATA,
       icon: <DataIcon />,
@@ -230,20 +190,6 @@ export default function Settings({
                     <Tabs.Content value={SettingsTabValues.CHAT} tabIndex={-1}>
                       <Chat />
                     </Tabs.Content>
-                    <Tabs.Content value={SettingsTabValues.COMMANDS} tabIndex={-1}>
-                      <Commands />
-                    </Tabs.Content>
-                    <Tabs.Content value={SettingsTabValues.SPEECH} tabIndex={-1}>
-                      <Speech />
-                    </Tabs.Content>
-                    {hasAnyPersonalizationFeature && (
-                      <Tabs.Content value={SettingsTabValues.PERSONALIZATION} tabIndex={-1}>
-                        <Personalization
-                          hasMemoryOptOut={hasMemoryOptOut}
-                          hasAnyPersonalizationFeature={hasAnyPersonalizationFeature}
-                        />
-                      </Tabs.Content>
-                    )}
                     <Tabs.Content value={SettingsTabValues.DATA} tabIndex={-1}>
                       <Data />
                     </Tabs.Content>

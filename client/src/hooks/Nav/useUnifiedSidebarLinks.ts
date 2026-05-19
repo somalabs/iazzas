@@ -91,7 +91,13 @@ export default function useUnifiedSidebarLinks() {
       },
     ];
 
-    return [...destinationLinks, conversationLink, ...sideNavLinks, ...adminGroup];
+    return [
+      conversationLink,
+      { id: 'sep-0', separator: true },
+      ...destinationLinks,
+      ...sideNavLinks,
+      ...adminGroup,
+    ];
   }, [sideNavLinks]);
 
   return links;

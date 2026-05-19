@@ -1,10 +1,9 @@
 import { useState, memo, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import * as Menu from '@ariakit/react/menu';
-import { FileText, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { SettingsTabValues } from 'librechat-data-provider';
-import { LinkIcon, GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
-import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
+import { GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { openSettingsTabAtom } from '~/store/settingsTab';
 import { useAuthContext } from '~/hooks/AuthContext';
@@ -20,7 +19,6 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
     enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
   });
   const [showSettings, setShowSettings] = useState(false);
-  const [showFiles, setShowFiles] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTabValues | undefined>(undefined);
   const [requestedTab, setRequestedTab] = useAtom(openSettingsTabAtom);
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null);
@@ -76,24 +74,10 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
         {startupConfig?.balance?.enabled === true && balanceQuery.data != null && (
           <>
             <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
-              {localize('com_nav_balance')}:{' '}
-              {formatDisplayCredits(balanceQuery.data.tokenCredits)}
+              {localize('com_nav_balance')}: {formatDisplayCredits(balanceQuery.data.tokenCredits)}
             </div>
             <DropdownMenuSeparator />
           </>
-        )}
-        <Menu.MenuItem onClick={() => setShowFiles(true)} className="select-item text-sm">
-          <FileText className="icon-md" aria-hidden="true" />
-          {localize('com_nav_my_files')}
-        </Menu.MenuItem>
-        {startupConfig?.helpAndFaqURL !== '/' && (
-          <Menu.MenuItem
-            onClick={() => window.open(startupConfig?.helpAndFaqURL, '_blank')}
-            className="select-item text-sm"
-          >
-            <LinkIcon aria-hidden="true" />
-            {localize('com_nav_help_faq')}
-          </Menu.MenuItem>
         )}
         <Menu.MenuItem
           onClick={() => {
@@ -111,13 +95,6 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           {localize('com_nav_log_out')}
         </Menu.MenuItem>
       </Menu.Menu>
-      {showFiles && (
-        <MyFilesModal
-          open={showFiles}
-          onOpenChange={setShowFiles}
-          triggerRef={accountSettingsButtonRef}
-        />
-      )}
       {showSettings && (
         <Settings open={showSettings} onOpenChange={setShowSettings} initialTab={settingsTab} />
       )}
