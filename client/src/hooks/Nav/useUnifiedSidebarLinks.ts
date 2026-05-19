@@ -77,11 +77,11 @@ export default function useUnifiedSidebarLinks() {
         id: 'nav-automacoes',
         href: '/d/automacoes',
       },
-      { title: 'com_ui_ux_nav_studio_imagens', id: 'sep-1', separator: true },
+      { id: 'sep-1', separator: true },
     ];
 
     const adminGroup: NavLink[] = [
-      { title: 'com_ui_ux_nav_studio_imagens', id: 'sep-2', separator: true, adminOnly: true },
+      { id: 'sep-2', separator: true, adminOnly: true },
       {
         title: 'com_admin_panel',
         icon: ShieldCheck,

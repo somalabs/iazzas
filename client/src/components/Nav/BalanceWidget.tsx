@@ -4,7 +4,7 @@ import { useSetAtom } from 'jotai';
 import { SettingsTabValues } from 'librechat-data-provider';
 import { Skeleton, TooltipAnchor } from '@librechat/client';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
-import { formatDisplayCredits, getCycleInfo } from '~/utils/credits';
+import { getCycleInfo } from '~/utils/credits';
 import { openSettingsTabAtom } from '~/store/settingsTab';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { useLocalize } from '~/hooks';
@@ -59,28 +59,25 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
   }
 
   const balance = balanceQuery.data;
-  const formattedCredits = formatDisplayCredits(balance.tokenCredits);
-  const { pct, colorState, hoursUntilRenewal, displayCeiling, hasCycle } =
-    getCycleInfo(balance);
+  const { pct, colorState, hoursUntilRenewal, hasCycle } = getCycleInfo(balance);
   const iconColor = ICON_COLOR[colorState];
   const barColor = BAR_COLOR[colorState];
-  const ceiling =
-    displayCeiling != null ? new Intl.NumberFormat().format(displayCeiling) : null;
   const renewalText =
     hoursUntilRenewal != null
       ? `${localize('com_ui_ux_balance_renova')} (${localize('com_ui_ux_balance_renova_em')} ${hoursUntilRenewal}h)`
       : null;
+  // Claude-style: surface the cycle as a clean label + progress, never the raw
+  // internal credit number (the user sees usage, not the $-proxy ledger).
+  const usageLabel = localize('com_ui_ux_balance_cycle');
 
-  const ariaLabel =
-    hasCycle && ceiling
-      ? `${formattedCredits} ${localize('com_ui_ux_balance_de')} ${ceiling} ${localize('com_ui_ux_balance_creditos')}${renewalText ? ` · ${renewalText}` : ''}`
-      : `${localize('com_nav_balance')}: ${formattedCredits}`;
+  const ariaLabel = hasCycle
+    ? `${usageLabel} ${pct}%${renewalText ? ` · ${renewalText}` : ''}`
+    : localize('com_nav_balance');
 
   if (collapsed) {
-    const tooltip =
-      hasCycle && ceiling
-        ? `${formattedCredits} / ${ceiling} ${localize('com_ui_ux_balance_creditos')}${renewalText ? ` · ${renewalText}` : ''}`
-        : `${localize('com_nav_balance')}: ${formattedCredits}`;
+    const tooltip = hasCycle
+      ? `${usageLabel} ${pct}%${renewalText ? ` · ${renewalText}` : ''}`
+      : localize('com_nav_balance');
 
     return (
       <TooltipAnchor
@@ -146,9 +143,7 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
       <Coins size={14} className={cn('flex-shrink-0', iconColor)} aria-hidden="true" />
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="truncate font-medium text-text-primary">
-          {hasCycle && ceiling
-            ? `${formattedCredits} / ${ceiling} ${localize('com_ui_ux_balance_creditos')}`
-            : `${formattedCredits} ${localize('com_ui_ux_balance_creditos')}`}
+          {hasCycle ? usageLabel : localize('com_nav_balance')}
         </span>
         {hasCycle && (
           <div className="flex items-center gap-1.5">

@@ -88,13 +88,13 @@ const NavIconButton = memo(function NavIconButton({
 
   return (
     <TooltipAnchor
-      description={localize(link.title)}
+      description={(link.title ? localize(link.title) : '')}
       side="right"
       render={
         <Button
           size="icon"
           variant="ghost"
-          aria-label={localize(link.title)}
+          aria-label={(link.title ? localize(link.title) : '')}
           aria-pressed={isActive}
           className={cn(
             'h-9 w-9 rounded-lg',
@@ -117,13 +117,13 @@ const NavRouteButton = memo(function NavRouteButton({ link }: { link: NavLink })
 
   return (
     <TooltipAnchor
-      description={localize(link.title)}
+      description={(link.title ? localize(link.title) : '')}
       side="right"
       render={
         <Button
           size="icon"
           variant="ghost"
-          aria-label={localize(link.title)}
+          aria-label={(link.title ? localize(link.title) : '')}
           aria-current={isNavActive ? 'page' : undefined}
           className={cn(
             'h-9 w-9 rounded-lg',

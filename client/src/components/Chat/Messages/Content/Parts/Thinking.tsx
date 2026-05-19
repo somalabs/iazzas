@@ -246,7 +246,7 @@ export const FloatingThinkingBar = memo(
  *
  * For modern structured content (agents/assistants), see Reasoning.tsx component.
  */
-const Thinking: React.ElementType = memo(({ children }: { children: React.ReactNode }) => {
+const Thinking = memo(({ children }: { children: React.ReactNode }) => {
   const localize = useLocalize();
   const showThinking = useAtomValue(showThinkingAtom);
   const [isExpanded, setIsExpanded] = useState(showThinking);
