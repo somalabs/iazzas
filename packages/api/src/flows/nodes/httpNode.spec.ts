@@ -6,7 +6,7 @@ const node = (data: object): FlowNode => ({
   id: 'h1',
   type: 'http',
   position: { x: 0, y: 0 },
-  data: { type: 'http', headers: [], timeout: 5000, ...data } as FlowNode['data'],
+  data: { type: 'http', headers: [], timeout: 5000, ...data } as unknown as FlowNode['data'],
 });
 
 const baseLogger = { warn: () => {}, error: () => {} };

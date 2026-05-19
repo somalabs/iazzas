@@ -41,6 +41,21 @@ jobs:
           # Extract all keys from the JSON file
           KEYS=$(jq -r 'keys[]' "$I18N_FILE")
 
+          # Structural fix: i18n keys are frequently completed dynamically, e.g.
+          #   localize(`com_studio_flow_run_error_${code}`)
+          #   localize('com_error_' + errorType)
+          # A literal grep for the full key then yields false positives, which is
+          # why this workflow historically needed a hardcoded special-case per
+          # feature. Instead, derive the set of dynamic key *prefixes* directly
+          # from the source once, and treat any key starting with one of them as
+          # used. New dynamic-key features are then covered automatically.
+          DYNAMIC_PREFIXES=$(grep -rhoE --include=\*.{js,jsx,ts,tsx} \
+              -e '`com_[a-zA-Z0-9_]*\$\{' \
+              -e "['\"]com_[a-zA-Z0-9_]*['\"][[:space:]]*\+" \
+              "${SOURCE_DIRS[@]}" 2>/dev/null \
+            | sed -E "s/.*[\`'\"](com_[a-zA-Z0-9_]*)(\\\$\{|['\"]).*/\1/" \
+            | sort -u)
+
           # Track unused keys
           UNUSED_KEYS=()
 
@@ -101,7 +116,18 @@ jobs:
                 fi
               done
             fi
-          
+
+            # Generic dynamic-key fallback: a key completed via a template
+            # literal / string concat (prefix derived from source above).
+            if [[ "$FOUND" == false ]]; then
+              for PREFIX in $DYNAMIC_PREFIXES; do
+                if [[ "$KEY" == "$PREFIX"* && "$KEY" != "$PREFIX" ]]; then
+                  FOUND=true
+                  break
+                fi
+              done
+            fi
+
             if [[ "$FOUND" == false ]]; then
               UNUSED_KEYS+=("$KEY")
             fi

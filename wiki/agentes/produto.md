@@ -2,7 +2,7 @@
 
 > Atualizado em: 2026-05-18
 > Escopo: fork LibreChat para Azzas 2154 (varejo de moda, multimarca: Farm, Animale, Cris Barros, etc.)
-> Produto central desta fase: **Studio** (imagens de moda) + **Studio de Agentes** (orquestração visual)
+> Produto central desta fase: **Studio** (imagens de moda) + **Studio de Agentes** (orquestração visual) + **Automações** (agendamento de flows)
 
 ---
 
@@ -182,6 +182,90 @@ Criados em `config/agent-studio/`:
 
 ---
 
+## Domínio: Automações
+
+### O que é Automações
+
+Aba full-page `/d/automacoes` que agenda flows do Agent Studio para rodar headless em horários
+definidos. Não cria nem edita flows — orquestra. Épico LEM-34.
+
+### Artefatos de Spec (LEM-34 — 2026-05-18)
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| `config/automacoes/CONTRACT.md` | Contrato autoritativo completo (RATIFICADO) |
+
+### Decisões de Produto Ratificadas — Automações (LEM-34)
+
+#### Gatilhos v1
+- **Cron** (obrigatório na criação) + **manual** ("rodar agora", sempre disponível).
+- Webhook = v2.
+- Intervalo mínimo entre disparos: ≥ `AUTOMATION_MIN_INTERVAL_MIN` minutos (default 5 min).
+- Expressão cron inválida ou abaixo do mínimo → 400.
+
+#### Semântica de falha
+- Run `failed` → para (sem retry v1), notifica createdBy, **automação CONTINUA habilitada** (não auto-desabilita).
+- Sem retry em v1. Próximo run = próxima janela de cron.
+
+#### Concorrência
+- **Skip atômico**: se já existe run `running|paused` para o mesmo flow, não cria novo run.
+- "Rodar agora" com run ativo → 409 `concurrentRunActive`.
+
+#### Destinos do resultado (v1 — todos mandatory)
+- Histórico de Runs: SEMPRE (FlowRun com `automationId`).
+- Nova conversa: criada com `userId = createdBy`, título `<flowName> — DD/MM/YYYY HH:mm` (timezone da automação).
+- Notificação in-app: enviada ao `createdBy`.
+- E-mail/webhook = v2. Falha num destino = best-effort (não derruba o run).
+
+#### Bloqueio inegociável: Aprovação Humana
+- Salvar automação com flow que contém nó `human_approval` → **422 approvalNodeIncompatible**.
+- Verificação no backend (POST/PUT) — frontend pode sinalizar, mas não é a barreira.
+- Mensagem PT-BR: `"Este flow contém um nó de Aprovação Humana, que é incompatível com execuções automáticas. Remova o nó de Aprovação Humana antes de criar uma automação."`
+
+#### Permissões
+- **Nova `PermissionType` `AUTOMATIONS`** com bits `USE` e `CREATE`.
+- Defaults: ADMIN = (USE: true, CREATE: true); USER = (USE: true, CREATE: true) — seguindo padrão de AGENTS.
+- Interface field: `automations` (adicionar a `PERMISSION_TYPE_INTERFACE_FIELDS`).
+- Teto: `AUTOMATION_MAX_ACTIVE_PER_TENANT` (default 20) automações `enabled: true` por tenant.
+
+#### Modelo de dados
+- `Automation`: `tenantId, flowId, name, cron, timezone, enabled, triggerInput?, outputTargets[], createdBy, lastRunAt?, lastStatus?, nextRunAt?`
+- `FlowRun` ganha campo opcional `automationId?: ObjectId` (Épico 1 estendido).
+- `nextRunAt` sempre UTC; converter para timezone da automação apenas na exibição.
+
+#### Env vars (novo)
+- `AUTOMATION_MIN_INTERVAL_MIN` (default 5)
+- `AUTOMATION_MAX_ACTIVE_PER_TENANT` (default 20)
+
+#### Endpoints
+```
+GET    /api/automacoes                → listar (cursor paginado)
+POST   /api/automacoes                → criar (checkWrite)
+GET    /api/automacoes/:id            → ler (checkRead)
+PUT    /api/automacoes/:id            → editar (checkWrite)
+DELETE /api/automacoes/:id            → deletar (checkWrite)
+PATCH  /api/automacoes/:id/enabled    → toggle (checkWrite)
+POST   /api/automacoes/:id/run        → rodar agora (checkRead)
+GET    /api/automacoes/:id/runs       → histórico de runs (checkRead, cursor ObjectId)
+```
+
+#### Restrições inegociáveis (para code review/QA)
+1. Bloqueio human_approval verificado no backend (não só frontend).
+2. Skip atômico com transação MongoDB (sem race condition).
+3. Automation.enabled nunca muda por falha de run — só por ação explícita do usuário.
+4. Best-effort em destinos (conversa, notificação) — falha não propaga ao run.
+5. Scrubbing em tudo que vai para destinos.
+6. Multi-tenant em todo query Automation e FlowRun (quando filtrado por automationId).
+7. Cron validado antes de qualquer write.
+8. Teto verificado antes de write (não após).
+9. nextRunAt em UTC.
+
+#### Fora de escopo v1
+Webhook como gatilho, e-mail/webhook como destino, retry automático, auto-desabilitar por N falhas,
+agendamento por evento, versionamento, compartilhamento cross-tenant, notificação multi-usuário.
+
+---
+
 ## Raciocínios Recorrentes do Produto
 
 - **Valor está no template, não no modelo**: A troca de modelo é cirúrgica (1 linha no YAML). A qualidade dos prompts e o schema do formulário é onde o produto ganha ou perde. Priorizar qualidade dos templates.
@@ -189,6 +273,9 @@ Criados em `config/agent-studio/`:
 - **UC como "unidade fundamental"**: cada UC mapeia a um workflow completo com form schema, routing, prompt e QA. Não misturar UCs ou criar "modo avançado" que contorna os templates.
 - **O Studio é a versão guiada do Freepik**: o time já usa Freepik com @img1..N e prompts livres. O Studio estrutura isso em UCs tipados. A intuição de produto sempre parte do que o time já faz na ferramenta de referência.
 - **Reutilizar permissões existentes, não inventar**: `PermissionTypes.AGENTS` cobre flows de agentes. Criar novos PermissionTypes tem custo de migração e manutenção — evitar (lição LEM-31).
+- **Automação ≠ auto-gestão**: automação que falha NÃO se desabilita — surpreenderia o usuário. O produto notifica e mantém habilitada; o usuário decide o que fazer.
+- **Concorrência → skip, não fila**: enfileirar runs de automação criaria backlog invisível. Skip com notificação é comportamento previsível e controlável.
+- **Best-effort para destinos de resultado**: o run é a fonte de verdade. Conversa e notificação são conveniências — falha nelas não pode matar o run.
 
 ---
 
@@ -214,7 +301,11 @@ Criados em `config/agent-studio/`:
 │       ├── 04-http.yaml
 │       ├── 05-human-approval.yaml
 │       └── 06-output.yaml
+├── config/automacoes/                   # Automações — spec e contrato de produto (LEM-34)
+│   └── CONTRACT.md                      # Contrato autoritativo (RATIFICADO)
 ├── packages/data-provider/src/permissions.ts  # PermissionTypes e Permissions (RBAC)
+├── packages/data-provider/src/roles.ts        # roleDefaults por SystemRole (ADMIN/USER)
+├── packages/api/src/app/permissions.ts        # hasExplicitConfig + updateInterfacePermissions
 ├── packages/api/src/middleware/access.ts      # generateCheckAccess (RBAC)
 ├── api/server/routes/memories.js             # Padrão de rota com RBAC (referência)
 └── client/src/components/Studio/             # UI do Studio de Imagens (em desenvolvimento)
