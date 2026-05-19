@@ -1,8 +1,4 @@
-const {
-  logger,
-  runAsSystem,
-  tenantStorage,
-} = require('@librechat/data-schemas');
+const { logger, runAsSystem, tenantStorage } = require('@librechat/data-schemas');
 const { AutomationScheduler, nextRunAt } = require('@librechat/api');
 const { Automation } = require('~/db/models');
 const { getAppConfig } = require('~/server/services/Config');
@@ -15,8 +11,7 @@ const BOOTSTRAP_PAGE = 100;
 let scheduler = null;
 
 /** Loads an automation across tenants (system context bypasses isolation). */
-const loadAutomationAsSystem = (id) =>
-  runAsSystem(() => Automation.findById(id).lean());
+const loadAutomationAsSystem = (id) => runAsSystem(() => Automation.findById(id).lean());
 
 /** Builds a minimal authenticated-like req so headless runs reuse the agent seam. */
 async function buildSyntheticReq(automation) {

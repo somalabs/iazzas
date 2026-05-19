@@ -13,7 +13,15 @@ const base: FlowRun = {
   ],
   startedAt: '2026-05-18T12:00:00.000Z',
   completedAt: '2026-05-18T12:00:05.000Z',
-  flowSnapshot: { _id: 'f1', tenantId: 't1', name: 'F', nodes: [], edges: [], createdAt: '', updatedAt: '' },
+  flowSnapshot: {
+    _id: 'f1',
+    tenantId: 't1',
+    name: 'F',
+    nodes: [],
+    edges: [],
+    createdAt: '',
+    updatedAt: '',
+  },
 };
 
 describe('toAutomationRun', () => {

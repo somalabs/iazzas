@@ -71,7 +71,9 @@ const AutomacoesContext = createContext<AutomacoesContextType | null>(null);
 
 export function AutomacoesProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  return <AutomacoesContext.Provider value={{ state, dispatch }}>{children}</AutomacoesContext.Provider>;
+  return (
+    <AutomacoesContext.Provider value={{ state, dispatch }}>{children}</AutomacoesContext.Provider>
+  );
 }
 
 export function useAutomacoesContext() {

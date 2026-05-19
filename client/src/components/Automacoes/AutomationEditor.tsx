@@ -78,8 +78,7 @@ function buildCron(
 const inputClass =
   'w-full rounded-lg border border-border-medium bg-surface-primary px-3 py-1.5 text-sm text-text-primary placeholder:text-text-tertiary focus:border-ring-primary focus:outline-none focus:ring-1 focus:ring-ring-primary';
 
-const labelClass =
-  'mb-1 block text-xs font-semibold uppercase tracking-wider text-text-tertiary';
+const labelClass = 'mb-1 block text-xs font-semibold uppercase tracking-wider text-text-tertiary';
 
 type ApiError = { response?: { data?: { error?: string } } };
 
@@ -130,6 +129,9 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
     setEnabled(automation.enabled);
     setRawCron(automation.cron);
     setScheduleMode('advanced');
+    // Resync only when a different automation is selected; depending on the
+    // whole object would clobber in-progress edits on every parent re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [automation?._id]);
 
   const currentCron = buildCron(
@@ -205,10 +207,7 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
     };
 
     if (automation) {
-      updateMutation.mutate(
-        { id: automation._id, data: payload },
-        { onSuccess, onError },
-      );
+      updateMutation.mutate({ id: automation._id, data: payload }, { onSuccess, onError });
     } else {
       createMutation.mutate(payload, { onSuccess, onError });
     }
@@ -218,13 +217,14 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
     <div className="flex h-full flex-col overflow-hidden bg-surface-secondary">
       <div className="flex items-center border-b border-border-light px-6 py-4">
         <h2 className="text-sm font-semibold text-text-primary">
-          {isCreating ? localize('com_automacoes_create_btn') : name || localize('com_automacoes_form_name_label')}
+          {isCreating
+            ? localize('com_automacoes_create_btn')
+            : name || localize('com_automacoes_form_name_label')}
         </h2>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-5">
         <div className="mx-auto max-w-xl space-y-5">
-
           {/* Name */}
           <div>
             <label htmlFor={`${uid}-name`} className={labelClass}>
@@ -255,7 +255,10 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
             <select
               id={`${uid}-flow`}
               value={flowId}
-              onChange={(e) => { setFlowId(e.target.value); setApprovalError(''); }}
+              onChange={(e) => {
+                setFlowId(e.target.value);
+                setApprovalError('');
+              }}
               className={cn(inputClass, flowError && 'border-red-500/60')}
               aria-invalid={!!flowError}
               aria-describedby={flowError ? `${uid}-flow-err` : undefined}
@@ -277,7 +280,10 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
                 className="mt-2 flex items-start gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2"
                 role="alert"
               >
-                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-red-400" aria-hidden="true" />
+                <AlertTriangle
+                  className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-red-400"
+                  aria-hidden="true"
+                />
                 <p className="text-xs text-red-400">{approvalError}</p>
               </div>
             )}
@@ -314,14 +320,10 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
 
             {/* Daily */}
             {scheduleMode === 'daily' && (
-              <div
-                id={`${uid}-tab-daily`}
-                role="tabpanel"
-                className="flex items-end gap-2"
-              >
+              <div id={`${uid}-tab-daily`} role="tabpanel" className="flex items-end gap-2">
                 <div className="flex-1">
                   <label htmlFor={`${uid}-hour`} className="mb-1 block text-xs text-text-tertiary">
-                    Hora (0–23)
+                    {localize('com_automacoes_field_hour')}
                   </label>
                   <input
                     id={`${uid}-hour`}
@@ -336,7 +338,7 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
                 <span className="mb-1.5 text-text-tertiary">:</span>
                 <div className="flex-1">
                   <label htmlFor={`${uid}-min`} className="mb-1 block text-xs text-text-tertiary">
-                    Minuto (0–59)
+                    {localize('com_automacoes_field_minute')}
                   </label>
                   <input
                     id={`${uid}-min`}
@@ -378,7 +380,7 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
                 <div className="flex items-end gap-2">
                   <div className="flex-1">
                     <label htmlFor={`${uid}-wh`} className="mb-1 block text-xs text-text-tertiary">
-                      Hora (0–23)
+                      {localize('com_automacoes_field_hour')}
                     </label>
                     <input
                       id={`${uid}-wh`}
@@ -393,7 +395,7 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
                   <span className="mb-1.5 text-text-tertiary">:</span>
                   <div className="flex-1">
                     <label htmlFor={`${uid}-wm`} className="mb-1 block text-xs text-text-tertiary">
-                      Minuto (0–59)
+                      {localize('com_automacoes_field_minute')}
                     </label>
                     <input
                       id={`${uid}-wm`}
@@ -417,7 +419,7 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
               <div id={`${uid}-tab-interval`} role="tabpanel" className="flex items-end gap-2">
                 <div className="w-28">
                   <label htmlFor={`${uid}-iv`} className="mb-1 block text-xs text-text-tertiary">
-                    A cada
+                    {localize('com_automacoes_interval_every')}
                   </label>
                   <input
                     id={`${uid}-iv`}
@@ -431,7 +433,7 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
                 </div>
                 <div className="flex-1">
                   <label htmlFor={`${uid}-iu`} className="mb-1 block text-xs text-text-tertiary">
-                    Unidade
+                    {localize('com_automacoes_interval_unit')}
                   </label>
                   <select
                     id={`${uid}-iu`}
@@ -443,8 +445,10 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
                     }}
                     className={inputClass}
                   >
-                    <option value="minutes">minutos</option>
-                    <option value="hours">horas</option>
+                    <option value="minutes">
+                      {localize('com_automacoes_interval_unit_minutes')}
+                    </option>
+                    <option value="hours">{localize('com_automacoes_interval_unit_hours')}</option>
                   </select>
                 </div>
                 <div className="mb-1.5">
@@ -459,7 +463,10 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
                 <input
                   type="text"
                   value={rawCron}
-                  onChange={(e) => { setRawCron(e.target.value); setCronError(''); }}
+                  onChange={(e) => {
+                    setRawCron(e.target.value);
+                    setCronError('');
+                  }}
                   placeholder={localize('com_automacoes_form_cron_placeholder')}
                   className={cn(inputClass, 'font-mono', cronError && 'border-red-500/60')}
                   aria-label={localize('com_automacoes_form_cron_label')}
@@ -535,7 +542,10 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
               className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2"
               role="alert"
             >
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-400" aria-hidden="true" />
+              <AlertTriangle
+                className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-400"
+                aria-hidden="true"
+              />
               <p className="text-xs text-amber-400">{limitError}</p>
             </div>
           )}
@@ -558,7 +568,7 @@ export default function AutomationEditor({ automation, onSaved, onCancel }: Auto
           className={cn(
             'flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
             saving
-              ? 'cursor-not-allowed bg-surface-submit/40 text-white/60'
+              ? 'bg-surface-submit/40 cursor-not-allowed text-white/60'
               : 'bg-surface-submit text-white hover:bg-surface-submit-hover',
           )}
           aria-disabled={saving}

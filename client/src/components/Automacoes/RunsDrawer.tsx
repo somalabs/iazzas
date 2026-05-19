@@ -47,9 +47,8 @@ export default function RunsDrawer({ automationName, runs, onClose }: RunsDrawer
 
   return (
     <aside
-      role="complementary"
       aria-label={localize('com_automacoes_runs_title')}
-      className="flex h-full w-[320px] flex-shrink-0 flex-col border-l border-border-light bg-surface-secondary animate-slide-in-right"
+      className="flex h-full w-[320px] flex-shrink-0 animate-slide-in-right flex-col border-l border-border-light bg-surface-secondary"
     >
       <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
         <div className="min-w-0">
@@ -57,7 +56,9 @@ export default function RunsDrawer({ automationName, runs, onClose }: RunsDrawer
             {localize('com_automacoes_runs_title')}
           </p>
           {automationName && (
-            <p className="max-w-[200px] truncate text-[11px] text-text-tertiary">{automationName}</p>
+            <p className="max-w-[200px] truncate text-[11px] text-text-tertiary">
+              {automationName}
+            </p>
           )}
         </div>
         <button
@@ -78,14 +79,12 @@ export default function RunsDrawer({ automationName, runs, onClose }: RunsDrawer
             {runs.map((run) => {
               const cfg = STATUS_CONFIG[run.status];
               const Icon = cfg.Icon;
-              const duration =
-                run.completedAt
-                  ? Math.round(
-                      (new Date(run.completedAt).getTime() -
-                        new Date(run.startedAt).getTime()) /
-                        1000,
-                    )
-                  : null;
+              const duration = run.completedAt
+                ? Math.round(
+                    (new Date(run.completedAt).getTime() - new Date(run.startedAt).getTime()) /
+                      1000,
+                  )
+                : null;
 
               return (
                 <div
@@ -115,7 +114,7 @@ export default function RunsDrawer({ automationName, runs, onClose }: RunsDrawer
                         </span>
                         {duration != null && (
                           <span>
-                            · {localize('com_automacoes_run_duration')}: {duration}s
+                            {localize('com_automacoes_run_duration', { seconds: duration })}
                           </span>
                         )}
                       </div>

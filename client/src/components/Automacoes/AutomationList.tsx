@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { Play, Pencil, Trash2, Clock, CheckCircle, XCircle, Loader, SkipForward, History } from 'lucide-react';
+import {
+  Play,
+  Pencil,
+  Trash2,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Loader,
+  SkipForward,
+  History,
+} from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import type { Automation } from './context';
@@ -10,15 +20,40 @@ const STATUS_CONFIG: Record<
   RunStatus,
   { Icon: React.ElementType; color: string; spin: boolean; labelKey: string }
 > = {
-  running: { Icon: Loader, color: 'text-blue-400', spin: true, labelKey: 'com_automacoes_run_status_running' },
-  success: { Icon: CheckCircle, color: 'text-emerald-400', spin: false, labelKey: 'com_automacoes_run_status_success' },
-  failed: { Icon: XCircle, color: 'text-red-400', spin: false, labelKey: 'com_automacoes_run_status_failed' },
-  skipped: { Icon: SkipForward, color: 'text-text-tertiary', spin: false, labelKey: 'com_automacoes_run_status_skipped' },
+  running: {
+    Icon: Loader,
+    color: 'text-blue-400',
+    spin: true,
+    labelKey: 'com_automacoes_run_status_running',
+  },
+  success: {
+    Icon: CheckCircle,
+    color: 'text-emerald-400',
+    spin: false,
+    labelKey: 'com_automacoes_run_status_success',
+  },
+  failed: {
+    Icon: XCircle,
+    color: 'text-red-400',
+    spin: false,
+    labelKey: 'com_automacoes_run_status_failed',
+  },
+  skipped: {
+    Icon: SkipForward,
+    color: 'text-text-tertiary',
+    spin: false,
+    labelKey: 'com_automacoes_run_status_skipped',
+  },
 };
 
 const DAY_NAMES: Record<string, string> = {
-  '0': 'dom', '1': 'seg', '2': 'ter',
-  '3': 'qua', '4': 'qui', '5': 'sex', '6': 'sáb',
+  '0': 'dom',
+  '1': 'seg',
+  '2': 'ter',
+  '3': 'qua',
+  '4': 'qui',
+  '5': 'sex',
+  '6': 'sáb',
 };
 
 function formatDateTime(iso?: string): string {
@@ -41,7 +76,10 @@ function formatCronSummary(cron: string): string {
   if (dow === '*') return `Diariamente às ${time}`;
   if (dow === '1-5' || dow === '1,2,3,4,5') return `Dias úteis às ${time}`;
 
-  const days = dow.split(',').map((d) => DAY_NAMES[d] ?? d).join(', ');
+  const days = dow
+    .split(',')
+    .map((d) => DAY_NAMES[d] ?? d)
+    .join(', ');
   return `${days} às ${time}`;
 }
 
@@ -116,14 +154,10 @@ function AutomationRow({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && onSelect()}
-        aria-selected={selected}
+        aria-current={selected}
         aria-label={automation.name}
       >
-        <div
-          className="mt-0.5 flex-shrink-0"
-          onClick={(e) => e.stopPropagation()}
-          role="none"
-        >
+        <div className="mt-0.5 flex-shrink-0" onClick={(e) => e.stopPropagation()} role="none">
           <ToggleSwitch
             checked={automation.enabled}
             onChange={onToggleEnabled}
@@ -160,7 +194,9 @@ function AutomationRow({
             )}
             {automation.nextRunAt && (
               <span className="text-[11px] text-text-tertiary">
-                {localize('com_automacoes_run_next_at', { datetime: formatDateTime(automation.nextRunAt) })}
+                {localize('com_automacoes_run_next_at', {
+                  datetime: formatDateTime(automation.nextRunAt),
+                })}
               </span>
             )}
           </div>
@@ -170,7 +206,10 @@ function AutomationRow({
       <div className="flex items-center gap-1 border-t border-border-light px-3 py-1.5 opacity-0 transition-opacity group-hover:opacity-100">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onRunNow(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRunNow();
+          }}
           className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
           aria-label={localize('com_automacoes_run_now_btn')}
         >
@@ -179,7 +218,10 @@ function AutomationRow({
         </button>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
           className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
           aria-label={localize('com_automacoes_edit_btn')}
         >
@@ -188,7 +230,10 @@ function AutomationRow({
         </button>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onOpenRuns(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenRuns();
+          }}
           className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
           aria-label={localize('com_automacoes_runs_title')}
         >
@@ -203,14 +248,21 @@ function AutomationRow({
             </span>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); onDelete(); setConfirmDelete(false); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+                setConfirmDelete(false);
+              }}
               className="rounded px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-500/10"
             >
               {localize('com_automacoes_delete_btn')}
             </button>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setConfirmDelete(false); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setConfirmDelete(false);
+              }}
               className="rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover"
             >
               {localize('com_automacoes_form_cancel_btn')}
@@ -219,7 +271,10 @@ function AutomationRow({
         ) : (
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setConfirmDelete(true); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setConfirmDelete(true);
+            }}
             className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-tertiary hover:bg-red-500/10 hover:text-red-400"
             aria-label={localize('com_automacoes_delete_btn')}
           >
@@ -284,7 +339,7 @@ export default function AutomationList({
             'ml-3 flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
             canCreate
               ? 'bg-surface-submit text-white hover:bg-surface-submit-hover'
-              : 'cursor-not-allowed bg-surface-submit/40 text-white/60',
+              : 'bg-surface-submit/40 cursor-not-allowed text-white/60',
           )}
         >
           + {localize('com_automacoes_create_btn')}
