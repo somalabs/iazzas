@@ -1,8 +1,6 @@
-import { PermissionTypes, Permissions } from 'librechat-data-provider';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useHasAccess } from '~/hooks';
+import { useAgentsAccessRedirect } from '~/hooks/Agents';
 import { useFlowsQuery, useFlowRunsQuery, useGetEndpointsQuery } from '~/data-provider';
 import AgentPanelSwitch from '~/components/SidePanel/Agents/AgentPanelSwitch';
 import { FlowProvider, useFlowContext } from '../context';
@@ -69,20 +67,11 @@ function StudioLayout() {
 }
 
 export default function AgentStudioView() {
-  const navigate = useNavigate();
-  const hasAccess = useHasAccess({
-    permissionType: PermissionTypes.AGENTS,
-    permission: Permissions.USE,
-  });
+  const hasAccess = useAgentsAccessRedirect();
 
-  useEffect(() => {
-    if (!hasAccess) {
-      const id = setTimeout(() => navigate('/c/new'), 1000);
-      return () => clearTimeout(id);
-    }
-  }, [hasAccess, navigate]);
-
-  if (!hasAccess) return null;
+  if (!hasAccess) {
+    return null;
+  }
 
   return (
     <FlowProvider>

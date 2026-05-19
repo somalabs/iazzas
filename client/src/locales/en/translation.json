@@ -1787,6 +1787,7 @@
   "com_ui_ux_rail_flows_desc": "Criar e orquestrar agentes",
   "com_ui_ux_rail_automacoes_desc": "Agendar execuções de flows",
   "com_ui_ux_rail_admin_desc": "Gestão da plataforma",
+  "com_ui_ux_rail_agentes_desc": "Criar, testar e gerenciar seus agentes",
   "com_ui_ux_balance_cycle": "Uso de hoje",
   "com_ui_ux_balance_renova": "Renova hoje 00:00",
   "com_ui_ux_balance_renova_em": "em",

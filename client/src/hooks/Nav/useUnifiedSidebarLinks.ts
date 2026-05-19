@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Image, GitFork, CalendarClock, ShieldCheck, MessageSquare } from 'lucide-react';
+import { Image, Bot, GitFork, CalendarClock, ShieldCheck, MessageSquare } from 'lucide-react';
 import type { NavLink } from '~/common';
 
 /**
@@ -23,6 +23,13 @@ export default function useUnifiedSidebarLinks() {
         icon: Image,
         id: 'nav-studio',
         href: '/d/studio',
+      },
+      {
+        title: 'com_ui_ux_nav_agentes',
+        description: 'com_ui_ux_rail_agentes_desc',
+        icon: Bot,
+        id: 'nav-agentes',
+        href: '/d/agentes',
       },
       {
         title: 'com_ui_ux_nav_flows',
