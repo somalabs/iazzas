@@ -203,7 +203,7 @@ export default function AgentConfig() {
                   id="name"
                   type="text"
                   placeholder={localize('com_agents_name_placeholder')}
-                  aria-label="Agent name"
+                  aria-label={localize('com_ui_name')}
                 />
                 <div
                   className={cn(
@@ -261,7 +261,7 @@ export default function AgentConfig() {
                   id="description"
                   type="text"
                   placeholder={localize('com_agents_description_placeholder')}
-                  aria-label="Agent description"
+                  aria-label={localize('com_ui_description')}
                 />
               )}
             />
