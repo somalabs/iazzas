@@ -226,6 +226,33 @@ mcpServers:
       Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
 
+  # MCPs externos SaaS — OAuth per-user com Dynamic Client Registration (RFC 7591).
+  # Não tem app pré-registrado; LibreChat se registra no provider na primeira conexão.
+  # Token de cada user fica em mongo:tokens com identifier "mcp:{name}".
+  # Redirect URI gerado automaticamente: {{DOMAIN_SERVER}}/api/mcp/{name}/oauth/callback
+  # (DOMAIN_SERVER precisa estar setado no .env de prod com o domínio público do IAzzas.)
+  notion:
+    type: streamable-http
+    url: https://mcp.notion.com/mcp
+    timeout: 60000
+    startup: false
+    requiresOAuth: true
+    oauth: {}
+  atlassian:
+    type: streamable-http
+    url: https://mcp.atlassian.com/v1/mcp/authv2
+    timeout: 60000
+    startup: false
+    requiresOAuth: true
+    oauth: {}
+  miro:
+    type: streamable-http
+    url: https://mcp.miro.com/
+    timeout: 60000
+    startup: false
+    requiresOAuth: true
+    oauth: {}
+
   # Rollback: descomente o bloco abaixo e remova os 4 acima pra voltar ao stdio.
   # azzas:
   #   type: stdio
