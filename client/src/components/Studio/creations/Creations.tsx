@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Search, ImageIcon, AlertCircle, RotateCcw } from 'lucide-react';
+import { Search, ImageIcon, AlertCircle, RotateCcw, Trash2 } from 'lucide-react';
+import { useToastContext } from '@librechat/client';
 import { useLocalize } from '~/hooks';
+import { useStudioDeleteMutation } from '~/data-provider';
 import { useStudio, useStudioDispatch, useStudioHistory, useRetryGeneration } from '../context';
 import { MODEL_DISPLAY_NAMES, useCaseHasRequiredInputs } from '../schemas';
 import { formatStudioDate } from '../date';
@@ -10,10 +12,12 @@ function CreationItem({
   creation,
   onSelect,
   onRetry,
+  onDelete,
 }: {
   creation: StudioCreation;
   onSelect: (c: StudioCreation) => void;
   onRetry: (creation: StudioCreation) => void;
+  onDelete: (creation: StudioCreation) => void;
 }) {
   const localize = useLocalize();
   const model = MODEL_DISPLAY_NAMES[creation.model] ?? creation.model;
@@ -27,7 +31,7 @@ function CreationItem({
     <div className="group relative flex w-full items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-hover">
       <button
         type="button"
-        onClick={() => !isError && onSelect(creation)}
+        onClick={() => onSelect(creation)}
         className="flex min-w-0 flex-1 items-start gap-3 text-left"
         aria-label={isError ? localize('com_studio_error_status') : creation.prompt}
       >
@@ -69,16 +73,27 @@ function CreationItem({
           so it is disabled for use cases with required inputs — those must be
           redone via the form. */}
       {isError && (
-        <button
-          type="button"
-          onClick={() => canRetry && onRetry(creation)}
-          disabled={!canRetry}
-          className="flex h-7 w-7 flex-shrink-0 items-center justify-center self-center rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-red-500/10"
-          aria-label={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
-          title={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
-        >
-          <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
-        </button>
+        <div className="flex flex-shrink-0 items-center gap-1.5 self-center">
+          <button
+            type="button"
+            onClick={() => canRetry && onRetry(creation)}
+            disabled={!canRetry}
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-red-500/10"
+            aria-label={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
+            title={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
+          >
+            <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(creation)}
+            className="flex h-7 w-7 items-center justify-center rounded-lg border border-border-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-red-500"
+            aria-label={localize('com_studio_delete_creation')}
+            title={localize('com_studio_delete_creation')}
+          >
+            <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+          </button>
+        </div>
       )}
     </div>
   );
@@ -90,6 +105,8 @@ export default function Creations() {
   const { creations } = useStudio();
   const dispatch = useStudioDispatch();
   const retryGeneration = useRetryGeneration();
+  const deleteMutation = useStudioDeleteMutation();
+  const { showToast } = useToastContext();
   const [search, setSearch] = useState('');
 
   const filtered = creations.filter((c) =>
@@ -102,6 +119,34 @@ export default function Creations() {
 
   function handleRetry(creation: StudioCreation) {
     retryGeneration(creation);
+  }
+
+  function handleDelete(creation: StudioCreation) {
+    if (deleteMutation.isLoading) {
+      return;
+    }
+    if (!window.confirm(localize('com_studio_delete_confirm'))) {
+      return;
+    }
+    const id = creation.id;
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        dispatch({ type: 'REMOVE_CREATION', payload: id });
+        showToast({ status: 'success', message: localize('com_studio_deleted') });
+      },
+      onError: (err: unknown) => {
+        const status = (err as { response?: { status?: number } })?.response
+          ?.status;
+        if (status === 404) {
+          // No server row under this id (still-optimistic failed card) —
+          // clearing it from the UI loses nothing.
+          dispatch({ type: 'REMOVE_CREATION', payload: id });
+          showToast({ status: 'success', message: localize('com_studio_deleted') });
+          return;
+        }
+        showToast({ status: 'error', message: localize('com_studio_delete_failed') });
+      },
+    });
   }
 
   return (
@@ -117,9 +162,15 @@ export default function Creations() {
           </button>
           <button
             type="button"
-            className="rounded-md px-2.5 py-1 text-xs text-text-tertiary hover:text-text-secondary"
+            disabled
+            title={`${localize('com_studio_my_templates')} · ${localize('com_studio_coming_soon')}`}
+            aria-label={`${localize('com_studio_my_templates')} (${localize('com_studio_coming_soon')})`}
+            className="flex cursor-not-allowed items-center gap-1.5 rounded-md px-2.5 py-1 text-xs text-text-tertiary opacity-50"
           >
             {localize('com_studio_my_templates')}
+            <span className="rounded-full bg-surface-tertiary px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-text-tertiary">
+              {localize('com_studio_coming_soon')}
+            </span>
           </button>
         </div>
       </div>
@@ -152,6 +203,7 @@ export default function Creations() {
               creation={creation}
               onSelect={handleSelect}
               onRetry={handleRetry}
+              onDelete={handleDelete}
             />
           ))
         )}

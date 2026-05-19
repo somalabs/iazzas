@@ -4,6 +4,7 @@ const { FileContext } = require('librechat-data-provider');
 const {
   StudioGenerationService,
   createStudioAdapters,
+  getStudioModelAvailability,
   AdapterCapabilityError,
   AdapterRequestError,
   TemplateInputError,
@@ -81,6 +82,15 @@ const validateEditBody = (body) => {
   if (!isModelOverrideValid(body.modelOverride)) {
     return 'Invalid modelOverride';
   }
+  if (body.referenceFileIds != null) {
+    if (
+      !Array.isArray(body.referenceFileIds) ||
+      body.referenceFileIds.length > 8 ||
+      !body.referenceFileIds.every((id) => typeof id === 'string' && id.trim() !== '')
+    ) {
+      return 'Invalid referenceFileIds';
+    }
+  }
   return null;
 };
 
@@ -103,12 +113,21 @@ const buildReferenceResolver = (req) => async (fileId) => {
   return { base64: buffer.toString('base64'), mimeType: file.type || 'image/png' };
 };
 
+// Studio is a creative image tool, not a chat thumbnail. saveBase64Image
+// defaults to the 'high' preset, which hard-caps the short side at 768px —
+// that silently destroyed every 2K/4K generation. Pass an explicit pixel
+// cap matching the requested resolution so full-size output survives.
+// `{ px }` only caps (Math.min, withoutEnlargement), so 1K stays 1K.
+const RESOLUTION_PX = { '1K': 1024, '2K': 2048, '4K': 4096 };
+
 const buildImagePersister = (req) => async ({ base64, mimeType, filename }) => {
   const dataUrl = `data:${mimeType};base64,${base64}`;
+  const px = RESOLUTION_PX[req.body?.resolution] ?? 4096;
   const saved = await saveBase64Image(dataUrl, {
     req,
     filename,
     context: FileContext.image_generation,
+    resolution: { px },
   });
   return {
     id: saved.file_id,
@@ -155,6 +174,28 @@ const buildRepository = (req) => ({
     });
     return { ...toRecord(doc), userId: req.user.id };
   },
+  async update(id, patch) {
+    const set = {};
+    for (const k of [
+      'model',
+      'resolution',
+      'images',
+      'referenceCount',
+      'status',
+      'routerReason',
+      'provenance',
+    ]) {
+      if (patch[k] !== undefined) {
+        set[k] = patch[k];
+      }
+    }
+    const doc = await StudioCreation.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
+      { $set: set },
+      { new: true },
+    ).lean();
+    return { ...toRecord(doc), userId: req.user.id };
+  },
   async findById(id, userId) {
     const doc = await StudioCreation.findOne({ _id: id, userId }).lean();
     if (!doc) {
@@ -195,9 +236,11 @@ const buildService = (req) =>
 
 const handleError = (res, err) => {
   if (err instanceof TemplateInputError || err instanceof AdapterCapabilityError) {
+    logger.warn(`[studio] 422 ${err.constructor.name}: ${err.message}`);
     return res.status(422).json({ error: err.message });
   }
   if (err instanceof AdapterRequestError) {
+    logger.warn(`[studio] 502 AdapterRequestError: ${err.message}`);
     return res.status(502).json({ error: err.message });
   }
   logger.error('[studio] unexpected error', err);
@@ -266,4 +309,26 @@ const listCreations = async (req, res) => {
   }
 };
 
-module.exports = { generate, edit, getCreation, listCreations };
+const deleteCreation = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ error: 'Creation not found' });
+    }
+    const doc = await StudioCreation.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    if (!doc) {
+      return res.status(404).json({ error: 'Creation not found' });
+    }
+    res.status(204).end();
+  } catch (err) {
+    handleError(res, err);
+  }
+};
+
+const getModels = (req, res) => {
+  res.json({ available: getStudioModelAvailability() });
+};
+
+module.exports = { generate, edit, getCreation, listCreations, deleteCreation, getModels };

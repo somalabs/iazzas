@@ -16,8 +16,8 @@ import {
   FeedbacksView,
 } from '~/components/Admin';
 import StudioScreen from '~/components/Studio/StudioScreen';
-import AutomacoesScreen from '~/components/Automacoes/AutomacoesScreen';
 import { AgentStudioView } from '~/components/AgentStudio';
+import { AutomacoesScreen } from '~/components/Automacoes';
 import DashboardRoute from './Layouts/Dashboard';
 
 const dashboardRoutes = {

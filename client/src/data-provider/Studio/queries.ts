@@ -7,6 +7,7 @@ import type {
   TStudioEditRequest,
   TStudioGenerateRequest,
   TStudioCreationListResponse,
+  TStudioModelsResponse,
 } from 'librechat-data-provider';
 
 export const useStudioCreationsQuery = (
@@ -18,6 +19,20 @@ export const useStudioCreationsQuery = (
     () => dataService.getStudioCreations({ limit: params.limit ?? 20 }),
     {
       refetchOnWindowFocus: false,
+      ...config,
+    },
+  );
+};
+
+export const useStudioModelsQuery = (
+  config?: UseQueryOptions<TStudioModelsResponse>,
+) => {
+  return useQuery<TStudioModelsResponse>(
+    [QueryKeys.studioModels],
+    () => dataService.getStudioModels(),
+    {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
       ...config,
     },
   );
@@ -44,7 +59,10 @@ export const useStudioGenerateMutation = (): UseMutationResult<
     [MutationKeys.studioGenerate],
     (payload: TStudioGenerateRequest) => dataService.studioGenerate(payload),
     {
-      onSuccess: () => {
+      // Refetch on success AND failure: a failed generation still persists
+      // a real error doc server-side (two-phase). Without this the client
+      // keeps an optimistic UUID-id card that can't be deleted.
+      onSettled: () => {
         queryClient.invalidateQueries([QueryKeys.studioCreations]);
       },
     },
@@ -60,6 +78,23 @@ export const useStudioEditMutation = (): UseMutationResult<
   return useMutation(
     [MutationKeys.studioEdit],
     (payload: TStudioEditRequest) => dataService.studioEdit(payload),
+    {
+      onSettled: () => {
+        queryClient.invalidateQueries([QueryKeys.studioCreations]);
+      },
+    },
+  );
+};
+
+export const useStudioDeleteMutation = (): UseMutationResult<
+  void,
+  Error,
+  string
+> => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ['studioDelete'],
+    (id: string) => dataService.deleteStudioCreation(id),
     {
       onSuccess: () => {
         queryClient.invalidateQueries([QueryKeys.studioCreations]);

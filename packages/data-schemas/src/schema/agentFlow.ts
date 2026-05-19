@@ -8,11 +8,11 @@ const agentFlowSchema = new Schema<IAgentFlow>(
       required: true,
     },
     nodes: {
-      type: [Schema.Types.Mixed],
+      type: Schema.Types.Mixed,
       default: [],
     },
     edges: {
-      type: [Schema.Types.Mixed],
+      type: Schema.Types.Mixed,
       default: [],
     },
     tenantId: {

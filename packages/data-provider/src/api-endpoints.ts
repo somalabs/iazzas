@@ -442,6 +442,13 @@ export const runFlow = (id: string) => `${flow(id)}/run`;
 export const resumeFlowRun = (runId: string) =>
   `${flows()}/runs/${encodeURIComponent(runId)}/resume`;
 
+/* Automations */
+export const automations = () => `${BASE_URL}/api/automacoes`;
+export const automation = (id: string) => `${automations()}/${encodeURIComponent(id)}`;
+export const automationEnabled = (id: string) => `${automation(id)}/enabled`;
+export const automationRun = (id: string) => `${automation(id)}/run`;
+export const automationRuns = (id: string) => `${automation(id)}/runs`;
+
 export const searchPrincipals = (params: q.PrincipalSearchParams) => {
   const { q: query, limit, types } = params;
   let url = `${BASE_URL}/api/permissions/search-principals?q=${encodeURIComponent(query)}`;
@@ -482,6 +489,8 @@ const studioRoot = `${BASE_URL}/api/studio`;
 export const studioGenerate = () => `${studioRoot}/generate`;
 
 export const studioEdit = () => `${studioRoot}/edit`;
+
+export const studioModels = () => `${studioRoot}/models`;
 
 export const studioCreation = (id: string) => `${studioRoot}/creations/${encodeURIComponent(id)}`;
 

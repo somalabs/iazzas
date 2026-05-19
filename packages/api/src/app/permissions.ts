@@ -45,6 +45,8 @@ function hasExplicitConfig(
       return interfaceConfig?.mcpServers !== undefined;
     case PermissionTypes.REMOTE_AGENTS:
       return interfaceConfig?.remoteAgents !== undefined;
+    case PermissionTypes.AUTOMATIONS:
+      return interfaceConfig?.automations !== undefined;
     default:
       return false;
   }
@@ -430,6 +432,18 @@ export async function updateInterfacePermissions({
               ),
             }
           : {}),
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: getPermissionValue(
+          getConfigUse(loadedInterface.automations),
+          defaultPerms[PermissionTypes.AUTOMATIONS]?.[Permissions.USE],
+          typeof defaults.automations === 'object' ? defaults.automations?.use : undefined,
+        ),
+        [Permissions.CREATE]: getPermissionValue(
+          getConfigCreate(loadedInterface.automations),
+          defaultPerms[PermissionTypes.AUTOMATIONS]?.[Permissions.CREATE],
+          typeof defaults.automations === 'object' ? defaults.automations?.create : undefined,
+        ),
       },
     };
 

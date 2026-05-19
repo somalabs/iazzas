@@ -57,8 +57,19 @@ export type StoredCreation = StudioCreation & {
   images: StudioImageResult[];
 };
 
+export type StudioCreationPatch = {
+  model?: StudioModelId;
+  resolution?: StudioCreation['resolution'];
+  images?: StudioImageResult[];
+  referenceCount?: number;
+  status?: StudioCreation['status'];
+  routerReason?: string;
+  provenance?: ProvenanceManifest;
+};
+
 export interface StudioRepository {
   create(draft: StudioCreationDraft): Promise<StudioCreation>;
+  update(id: string, patch: StudioCreationPatch): Promise<StudioCreation>;
   findById(id: string, userId: string): Promise<StoredCreation | null>;
   list(params: {
     userId: string;
@@ -75,6 +86,18 @@ export type StudioServiceDeps = {
   audit: AuditLogger;
   now?: () => Date;
 };
+
+/**
+ * The persisted/displayed resolution must match what the model actually
+ * produced. Models without imageSize support (e.g. the nano-banana-2 fallback)
+ * ignore the requested resolution and emit the SDK default — persisting "4K"
+ * for those would lie to the user (the "imagem super leve" complaint).
+ */
+const effectiveResolution = (
+  model: StudioModelId,
+  requested: StudioCreation['resolution'],
+): StudioCreation['resolution'] =>
+  ADAPTER_CAPABILITIES[model].supportsImageSize ? requested : '1K';
 
 const assertCapabilities = (model: StudioModelId, referenceCount: number): void => {
   const caps = ADAPTER_CAPABILITIES[model];
@@ -137,55 +160,79 @@ export class StudioGenerationService {
 
     assertCapabilities(decision.model, orderedRefs.length);
 
-    const references: StudioReferenceImage[] = [];
-    for (const ref of orderedRefs) {
-      const resolved = await this.deps.resolveReference(ref.fileId);
-      references.push({ label: ref.label, base64: resolved.base64, mimeType: resolved.mimeType });
-    }
-
-    const output = await this.runWithFallback(decision.model, useCase.fallbackModel, {
-      prompt,
-      references,
-      aspectRatio: req.aspectRatio,
-      resolution: req.resolution,
-      count: req.imageCount,
-    });
-
     const createdAt = this.now();
-    const provenance = buildProvenanceManifest({
-      model: output.model,
-      useCase: req.useCase,
-      createdAt,
-    });
-
-    const images = await this.persistAll(output.images, req.useCase);
-
-    const creation = await this.deps.repository.create({
+    // Persist a `generating` row up front so the in-progress project
+    // survives a page refresh (the request itself stays open until done).
+    const pending = await this.deps.repository.create({
       userId,
       useCase: req.useCase,
       prompt,
-      model: output.model,
+      model: decision.model,
       aspectRatio: req.aspectRatio,
       resolution: req.resolution,
       imageCount: req.imageCount,
-      images,
+      images: [],
       referenceCount: orderedRefs.length,
-      status: 'done',
-      provenance,
-      routerReason: output.reason,
+      status: 'generating',
+      provenance: buildProvenanceManifest({
+        model: decision.model,
+        useCase: req.useCase,
+        createdAt,
+      }),
+      routerReason: decision.reason,
     });
 
-    await this.deps.audit({
-      type: 'studio.generate',
-      userId,
-      useCase: req.useCase,
-      model: output.model,
-      routerReason: output.reason,
-      referenceCount: orderedRefs.length,
-      provenance,
-    });
+    try {
+      const references: StudioReferenceImage[] = [];
+      for (const ref of orderedRefs) {
+        const resolved = await this.deps.resolveReference(ref.fileId);
+        references.push({
+          label: ref.label,
+          base64: resolved.base64,
+          mimeType: resolved.mimeType,
+        });
+      }
 
-    return creation;
+      const output = await this.runWithFallback(decision.model, useCase.fallbackModel, {
+        prompt,
+        references,
+        aspectRatio: req.aspectRatio,
+        resolution: req.resolution,
+        count: req.imageCount,
+      });
+
+      const provenance = buildProvenanceManifest({
+        model: output.model,
+        useCase: req.useCase,
+        createdAt,
+      });
+
+      const images = await this.persistAll(output.images, req.useCase);
+
+      const creation = await this.deps.repository.update(pending.id, {
+        model: output.model,
+        resolution: effectiveResolution(output.model, req.resolution),
+        images,
+        status: 'done',
+        provenance,
+        routerReason: output.reason,
+      });
+
+      await this.deps.audit({
+        type: 'studio.generate',
+        userId,
+        useCase: req.useCase,
+        model: output.model,
+        routerReason: output.reason,
+        referenceCount: orderedRefs.length,
+        provenance,
+      });
+
+      return creation;
+    } catch (err) {
+      await this.deps.repository.update(pending.id, { status: 'error' });
+      throw err;
+    }
   }
 
   async edit(userId: string, req: TStudioEditRequest): Promise<StudioCreation> {
@@ -202,27 +249,21 @@ export class StudioGenerationService {
     const model: StudioModelId = req.modelOverride ?? parent.model;
     const source = await this.deps.resolveReference(sourceImage.id);
 
-    const adapter = this.getAdapter(model);
-    let output;
-    try {
-      output = await adapter.generate({
-        prompt: req.prompt,
-        references: [{ label: '@img1', base64: source.base64, mimeType: source.mimeType }],
-        aspectRatio: parent.aspectRatio,
-        resolution: parent.resolution,
-        count: 1,
+    const references: StudioReferenceImage[] = [
+      { label: '@img1', base64: source.base64, mimeType: source.mimeType },
+    ];
+    for (const fileId of req.referenceFileIds ?? []) {
+      const resolved = await this.deps.resolveReference(fileId);
+      references.push({
+        label: `@img${references.length + 1}`,
+        base64: resolved.base64,
+        mimeType: resolved.mimeType,
       });
-    } catch (err) {
-      throw err instanceof AdapterRequestError
-        ? err
-        : new AdapterRequestError(model, (err as Error).message);
     }
+    assertCapabilities(model, references.length);
 
     const createdAt = this.now();
-    const provenance = buildProvenanceManifest({ model, useCase: parent.useCase, createdAt });
-    const images = await this.persistAll(output.images, parent.useCase);
-
-    const creation = await this.deps.repository.create({
+    const pending = await this.deps.repository.create({
       userId,
       useCase: parent.useCase,
       prompt: req.prompt,
@@ -230,26 +271,59 @@ export class StudioGenerationService {
       aspectRatio: parent.aspectRatio,
       resolution: parent.resolution,
       imageCount: 1,
-      images,
-      referenceCount: 1,
-      status: 'done',
-      provenance,
+      images: [],
+      referenceCount: references.length,
+      status: 'generating',
+      provenance: buildProvenanceManifest({ model, useCase: parent.useCase, createdAt }),
       routerReason: `Edit of ${parent.id}`,
       parentCreationId: parent.id,
     });
 
-    await this.deps.audit({
-      type: 'studio.edit',
-      userId,
-      useCase: parent.useCase,
-      model,
-      routerReason: `Edit of ${parent.id}`,
-      referenceCount: 1,
-      parentCreationId: parent.id,
-      provenance,
-    });
+    try {
+      const adapter = this.getAdapter(model);
+      let output;
+      try {
+        output = await adapter.generate({
+          prompt: req.prompt,
+          references,
+          aspectRatio: parent.aspectRatio,
+          resolution: parent.resolution,
+          count: 1,
+        });
+      } catch (err) {
+        throw err instanceof AdapterRequestError
+          ? err
+          : new AdapterRequestError(model, (err as Error).message);
+      }
 
-    return creation;
+      const provenance = buildProvenanceManifest({ model, useCase: parent.useCase, createdAt });
+      const images = await this.persistAll(output.images, parent.useCase);
+
+      const creation = await this.deps.repository.update(pending.id, {
+        model,
+        resolution: effectiveResolution(model, parent.resolution),
+        images,
+        status: 'done',
+        provenance,
+        routerReason: `Edit of ${parent.id}`,
+      });
+
+      await this.deps.audit({
+        type: 'studio.edit',
+        userId,
+        useCase: parent.useCase,
+        model,
+        routerReason: `Edit of ${parent.id}`,
+        referenceCount: 1,
+        parentCreationId: parent.id,
+        provenance,
+      });
+
+      return creation;
+    } catch (err) {
+      await this.deps.repository.update(pending.id, { status: 'error' });
+      throw err;
+    }
   }
 
   private async runWithFallback(

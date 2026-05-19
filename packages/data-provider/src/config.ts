@@ -744,6 +744,12 @@ export const interfaceSchema = z
         public: z.boolean().optional(),
       })
       .optional(),
+    automations: z
+      .object({
+        use: z.boolean().optional(),
+        create: z.boolean().optional(),
+      })
+      .optional(),
   })
   .default({
     modelSelect: true,
@@ -788,6 +794,10 @@ export const interfaceSchema = z
       create: false,
       share: false,
       public: false,
+    },
+    automations: {
+      use: true,
+      create: true,
     },
   });
 

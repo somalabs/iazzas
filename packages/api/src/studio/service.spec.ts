@@ -17,6 +17,7 @@ import type {
 import type {
   StoredCreation,
   StudioCreationDraft,
+  StudioCreationPatch,
   StudioRepository,
   StudioServiceDeps,
 } from './service';
@@ -63,6 +64,24 @@ class InMemoryRepo implements StudioRepository {
     };
     this.rows.push(creation);
     return creation;
+  }
+  async update(id: string, patch: StudioCreationPatch): Promise<StudioCreation> {
+    const idx = this.rows.findIndex((r) => r.id === id);
+    if (idx === -1) {
+      throw new Error(`InMemoryRepo: creation ${id} not found`);
+    }
+    const updated: StoredCreation = {
+      ...this.rows[idx],
+      ...(patch.model !== undefined ? { model: patch.model } : {}),
+      ...(patch.resolution !== undefined ? { resolution: patch.resolution } : {}),
+      ...(patch.images !== undefined ? { images: patch.images } : {}),
+      ...(patch.referenceCount !== undefined ? { referenceCount: patch.referenceCount } : {}),
+      ...(patch.status !== undefined ? { status: patch.status } : {}),
+      ...(patch.routerReason !== undefined ? { routerReason: patch.routerReason } : {}),
+      ...(patch.provenance !== undefined ? { provenance: patch.provenance } : {}),
+    };
+    this.rows[idx] = updated;
+    return updated;
   }
   async findById(id: string, userId: string): Promise<StoredCreation | null> {
     return this.rows.find((r) => r.id === id && r.userId === userId) ?? null;

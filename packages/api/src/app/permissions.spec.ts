@@ -100,6 +100,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
       },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
+      },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: false,
         [Permissions.CREATE]: false,
@@ -146,6 +150,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
       },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: true,
@@ -258,6 +266,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
       },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
+      },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: false,
         [Permissions.CREATE]: false,
@@ -304,6 +316,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
       },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: true,
@@ -402,6 +418,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
       },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
+      },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: false,
         [Permissions.CREATE]: false,
@@ -448,6 +468,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: true,
         [Permissions.SHARE_PUBLIC]: true,
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
       },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: true,
@@ -559,6 +583,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
       },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
+      },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: false,
         [Permissions.CREATE]: false,
@@ -605,6 +633,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: true,
         [Permissions.SHARE_PUBLIC]: true,
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
       },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: true,
@@ -703,6 +735,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
       },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
+      },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: false,
         [Permissions.CREATE]: false,
@@ -749,6 +785,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: true,
         [Permissions.SHARE_PUBLIC]: true,
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
       },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: true,
@@ -852,6 +892,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
       },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
+      },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: false,
         [Permissions.CREATE]: false,
@@ -886,6 +930,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: true,
         [Permissions.SHARE_PUBLIC]: true,
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
       },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: true,
@@ -1006,6 +1054,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
       },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
+      },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: false,
         [Permissions.CREATE]: false,
@@ -1044,6 +1096,10 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: true,
         [Permissions.SHARE_PUBLIC]: true,
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
       },
       [PermissionTypes.REMOTE_AGENTS]: {
         [Permissions.USE]: true,

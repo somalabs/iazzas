@@ -57,6 +57,10 @@ export enum QueryKeys {
   flows = 'flows',
   flow = 'flow',
   flowRuns = 'flowRuns',
+  /* Automations */
+  automations = 'automations',
+  automation = 'automation',
+  automationRuns = 'automationRuns',
   principalSearch = 'principalSearch',
   accessRoles = 'accessRoles',
   resourcePermissions = 'resourcePermissions',
@@ -84,6 +88,7 @@ export enum QueryKeys {
   /* Studio */
   studioCreations = 'studioCreations',
   studioCreation = 'studioCreation',
+  studioModels = 'studioModels',
   adminFeedbacks = 'adminFeedbacks',
 }
 
@@ -146,4 +151,10 @@ export enum MutationKeys {
   deleteFlow = 'deleteFlow',
   runFlow = 'runFlow',
   resumeFlowRun = 'resumeFlowRun',
+  /* Automations */
+  createAutomation = 'createAutomation',
+  updateAutomation = 'updateAutomation',
+  deleteAutomation = 'deleteAutomation',
+  toggleAutomation = 'toggleAutomation',
+  runAutomation = 'runAutomation',
 }

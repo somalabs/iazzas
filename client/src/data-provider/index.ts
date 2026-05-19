@@ -9,6 +9,8 @@ export * from './Memories';
 export * from './Studio';
 /* Agent Studio flows */
 export * from './Flows';
+/* Automations */
+export * from './Automations';
 export * from './Messages';
 export * from './Misc';
 export * from './Tools';

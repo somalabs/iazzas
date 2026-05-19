@@ -215,6 +215,7 @@ describe('socialLogin', () => {
         name: 'New User',
         emailVerified: true,
         appConfig: expect.any(Object),
+        claims: { email, name: 'New User', username: 'New' },
       });
 
       expect(callback).toHaveBeenCalledWith(null, newUser);
