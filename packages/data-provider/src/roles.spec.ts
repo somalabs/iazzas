@@ -87,7 +87,11 @@ describe('roleDefaults', () => {
           restrictedSet.has(permType) ||
           permType === PermissionTypes.MEMORIES ||
           permType === PermissionTypes.PROMPTS ||
-          permType === PermissionTypes.AGENTS;
+          permType === PermissionTypes.AGENTS ||
+          // AUTOMATIONS is user-owned (createdBy, tenant-scoped, not shared
+          // between users); CREATE=true for USER is intentional per CONTRACT
+          // §9.2, mirroring AGENTS/PROMPTS.
+          permType === PermissionTypes.AUTOMATIONS;
 
         expect({
           permType,
@@ -126,6 +130,23 @@ describe('roleDefaults', () => {
             }),
           );
         }
+      }
+    });
+  });
+
+  describe('AUTOMATIONS permission seeding', () => {
+    it('is part of the root permissions schema', () => {
+      expect(permissionsSchema.shape).toHaveProperty(PermissionTypes.AUTOMATIONS);
+    });
+
+    it('seeds USE+CREATE=true for ADMIN and USER (CONTRACT §9.2)', () => {
+      for (const role of [SystemRoles.ADMIN, SystemRoles.USER]) {
+        const perms = roleDefaults[role].permissions[PermissionTypes.AUTOMATIONS] as Record<
+          string,
+          boolean
+        >;
+        expect(perms[Permissions.USE]).toBe(true);
+        expect(perms[Permissions.CREATE]).toBe(true);
       }
     });
   });

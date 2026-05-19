@@ -30,3 +30,4 @@ export { default as studioCreationSchema } from './studio';
 export { default as feedbackSchema } from './feedback';
 export { default as agentFlowSchema } from './agentFlow';
 export { default as agentFlowRunSchema } from './agentFlowRun';
+export { default as automationSchema, notificationSchema } from './automation';

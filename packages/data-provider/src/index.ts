@@ -28,6 +28,7 @@ export * from './types/queries';
 export * from './types/runs';
 export * from './types/web';
 export * from './types/flow';
+export * from './types/automations';
 export * from './types/graph';
 /* access permissions */
 export * from './accessPermissions';

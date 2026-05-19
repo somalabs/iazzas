@@ -25,6 +25,8 @@ export * from './memory';
 export * from './studio';
 /* Agent Flows (Agent Studio) */
 export * from './agentFlow';
+/* Automations */
+export * from './automation';
 /* Prompts */
 export * from './prompts';
 /* Access Control */

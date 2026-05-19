@@ -185,6 +185,10 @@ export const roleDefaults = defaultRolesSchema.parse({
         [Permissions.SHARE]: true,
         [Permissions.SHARE_PUBLIC]: true,
       },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
+      },
     },
   },
   [SystemRoles.USER]: {
@@ -229,6 +233,10 @@ export const roleDefaults = defaultRolesSchema.parse({
         [Permissions.CREATE]: false,
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
+      },
+      [PermissionTypes.AUTOMATIONS]: {
+        [Permissions.USE]: true,
+        [Permissions.CREATE]: true,
       },
     },
   },

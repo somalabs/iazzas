@@ -198,9 +198,38 @@ fileConfig:
         - image/webp
 
 mcpServers:
-  azzas:
-    type: stdio
-    command: node
-    args:
-      - /opt/azzas-mcp/index.js
+  # JWT passthrough: o id_token do user logado (Authentik em prod, Azure em dev)
+  # vai no header Authorization. O bq-analista valida assinatura, extrai email
+  # e checa allowlist por agent. Allowlist de cada deploy é independente.
+  azzas_vendas_linx:
+    type: streamable-http
+    url: https://bq-analista-production.up.railway.app/mcp
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
+  azzas_devolucoes:
+    type: streamable-http
+    url: https://analista-devolucoes-production.up.railway.app/mcp
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
+    timeout: 60000
+  azzas_ciclo:
+    type: streamable-http
+    url: https://agent-atacado-production.up.railway.app/mcp
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
+    timeout: 60000
+  azzas_clientes:
+    type: streamable-http
+    url: https://agent-clientes-production.up.railway.app/mcp
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
+    timeout: 60000
+
+  # Rollback: descomente o bloco abaixo e remova os 4 acima pra voltar ao stdio.
+  # azzas:
+  #   type: stdio
+  #   command: node
+  #   args:
+  #     - /opt/azzas-mcp/index.js
+  #   timeout: 60000

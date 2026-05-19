@@ -34,6 +34,7 @@ const { initializeBalanceScheduler } = require('./services/start/balanceSchedule
 const initializeMCPs = require('./services/initializeMCPs');
 const configureSocialLogins = require('./socialLogins');
 const { getAppConfig } = require('./services/Config');
+const { bootstrapScheduler } = require('./services/Automations/scheduler');
 const staticCache = require('./utils/staticCache');
 const optionalJwtAuth = require('./middleware/optionalJwtAuth');
 const noIndex = require('./middleware/noIndex');
@@ -75,6 +76,10 @@ const startServer = async () => {
   await runAsSystem(async () => {
     await performStartupChecks(appConfig);
     await updateInterfacePermissions({ appConfig, getRoleByName, updateAccessPermissions });
+  });
+
+  bootstrapScheduler().catch((err) => {
+    logger.error('[Automations] scheduler bootstrap failed:', err);
   });
 
   const indexPath = path.join(appConfig.paths.dist, 'index.html');
@@ -187,6 +192,7 @@ const startServer = async () => {
   app.use('/api/memories', routes.memories);
   app.use('/api/studio', routes.studio);
   app.use('/api/flows', routes.flows);
+  app.use('/api/automacoes', routes.automations);
   app.use('/api/permissions', routes.accessPermissions);
 
   app.use('/api/tags', routes.tags);

@@ -661,12 +661,20 @@ function createToolInstance({
         error,
       );
 
+      /** Allowlist denial from MCP server — surface the server's user-facing message directly. */
+      const rawMessage = typeof error?.message === 'string' ? error.message : '';
+      const isAllowlistDenial = rawMessage.includes('não tem acesso ao agent');
+      if (isAllowlistDenial) {
+        const cleaned = rawMessage.replace(/^MCP error -?\d+:\s*/i, '');
+        throw new Error(cleaned);
+      }
+
       /** OAuth error, provide a helpful message */
       const isOAuthError =
-        error.message?.includes('401') ||
-        error.message?.includes('OAuth') ||
-        error.message?.includes('authentication') ||
-        error.message?.includes('Non-200 status code (401)');
+        rawMessage.includes('401') ||
+        rawMessage.includes('OAuth') ||
+        rawMessage.includes('authentication') ||
+        rawMessage.includes('Non-200 status code (401)');
 
       if (isOAuthError) {
         throw new Error(
