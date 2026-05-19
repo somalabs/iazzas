@@ -41,35 +41,34 @@ const NewChatButton = memo(function NewChatButton({ expanded }: { expanded: bool
 
   const label = localize('com_ui_new_chat');
 
-  return (
-    <TooltipAnchor
-      side="right"
-      description={expanded ? '' : label}
-      render={
-        <a
-          href="/c/new"
-          data-testid="new-chat-button"
-          aria-label={label}
-          className={cn(ROW_BASE, expanded ? ROW_EXPANDED : ROW_COLLAPSED)}
-          onClick={handleClick}
-        >
-          <span className={ICON_SLOT}>
-            <span className="flex size-6 items-center justify-center rounded-full bg-text-primary">
-              <NewChatIcon className="size-3.5 text-white dark:text-black" />
-            </span>
+  const element = (
+    <a
+      href="/c/new"
+      data-testid="new-chat-button"
+      aria-label={label}
+      className={cn(ROW_BASE, expanded ? ROW_EXPANDED : ROW_COLLAPSED)}
+      onClick={handleClick}
+    >
+      <span className={ICON_SLOT}>
+        <span className="flex size-6 items-center justify-center rounded-full bg-text-primary">
+          <NewChatIcon className="size-3.5 text-white dark:text-black" />
+        </span>
+      </span>
+      {expanded && (
+        <span className="flex min-w-0 flex-col">
+          <span className="truncate text-sm font-medium text-text-primary">{label}</span>
+          <span className="truncate text-xs text-text-secondary">
+            {localize('com_ui_ux_rail_novo_chat_desc')}
           </span>
-          {expanded && (
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate text-sm font-medium text-text-primary">{label}</span>
-              <span className="truncate text-xs text-text-secondary">
-                {localize('com_ui_ux_rail_novo_chat_desc')}
-              </span>
-            </span>
-          )}
-        </a>
-      }
-    />
+        </span>
+      )}
+    </a>
   );
+
+  if (expanded) {
+    return element;
+  }
+  return <TooltipAnchor side="right" description={label} render={element} />;
 });
 
 const NavRouteButton = memo(function NavRouteButton({
@@ -85,41 +84,40 @@ const NavRouteButton = memo(function NavRouteButton({
   const isNavActive = link.href ? location.pathname.startsWith(link.href) : false;
   const label = link.title ? localize(link.title) : '';
 
-  return (
-    <TooltipAnchor
-      description={expanded ? '' : label}
-      side="right"
-      render={
-        <Button
-          variant="ghost"
-          aria-label={label}
-          aria-current={isNavActive ? 'page' : undefined}
-          className={cn(
-            ROW_BASE,
-            expanded ? ROW_EXPANDED : ROW_COLLAPSED,
-            isNavActive
-              ? 'bg-surface-active-alt text-text-primary'
-              : 'text-text-secondary hover:bg-surface-hover',
-          )}
-          onClick={() => navigate(link.href!)}
-        >
-          <span className={ICON_SLOT}>
-            {link.icon && <link.icon className="h-5 w-5" aria-hidden="true" />}
-          </span>
-          {expanded && (
-            <span className="flex min-w-0 flex-col">
-              <span className="truncate text-sm font-medium text-text-primary">{label}</span>
-              {link.description && (
-                <span className="truncate text-xs text-text-secondary">
-                  {localize(link.description)}
-                </span>
-              )}
+  const element = (
+    <Button
+      variant="ghost"
+      aria-label={label}
+      aria-current={isNavActive ? 'page' : undefined}
+      className={cn(
+        ROW_BASE,
+        expanded ? ROW_EXPANDED : ROW_COLLAPSED,
+        isNavActive
+          ? 'bg-surface-active-alt text-text-primary'
+          : 'text-text-secondary hover:bg-surface-hover',
+      )}
+      onClick={() => navigate(link.href!)}
+    >
+      <span className={ICON_SLOT}>
+        {link.icon && <link.icon className="h-5 w-5" aria-hidden="true" />}
+      </span>
+      {expanded && (
+        <span className="flex min-w-0 flex-col">
+          <span className="truncate text-sm font-medium text-text-primary">{label}</span>
+          {link.description && (
+            <span className="truncate text-xs text-text-secondary">
+              {localize(link.description)}
             </span>
           )}
-        </Button>
-      }
-    />
+        </span>
+      )}
+    </Button>
   );
+
+  if (expanded) {
+    return element;
+  }
+  return <TooltipAnchor side="right" description={label} render={element} />;
 });
 
 function ExpandedPanel({
@@ -137,27 +135,29 @@ function ExpandedPanel({
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
 
+  const toggleButton = (
+    <Button
+      id={expanded ? CLOSE_SIDEBAR_ID : undefined}
+      data-testid={expanded ? 'close-sidebar-button' : 'open-sidebar-button'}
+      variant="ghost"
+      aria-label={localize(toggleLabel)}
+      aria-expanded={expanded}
+      className={cn(ROW_BASE, expanded ? ROW_EXPANDED : ROW_COLLAPSED)}
+      onClick={onToggle}
+    >
+      <span className={ICON_SLOT}>
+        <Sidebar aria-hidden="true" className="h-5 w-5 text-text-primary" />
+      </span>
+    </Button>
+  );
+
   return (
     <div className="flex h-full w-full flex-shrink-0 flex-col gap-2 border-r border-border-light bg-surface-primary-alt px-2 py-2">
-      <TooltipAnchor
-        side="right"
-        description={expanded ? '' : localize(toggleLabel)}
-        render={
-          <Button
-            id={expanded ? CLOSE_SIDEBAR_ID : undefined}
-            data-testid={expanded ? 'close-sidebar-button' : 'open-sidebar-button'}
-            variant="ghost"
-            aria-label={localize(toggleLabel)}
-            aria-expanded={expanded}
-            className={cn(ROW_BASE, expanded ? ROW_EXPANDED : ROW_COLLAPSED)}
-            onClick={onToggle}
-          >
-            <span className={ICON_SLOT}>
-              <Sidebar aria-hidden="true" className="h-5 w-5 text-text-primary" />
-            </span>
-          </Button>
-        }
-      />
+      {expanded ? (
+        toggleButton
+      ) : (
+        <TooltipAnchor side="right" description={localize(toggleLabel)} render={toggleButton} />
+      )}
       <NewChatButton expanded={expanded} />
       <div className="flex flex-col gap-1 overflow-y-auto">
         {links.map((link) => {
