@@ -33,7 +33,7 @@ function Balance() {
     refillIntervalUnit !== undefined &&
     refillIntervalValue !== undefined;
 
-  const { pct, colorState, viraDDMM, displayCeiling, hasCycle } = getCycleInfo({
+  const { pct, colorState, hoursUntilRenewal, displayCeiling, hasCycle } = getCycleInfo({
     tokenCredits,
     autoRefillEnabled,
     refillAmount,
@@ -65,9 +65,10 @@ function Balance() {
             <span className="text-sm font-medium text-text-primary">
               {localize('com_ui_ux_balance_cycle')}
             </span>
-            {viraDDMM && (
+            {hoursUntilRenewal != null && (
               <span className={cn('text-xs', dateColor)}>
-                {localize('com_ui_ux_balance_vira_em')} {viraDDMM}
+                {localize('com_ui_ux_balance_renova')} ({localize('com_ui_ux_balance_renova_em')}{' '}
+                {hoursUntilRenewal}h)
               </span>
             )}
           </div>

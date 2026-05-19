@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label, InfoHoverCard, ESide } from '@librechat/client';
 import type { RefillIntervalUnit } from '~/utils/credits';
-import { getNextFutureInterval } from '~/utils/credits';
+import { hoursUntilSaoPauloMidnight } from '~/utils/credits';
 import { TranslationKeys, useLocalize } from '~/hooks';
 
 interface AutoRefillSettingsProps {
@@ -20,9 +20,7 @@ const AutoRefillSettings: React.FC<AutoRefillSettingsProps> = ({
   const localize = useLocalize();
 
   const lastRefillDate = lastRefill ? new Date(lastRefill) : null;
-  const nextRefill = lastRefillDate
-    ? getNextFutureInterval(lastRefillDate, refillIntervalValue, refillIntervalUnit)
-    : null;
+  const hoursUntilRenewal = hoursUntilSaoPauloMidnight();
 
   // Return the localized unit based on singular/plural values
   const getLocalizedIntervalUnit = (value: number, unit: RefillIntervalUnit): string => {
@@ -77,9 +75,10 @@ const AutoRefillSettings: React.FC<AutoRefillSettingsProps> = ({
           <InfoHoverCard side={ESide.Bottom} text={localize('com_nav_balance_next_refill_info')} />
         </div>
 
-        {/* Right Section: tokenCredits Value */}
+        {/* Right Section: daily renewal countdown */}
         <span className="text-sm font-medium text-gray-800 dark:text-gray-200" role="note">
-          {nextRefill ? nextRefill.toLocaleString() : '-'}
+          {localize('com_ui_ux_balance_renova')} ({localize('com_ui_ux_balance_renova_em')}{' '}
+          {hoursUntilRenewal}h)
         </span>
       </div>
     </div>

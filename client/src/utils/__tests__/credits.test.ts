@@ -1,4 +1,4 @@
-import { getCycleInfo } from '../credits';
+import { getCycleInfo, hoursUntilSaoPauloMidnight } from '../credits';
 
 describe('getCycleInfo', () => {
   test('no auto-refill → no cycle, safe state', () => {
@@ -6,7 +6,7 @@ describe('getCycleInfo', () => {
     expect(info.hasCycle).toBe(false);
     expect(info.pct).toBe(0);
     expect(info.colorState).toBe('safe');
-    expect(info.viraDDMM).toBeNull();
+    expect(info.hoursUntilRenewal).toBeNull();
     expect(info.displayCeiling).toBeNull();
   });
 
@@ -61,26 +61,44 @@ describe('getCycleInfo', () => {
     expect(info.pct).toBe(0);
   });
 
-  test('viraDDMM computed for monthly cycle as DD/MM', () => {
-    const lastRefill = new Date('2026-05-01T00:00:00Z');
+  test('daily cycle exposes hoursUntilRenewal in [1, 24]', () => {
     const info = getCycleInfo({
       tokenCredits: 500 * 10_000,
       autoRefillEnabled: true,
       refillAmount: 1000,
-      lastRefill,
-      refillIntervalUnit: 'months',
-      refillIntervalValue: 1,
     });
-    expect(info.viraDDMM).toMatch(/^\d{2}\/\d{2}$/);
+    expect(info.hoursUntilRenewal).not.toBeNull();
+    expect(info.hoursUntilRenewal).toBeGreaterThanOrEqual(1);
+    expect(info.hoursUntilRenewal).toBeLessThanOrEqual(24);
   });
 
-  test('viraDDMM null when interval data missing', () => {
+  test('hoursUntilRenewal null when no cycle (refillAmount = 0)', () => {
     const info = getCycleInfo({
       tokenCredits: 500 * 10_000,
       autoRefillEnabled: true,
-      refillAmount: 1000,
-      lastRefill: new Date('2026-05-01T00:00:00Z'),
+      refillAmount: 0,
     });
-    expect(info.viraDDMM).toBeNull();
+    expect(info.hoursUntilRenewal).toBeNull();
+  });
+});
+
+describe('hoursUntilSaoPauloMidnight', () => {
+  // America/Sao_Paulo is UTC-3 (no DST since 2019).
+  test('at 21:00 São Paulo (00:00 UTC) → 3h until midnight', () => {
+    expect(hoursUntilSaoPauloMidnight(new Date('2026-05-19T00:00:00Z'))).toBe(3);
+  });
+
+  test('at 00:00 São Paulo (03:00 UTC) → full 24h', () => {
+    expect(hoursUntilSaoPauloMidnight(new Date('2026-05-19T03:00:00Z'))).toBe(24);
+  });
+
+  test('30min before midnight São Paulo rounds up to 1h', () => {
+    expect(hoursUntilSaoPauloMidnight(new Date('2026-05-19T02:30:00Z'))).toBe(1);
+  });
+
+  test('result is always clamped to [1, 24]', () => {
+    const h = hoursUntilSaoPauloMidnight(new Date('2026-05-19T15:00:00Z'));
+    expect(h).toBeGreaterThanOrEqual(1);
+    expect(h).toBeLessThanOrEqual(24);
   });
 });

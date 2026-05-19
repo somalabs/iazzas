@@ -41,16 +41,46 @@ export function formatUSD(raw: number): string {
 export type CycleColorState = 'safe' | 'warning' | 'danger';
 
 export type CycleInfo = {
-  /** Percent of the cycle ceiling already consumed (0-100). */
+  /** Percent of the daily ceiling already consumed (0-100). */
   pct: number;
   colorState: CycleColorState;
-  /** Short "DD/MM" date of the next refill, or null when not applicable. */
-  viraDDMM: string | null;
-  /** Cycle ceiling in display credits (= refillAmount), or null. */
+  /** Hours (rounded up, 1-24) until the next daily renewal at 00:00
+   * America/Sao_Paulo, or null when there is no cycle. */
+  hoursUntilRenewal: number | null;
+  /** Daily ceiling in display credits (= refillAmount), or null. */
   displayCeiling: number | null;
   /** True when a progress bar/ring should be shown. */
   hasCycle: boolean;
 };
+
+const SAO_PAULO_TZ = 'America/Sao_Paulo';
+
+/**
+ * Hours (rounded up, clamped to 1-24) until the next 00:00 in
+ * America/Sao_Paulo. The credit cycle renews daily at local midnight,
+ * independent of the backend refill interval fields.
+ */
+export function hoursUntilSaoPauloMidnight(now: Date = new Date()): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: SAO_PAULO_TZ,
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(now);
+
+  const part = (type: string): number =>
+    Number(parts.find((p) => p.type === type)?.value ?? 0);
+
+  let hour = part('hour');
+  if (hour === 24) {
+    hour = 0;
+  }
+  const elapsedSeconds = hour * 3600 + part('minute') * 60 + part('second');
+  const remainingSeconds = 86_400 - elapsedSeconds;
+
+  return Math.min(24, Math.max(1, Math.ceil(remainingSeconds / 3600)));
+}
 
 type CycleInput = {
   tokenCredits: number;
@@ -61,16 +91,9 @@ type CycleInput = {
   refillIntervalValue?: number;
 };
 
-/** Derives cycle progress (percent, color, next-refill date) from balance data. */
+/** Derives daily-cycle progress (percent, color, renewal countdown). */
 export function getCycleInfo(balance: CycleInput): CycleInfo {
-  const {
-    tokenCredits,
-    autoRefillEnabled,
-    refillAmount,
-    lastRefill,
-    refillIntervalUnit,
-    refillIntervalValue,
-  } = balance;
+  const { tokenCredits, autoRefillEnabled, refillAmount } = balance;
 
   const hasCycle =
     !!autoRefillEnabled && refillAmount !== undefined && refillAmount > 0;
@@ -90,24 +113,10 @@ export function getCycleInfo(balance: CycleInput): CycleInfo {
   const colorState: CycleColorState =
     pct >= 90 ? 'danger' : pct >= 70 ? 'warning' : 'safe';
 
-  const canComputeDate =
-    !!autoRefillEnabled &&
-    lastRefill != null &&
-    refillIntervalUnit !== undefined &&
-    refillIntervalValue !== undefined;
-
-  const nextRefillDate = canComputeDate
-    ? getNextFutureInterval(new Date(lastRefill!), refillIntervalValue!, refillIntervalUnit!)
-    : null;
-
-  const viraDDMM = nextRefillDate
-    ? nextRefillDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-    : null;
-
   return {
     pct,
     colorState,
-    viraDDMM,
+    hoursUntilRenewal: hasCycle ? hoursUntilSaoPauloMidnight() : null,
     displayCeiling: refillAmount ?? null,
     hasCycle,
   };

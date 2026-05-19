@@ -60,21 +60,26 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
 
   const balance = balanceQuery.data;
   const formattedCredits = formatDisplayCredits(balance.tokenCredits);
-  const { pct, colorState, viraDDMM, displayCeiling, hasCycle } = getCycleInfo(balance);
+  const { pct, colorState, hoursUntilRenewal, displayCeiling, hasCycle } =
+    getCycleInfo(balance);
   const iconColor = ICON_COLOR[colorState];
   const barColor = BAR_COLOR[colorState];
   const ceiling =
     displayCeiling != null ? new Intl.NumberFormat().format(displayCeiling) : null;
+  const renewalText =
+    hoursUntilRenewal != null
+      ? `${localize('com_ui_ux_balance_renova')} (${localize('com_ui_ux_balance_renova_em')} ${hoursUntilRenewal}h)`
+      : null;
 
   const ariaLabel =
     hasCycle && ceiling
-      ? `${formattedCredits} ${localize('com_ui_ux_balance_de')} ${ceiling} ${localize('com_ui_ux_balance_creditos')}${viraDDMM ? ` · ${localize('com_ui_ux_balance_vira_em')} ${viraDDMM}` : ''}`
+      ? `${formattedCredits} ${localize('com_ui_ux_balance_de')} ${ceiling} ${localize('com_ui_ux_balance_creditos')}${renewalText ? ` · ${renewalText}` : ''}`
       : `${localize('com_nav_balance')}: ${formattedCredits}`;
 
   if (collapsed) {
     const tooltip =
       hasCycle && ceiling
-        ? `${formattedCredits} / ${ceiling} ${localize('com_ui_ux_balance_creditos')}${viraDDMM ? ` · ${localize('com_ui_ux_balance_vira_em')} ${viraDDMM}` : ''}`
+        ? `${formattedCredits} / ${ceiling} ${localize('com_ui_ux_balance_creditos')}${renewalText ? ` · ${renewalText}` : ''}`
         : `${localize('com_nav_balance')}: ${formattedCredits}`;
 
     return (
@@ -159,14 +164,14 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
                 style={{ width: `${pct}%` }}
               />
             </div>
-            {viraDDMM && (
+            {renewalText && (
               <span
                 className={cn(
                   'truncate text-text-tertiary',
                   colorState !== 'safe' && iconColor,
                 )}
               >
-                {localize('com_ui_ux_balance_vira_em')} {viraDDMM}
+                {renewalText}
               </span>
             )}
           </div>
