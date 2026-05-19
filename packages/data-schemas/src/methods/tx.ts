@@ -184,7 +184,6 @@ export const tokenValues: Record<string, { prompt: number; completion: number }>
     'gemini-3-flash': { prompt: 0.5, completion: 3 },
     'gemini-3-pro-image': { prompt: 2, completion: 120 },
     'gemini-3.1': { prompt: 2, completion: 12 },
-    'gemini-3.1-pro': { prompt: 2, completion: 12 },
     'gemini-3.1-flash-lite': { prompt: 0.25, completion: 1.5 },
     'gemini-3.1-flash-image': { prompt: 0.5, completion: 60 },
     'gemini-3.1-flash-live': { prompt: 0.75, completion: 4.5 },
@@ -342,7 +341,6 @@ export const premiumTokenValues: Record<
   'claude-sonnet-4-6': { threshold: 200000, prompt: 6, completion: 22.5 },
   'gemini-2.5-pro': { threshold: 200000, prompt: 2.5, completion: 15 },
   'gemini-3.1': { threshold: 200000, prompt: 4, completion: 18 },
-  'gemini-3.1-pro': { threshold: 200000, prompt: 4, completion: 18 },
 };
 
 export function createTxMethods(_mongoose: typeof import('mongoose'), txDeps: TxDeps) {
