@@ -27,3 +27,4 @@ export * from './ArtifactsContext';
 export * from './PromptGroupsContext';
 export * from './MessagesViewContext';
 export { default as BadgeRowProvider } from './BadgeRowContext';
+export * from './AgentDraftContext';
