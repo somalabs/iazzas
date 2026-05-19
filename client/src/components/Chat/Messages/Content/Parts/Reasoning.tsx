@@ -38,9 +38,7 @@ const Reasoning = memo(({ reasoning, isLast }: ReasoningProps) => {
   const localize = useLocalize();
   const { isSubmitting, isLatestMessage, nextType } = useMessageContext();
   const effectiveIsSubmitting = isLatestMessage ? isSubmitting : false;
-  const [isExpanded, setIsExpanded] = useState(
-    () => Boolean(effectiveIsSubmitting && isLast),
-  );
+  const [isExpanded, setIsExpanded] = useState(() => Boolean(effectiveIsSubmitting && isLast));
   const [isBarVisible, setIsBarVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { style: expandStyle, ref: expandRef } = useExpandCollapse(isExpanded);

@@ -31,9 +31,7 @@ export default function AgentInspector({ nodeId, data }: { nodeId: string; data:
     return (
       <div className="flex flex-col items-center gap-3 rounded-lg border border-border-light bg-surface-secondary p-6 text-center">
         <Bot className="h-6 w-6 text-text-tertiary" aria-hidden="true" />
-        <p className="text-sm text-text-secondary">
-          {localize('com_ui_ux_flows_empty_agent')}
-        </p>
+        <p className="text-sm text-text-secondary">{localize('com_ui_ux_flows_empty_agent')}</p>
         <button
           type="button"
           onClick={() => navigate('/c/new')}

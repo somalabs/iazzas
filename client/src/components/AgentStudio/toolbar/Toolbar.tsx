@@ -42,9 +42,8 @@ export default function Toolbar() {
     };
     const onError = (error: unknown) => {
       dispatch({ type: 'SET_SAVING', payload: false });
-      const details = (
-        error as { response?: { data?: { details?: Array<{ code: string }> } } }
-      )?.response?.data?.details;
+      const details = (error as { response?: { data?: { details?: Array<{ code: string }> } } })
+        ?.response?.data?.details;
       const firstCode = Array.isArray(details) && details.length > 0 ? details[0].code : null;
       const msgKey = firstCode ? `com_studio_flow_run_error_${firstCode}` : null;
       showToast({
@@ -141,7 +140,7 @@ export default function Toolbar() {
             'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
             canRun
               ? 'bg-surface-submit text-white hover:bg-surface-submit-hover'
-              : 'cursor-not-allowed bg-surface-submit/40 text-white/60',
+              : 'bg-surface-submit/40 cursor-not-allowed text-white/60',
           )}
         >
           <Play className="h-3.5 w-3.5" aria-hidden="true" />
