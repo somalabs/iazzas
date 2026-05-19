@@ -23,7 +23,9 @@ describe('FluxKontextAdapter', () => {
     const get = jest
       .fn()
       .mockResolvedValueOnce({ data: { status: 'Pending' } })
-      .mockResolvedValueOnce({ data: { status: 'Ready', result: { sample: 'https://cdn/x.png' } } })
+      .mockResolvedValueOnce({
+        data: { status: 'Ready', result: { sample: 'https://delivery-us1.bfl.ai/x.png' } },
+      })
       .mockResolvedValueOnce({
         data: Buffer.from('binary'),
         headers: { 'content-type': 'image/png' },

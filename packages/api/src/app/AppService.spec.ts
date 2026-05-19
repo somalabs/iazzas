@@ -107,7 +107,7 @@ describe('AppService', () => {
         interfaceConfig: expect.objectContaining({
           modelSelect: true,
           parameters: true,
-          presets: true,
+          presets: false,
         }),
         mcpConfig: null,
         imageOutputType: expect.any(String),
