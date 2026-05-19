@@ -11,6 +11,10 @@ import { createMethods } from '~/methods';
  * on `role.save()` during `initializeRoles()`, so seeded ADMIN/USER docs lose
  * AUTOMATIONS and every `/api/automacoes` request 403s.
  */
+type RolePermissionsDoc = {
+  permissions?: Record<string, Record<string, boolean>>;
+} | null;
+
 describe('Role schema — AUTOMATIONS permission persistence', () => {
   let mongoServer: MongoMemoryServer;
   let modelsToCleanup: string[] = [];
@@ -52,7 +56,9 @@ describe('Role schema — AUTOMATIONS permission persistence', () => {
     });
     await role.save();
 
-    const reloaded = await Role.findOne({ name: 'lem48-explicit' }).lean();
+    const reloaded = (await Role.findOne({
+      name: 'lem48-explicit',
+    }).lean()) as RolePermissionsDoc;
     expect(reloaded?.permissions?.[PermissionTypes.AUTOMATIONS]).toEqual({
       [Permissions.USE]: true,
       [Permissions.CREATE]: true,
@@ -64,7 +70,7 @@ describe('Role schema — AUTOMATIONS permission persistence', () => {
     const Role = mongoose.models.Role;
 
     for (const roleName of [SystemRoles.ADMIN, SystemRoles.USER]) {
-      const role = await Role.findOne({ name: roleName }).lean();
+      const role = (await Role.findOne({ name: roleName }).lean()) as RolePermissionsDoc;
       expect(role?.permissions?.[PermissionTypes.AUTOMATIONS]).toEqual({
         [Permissions.USE]: true,
         [Permissions.CREATE]: true,
