@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button, useToastContext } from '@librechat/client';
 import { useWatch, useForm, FormProvider } from 'react-hook-form';
@@ -22,7 +22,11 @@ import {
   useGetExpandedAgentByIdQuery,
   useUploadAgentAvatarMutation,
 } from '~/data-provider';
-import { createProviderOption, getDefaultAgentFormValues } from '~/utils';
+import {
+  createProviderOption,
+  getDefaultAgentFormValues,
+  resolveDefaultProviderModel,
+} from '~/utils';
 import { useResourcePermissions } from '~/hooks/useResourcePermissions';
 import { useSelectAgent, useLocalize, useAuthContext } from '~/hooks';
 import { useAgentPanelContext } from '~/Providers/AgentPanelContext';
@@ -315,6 +319,23 @@ export default function AgentPanel() {
         .map((provider) => createProviderOption(provider)),
     [endpointsConfig, allowedProviders],
   );
+
+  const defaultsAppliedRef = useRef(false);
+  useEffect(() => {
+    if (defaultsAppliedRef.current || agent_id) {
+      return;
+    }
+    if ((getValues('model') ?? '') !== '') {
+      return;
+    }
+    const resolved = resolveDefaultProviderModel(providers, models);
+    if (!resolved) {
+      return;
+    }
+    setValue('provider', createProviderOption(resolved.provider), { shouldDirty: false });
+    setValue('model', resolved.model, { shouldDirty: false });
+    defaultsAppliedRef.current = true;
+  }, [agent_id, providers, models, getValues, setValue]);
 
   /* Mutations */
   const update = useUpdateAgentMutation({

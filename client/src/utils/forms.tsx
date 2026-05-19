@@ -45,6 +45,24 @@ export const createProviderOption = (provider: string) => ({
 });
 
 /**
+ * Primeiro provider (na ordem dada) com ao menos um modelo disponível.
+ * `models` pode conter chaves não-array (ex.: `initial`) — ignoradas via
+ * Array.isArray. Usado para pré-selecionar um default válido na criação.
+ */
+export const resolveDefaultProviderModel = (
+  providers: Array<{ value: string }>,
+  models: Record<string, unknown>,
+): { provider: string; model: string } | null => {
+  for (const { value } of providers) {
+    const list = models[value];
+    if (Array.isArray(list) && list.length > 0) {
+      return { provider: value, model: list[0] as string };
+    }
+  }
+  return null;
+};
+
+/**
  * Gets default agent form values with localStorage values for model and provider.
  * This is used to initialize agent forms with the last used model and provider.
  **/
