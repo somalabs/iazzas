@@ -72,6 +72,7 @@ jest.mock('~/hooks', () => ({
     const translations = {
       com_ui_save: 'Save',
       com_ui_create: 'Create',
+      com_ui_ux_publicar_agente: 'Publicar',
     };
     return translations[key] || key;
   },
@@ -331,7 +332,7 @@ describe('AgentFooter', () => {
       });
 
       render(<AgentFooter {...defaultProps} />);
-      expect(screen.getByText('Create')).toBeInTheDocument();
+      expect(screen.getByText('Publicar')).toBeInTheDocument();
       expect(screen.queryByTestId('version-button')).not.toBeInTheDocument();
       expect(screen.queryByTestId('delete-button')).not.toBeInTheDocument();
       expect(screen.queryByTestId('grant-access-dialog-agent')).not.toBeInTheDocument();
