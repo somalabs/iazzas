@@ -22,7 +22,7 @@ const agentFlowRunSchema = new Schema<IAgentFlowRun>(
       default: '',
     },
     nodeRuns: {
-      type: [Schema.Types.Mixed],
+      type: Schema.Types.Mixed,
       default: [],
     },
     context: {
