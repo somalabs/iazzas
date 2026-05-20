@@ -1284,18 +1284,35 @@ async function loadToolsForExecution({
                 let schemaDump = '<no schema>';
                 try {
                   const schema = tool.schema ?? tool.lc_kwargs?.schema;
-                  schemaDump = JSON.stringify(schema, null, 2).slice(0, 4000);
+                  schemaDump = JSON.stringify(schema, null, 2);
                 } catch (_e) {
                   schemaDump = `<unserializable: ${_e?.message}>`;
                 }
                 let inputDump = '<no input>';
                 try {
-                  inputDump = JSON.stringify(input, null, 2).slice(0, 4000);
+                  inputDump = JSON.stringify(input, null, 2);
                 } catch (_e) {
                   inputDump = `<unserializable: ${_e?.message}>`;
                 }
+                let causeDump = '';
+                if (err.cause) {
+                  try {
+                    causeDump = `\nCAUSE:\n${JSON.stringify(err.cause, null, 2)}`;
+                  } catch (_e) {
+                    causeDump = `\nCAUSE: <unserializable>`;
+                  }
+                }
+                const issues = err.issues || err.errors;
+                let issuesDump = '';
+                if (issues) {
+                  try {
+                    issuesDump = `\nISSUES:\n${JSON.stringify(issues, null, 2)}`;
+                  } catch (_e) {
+                    issuesDump = `\nISSUES: <unserializable>`;
+                  }
+                }
                 logger.error(
-                  `[TOOL_INPUT_DEBUG] tool=${tool.name}\nINPUT:\n${inputDump}\nSCHEMA:\n${schemaDump}`,
+                  `[TOOL_INPUT_DEBUG] tool=${tool.name}\nINPUT:\n${inputDump}${issuesDump}${causeDump}\nSCHEMA:\n${schemaDump}`,
                 );
               }
               throw err;
