@@ -42,7 +42,11 @@ describe('AgentesLayout — mobile (width < 768)', () => {
 
 describe('AgentesLayout — desktop (width >= 768)', () => {
   beforeEach(() => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 1280 });
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 1280,
+    });
   });
 
   it('renders both panels simultaneously', () => {

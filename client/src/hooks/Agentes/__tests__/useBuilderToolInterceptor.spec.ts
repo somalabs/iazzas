@@ -30,9 +30,7 @@ describe('useBuilderToolInterceptor', () => {
     const setFormValue = jest.fn();
     const messages = [makeMessage('atualizar_rascunho', { name: 'Bot X' }, true)];
 
-    renderHook(() =>
-      useBuilderToolInterceptor(messages, setDraftParams, setFormValue),
-    );
+    renderHook(() => useBuilderToolInterceptor(messages, setDraftParams, setFormValue));
 
     expect(setDraftParams).toHaveBeenCalled();
   });
@@ -41,9 +39,7 @@ describe('useBuilderToolInterceptor', () => {
     const setDraftParams = jest.fn();
     const messages = [makeMessage('web_search', { query: 'test' }, true)];
 
-    renderHook(() =>
-      useBuilderToolInterceptor(messages, setDraftParams, null),
-    );
+    renderHook(() => useBuilderToolInterceptor(messages, setDraftParams, null));
 
     expect(setDraftParams).not.toHaveBeenCalled();
   });
@@ -52,9 +48,7 @@ describe('useBuilderToolInterceptor', () => {
     const setDraftParams = jest.fn();
     const messages = [makeMessage('atualizar_rascunho', { name: 'Bot X' }, false)];
 
-    renderHook(() =>
-      useBuilderToolInterceptor(messages, setDraftParams, null),
-    );
+    renderHook(() => useBuilderToolInterceptor(messages, setDraftParams, null));
 
     expect(setDraftParams).not.toHaveBeenCalled();
   });
@@ -62,9 +56,7 @@ describe('useBuilderToolInterceptor', () => {
   it('does nothing with empty messages', () => {
     const setDraftParams = jest.fn();
 
-    renderHook(() =>
-      useBuilderToolInterceptor([], setDraftParams, null),
-    );
+    renderHook(() => useBuilderToolInterceptor([], setDraftParams, null));
 
     expect(setDraftParams).not.toHaveBeenCalled();
   });

@@ -58,9 +58,15 @@ jest.mock('~/Providers/AgentDraftContext', () => ({
 import BuilderChatView from '../BuilderChatView';
 
 const defaultDraft: AgentDraftParams = {
-  name: 'Test', category: '', provider: 'openAI', model: 'gpt-4o',
-  instructions: 'Be helpful', webSearch: false, fileSearch: false,
-  executeCode: false, mcpServers: [],
+  name: 'Test',
+  category: '',
+  provider: 'openAI',
+  model: 'gpt-4o',
+  instructions: 'Be helpful',
+  webSearch: false,
+  fileSearch: false,
+  executeCode: false,
+  mcpServers: [],
 };
 
 describe('BuilderChatView', () => {

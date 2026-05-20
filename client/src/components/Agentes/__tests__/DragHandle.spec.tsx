@@ -7,7 +7,6 @@ jest.mock('~/hooks', () => ({
 
 import DragHandle from '../DragHandle';
 
-
 describe('DragHandle', () => {
   it('calls onDrag with clientX after mousedown then mousemove', () => {
     const onDrag = jest.fn();
