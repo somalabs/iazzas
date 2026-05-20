@@ -18,7 +18,7 @@ export function createAtualizarRascunhoTool(): DynamicStructuredTool {
   return new DynamicStructuredTool({
     name: 'atualizar_rascunho',
     description:
-      'Atualiza campos do agente em construção diretamente no formulário do usuário.',
+      'Atualiza campos do agente em construção diretamente no formulário do usuário. Use sempre que quiser modificar nome, instrução, modelo, capacidades ou parâmetros avançados do agente.',
     schema: atualizarRascunhoInput,
     func: async () => JSON.stringify({ aplicado: true }),
   });
