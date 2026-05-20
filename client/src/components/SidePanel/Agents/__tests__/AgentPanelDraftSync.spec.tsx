@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Import the pure extraction helper that AgentPanel uses internally.
-import { extractMcpServerNames } from '~/utils/mcpTools';
+import { extractMcpServerNames } from '../../../../utils/mcpTools';
 
 describe('extractMcpServerNames', () => {
   const mcpServersMap = new Map([
