@@ -8,11 +8,16 @@ interface DragHandleProps {
 export default function DragHandle({ onDrag }: DragHandleProps) {
   const localize = useLocalize();
   const isDragging = useRef(false);
+  const onDragRef = useRef(onDrag);
+
+  useEffect(() => {
+    onDragRef.current = onDrag;
+  });
 
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
       if (isDragging.current) {
-        onDrag(e.clientX);
+        onDragRef.current(e.clientX);
       }
     }
     function handleMouseUp() {
@@ -24,7 +29,7 @@ export default function DragHandle({ onDrag }: DragHandleProps) {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [onDrag]);
+  }, []);
 
   return (
     <div
