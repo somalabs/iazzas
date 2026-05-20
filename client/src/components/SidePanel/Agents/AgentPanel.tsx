@@ -305,9 +305,16 @@ export default function AgentPanel() {
   );
   const agent_id = useWatch({ control, name: 'id' });
 
-  const { setDraftParams } = useAgentDraftContext();
+  const { setDraftParams, registerFormSetValue } = useAgentDraftContext();
+
+  useEffect(() => {
+    registerFormSetValue((field, value, options) => setValue(field as any, value, options));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [
+    watchedName,
+    watchedCategory,
     watchedProvider,
     watchedModel,
     watchedInstructions,
@@ -318,6 +325,8 @@ export default function AgentPanel() {
   ] = useWatch({
     control,
     name: [
+      'name',
+      'category',
       'provider',
       'model',
       'instructions',
@@ -336,6 +345,8 @@ export default function AgentPanel() {
           : ((watchedProvider as string | undefined) ?? '');
 
       setDraftParams({
+        name: (watchedName as string | null) ?? '',
+        category: (watchedCategory as string | null) ?? '',
         provider: providerValue,
         model: (watchedModel as string | null) ?? '',
         instructions: (watchedInstructions as string | null) ?? '',
@@ -347,6 +358,8 @@ export default function AgentPanel() {
     }, 300);
     return () => clearTimeout(timer);
   }, [
+    watchedName,
+    watchedCategory,
     watchedProvider,
     watchedModel,
     watchedInstructions,

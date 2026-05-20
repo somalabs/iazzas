@@ -5,6 +5,8 @@ import { AgentDraftProvider, useAgentDraftContext } from '../AgentDraftContext';
 import type { AgentDraftParams } from '../AgentDraftContext';
 
 const blank: AgentDraftParams = {
+  name: '',
+  category: '',
   provider: '',
   model: '',
   instructions: '',
