@@ -9,6 +9,7 @@ import {
   ResourceType,
   EModelEndpoint,
   PermissionBits,
+  AgentCapabilities,
   isAssistantsEndpoint,
 } from 'librechat-data-provider';
 import type { FieldNamesMarkedBoolean } from 'react-hook-form';
@@ -24,11 +25,13 @@ import {
 } from '~/data-provider';
 import {
   createProviderOption,
+  extractMcpServerNames,
   getDefaultAgentFormValues,
   resolveDefaultProviderModel,
 } from '~/utils';
 import { useResourcePermissions } from '~/hooks/useResourcePermissions';
 import { useSelectAgent, useLocalize, useAuthContext } from '~/hooks';
+import { useAgentDraftContext } from '~/Providers';
 import { useAgentPanelContext } from '~/Providers/AgentPanelContext';
 import AgentPanelSkeleton from './AgentPanelSkeleton';
 import AdvancedPanel from './Advanced/AdvancedPanel';
@@ -219,6 +222,7 @@ export default function AgentPanel() {
     agentsConfig,
     setActivePanel,
     endpointsConfig,
+    mcpServersMap,
     setCurrentAgentId,
     agent_id: current_agent_id,
   } = useAgentPanelContext();
@@ -300,6 +304,60 @@ export default function AgentPanel() {
     [getValues, uploadAvatarMutation],
   );
   const agent_id = useWatch({ control, name: 'id' });
+
+  const { setDraftParams } = useAgentDraftContext();
+
+  const [
+    watchedProvider,
+    watchedModel,
+    watchedInstructions,
+    watchedTools,
+    watchedWebSearch,
+    watchedFileSearch,
+    watchedExecuteCode,
+  ] = useWatch({
+    control,
+    name: [
+      'provider',
+      'model',
+      'instructions',
+      'tools',
+      AgentCapabilities.web_search,
+      AgentCapabilities.file_search,
+      AgentCapabilities.execute_code,
+    ],
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const providerValue =
+        watchedProvider != null && typeof watchedProvider === 'object' && 'value' in watchedProvider
+          ? (watchedProvider as { value: string }).value
+          : ((watchedProvider as string | undefined) ?? '');
+
+      setDraftParams({
+        provider: providerValue,
+        model: (watchedModel as string | null) ?? '',
+        instructions: (watchedInstructions as string | null) ?? '',
+        webSearch: Boolean(watchedWebSearch),
+        fileSearch: Boolean(watchedFileSearch),
+        executeCode: Boolean(watchedExecuteCode),
+        mcpServers: extractMcpServerNames(watchedTools as string[] | undefined, mcpServersMap),
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [
+    watchedProvider,
+    watchedModel,
+    watchedInstructions,
+    watchedTools,
+    watchedWebSearch,
+    watchedFileSearch,
+    watchedExecuteCode,
+    setDraftParams,
+    mcpServersMap,
+  ]);
+
   const previousVersionRef = useRef<number | undefined>();
 
   const allowedProviders = useMemo(
