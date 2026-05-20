@@ -1,0 +1,25 @@
+import { DynamicStructuredTool } from '@langchain/core/tools';
+import { z } from 'zod';
+
+const atualizarRascunhoInput = z.object({
+  name:         z.string().optional(),
+  instructions: z.string().optional(),
+  provider:     z.string().optional(),
+  model:        z.string().optional(),
+  webSearch:    z.boolean().optional(),
+  fileSearch:   z.boolean().optional(),
+  executeCode:  z.boolean().optional(),
+  mcpServers:   z.array(z.string()).optional(),
+  temperature:  z.number().optional(),
+  top_p:        z.number().optional(),
+});
+
+export function createAtualizarRascunhoTool(): DynamicStructuredTool {
+  return new DynamicStructuredTool({
+    name: 'atualizar_rascunho',
+    description:
+      'Atualiza campos do agente em construção diretamente no formulário do usuário.',
+    schema: atualizarRascunhoInput,
+    func: async () => JSON.stringify({ aplicado: true }),
+  });
+}

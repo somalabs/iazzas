@@ -354,6 +354,24 @@ export const fileSearchSchema: ExtendedJsonSchema = {
   required: ['query'],
 };
 
+/** Schema for the atualizar_rascunho frontend-bridge tool */
+export const atualizarRascunhoSchema: ExtendedJsonSchema = {
+  type: 'object',
+  properties: {
+    name:         { type: 'string', description: 'Nome do agente.' },
+    instructions: { type: 'string', description: 'Instruções do sistema do agente.' },
+    provider:     { type: 'string', description: 'Endpoint/provider do agente.' },
+    model:        { type: 'string', description: 'Modelo a usar.' },
+    webSearch:    { type: 'boolean', description: 'Habilitar busca na web.' },
+    fileSearch:   { type: 'boolean', description: 'Habilitar busca em arquivos.' },
+    executeCode:  { type: 'boolean', description: 'Habilitar execução de código.' },
+    mcpServers:   { type: 'array', items: { type: 'string' }, description: 'Servidores MCP habilitados.' },
+    temperature:  { type: 'number', description: 'Temperatura do modelo (0–2).' },
+    top_p:        { type: 'number', description: 'Top-p do modelo (0–1).' },
+  },
+  required: [],
+};
+
 /** Tool definitions registry - maps tool names to their definitions */
 export const toolDefinitions: Record<string, ToolRegistryDefinition> = {
   google: {
@@ -448,6 +466,13 @@ export const toolDefinitions: Record<string, ToolRegistryDefinition> = {
     schema: geminiToolkit.gemini_image_gen.schema,
     toolType: 'builtin',
     responseFormat: geminiToolkit.gemini_image_gen.responseFormat,
+  },
+  atualizar_rascunho: {
+    name: 'atualizar_rascunho',
+    description:
+      'Atualiza campos do agente em construção diretamente no formulário do usuário. Use sempre que quiser modificar nome, instrução, modelo, capacidades ou parâmetros avançados do agente.',
+    schema: atualizarRascunhoSchema,
+    toolType: 'builtin',
   },
 };
 
