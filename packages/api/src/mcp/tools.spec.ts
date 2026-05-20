@@ -57,6 +57,39 @@ describe('createMCPToolCacheService', () => {
       });
     });
 
+    it('normalizes the cached schema so propertyNames and other Gemini-incompatible keywords are stripped', async () => {
+      const deps = createMockDeps();
+      const { updateMCPServerTools } = createMCPToolCacheService(deps);
+      const tools: MCPToolInput[] = [
+        {
+          name: 'notion-search',
+          description: 'Search Notion',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              filter: {
+                type: 'object',
+                additionalProperties: { type: 'string' },
+                propertyNames: { pattern: '^[a-z_]+$' },
+              },
+            },
+            patternProperties: { '^x-': { type: 'string' } },
+            unevaluatedProperties: false,
+          } as unknown as MCPToolInput['inputSchema'],
+        },
+      ];
+
+      const result = await updateMCPServerTools({ userId: 'u1', serverName: 'notion', tools });
+
+      const key = `notion-search${Constants.mcp_delimiter}notion`;
+      const cached = result[key]['function'].parameters as Record<string, unknown>;
+      expect(cached).not.toHaveProperty('patternProperties');
+      expect(cached).not.toHaveProperty('unevaluatedProperties');
+      const filter = (cached.properties as Record<string, Record<string, unknown>>).filter;
+      expect(filter).not.toHaveProperty('propertyNames');
+      expect(filter.additionalProperties).toEqual({ type: 'string' });
+    });
+
     it('propagates setCachedTools errors', async () => {
       const deps = createMockDeps({
         setCachedTools: jest.fn().mockRejectedValue(new Error('Redis down')),

@@ -1,5 +1,6 @@
 import { logger } from '@librechat/data-schemas';
 import { Constants } from 'librechat-data-provider';
+import { normalizeJsonSchema, resolveJsonSchemaRefs } from './zod';
 import type { JsonSchemaType } from '@librechat/agents';
 import type { LCAvailableTools, LCFunctionTool } from './types';
 
@@ -40,12 +41,17 @@ export function createMCPToolCacheService(deps: MCPToolCacheDeps) {
 
       for (const tool of tools) {
         const name = `${tool.name}${mcpDelimiter}${serverName}`;
+        const parameters: JsonSchemaType = tool.inputSchema
+          ? (normalizeJsonSchema(
+              resolveJsonSchemaRefs(tool.inputSchema as Record<string, unknown>),
+            ) as JsonSchemaType)
+          : ({ type: 'object', properties: {} } as JsonSchemaType);
         const entry: LCFunctionTool = {
           type: 'function',
           ['function']: {
             name,
             description: tool.description ?? '',
-            parameters: tool.inputSchema ?? ({ type: 'object', properties: {} } as JsonSchemaType),
+            parameters,
           },
         };
         serverTools[name] = entry;
