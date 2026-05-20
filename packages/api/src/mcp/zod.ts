@@ -249,12 +249,36 @@ export function resolveJsonSchemaRefs<T extends Record<string, unknown>>(
 }
 
 /**
+ * JSON Schema 2019-09+ keywords that the Google Gemini function-calling API rejects.
+ * Gemini accepts only an OpenAPI 3.0 subset; passing these raises HTTP 400
+ * "Unknown name '<keyword>': Cannot find field". Stripping them is safe across
+ * providers because they only tighten validation — removing them widens what
+ * the model may emit but never invalidates an otherwise-valid schema.
+ */
+const GEMINI_UNSUPPORTED_KEYS = new Set([
+  'propertyNames',
+  'patternProperties',
+  'dependentRequired',
+  'dependentSchemas',
+  'if',
+  'then',
+  'else',
+  'prefixItems',
+  'unevaluatedProperties',
+  'unevaluatedItems',
+  'contentEncoding',
+  'contentMediaType',
+  'contentSchema',
+]);
+
+/**
  * Recursively normalizes a JSON schema for LLM API compatibility.
  *
  * Transformations applied:
  * - Converts `const` values to `enum` arrays (Gemini/Vertex AI rejects `const`)
  * - Strips vendor extension fields (`x-*` prefixed keys, e.g. `x-google-enum-descriptions`)
  * - Strips leftover `$defs`/`definitions` blocks that may survive ref resolution
+ * - Strips JSON Schema 2019-09+ keywords not supported by Gemini (see GEMINI_UNSUPPORTED_KEYS)
  *
  * @param schema - The JSON schema to normalize
  * @returns The normalized schema
@@ -282,6 +306,10 @@ export function normalizeJsonSchema<T extends Record<string, unknown>>(schema: T
     // Strip leftover $defs/definitions (should already be resolved by resolveJsonSchemaRefs,
     // but strip as a safety net for schemas that bypass ref resolution).
     if (key === '$defs' || key === 'definitions') {
+      continue;
+    }
+
+    if (GEMINI_UNSUPPORTED_KEYS.has(key)) {
       continue;
     }
 

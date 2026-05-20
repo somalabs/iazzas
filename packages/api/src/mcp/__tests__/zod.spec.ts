@@ -2360,4 +2360,80 @@ describe('normalizeJsonSchema', () => {
     expect(result.properties.travelMode.enum).toEqual(['DRIVE', 'BICYCLE', 'TRANSIT', 'WALK']);
     expect(result.properties.origin).toEqual({ type: 'string', description: 'Starting address' });
   });
+
+  it('should strip propertyNames (rejected by Gemini)', () => {
+    const schema = {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+      propertyNames: { pattern: '^[a-z]+$' },
+    } as any;
+
+    const result = normalizeJsonSchema(schema);
+    expect(result).not.toHaveProperty('propertyNames');
+    expect(result.additionalProperties).toEqual({ type: 'string' });
+  });
+
+  it('should strip JSON Schema 2019-09+ keywords not supported by Gemini', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        a: { type: 'string' },
+      },
+      patternProperties: { '^foo': { type: 'number' } },
+      dependentRequired: { a: ['b'] },
+      dependentSchemas: { a: { properties: { b: { type: 'string' } } } },
+      if: { properties: { a: { const: 'x' } } },
+      then: { required: ['b'] },
+      else: { required: ['c'] },
+      prefixItems: [{ type: 'string' }, { type: 'number' }],
+      unevaluatedProperties: false,
+      unevaluatedItems: false,
+      contentEncoding: 'base64',
+      contentMediaType: 'image/png',
+      contentSchema: { type: 'string' },
+    } as any;
+
+    const result = normalizeJsonSchema(schema);
+    const stripped = [
+      'patternProperties',
+      'dependentRequired',
+      'dependentSchemas',
+      'if',
+      'then',
+      'else',
+      'prefixItems',
+      'unevaluatedProperties',
+      'unevaluatedItems',
+      'contentEncoding',
+      'contentMediaType',
+      'contentSchema',
+    ];
+    for (const key of stripped) {
+      expect(result).not.toHaveProperty(key);
+    }
+    expect(result.type).toBe('object');
+    expect(result.properties.a).toEqual({ type: 'string' });
+  });
+
+  it('should strip propertyNames at nested levels (Notion MCP regression)', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        filter: {
+          type: 'object',
+          additionalProperties: {
+            type: 'object',
+            propertyNames: { pattern: '^[a-z_]+$' },
+            additionalProperties: { type: 'string' },
+          },
+        },
+      },
+    } as any;
+
+    const result = normalizeJsonSchema(schema);
+    expect(result.properties.filter.additionalProperties).not.toHaveProperty('propertyNames');
+    expect(result.properties.filter.additionalProperties.additionalProperties).toEqual({
+      type: 'string',
+    });
+  });
 });
