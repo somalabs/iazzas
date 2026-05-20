@@ -1270,7 +1270,40 @@ async function loadToolsForExecution({
     });
 
     if (loadedTools) {
-      allLoadedTools.push(...loadedTools);
+      for (const tool of loadedTools) {
+        // TEMP DEBUG: log input + schema when LangChain Zod validation rejects a tool input.
+        // Remove after Gemini+Notion schema-mismatch root-cause is identified.
+        if (typeof tool?.invoke === 'function') {
+          const origInvoke = tool.invoke.bind(tool);
+          tool.invoke = async function debugInvoke(input, config) {
+            try {
+              return await origInvoke(input, config);
+            } catch (err) {
+              const msg = err?.message ?? '';
+              if (msg.includes('Received tool input did not match expected schema')) {
+                let schemaDump = '<no schema>';
+                try {
+                  const schema = tool.schema ?? tool.lc_kwargs?.schema;
+                  schemaDump = JSON.stringify(schema, null, 2).slice(0, 4000);
+                } catch (_e) {
+                  schemaDump = `<unserializable: ${_e?.message}>`;
+                }
+                let inputDump = '<no input>';
+                try {
+                  inputDump = JSON.stringify(input, null, 2).slice(0, 4000);
+                } catch (_e) {
+                  inputDump = `<unserializable: ${_e?.message}>`;
+                }
+                logger.error(
+                  `[TOOL_INPUT_DEBUG] tool=${tool.name}\nINPUT:\n${inputDump}\nSCHEMA:\n${schemaDump}`,
+                );
+              }
+              throw err;
+            }
+          };
+        }
+        allLoadedTools.push(tool);
+      }
     }
   }
 
