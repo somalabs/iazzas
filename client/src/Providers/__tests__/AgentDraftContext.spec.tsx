@@ -23,10 +23,9 @@ function Consumer() {
       <span data-testid="model">{draftParams.model}</span>
       <span data-testid="web">{String(draftParams.webSearch)}</span>
       <button
+        aria-label="update"
         onClick={() => setDraftParams({ ...blank, model: 'gpt-4o', webSearch: true })}
-      >
-        update
-      </button>
+      />
     </div>
   );
 }

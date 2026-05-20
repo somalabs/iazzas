@@ -41,8 +41,12 @@ describe('applyDraftUpdate', () => {
     expect(setFormValue).toHaveBeenCalledWith('name', 'X', { shouldDirty: true });
     expect(setFormValue).toHaveBeenCalledWith('instructions', 'Y', { shouldDirty: true });
     expect(setFormValue).toHaveBeenCalledWith('model', 'gpt-4', { shouldDirty: true });
-    expect(setFormValue).toHaveBeenCalledWith(AgentCapabilities.web_search, true, { shouldDirty: true });
-    expect(setFormValue).toHaveBeenCalledWith(AgentCapabilities.file_search, false, { shouldDirty: true });
+    expect(setFormValue).toHaveBeenCalledWith(AgentCapabilities.web_search, true, {
+      shouldDirty: true,
+    });
+    expect(setFormValue).toHaveBeenCalledWith(AgentCapabilities.file_search, false, {
+      shouldDirty: true,
+    });
   });
 
   it('does not call setFormValue for unmapped fields (mcpServers, temperature, top_p)', () => {
@@ -57,15 +61,15 @@ describe('applyDraftUpdate', () => {
   it('is a no-op for form updates when setFormValue is null', () => {
     const setDraftParams = jest.fn((fn: any) => fn(baseParams));
 
-    expect(() =>
-      applyDraftUpdate({ name: 'X' }, setDraftParams, null),
-    ).not.toThrow();
+    expect(() => applyDraftUpdate({ name: 'X' }, setDraftParams, null)).not.toThrow();
     expect(setDraftParams).toHaveBeenCalled();
   });
 
   it('ignores undefined values — does not override existing params', () => {
     let captured: AgentDraftParams | null = null;
-    const setDraftParams = jest.fn((fn: any) => { captured = fn(baseParams); });
+    const setDraftParams = jest.fn((fn: any) => {
+      captured = fn(baseParams);
+    });
 
     applyDraftUpdate({ name: 'New', instructions: undefined }, setDraftParams, null);
 
@@ -74,7 +78,15 @@ describe('applyDraftUpdate', () => {
 
   it('exports DRAFT_FORM_FIELD_MAP with expected keys', () => {
     expect(Object.keys(DRAFT_FORM_FIELD_MAP)).toEqual(
-      expect.arrayContaining(['name', 'instructions', 'category', 'model', 'webSearch', 'fileSearch', 'executeCode']),
+      expect.arrayContaining([
+        'name',
+        'instructions',
+        'category',
+        'model',
+        'webSearch',
+        'fileSearch',
+        'executeCode',
+      ]),
     );
   });
 });
