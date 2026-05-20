@@ -21,22 +21,37 @@ describe('AgentesLayout — mobile (width < 768)', () => {
   });
 
   it('renders the segmented toggle with both tabs', () => {
-    render(<AgentesLayout left={<div>form</div>} right={<div>chat</div>} />);
+    render(
+      <AgentesLayout
+        left={<div data-testid="left-slot" />}
+        right={<div data-testid="right-slot" />}
+      />,
+    );
     expect(screen.getByText('com_ui_ux_configurar_tab')).toBeInTheDocument();
     expect(screen.getByText('com_ui_ux_conversar_tab')).toBeInTheDocument();
   });
 
   it('shows the left panel by default', () => {
-    render(<AgentesLayout left={<div>form</div>} right={<div>chat</div>} />);
-    expect(screen.getByText('form')).toBeInTheDocument();
-    expect(screen.queryByText('chat')).not.toBeInTheDocument();
+    render(
+      <AgentesLayout
+        left={<div data-testid="left-slot" />}
+        right={<div data-testid="right-slot" />}
+      />,
+    );
+    expect(screen.getByTestId('left-slot')).toBeInTheDocument();
+    expect(screen.queryByTestId('right-slot')).not.toBeInTheDocument();
   });
 
   it('switches to the right panel when "Conversar" tab is clicked', () => {
-    render(<AgentesLayout left={<div>form</div>} right={<div>chat</div>} />);
+    render(
+      <AgentesLayout
+        left={<div data-testid="left-slot" />}
+        right={<div data-testid="right-slot" />}
+      />,
+    );
     fireEvent.click(screen.getByText('com_ui_ux_conversar_tab'));
-    expect(screen.queryByText('form')).not.toBeInTheDocument();
-    expect(screen.getByText('chat')).toBeInTheDocument();
+    expect(screen.queryByTestId('left-slot')).not.toBeInTheDocument();
+    expect(screen.getByTestId('right-slot')).toBeInTheDocument();
   });
 });
 
@@ -50,13 +65,23 @@ describe('AgentesLayout — desktop (width >= 768)', () => {
   });
 
   it('renders both panels simultaneously', () => {
-    render(<AgentesLayout left={<div>form</div>} right={<div>chat</div>} />);
-    expect(screen.getByText('form')).toBeInTheDocument();
-    expect(screen.getByText('chat')).toBeInTheDocument();
+    render(
+      <AgentesLayout
+        left={<div data-testid="left-slot" />}
+        right={<div data-testid="right-slot" />}
+      />,
+    );
+    expect(screen.getByTestId('left-slot')).toBeInTheDocument();
+    expect(screen.getByTestId('right-slot')).toBeInTheDocument();
   });
 
   it('renders the DragHandle', () => {
-    render(<AgentesLayout left={<div>form</div>} right={<div>chat</div>} />);
+    render(
+      <AgentesLayout
+        left={<div data-testid="left-slot" />}
+        right={<div data-testid="right-slot" />}
+      />,
+    );
     expect(screen.getByTestId('drag-handle')).toBeInTheDocument();
   });
 });
