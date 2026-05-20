@@ -79,6 +79,14 @@ export interface FlowRunnerDeps {
     instructionsOverride?: string;
     modelOverride?: string;
   }) => Promise<{ output: string }>;
+  /**
+   * Evaluates a natural-language yes/no `criterio` against a context dump and
+   * returns a structured answer. Used by the Decisão (condition) node.
+   */
+  invokeJudge: (params: {
+    criterio: string;
+    contextDump: string;
+  }) => Promise<{ answer: boolean; reasoning: string }>;
   /** Returns true if the calling user may VIEW the given agent. */
   checkAgentAccess: (agentId: string) => Promise<boolean>;
   /** Minimal fetch seam (host already validated by the HTTP node before this is called). */

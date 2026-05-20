@@ -1,0 +1,115 @@
+use_case: render_to_sketch
+version: 1.0.0
+display_name: "Foto → Desenho Técnico"
+description: "Convert a real product photo into a fashion technical drawing (flat/CAD) as a development starting point."
+default_model: nano-banana-pro
+fallback_model: nano-banana-2
+
+ui_defaults:
+  aspect_ratio: "4:5"
+  image_count: 2
+  resolution: "2K"
+
+image_slots:
+  - id: product_image
+    label: "Foto do produto"
+    description: "Uma ou mais fotos do MESMO produto (frente, costas, lateral, close de detalhes)"
+    required: true
+    multiple: true
+    max_count: 5
+    accepts: [jpg, jpeg, png, webp]
+    max_size_mb: 15
+
+form_fields:
+  - id: sketch_style
+    type: select
+    label: "Estilo do desenho"
+    required: true
+    default: technical-flat
+    options:
+      - value: technical-flat
+        label: "Flat técnico (linha limpa)"
+      - value: cad-spec
+        label: "CAD / Spec sheet"
+      - value: fashion-illustration
+        label: "Croqui de moda"
+
+  - id: views
+    type: select
+    label: "Vistas"
+    required: true
+    default: front-back
+    options:
+      - value: front-only
+        label: "Apenas frente"
+      - value: front-back
+        label: "Frente e costas"
+      - value: front-back-side
+        label: "Frente, costas e lateral"
+
+  - id: line_weight
+    type: toggle
+    label: "Traço"
+    required: true
+    default: medium
+    options:
+      - value: thin
+        label: "Fino"
+      - value: medium
+        label: "Médio"
+
+  - id: include_stitching
+    type: boolean
+    label: "Mostrar costuras e pespontos"
+    required: false
+    default: true
+
+  - id: background
+    type: toggle
+    label: "Fundo"
+    required: true
+    default: white
+    options:
+      - value: white
+        label: "Branco"
+      - value: transparent
+        label: "Transparente"
+
+  - id: notes
+    type: text
+    label: "Observações"
+    placeholder: "ex: destacar zíper frontal, cós elástico, bolsos chapados"
+    required: false
+    max_length: 300
+
+prompt_template: |
+  Convert the input product photo into a fashion technical drawing as a starting point for product development.
+  Preserve the exact silhouette, proportions, construction details, and trims observed in the photo.
+  Do NOT photograph or render — produce a clean 2D drawing.
+  {{#if sketch_style == "technical-flat"}}Style: technical flat sketch with clean, even line work, no shading, no fabric texture, no model.{{/if}}
+  {{#if sketch_style == "cad-spec"}}Style: CAD-style spec sheet drawing — precise vector-like lines, strict orthographic projection, no shading, drafting accuracy.{{/if}}
+  {{#if sketch_style == "fashion-illustration"}}Style: fashion croqui — stylized illustration with expressive proportions but accurate garment details.{{/if}}
+  {{#if views == "front-only"}}Show the front view only, centered.{{/if}}
+  {{#if views == "front-back"}}Show front and back views side by side, same scale.{{/if}}
+  {{#if views == "front-back-side"}}Show front, back, and side views side by side, same scale.{{/if}}
+  {{#if line_weight == "thin"}}Use thin, uniform line weight.{{/if}}
+  {{#if line_weight == "medium"}}Use medium line weight with slightly heavier outlines and finer interior detail lines.{{/if}}
+  {{#if include_stitching}}Include stitching lines, topstitching, seams, darts, and visible construction details as dashed or fine lines.{{else}}Omit stitching and interior construction lines; show only silhouette and major panel seams.{{/if}}
+  {{#if background == "white"}}Place the drawing on a plain white background.{{/if}}
+  {{#if background == "transparent"}}Render on a transparent background suitable for spec documents.{{/if}}
+  Use any additional reference photos provided to inform back, side, or close-up details that are not visible in the main photo.
+  {{#if notes}}Additional notes: {{notes}}.{{/if}}
+
+post_processing:
+  upscale_if_below: 2048
+  apply_watermark: c2pa
+
+quality_signals:
+  - check: silhouette_fidelity
+    description: "Drawing silhouette and proportions match the input product"
+  - check: construction_accuracy
+    description: "Seams, panels, trims and closures from the photo are represented"
+  - check: style_match
+    description: "Line quality matches the selected sketch_style"
+  - check: no_photo_artifacts
+    description: "Output is a drawing, not a photograph or render"

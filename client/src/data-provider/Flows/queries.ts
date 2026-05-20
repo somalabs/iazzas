@@ -82,6 +82,24 @@ export const useUpdateFlowMutation = (
   );
 };
 
+export const useDeleteFlowMutation = (
+  options?: UseMutationOptions<{ deleted: boolean }, Error, { id: string }>,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation<{ deleted: boolean }, Error, { id: string }>(
+    [MutationKeys.deleteFlow],
+    ({ id }) => dataService.deleteFlow(id),
+    {
+      ...options,
+      onSuccess: (res, vars, ctx) => {
+        queryClient.invalidateQueries([QueryKeys.flows]);
+        queryClient.removeQueries([QueryKeys.flow, vars.id]);
+        options?.onSuccess?.(res, vars, ctx);
+      },
+    },
+  );
+};
+
 export const useRunFlowMutation = (
   options?: UseMutationOptions<TRunFlowResponse, Error, { id: string; input: string }>,
 ) => {

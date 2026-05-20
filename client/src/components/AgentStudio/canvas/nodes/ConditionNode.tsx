@@ -24,13 +24,11 @@ export default function ConditionNode({ id, selected, data }: NodeProps) {
         icon={<GitBranch className="h-3.5 w-3.5" />}
         label={localize('com_studio_flow_node_condition')}
       >
-        {d.value ? (
-          <p className="truncate font-mono text-[10px] text-text-secondary">
-            {d.field} {d.operator} {d.value}
-          </p>
+        {d.criterio ? (
+          <p className="line-clamp-2 italic text-text-secondary">{d.criterio}</p>
         ) : (
           <p className="italic text-text-tertiary">
-            {localize('com_studio_flow_condition_value_hint')}
+            {localize('com_studio_flow_condition_criterio_placeholder')}
           </p>
         )}
       </BaseNode>

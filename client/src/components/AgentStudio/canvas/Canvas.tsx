@@ -26,8 +26,8 @@ import { validateFlow } from './validation';
 import type { FlowNodeType } from 'librechat-data-provider';
 
 const HANDLE_LABELS: Record<string, string> = {
-  true: 'Verdadeiro',
-  false: 'Falso',
+  true: 'Sim',
+  false: 'Não',
   approved: 'Aprovado',
   rejected: 'Rejeitado',
 };

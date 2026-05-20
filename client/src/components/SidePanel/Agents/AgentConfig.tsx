@@ -1,33 +1,36 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { useToastContext } from '@librechat/client';
+import React, { useState, useMemo } from 'react';
+import { ControlCombobox } from '@librechat/client';
 import { Controller, useWatch, useFormContext } from 'react-hook-form';
-import { EModelEndpoint, getEndpointField } from 'librechat-data-provider';
-import type { AgentForm, IconComponentTypes } from '~/common';
+import { useGetModelsQuery } from 'librechat-data-provider/react-query';
+import {
+  alternateName,
+  EModelEndpoint,
+  AgentCapabilities,
+  isAssistantsEndpoint,
+} from 'librechat-data-provider';
+import type { AgentForm, StringOption } from '~/common';
 import {
   removeFocusOutlines,
   processAgentOption,
+  createProviderOption,
   defaultTextProps,
   validateEmail,
-  getIconKey,
   cn,
 } from '~/utils';
-import { ToolSelectDialog, MCPToolSelectDialog } from '~/components/Tools';
+import { MCPToolSelectDialog } from '~/components/Tools';
 import useAgentCapabilities from '~/hooks/Agents/useAgentCapabilities';
 import { useFileMapContext, useAgentPanelContext } from '~/Providers';
 import AgentCategorySelector from './AgentCategorySelector';
-import Action from '~/components/SidePanel/Builder/Action';
 import { useLocalize, useVisibleTools } from '~/hooks';
-import { Panel, isEphemeralAgent } from '~/common';
 import { useGetAgentFiles } from '~/data-provider';
-import { icons } from '~/hooks/Endpoint/Icons';
+import MaxAgentSteps from './Advanced/MaxAgentSteps';
+import AgentChain from './Advanced/AgentChain';
 import AdvancedSection from './AdvancedSection';
 import Instructions from './Instructions';
-import AgentAvatar from './AgentAvatar';
 import FileContext from './FileContext';
 import SearchForm from './Search/Form';
 import FileSearch from './FileSearch';
 import Artifacts from './Artifacts';
-import AgentTool from './AgentTool';
 import CodeForm from './Code/Form';
 import MCPTools from './MCPTools';
 
@@ -41,30 +44,51 @@ const inputClass = cn(
 export default function AgentConfig() {
   const localize = useLocalize();
   const fileMap = useFileMapContext();
-  const { showToast } = useToastContext();
   const methods = useFormContext<AgentForm>();
-  const [showToolDialog, setShowToolDialog] = useState(false);
   const [showMCPToolDialog, setShowMCPToolDialog] = useState(false);
   const {
-    actions,
-    setAction,
-    regularTools,
     agentsConfig,
     availableMCPServers,
     mcpServersMap,
-    setActivePanel,
     endpointsConfig,
   } = useAgentPanelContext();
 
   const {
     control,
+    setValue,
     formState: { errors },
   } = methods;
   const provider = useWatch({ control, name: 'provider' });
-  const model = useWatch({ control, name: 'model' });
   const agent = useWatch({ control, name: 'agent' });
   const tools = useWatch({ control, name: 'tools' });
   const agent_id = useWatch({ control, name: 'id' });
+
+  const modelsQuery = useGetModelsQuery({ refetchOnMount: 'always' });
+  const modelsData = useMemo(() => modelsQuery.data ?? {}, [modelsQuery.data]);
+
+  const allowedProviders = useMemo(
+    () => new Set(agentsConfig?.allowedProviders),
+    [agentsConfig?.allowedProviders],
+  );
+
+  const providers = useMemo(
+    () =>
+      Object.keys(endpointsConfig ?? {})
+        .filter(
+          (key) =>
+            !isAssistantsEndpoint(key) &&
+            (allowedProviders.size > 0 ? allowedProviders.has(key) : true) &&
+            key !== EModelEndpoint.agents,
+        )
+        .map((p) => createProviderOption(p)),
+    [endpointsConfig, allowedProviders],
+  );
+
+  const providerValue = typeof provider === 'string' ? provider : (provider as StringOption)?.value;
+  const availableModels = useMemo(
+    () => (providerValue ? (modelsData[providerValue] ?? []) : []),
+    [modelsData, providerValue],
+  );
 
   const { data: agentFiles = [] } = useGetAgentFiles(agent_id);
 
@@ -80,13 +104,16 @@ export default function AgentConfig() {
 
   const {
     codeEnabled,
-    toolsEnabled,
     contextEnabled,
-    actionsEnabled,
     artifactsEnabled,
     webSearchEnabled,
     fileSearchEnabled,
   } = useAgentCapabilities(agentsConfig?.capabilities);
+
+  const chainEnabled = useMemo(
+    () => agentsConfig?.capabilities.includes(AgentCapabilities.chain) ?? false,
+    [agentsConfig],
+  );
 
   const context_files = useMemo(() => {
     if (typeof agent === 'string') {
@@ -128,63 +155,13 @@ export default function AgentConfig() {
     return _agent.knowledge_files ?? [];
   }, [agent, agent_id, mergedFileMap]);
 
-  const code_files = useMemo(() => {
-    if (typeof agent === 'string') {
-      return [];
-    }
-
-    if (agent?.id !== agent_id) {
-      return [];
-    }
-
-    if (agent.code_files) {
-      return agent.code_files;
-    }
-
-    const _agent = processAgentOption({
-      agent,
-      fileMap: mergedFileMap,
-    });
-    return _agent.code_files ?? [];
-  }, [agent, agent_id, mergedFileMap]);
-
-  const handleAddActions = useCallback(() => {
-    if (isEphemeralAgent(agent_id)) {
-      showToast({
-        message: localize('com_assistants_actions_disabled'),
-        status: 'warning',
-      });
-      return;
-    }
-    setActivePanel(Panel.actions);
-  }, [agent_id, setActivePanel, showToast, localize]);
-
-  const providerValue = typeof provider === 'string' ? provider : provider?.value;
-  let Icon: IconComponentTypes | null | undefined;
-  let endpointType: EModelEndpoint | undefined;
-  let endpointIconURL: string | undefined;
-  let iconKey: string | undefined;
-
-  if (providerValue !== undefined) {
-    endpointType = getEndpointField(endpointsConfig, providerValue as string, 'type');
-    endpointIconURL = getEndpointField(endpointsConfig, providerValue as string, 'iconURL');
-    iconKey = getIconKey({
-      endpoint: providerValue as string,
-      endpointsConfig,
-      endpointType,
-      endpointIconURL,
-    });
-    Icon = icons[iconKey];
-  }
-
-  const { toolIds, mcpServerNames } = useVisibleTools(tools, regularTools, mcpServersMap);
+  const { mcpServerNames } = useVisibleTools(tools, undefined, mcpServersMap);
 
   return (
     <>
       <div className="h-auto pt-1">
-        {/* Avatar & Name */}
+        {/* Name */}
         <div className="mb-4">
-          <AgentAvatar avatar={agent?.['avatar'] ?? null} />
           <label className={labelClass} htmlFor="name">
             {localize('com_ui_name')}
             <span className="text-red-500">*</span>
@@ -236,7 +213,7 @@ export default function AgentConfig() {
             <label className="text-token-text-primary block text-sm font-medium">
               {localize('com_ui_ux_agent_capacidades')}
             </label>
-            {codeEnabled && <CodeForm agent_id={agent_id} files={code_files} />}
+            {codeEnabled && <CodeForm />}
             {webSearchEnabled && <SearchForm />}
             {contextEnabled && <FileContext agent_id={agent_id} files={context_files} />}
             {artifactsEnabled && <Artifacts />}
@@ -244,28 +221,6 @@ export default function AgentConfig() {
           </div>
         )}
         <AdvancedSection label={localize('com_ui_ux_agent_avancado')}>
-          {/* Description */}
-          <div className="mb-4">
-            <label className={labelClass} htmlFor="description">
-              {localize('com_ui_description')}
-            </label>
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <input
-                  {...field}
-                  value={field.value ?? ''}
-                  maxLength={512}
-                  className={inputClass}
-                  id="description"
-                  type="text"
-                  placeholder={localize('com_agents_description_placeholder')}
-                  aria-label={localize('com_ui_description')}
-                />
-              )}
-            />
-          </div>
           {/* Agent ID */}
           <div className="mb-4">
             <Controller
@@ -278,32 +233,72 @@ export default function AgentConfig() {
               )}
             />
           </div>
-          {/* Model and Provider */}
+          {/* Provider */}
           <div className="mb-4">
             <label className={labelClass} htmlFor="provider">
+              {localize('com_ui_provider')} <span className="text-red-500">*</span>
+            </label>
+            <Controller
+              name="provider"
+              control={control}
+              render={({ field }) => {
+                const value =
+                  typeof field.value === 'string'
+                    ? field.value
+                    : ((field.value as StringOption)?.value ?? '');
+                const display =
+                  typeof field.value === 'string'
+                    ? field.value
+                    : ((field.value as StringOption)?.label ?? '');
+                return (
+                  <ControlCombobox
+                    selectedValue={value}
+                    displayValue={alternateName[display] ?? display}
+                    selectPlaceholder={localize('com_ui_select_provider')}
+                    searchPlaceholder={localize('com_ui_select_search_provider')}
+                    setValue={(v) => {
+                      field.onChange(createProviderOption(v));
+                      setValue('model', '');
+                    }}
+                    items={providers.map((p) => ({
+                      label: typeof p === 'string' ? p : p.label,
+                      value: typeof p === 'string' ? p : p.value,
+                    }))}
+                    ariaLabel={localize('com_ui_provider')}
+                    isCollapsed={false}
+                    showCarat={true}
+                  />
+                );
+              }}
+            />
+          </div>
+          {/* Model */}
+          <div className="mb-4">
+            <label className={labelClass} htmlFor="model">
               {localize('com_ui_model')} <span className="text-red-500">*</span>
             </label>
-            <button
-              type="button"
-              onClick={() => setActivePanel(Panel.model)}
-              className="btn btn-neutral border-token-border-light relative h-9 w-full rounded-lg font-medium"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              <div className="flex w-full items-center gap-2">
-                {Icon && (
-                  <div className="shadow-stroke relative flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-white text-black dark:bg-white">
-                    <Icon
-                      className="h-2/3 w-2/3"
-                      endpoint={providerValue as string}
-                      endpointType={endpointType}
-                      iconURL={endpointIconURL}
-                    />
-                  </div>
-                )}
-                <span>{model != null && model ? model : localize('com_ui_select_model')}</span>
-              </div>
-            </button>
+            <Controller
+              name="model"
+              control={control}
+              render={({ field }) => (
+                <ControlCombobox
+                  selectedValue={field.value ?? ''}
+                  selectPlaceholder={
+                    providerValue
+                      ? localize('com_ui_select_model')
+                      : localize('com_ui_select_provider_first')
+                  }
+                  searchPlaceholder={localize('com_ui_select_model')}
+                  setValue={field.onChange}
+                  items={availableModels.map((m) => ({ label: m, value: m }))}
+                  disabled={!providerValue}
+                  className={cn('disabled:opacity-50')}
+                  ariaLabel={localize('com_ui_model')}
+                  isCollapsed={false}
+                  showCarat={true}
+                />
+              )}
+            />
           </div>
           {/* MCP Section */}
           {availableMCPServers != null && availableMCPServers.length > 0 && (
@@ -313,81 +308,21 @@ export default function AgentConfig() {
               setShowMCPToolDialog={setShowMCPToolDialog}
             />
           )}
-          {/* Agent Tools & Actions */}
+          {/* Advanced: steps, handoffs, chain */}
           <div className="mb-4">
-            <label className={labelClass}>
-              {(() => {
-                if (toolsEnabled === true && actionsEnabled === true) {
-                  return localize('com_ui_tools_and_actions');
-                }
-                if (toolsEnabled === true) {
-                  return localize('com_ui_tools');
-                }
-                if (actionsEnabled === true) {
-                  return localize('com_assistants_actions');
-                }
-                return '';
-              })()}
-            </label>
-            <div>
-              <div className="mb-1">
-                {toolIds.map((toolId, i) => {
-                  const tool = regularTools?.find((t) => t.pluginKey === toolId);
-                  if (!tool) return null;
-                  return (
-                    <AgentTool
-                      key={`${toolId}-${i}-${agent_id}`}
-                      tool={toolId}
-                      regularTools={regularTools}
-                      agent_id={agent_id}
-                    />
-                  );
-                })}
-              </div>
-              <div className="flex flex-col gap-1">
-                {(actions ?? [])
-                  .filter((action) => action.agent_id === agent_id)
-                  .map((action, i) => (
-                    <Action
-                      key={i}
-                      action={action}
-                      onClick={() => {
-                        setAction(action);
-                        setActivePanel(Panel.actions);
-                      }}
-                    />
-                  ))}
-              </div>
-              <div className="mt-2 flex space-x-2">
-                {(toolsEnabled ?? false) && (
-                  <button
-                    type="button"
-                    onClick={() => setShowToolDialog(true)}
-                    className="btn btn-neutral border-token-border-light relative h-9 w-full rounded-lg font-medium"
-                    aria-haspopup="dialog"
-                  >
-                    <div className="flex w-full items-center justify-center gap-2">
-                      {localize('com_assistants_add_tools')}
-                    </div>
-                  </button>
-                )}
-                {(actionsEnabled ?? false) && (
-                  <button
-                    type="button"
-                    disabled={isEphemeralAgent(agent_id)}
-                    onClick={handleAddActions}
-                    className="btn btn-neutral border-token-border-light relative h-9 w-full rounded-lg font-medium"
-                    aria-haspopup="dialog"
-                  >
-                    <div className="flex w-full items-center justify-center gap-2">
-                      {localize('com_assistants_add_actions')}
-                    </div>
-                  </button>
-                )}
-              </div>
-            </div>
+            <MaxAgentSteps />
           </div>
-          {/* Support Contact (Optional) */}
+          {chainEnabled && (
+            <div className="mb-4">
+              <Controller
+                name="agent_ids"
+                control={control}
+                defaultValue={[]}
+                render={({ field }) => <AgentChain field={field} currentAgentId={agent_id} />}
+              />
+            </div>
+          )}
+          {/* Support Contact */}
           <div className="mb-4">
             <div className="mb-1.5 flex items-center gap-2">
               <span>
@@ -485,11 +420,6 @@ export default function AgentConfig() {
           </div>
         </AdvancedSection>
       </div>
-      <ToolSelectDialog
-        isOpen={showToolDialog}
-        setIsOpen={setShowToolDialog}
-        endpoint={EModelEndpoint.agents}
-      />
       {availableMCPServers != null && availableMCPServers.length > 0 && (
         <MCPToolSelectDialog
           agentId={agent_id}

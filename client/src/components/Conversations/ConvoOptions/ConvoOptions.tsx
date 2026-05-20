@@ -1,4 +1,4 @@
-import { useState, useId, useRef, memo, useCallback, useMemo } from 'react';
+import { useState, useId, useRef, memo, useCallback, useMemo, useContext } from 'react';
 import * as Ariakit from '@ariakit/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { QueryKeys } from 'librechat-data-provider';
@@ -15,7 +15,7 @@ import {
 } from '~/data-provider';
 import { useLocalize, useNavigateToConvo, useNewConvo } from '~/hooks';
 import { NotificationSeverity } from '~/common';
-import { useChatContext } from '~/Providers';
+import { ChatContext } from '~/Providers';
 import DeleteButton from './DeleteButton';
 import ShareButton from './ShareButton';
 import { cn } from '~/utils';
@@ -41,7 +41,8 @@ function ConvoOptions({
 }) {
   const localize = useLocalize();
   const queryClient = useQueryClient();
-  const { index } = useChatContext();
+  const chatCtx = useContext(ChatContext);
+  const index = chatCtx?.index ?? 0;
   const { data: startupConfig } = useGetStartupConfig();
   const { navigateToConvo } = useNavigateToConvo(index);
   const { showToast } = useToastContext();

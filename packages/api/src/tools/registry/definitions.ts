@@ -474,6 +474,13 @@ export const toolDefinitions: Record<string, ToolRegistryDefinition> = {
     schema: atualizarRascunhoSchema,
     toolType: 'builtin',
   },
+  salvar_agente: {
+    name: 'salvar_agente',
+    description:
+      'Persiste o agente em construção. Chame apenas quando o usuário explicitamente confirmar que deseja salvar/criar o agente.',
+    schema: { type: 'object', properties: {}, required: [] },
+    toolType: 'builtin',
+  },
 };
 
 /** Tool definitions from @librechat/agents */

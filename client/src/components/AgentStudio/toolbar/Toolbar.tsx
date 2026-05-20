@@ -1,5 +1,5 @@
-import { Save, Play, History, ArrowLeft, Loader } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Save, Play, History, Loader } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useToastContext } from '@librechat/client';
 import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
@@ -32,6 +32,7 @@ export default function Toolbar() {
       nodes: serializeNodes(state.nodes),
       edges: serializeEdges(state.edges),
     };
+    const wasNew = !state.flowId;
     const onSuccess = (flowId: string, name: string) => {
       dispatch({
         type: 'SET_FLOW',
@@ -39,6 +40,9 @@ export default function Toolbar() {
       });
       dispatch({ type: 'SET_SAVING', payload: false });
       showToast({ message: localize('com_studio_flow_save_success'), status: 'success' });
+      if (wasNew) {
+        navigate(`/d/flows/${flowId}`, { replace: true });
+      }
     };
     const onError = (error: unknown) => {
       dispatch({ type: 'SET_SAVING', payload: false });
@@ -72,20 +76,13 @@ export default function Toolbar() {
       className="flex h-12 flex-shrink-0 items-center justify-between border-b border-border-light bg-surface-primary px-4"
     >
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => navigate('/c/new')}
-          className="rounded-lg p-1.5 text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-          aria-label={localize('com_ui_ux_flows_back')}
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        </button>
-        <span
-          className="select-none text-sm font-semibold text-text-primary"
+        <Link
+          to="/d/flows"
+          className="select-none rounded text-sm font-semibold text-text-primary hover:text-text-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
           aria-label={localize('com_ui_ux_nav_flows')}
         >
           {localize('com_ui_ux_nav_flows')}
-        </span>
+        </Link>
         <span className="text-text-tertiary" aria-hidden="true">
           /
         </span>

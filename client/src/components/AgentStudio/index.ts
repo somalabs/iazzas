@@ -1,1 +1,1 @@
-export { AgentStudioView } from './layouts';
+export { AgentStudioView, FlowsHome } from './layouts';

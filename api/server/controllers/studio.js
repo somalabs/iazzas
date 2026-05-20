@@ -20,6 +20,7 @@ const STUDIO_USE_CASES = [
   'virtual_tryon',
   'multi_reference',
   'sketch_to_render',
+  'render_to_sketch',
 ];
 const STUDIO_ASPECT_RATIOS = [
   '1:1',

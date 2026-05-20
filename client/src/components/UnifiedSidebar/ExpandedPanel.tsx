@@ -1,82 +1,31 @@
-import { memo, useCallback, lazy, Suspense } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { memo, lazy, Suspense, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
-import { QueryKeys, SystemRoles } from 'librechat-data-provider';
-import { Skeleton, Sidebar, Button, TooltipAnchor, NewChatIcon } from '@librechat/client';
+import { SystemRoles } from 'librechat-data-provider';
+import { Skeleton, Sidebar, Button, TooltipAnchor } from '@librechat/client';
 import type { NavLink } from '~/common';
 import { CLOSE_SIDEBAR_ID } from '~/components/Chat/Menus/OpenSidebar';
-import { useLocalize, useNewConvo } from '~/hooks';
+import { useGoToNewChat, useLocalize } from '~/hooks';
 import { useAuthContext } from '~/hooks/AuthContext';
-import { clearMessagesCache, cn } from '~/utils';
-import store from '~/store';
+import { cn } from '~/utils';
 
 const BalanceWidget = lazy(() => import('~/components/Nav/BalanceWidget'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
-const ROW_BASE =
-  'flex w-full items-center rounded-lg text-left transition-colors hover:bg-surface-hover';
-const ROW_EXPANDED = 'h-auto justify-start gap-3 px-2 py-2';
-const ROW_COLLAPSED = 'h-9 w-9 justify-center p-0';
+const ROW_BASE = 'group flex w-full items-center rounded-lg text-left transition-colors';
+const ROW_EXPANDED = 'h-auto justify-start gap-3 px-2 py-2 hover:!bg-transparent';
+const ROW_COLLAPSED = 'h-9 w-9 justify-center p-0 hover:bg-surface-hover';
 const ICON_SLOT = 'flex h-6 w-6 flex-shrink-0 items-center justify-center';
-
-const NewChatButton = memo(function NewChatButton({ expanded }: { expanded: boolean }) {
-  const localize = useLocalize();
-  const queryClient = useQueryClient();
-  const { newConversation } = useNewConvo();
-  const conversation = useRecoilValue(store.conversationByIndex(0));
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      if (e.button === 0 && (e.ctrlKey || e.metaKey)) {
-        return;
-      }
-      e.preventDefault();
-      clearMessagesCache(queryClient, conversation?.conversationId);
-      queryClient.invalidateQueries([QueryKeys.messages]);
-      newConversation();
-    },
-    [queryClient, conversation?.conversationId, newConversation],
-  );
-
-  const label = localize('com_ui_new_chat');
-
-  const element = (
-    <a
-      href="/c/new"
-      data-testid="new-chat-button"
-      aria-label={label}
-      className={cn(ROW_BASE, expanded ? ROW_EXPANDED : ROW_COLLAPSED)}
-      onClick={handleClick}
-    >
-      <span className={ICON_SLOT}>
-        <span className="flex size-6 items-center justify-center rounded-full bg-text-primary">
-          <NewChatIcon className="size-3.5 text-white dark:text-black" />
-        </span>
-      </span>
-      {expanded && (
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-sm font-medium text-text-primary">{label}</span>
-          <span className="truncate text-xs text-text-secondary">
-            {localize('com_ui_ux_rail_novo_chat_desc')}
-          </span>
-        </span>
-      )}
-    </a>
-  );
-
-  if (expanded) {
-    return element;
-  }
-  return <TooltipAnchor side="right" description={label} render={element} />;
-});
+const ICON_HIGHLIGHT_EXPANDED =
+  'rounded-md transition-colors group-hover:bg-surface-hover h-8 w-8';
 
 const NavRouteButton = memo(function NavRouteButton({
   link,
   expanded,
+  onClickOverride,
 }: {
   link: NavLink;
   expanded: boolean;
+  onClickOverride?: () => void;
 }) {
   const localize = useLocalize();
   const navigate = useNavigate();
@@ -84,21 +33,34 @@ const NavRouteButton = memo(function NavRouteButton({
   const isNavActive = link.href ? location.pathname.startsWith(link.href) : false;
   const label = link.title ? localize(link.title) : '';
 
+  const handleClick = useCallback(() => {
+    if (onClickOverride) {
+      onClickOverride();
+      return;
+    }
+    navigate(link.href!);
+  }, [onClickOverride, navigate, link.href]);
+
   const element = (
     <Button
       variant="ghost"
       aria-label={label}
       aria-current={isNavActive ? 'page' : undefined}
+      data-testid={link.id}
       className={cn(
         ROW_BASE,
         expanded ? ROW_EXPANDED : ROW_COLLAPSED,
-        isNavActive
-          ? 'bg-surface-active-alt text-text-primary'
-          : 'text-text-secondary hover:bg-surface-hover',
+        isNavActive && !expanded ? 'bg-surface-active-alt text-text-primary' : 'text-text-secondary',
       )}
-      onClick={() => navigate(link.href!)}
+      onClick={handleClick}
     >
-      <span className={ICON_SLOT}>
+      <span
+        className={cn(
+          ICON_SLOT,
+          expanded && ICON_HIGHLIGHT_EXPANDED,
+          expanded && isNavActive && 'bg-surface-active-alt text-text-primary',
+        )}
+      >
         {link.icon && <link.icon className="h-5 w-5" aria-hidden="true" />}
       </span>
       {expanded && (
@@ -132,6 +94,7 @@ function ExpandedPanel({
   const localize = useLocalize();
   const { user } = useAuthContext();
   const isAdmin = user?.role === SystemRoles.ADMIN;
+  const onNavChats = useGoToNewChat();
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
 
@@ -145,7 +108,7 @@ function ExpandedPanel({
       className={cn(ROW_BASE, expanded ? ROW_EXPANDED : ROW_COLLAPSED)}
       onClick={onToggle}
     >
-      <span className={ICON_SLOT}>
+      <span className={cn(ICON_SLOT, expanded && ICON_HIGHLIGHT_EXPANDED)}>
         <Sidebar aria-hidden="true" className="h-5 w-5 text-text-primary" />
       </span>
     </Button>
@@ -158,7 +121,6 @@ function ExpandedPanel({
       ) : (
         <TooltipAnchor side="right" description={localize(toggleLabel)} render={toggleButton} />
       )}
-      <NewChatButton expanded={expanded} />
       <div className="flex flex-col gap-1 overflow-y-auto">
         {links.map((link) => {
           if (link.adminOnly && !isAdmin) {
@@ -174,7 +136,14 @@ function ExpandedPanel({
               />
             );
           }
-          return <NavRouteButton key={link.id} link={link} expanded={expanded} />;
+          return (
+            <NavRouteButton
+              key={link.id}
+              link={link}
+              expanded={expanded}
+              onClickOverride={link.id === 'nav-chats' ? onNavChats : undefined}
+            />
+          );
         })}
       </div>
 

@@ -447,8 +447,11 @@ export default function useEventHandlers({
           );
           setShowStopButton(false);
           setIsSubmitting(false);
-          // Navigate to new chat if not already there
-          if (location.pathname !== `/c/${Constants.NEW_CONVO}`) {
+          // Navigate to new chat if not already there (skip when inside Agentes)
+          if (
+            location.pathname !== `/c/${Constants.NEW_CONVO}` &&
+            !location.pathname.startsWith('/d/agentes')
+          ) {
             navigate(`/c/${Constants.NEW_CONVO}`, { replace: true });
           }
           return;

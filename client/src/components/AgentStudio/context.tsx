@@ -38,7 +38,7 @@ const defaultDataForType = (nodeType: FlowNodeType): FlowNodeData => {
     case 'agent':
       return { type: 'agent', agentId: '' };
     case 'condition':
-      return { type: 'condition', field: '{{trigger.input}}', operator: 'equals', value: '' };
+      return { type: 'condition', criterio: '' };
     case 'http':
       return { type: 'http', method: 'GET', url: '', headers: [], timeout: 10000 };
     case 'human_approval':

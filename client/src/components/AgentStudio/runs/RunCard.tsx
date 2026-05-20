@@ -38,6 +38,10 @@ export default function RunCard({ run, onApprove, onReject }: RunCardProps) {
       ? Math.round((new Date(run.completedAt).getTime() - new Date(run.startedAt).getTime()) / 1000)
       : null;
 
+  const firstError = run.status === 'failed'
+    ? run.nodeRuns.find((nr) => nr.status === 'failed' && nr.error)
+    : undefined;
+
   return (
     <div className="rounded-lg border border-border-light bg-surface-primary overflow-hidden">
       <button
@@ -66,6 +70,14 @@ export default function RunCard({ run, onApprove, onReject }: RunCardProps) {
           {localize(config.labelKey)}
         </span>
       </button>
+
+      {firstError && !expanded && (
+        <div className="border-t border-red-500/20 bg-red-500/5 px-3 py-2">
+          <p className="line-clamp-2 font-mono text-[10px] text-red-400" title={firstError.error}>
+            <span className="font-semibold">{firstError.nodeType}:</span> {firstError.error}
+          </p>
+        </div>
+      )}
 
       {expanded && (
         <div className="border-t border-border-light px-3 pb-3 pt-2">

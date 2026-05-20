@@ -5,6 +5,7 @@ const { ResourceType, PermissionBits } = require('librechat-data-provider');
 const { getResourcePermissionsMap } = require('~/server/services/PermissionService');
 const repo = require('~/server/services/Flows/repository');
 const { runAgent } = require('~/server/services/Flows/runAgent');
+const { runJudge } = require('~/server/services/Flows/runJudge');
 const db = require('~/models');
 
 const NODE_TYPES = new Set([
@@ -133,6 +134,7 @@ function buildDeps(req) {
     checkAgentAccess: undefined,
     invokeAgent: ({ agentId, input, instructionsOverride, modelOverride }) =>
       runAgent({ req, agentId, input, instructionsOverride, modelOverride }),
+    invokeJudge: ({ criterio, contextDump }) => runJudge({ req, criterio, contextDump }),
     httpFetch: async (url, init) => {
       const r = await fetch(url, init);
       return { status: r.status, text: () => r.text() };

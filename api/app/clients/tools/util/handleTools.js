@@ -14,6 +14,7 @@ const {
   buildImageToolContext,
   buildWebSearchContext,
   createAtualizarRascunhoTool,
+  createSalvarAgenteTool,
 } = require('@librechat/api');
 const {
   Tools,
@@ -208,6 +209,7 @@ const loadTools = async ({
       });
     },
     atualizar_rascunho: async () => createAtualizarRascunhoTool(),
+    salvar_agente: async () => createSalvarAgenteTool(),
     gemini_image_gen: async (toolContextMap) => {
       const authFields = getAuthFields('gemini_image_gen');
       const authValues = await loadAuthValues({ userId: user, authFields, throwError: false });

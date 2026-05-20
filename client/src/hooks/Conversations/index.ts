@@ -5,6 +5,7 @@ export { default as useSearchEnabled } from './useSearchEnabled';
 export { default as useGenerateConvo } from './useGenerateConvo';
 export { default as useDebouncedInput } from './useDebouncedInput';
 export { default as useGetConversation } from './useGetConversation';
+export { default as useGoToNewChat } from './useGoToNewChat';
 export { default as useBookmarkSuccess } from './useBookmarkSuccess';
 export { default as useNavigateToConvo } from './useNavigateToConvo';
 export { default as useSetIndexOptions } from './useSetIndexOptions';

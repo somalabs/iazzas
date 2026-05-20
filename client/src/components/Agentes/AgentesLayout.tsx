@@ -63,9 +63,16 @@ export default function AgentesLayout({ left, right }: AgentesLayoutProps) {
 
   return (
     <div className="flex h-full">
-      <div style={{ width: `${leftPct}%`, overflowY: 'auto', overflowX: 'hidden' }}>{left}</div>
+      <div
+        data-testid="agentes-left-panel"
+        style={{ width: `${leftPct}%`, height: '100%', overflow: 'hidden' }}
+      >
+        {left}
+      </div>
       <DragHandle onDrag={onDrag} />
-      <div style={{ flex: 1, overflow: 'hidden' }}>{right}</div>
+      <div data-testid="agentes-right-panel" style={{ flex: 1, overflow: 'hidden' }}>
+        {right}
+      </div>
     </div>
   );
 }

@@ -23,3 +23,15 @@ export function createAtualizarRascunhoTool(): DynamicStructuredTool {
     func: async () => JSON.stringify({ aplicado: true }),
   });
 }
+
+const salvarAgenteInput = z.object({});
+
+export function createSalvarAgenteTool(): DynamicStructuredTool {
+  return new DynamicStructuredTool({
+    name: 'salvar_agente',
+    description:
+      'Persiste o agente em construção. Chame apenas quando o usuário explicitamente confirmar que deseja salvar/criar o agente. Falha se faltarem campos obrigatórios (nome, provider, modelo).',
+    schema: salvarAgenteInput,
+    func: async () => JSON.stringify({ solicitado: true }),
+  });
+}

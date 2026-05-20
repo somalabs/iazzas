@@ -203,49 +203,26 @@ function AutomationRow({
         </div>
       </div>
 
-      <div className="flex items-center gap-1 border-t border-border-light px-3 py-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRunNow();
-          }}
-          className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-          aria-label={localize('com_automacoes_run_now_btn')}
+      {confirmDelete ? (
+        <div
+          className="flex flex-col gap-2 border-t border-border-light px-3 py-2"
+          onClick={(e) => e.stopPropagation()}
+          role="none"
         >
-          <Play className="h-3 w-3" aria-hidden="true" />
-          {localize('com_automacoes_run_now_btn')}
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-          aria-label={localize('com_automacoes_edit_btn')}
-        >
-          <Pencil className="h-3 w-3" aria-hidden="true" />
-          {localize('com_automacoes_edit_btn')}
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenRuns();
-          }}
-          className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
-          aria-label={localize('com_automacoes_runs_title')}
-        >
-          <History className="h-3 w-3" aria-hidden="true" />
-          {localize('com_automacoes_runs_title')}
-        </button>
-
-        {confirmDelete ? (
-          <div className="ml-auto flex items-center gap-1">
-            <span className="text-[11px] text-text-tertiary">
-              {localize('com_automacoes_delete_confirm')}
-            </span>
+          <p className="text-[11px] leading-snug text-text-secondary">
+            {localize('com_automacoes_delete_confirm')}
+          </p>
+          <div className="flex items-center justify-end gap-1">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setConfirmDelete(false);
+              }}
+              className="rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover"
+            >
+              {localize('com_automacoes_form_cancel_btn')}
+            </button>
             <button
               type="button"
               onClick={(e) => {
@@ -257,18 +234,46 @@ function AutomationRow({
             >
               {localize('com_automacoes_delete_btn')}
             </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setConfirmDelete(false);
-              }}
-              className="rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover"
-            >
-              {localize('com_automacoes_form_cancel_btn')}
-            </button>
           </div>
-        ) : (
+        </div>
+      ) : (
+        <div className="flex items-center gap-1 border-t border-border-light px-3 py-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRunNow();
+            }}
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+            aria-label={localize('com_automacoes_run_now_btn')}
+          >
+            <Play className="h-3 w-3" aria-hidden="true" />
+            {localize('com_automacoes_run_now_btn')}
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+            aria-label={localize('com_automacoes_edit_btn')}
+          >
+            <Pencil className="h-3 w-3" aria-hidden="true" />
+            {localize('com_automacoes_edit_btn')}
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenRuns();
+            }}
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+            aria-label={localize('com_automacoes_runs_title')}
+          >
+            <History className="h-3 w-3" aria-hidden="true" />
+            {localize('com_automacoes_runs_title')}
+          </button>
           <button
             type="button"
             onClick={(e) => {
@@ -280,8 +285,8 @@ function AutomationRow({
           >
             <Trash2 className="h-3 w-3" aria-hidden="true" />
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

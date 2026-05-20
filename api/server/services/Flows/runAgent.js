@@ -1,3 +1,4 @@
+const { randomUUID } = require('crypto');
 const { logger } = require('@librechat/data-schemas');
 const { EModelEndpoint } = require('librechat-data-provider');
 
@@ -52,18 +53,29 @@ function collectText(parts) {
  */
 async function runAgent({ req, agentId, input, instructionsOverride, modelOverride }) {
   const { initializeClient } = require('~/server/services/Endpoints/agents/initialize');
+  const { loadAgent: loadAgentFn } = require('@librechat/api');
+  const { getMCPServerTools } = require('~/server/services/Config');
+  const db = require('~/models');
+
+  const model_parameters = modelOverride ? { model: modelOverride } : {};
+  const agentPromise = loadAgentFn(
+    { req, agent_id: agentId, endpoint: EModelEndpoint.agents, model_parameters },
+    { getAgent: db.getAgent, getMCPServerTools },
+  ).catch((error) => {
+    logger.error(`[Flows.runAgent] loadAgent failed for ${agentId}`, error);
+    return undefined;
+  });
 
   const endpointOption = {
     endpoint: EModelEndpoint.agents,
     agent_id: agentId,
+    agent: agentPromise,
+    model_parameters,
     /** Single-agent run: no edges => standard (non-handoff) graph. */
     edges: [],
   };
   if (instructionsOverride) {
     endpointOption.instructions = instructionsOverride;
-  }
-  if (modelOverride) {
-    endpointOption.model_parameters = { model: modelOverride };
   }
 
   const syntheticReq = {
@@ -83,6 +95,14 @@ async function runAgent({ req, agentId, input, instructionsOverride, modelOverri
       res,
       endpointOption,
     });
+    /**
+     * AgentClient seeds Run/Graph metadata (run_id, thread_id, parentMessageId) from
+     * these instance fields. The flow runner has no chat persistence, so we mint
+     * synthetic UUIDs for each invocation.
+     */
+    client.responseMessageId = randomUUID();
+    client.conversationId = randomUUID();
+    client.parentMessageId = randomUUID();
     const { completion } = await client.sendCompletion(
       [{ role: 'user', content: input }],
       {},

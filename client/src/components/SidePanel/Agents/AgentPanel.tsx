@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
+import BuilderChatView from '~/components/Agentes/BuilderChatView';
 import { Plus } from 'lucide-react';
 import { Button, useToastContext } from '@librechat/client';
 import { useWatch, useForm, FormProvider } from 'react-hook-form';
@@ -34,7 +35,6 @@ import { useSelectAgent, useLocalize, useAuthContext } from '~/hooks';
 import { useAgentDraftContext } from '~/Providers';
 import { useAgentPanelContext } from '~/Providers/AgentPanelContext';
 import AgentPanelSkeleton from './AgentPanelSkeleton';
-import AdvancedPanel from './Advanced/AdvancedPanel';
 import { Panel, isEphemeralAgent } from '~/common';
 import AgentConfig from './AgentConfig';
 import AgentSelect from './AgentSelect';
@@ -259,6 +259,7 @@ export default function AgentPanel() {
     setValue,
     formState: { dirtyFields },
   } = methods;
+  const [builderConvoId, setBuilderConvoId] = useState<string | null>(null);
   const [isAvatarUploadInFlight, setIsAvatarUploadInFlight] = useState(false);
   const uploadAvatarMutation = useUploadAgentAvatarMutation({
     onSuccess: (updatedAgent) => {
@@ -305,7 +306,14 @@ export default function AgentPanel() {
   );
   const agent_id = useWatch({ control, name: 'id' });
 
-  const { setDraftParams, registerFormSetValue } = useAgentDraftContext();
+  const {
+    draftParams,
+    setDraftParams,
+    registerFormSetValue,
+    registerSaveAgent,
+    creationMode,
+    setCreationMode,
+  } = useAgentDraftContext();
 
   useEffect(() => {
     registerFormSetValue((field, value, options) =>
@@ -564,6 +572,14 @@ export default function AgentPanel() {
     }
   }, [agent_id, onSelectAgent]);
 
+  const submitFormRef = useRef<() => void>(() => undefined);
+  submitFormRef.current = handleSubmit(onSubmit);
+  useEffect(() => {
+    registerSaveAgent(() => submitFormRef.current());
+    // Mount-only: registerSaveAgent and submitFormRef are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const canEditAgent = useMemo(() => {
     if (!agentQuery.data?.id) {
       return true;
@@ -576,52 +592,88 @@ export default function AgentPanel() {
     return canEdit;
   }, [agentQuery.data?.id, user?.role, canEdit]);
 
+  const isPromptMode = creationMode === 'prompt';
+  const ContainerTag = isPromptMode ? 'div' : 'form';
+  const containerProps = isPromptMode
+    ? {}
+    : { onSubmit: handleSubmit(onSubmit) };
   return (
     <FormProvider {...methods}>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="scrollbar-gutter-stable h-auto w-full flex-shrink-0 px-3 pb-3"
+      <ContainerTag
+        {...containerProps}
+        className={
+          isPromptMode
+            ? 'flex h-full w-full flex-col overflow-hidden'
+            : 'scrollbar-gutter-stable h-full w-full flex-col overflow-y-auto px-3 pb-3 pt-3'
+        }
         aria-label={localize('com_ui_ux_agent_form')}
       >
-        <div className="flex w-full flex-wrap gap-2">
-          <div className="w-full">
-            <AgentSelect
-              createMutation={create}
-              agentQuery={agentQuery}
-              setCurrentAgentId={setCurrentAgentId}
-              // The following is required to force re-render the component when the form's agent ID changes
-              // Also maintains ComboBox Focus for Accessibility
-              selectedAgentId={agentQuery.isInitialLoading ? null : (current_agent_id ?? null)}
-            />
+        <div className={creationMode === 'prompt' ? 'flex-shrink-0 px-3 pt-3' : ''}>
+          <div className="flex w-full flex-wrap gap-2">
+            <div className="w-full">
+              <AgentSelect
+                createMutation={create}
+                agentQuery={agentQuery}
+                setCurrentAgentId={setCurrentAgentId}
+                selectedAgentId={agentQuery.isInitialLoading ? null : (current_agent_id ?? null)}
+              />
+            </div>
+            {/* Create + Select Button */}
+            {agent_id && (
+              <div className="flex w-full gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-center"
+                  onClick={() => {
+                    reset(getDefaultAgentFormValues());
+                    setCurrentAgentId(undefined);
+                  }}
+                  disabled={agentQuery.isInitialLoading}
+                  aria-label={localize('com_ui_create_new_agent')}
+                >
+                  <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+                  {localize('com_ui_create_new_agent')}
+                </Button>
+                <Button
+                  variant="submit"
+                  disabled={isEphemeralAgent(agent_id) || agentQuery.isInitialLoading}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSelectAgent();
+                  }}
+                  aria-label={localize('com_ui_select_agent')}
+                >
+                  {localize('com_ui_select')}
+                </Button>
+              </div>
+            )}
           </div>
-          {/* Create + Select Button */}
-          {agent_id && (
-            <div className="flex w-full gap-2">
-              <Button
+          {/* Mode tabs */}
+          {canEditAgent && !agentQuery.isInitialLoading && activePanel === Panel.builder && (
+            <div className="mt-2 flex border-b border-border-medium">
+              <button
                 type="button"
-                variant="outline"
-                className="w-full justify-center"
-                onClick={() => {
-                  reset(getDefaultAgentFormValues());
-                  setCurrentAgentId(undefined);
-                }}
-                disabled={agentQuery.isInitialLoading}
-                aria-label={localize('com_ui_create_new_agent')}
+                onClick={() => setCreationMode('manual')}
+                className={`px-3 py-2 text-sm transition-colors ${
+                  creationMode === 'manual'
+                    ? 'border-b-2 border-green-500 font-semibold text-green-600'
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
               >
-                <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
-                {localize('com_ui_create_new_agent')}
-              </Button>
-              <Button
-                variant="submit"
-                disabled={isEphemeralAgent(agent_id) || agentQuery.isInitialLoading}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleSelectAgent();
-                }}
-                aria-label={localize('com_ui_select_agent')}
+                {localize('com_ui_ux_modo_manual')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreationMode('prompt')}
+                className={`px-3 py-2 text-sm transition-colors ${
+                  creationMode === 'prompt'
+                    ? 'border-b-2 border-green-500 font-semibold text-green-600'
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
               >
-                {localize('com_ui_select')}
-              </Button>
+                {localize('com_ui_ux_modo_prompt')}
+              </button>
             </div>
           )}
         </div>
@@ -639,13 +691,36 @@ export default function AgentPanel() {
         {canEditAgent && !agentQuery.isInitialLoading && activePanel === Panel.model && (
           <ModelPanel models={models} providers={providers} setActivePanel={setActivePanel} />
         )}
-        {canEditAgent && !agentQuery.isInitialLoading && activePanel === Panel.builder && (
-          <AgentConfig />
-        )}
-        {canEditAgent && !agentQuery.isInitialLoading && activePanel === Panel.advanced && (
-          <AdvancedPanel />
-        )}
-        {canEditAgent && !agentQuery.isInitialLoading && (
+        {canEditAgent &&
+          !agentQuery.isInitialLoading &&
+          activePanel === Panel.builder &&
+          creationMode === 'manual' && <AgentConfig />}
+        {canEditAgent &&
+          !agentQuery.isInitialLoading &&
+          activePanel === Panel.builder &&
+          creationMode === 'prompt' && (
+            <div className="flex-1 overflow-hidden">
+              <BuilderChatView
+                conversationId={builderConvoId}
+                draftParams={draftParams}
+                onConversationCreated={setBuilderConvoId}
+              />
+            </div>
+          )}
+        {canEditAgent &&
+          !agentQuery.isInitialLoading &&
+          activePanel === Panel.builder &&
+          creationMode === 'manual' && (
+            <AgentFooter
+              createMutation={create}
+              updateMutation={update}
+              isAvatarUploading={isAvatarUploadInFlight || uploadAvatarMutation.isLoading}
+              activePanel={activePanel}
+              setActivePanel={setActivePanel}
+              setCurrentAgentId={setCurrentAgentId}
+            />
+          )}
+        {canEditAgent && !agentQuery.isInitialLoading && activePanel !== Panel.builder && (
           <AgentFooter
             createMutation={create}
             updateMutation={update}
@@ -655,7 +730,7 @@ export default function AgentPanel() {
             setCurrentAgentId={setCurrentAgentId}
           />
         )}
-      </form>
+      </ContainerTag>
     </FormProvider>
   );
 }

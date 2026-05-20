@@ -1,5 +1,5 @@
-import { memo, useMemo, useRef, useState } from 'react';
-import { Folder } from 'lucide-react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { Folder, X } from 'lucide-react';
 import * as Ariakit from '@ariakit/react';
 import { useFormContext } from 'react-hook-form';
 import { SharePointIcon, AttachmentIcon, DropdownPopup } from '@librechat/client';
@@ -11,7 +11,6 @@ import { useAgentFileConfig, useLocalize, useLazyEffect } from '~/hooks';
 import { SharePointPickerDialog } from '~/components/SharePoint';
 import FileRow from '~/components/Chat/Input/Files/FileRow';
 import { useGetStartupConfig } from '~/data-provider';
-import FileSearchCheckbox from './FileSearchCheckbox';
 import { isEphemeralAgent } from '~/common';
 
 function FileSearch({
@@ -22,17 +21,18 @@ function FileSearch({
   files?: [string, ExtendedFile][];
 }) {
   const localize = useLocalize();
-  const { watch } = useFormContext<AgentForm>();
+  const { setValue } = useFormContext<AgentForm>();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<Map<string, ExtendedFile>>(new Map());
+  const [queuedFiles, setQueuedFiles] = useState<File[]>([]);
   const fileHandlingState = useMemo(() => ({ files, setFiles, conversation: null }), [files]);
   const [isPopoverActive, setIsPopoverActive] = useState(false);
   const [isSharePointDialogOpen, setIsSharePointDialogOpen] = useState(false);
 
-  // Get startup configuration for SharePoint feature flag
   const { data: startupConfig } = useGetStartupConfig();
   const { endpointFileConfig, providerValue, endpointType } = useAgentFileConfig();
   const endpointOverride = providerValue || EModelEndpoint.agents;
+  const isEphemeral = isEphemeralAgent(agent_id);
 
   const { handleFileChange } = useFileHandlingNoChatContext(
     {
@@ -65,11 +65,33 @@ function FileSearch({
     750,
   );
 
-  const fileSearchChecked = watch(AgentCapabilities.file_search);
-  const isUploadDisabled = endpointFileConfig?.disabled ?? false;
+  useEffect(() => {
+    if (files.size > 0 || queuedFiles.length > 0) {
+      setValue(AgentCapabilities.file_search as keyof AgentForm, true, { shouldDirty: true });
+    }
+  }, [files.size, queuedFiles.length, setValue]);
 
+  // When agent transitions from ephemeral → real, flush any queued files.
+  useEffect(() => {
+    if (isEphemeral || queuedFiles.length === 0) {
+      return;
+    }
+    const dt = new DataTransfer();
+    queuedFiles.forEach((f) => dt.items.add(f));
+    if (fileInputRef.current) {
+      fileInputRef.current.files = dt.files;
+      handleFileChange({
+        target: fileInputRef.current,
+        currentTarget: fileInputRef.current,
+      } as unknown as React.ChangeEvent<HTMLInputElement>);
+    }
+    setQueuedFiles([]);
+    // handleFileChange identity changes per render; only flush on agent_id transition.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEphemeral]);
+
+  const isUploadDisabled = endpointFileConfig?.disabled ?? false;
   const sharePointEnabled = startupConfig?.sharePointFilePickerEnabled;
-  const disabledUploadButton = isEphemeralAgent(agent_id) || fileSearchChecked === false;
 
   const handleSharePointFilesSelected = async (sharePointFiles: any[]) => {
     try {
@@ -84,7 +106,6 @@ function FileSearch({
   }
 
   const handleButtonClick = () => {
-    // necessary to reset the input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -96,6 +117,21 @@ function FileSearch({
       fileInputRef.current.value = '';
     }
     fileInputRef.current?.click();
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isEphemeral) {
+      const selected = Array.from(e.target.files ?? []);
+      if (selected.length > 0) {
+        setQueuedFiles((prev) => [...prev, ...selected]);
+      }
+      return;
+    }
+    handleFileChange(e);
+  };
+
+  const removeQueuedFile = (index: number) => {
+    setQueuedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const dropdownItems = [
@@ -112,10 +148,7 @@ function FileSearch({
   ];
 
   const menuTrigger = (
-    <Ariakit.MenuButton
-      disabled={disabledUploadButton}
-      className="btn btn-neutral border-token-border-light relative h-9 w-full rounded-lg text-sm font-medium"
-    >
+    <Ariakit.MenuButton className="btn btn-neutral border-token-border-light relative h-9 w-full rounded-lg text-sm font-medium">
       <div className="flex w-full items-center justify-center gap-1">
         <AttachmentIcon className="text-token-text-primary h-4 w-4" />
         {localize('com_ui_upload_file_search')}
@@ -128,13 +161,11 @@ function FileSearch({
       <div className="mb-1.5 flex items-center gap-2">
         <span>
           <label className="text-token-text-primary block text-sm font-medium">
-            {localize('com_assistants_file_search')}
+            {localize('com_agents_file_search_label')}
           </label>
         </span>
       </div>
-      <FileSearchCheckbox />
       <div className="flex flex-col gap-3">
-        {/* File Search (RAG API) Files */}
         <FileRow
           files={files}
           setFiles={setFiles}
@@ -142,6 +173,26 @@ function FileSearch({
           tool_resource={EToolResources.file_search}
           Wrapper={({ children }) => <div className="flex flex-wrap gap-2">{children}</div>}
         />
+        {queuedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {queuedFiles.map((file, idx) => (
+              <div
+                key={`${file.name}-${idx}`}
+                className="flex items-center gap-1 rounded-md border border-border-medium bg-surface-tertiary px-2 py-1 text-xs"
+              >
+                <span className="max-w-[12rem] truncate">{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeQueuedFile(idx)}
+                  className="rounded p-0.5 hover:bg-surface-hover"
+                  aria-label={localize('com_ui_delete')}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <div>
           {sharePointEnabled ? (
             <DropdownPopup
@@ -157,7 +208,6 @@ function FileSearch({
           ) : (
             <button
               type="button"
-              disabled={disabledUploadButton}
               className="btn btn-neutral border-token-border-light relative h-9 w-full rounded-lg text-sm font-medium"
               onClick={handleButtonClick}
             >
@@ -173,14 +223,12 @@ function FileSearch({
             style={{ display: 'none' }}
             tabIndex={-1}
             ref={fileInputRef}
-            disabled={disabledUploadButton}
-            onChange={handleFileChange}
+            onChange={handleInputChange}
           />
         </div>
-        {/* Disabled Message */}
-        {agent_id ? null : (
+        {isEphemeral && queuedFiles.length > 0 && (
           <div className="text-xs text-text-secondary">
-            {localize('com_agents_file_search_disabled')}
+            {localize('com_ui_ux_files_queued_until_save')}
           </div>
         )}
       </div>
@@ -189,7 +237,7 @@ function FileSearch({
         isOpen={isSharePointDialogOpen}
         onOpenChange={setIsSharePointDialogOpen}
         onFilesSelected={handleSharePointFilesSelected}
-        disabled={disabledUploadButton}
+        disabled={false}
         isDownloading={isProcessing}
         downloadProgress={downloadProgress}
         maxSelectionCount={endpointFileConfig?.fileLimit}

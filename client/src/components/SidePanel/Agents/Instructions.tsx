@@ -20,10 +20,13 @@ interface VariableOption {
   value: string;
 }
 
-const variableOptions: VariableOption[] = Object.keys(specialVariables).map((key) => ({
-  label: `com_ui_special_var_${key}` as TSpecialVarLabel,
-  value: `{{${key}}}`,
-}));
+const EXCLUDED_VARS = new Set(['iso_datetime', 'current_date']);
+const variableOptions: VariableOption[] = Object.keys(specialVariables)
+  .filter((key) => !EXCLUDED_VARS.has(key))
+  .map((key) => ({
+    label: `com_ui_special_var_${key}` as TSpecialVarLabel,
+    value: `{{${key}}}`,
+  }));
 
 export default function Instructions() {
   const menuId = useId();

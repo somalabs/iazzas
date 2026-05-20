@@ -4,42 +4,63 @@ import { X, Play } from 'lucide-react';
 import { useToastContext } from '@librechat/client';
 import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
-import { useRunFlowMutation } from '~/data-provider';
+import { useRunFlowMutation, useUpdateFlowMutation } from '~/data-provider';
 import { useFlowContext } from '../context';
+import { serializeNodes, serializeEdges } from '../serialize';
 
 export default function RunModal() {
   const localize = useLocalize();
   const { state, dispatch } = useFlowContext();
   const { showToast } = useToastContext();
   const runFlow = useRunFlowMutation();
+  const updateFlow = useUpdateFlowMutation();
   const [input, setInput] = useState('');
+
+  const handleError = (error: unknown, fallbackKey: TranslationKeys) => {
+    const details = (
+      error as { response?: { data?: { details?: Array<{ code: string }> } } }
+    )?.response?.data?.details;
+    const firstCode = Array.isArray(details) && details.length > 0 ? details[0].code : null;
+    const msgKey = firstCode ? `com_studio_flow_run_error_${firstCode}` : null;
+    showToast({
+      message: msgKey ? localize(msgKey as TranslationKeys) : localize(fallbackKey),
+      status: 'error',
+    });
+  };
+
+  const dispatchRun = (flowId: string) => {
+    runFlow.mutate(
+      { id: flowId, input },
+      {
+        onSuccess: () => {
+          showToast({ message: localize('com_studio_flow_run_started'), status: 'success' });
+          if (!state.runsOpen) {
+            dispatch({ type: 'TOGGLE_RUNS' });
+          }
+        },
+        onError: (error: unknown) => handleError(error, 'com_studio_flow_run_error'),
+      },
+    );
+    dispatch({ type: 'TOGGLE_RUN_MODAL' });
+    setInput('');
+  };
 
   const handleRun = () => {
     if (!input.trim() || !state.flowId) {
       return;
     }
-    runFlow.mutate(
-      { id: state.flowId, input },
+    const payload = {
+      name: state.flowName.trim() || localize('com_studio_flow_name_placeholder'),
+      nodes: serializeNodes(state.nodes),
+      edges: serializeEdges(state.edges),
+    };
+    updateFlow.mutate(
+      { id: state.flowId, data: payload },
       {
-        onSuccess: () =>
-          showToast({ message: localize('com_studio_flow_run_started'), status: 'success' }),
-        onError: (error: unknown) => {
-          const details = (
-            error as { response?: { data?: { details?: Array<{ code: string }> } } }
-          )?.response?.data?.details;
-          const firstCode = Array.isArray(details) && details.length > 0 ? details[0].code : null;
-          const msgKey = firstCode ? `com_studio_flow_run_error_${firstCode}` : null;
-          showToast({
-            message: msgKey
-              ? localize(msgKey as TranslationKeys)
-              : localize('com_studio_flow_run_error'),
-            status: 'error',
-          });
-        },
+        onSuccess: (res) => dispatchRun(res.flow._id),
+        onError: (error: unknown) => handleError(error, 'com_studio_flow_save_error'),
       },
     );
-    dispatch({ type: 'TOGGLE_RUN_MODAL' });
-    setInput('');
   };
 
   return (

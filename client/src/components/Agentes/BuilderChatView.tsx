@@ -33,7 +33,7 @@ export default function BuilderChatView({
 
   const methods = useForm<ChatFormValues>({ defaultValues: { text: '' } });
   const fileMap = useFileMapContext();
-  const { setDraftParams, setFormValue } = useAgentDraftContext();
+  const { setDraftParams, setFormValue, saveAgent } = useAgentDraftContext();
 
   const rootSubmission = useRecoilValue(store.submissionByIndex(BUILDER_CHAT_INDEX));
 
@@ -51,12 +51,13 @@ export default function BuilderChatView({
         title: base?.title ?? '',
         createdAt: base?.createdAt ?? '',
         updatedAt: base?.updatedAt ?? '',
-        endpoint: base?.endpoint ?? null,
+        endpoint: 'agents',
+        endpointType: 'agents',
+        model: 'gemini-2.5-flash',
         agent_id: Constants.CONSTRUTOR_AGENT_ID,
-        promptPrefix: `[Rascunho atual]:\n${JSON.stringify(draftParams)}`,
       } as Parameters<typeof setConversation>[0] extends (c: infer C) => unknown ? C : never;
     });
-  }, [activeConvoId, draftParams, setConversation]);
+  }, [activeConvoId, setConversation]);
 
   const recoilConvoId = chatHelpers.conversation?.conversationId;
   useEffect(() => {
@@ -68,7 +69,9 @@ export default function BuilderChatView({
 
   useAdaptiveSSE(rootSubmission, chatHelpers, false, BUILDER_CHAT_INDEX);
 
-  const { data: messagesTree = null } = useGetMessagesByConvoId(activeConvoId, {
+  const messagesKey =
+    activeConvoId === Constants.NEW_CONVO ? `new-${BUILDER_CHAT_INDEX}` : activeConvoId;
+  const { data: messagesTree = null } = useGetMessagesByConvoId(messagesKey, {
     select: useCallback(
       (data: TMessage[]) => {
         const tree = buildTree({ messages: data, fileMap });
@@ -80,7 +83,7 @@ export default function BuilderChatView({
   });
 
   const messages = chatHelpers.getMessages() ?? [];
-  useBuilderToolInterceptor(messages, setDraftParams, setFormValue);
+  useBuilderToolInterceptor(messages, setDraftParams, setFormValue, saveAgent);
 
   return (
     <ChatFormProvider {...methods}>

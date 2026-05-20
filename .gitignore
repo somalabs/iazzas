@@ -109,6 +109,8 @@ meilisearch
 meilisearch.exe
 data.ms/*
 auth.json
+e2e/.auth-*.json
+e2e/e2e/
 
 /packages/ux-shared/
 /images

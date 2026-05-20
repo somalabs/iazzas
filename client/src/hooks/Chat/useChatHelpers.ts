@@ -24,8 +24,15 @@ export default function useChatHelpers(index = 0, paramId?: string) {
   const { conversationId, endpoint, endpointType } = conversation ?? {};
 
   /** Use paramId (from URL) as primary source for query key - this must match what ChatView uses
-  Falling back to conversationId (Recoil) only if paramId is not available */
-  const queryParam = paramId === 'new' ? paramId : (paramId ?? conversationId ?? '');
+  Falling back to conversationId (Recoil) only if paramId is not available.
+  For non-zero indices (side panels like Agentes Preview/Builder) we isolate the 'new'
+  cache key per index so multiple "new" chats don't pollute each other's messages. */
+  const queryParam =
+    paramId === 'new' && index !== 0
+      ? `new-${index}`
+      : paramId === 'new'
+        ? paramId
+        : (paramId ?? conversationId ?? '');
 
   const resetLatestMessage = useResetRecoilState(store.latestMessageFamily(index));
   const [isSubmitting, setIsSubmitting] = useRecoilState(store.isSubmittingFamily(index));
@@ -43,7 +50,12 @@ export default function useChatHelpers(index = 0, paramId?: string) {
   const setMessages = useCallback(
     (messages: TMessage[]) => {
       queryClient.setQueryData<TMessage[]>([QueryKeys.messages, queryParam], messages);
-      if (queryParam === 'new' && conversationId && conversationId !== 'new') {
+      if (
+        queryParam.startsWith('new') &&
+        conversationId &&
+        conversationId !== 'new' &&
+        conversationId !== queryParam
+      ) {
         queryClient.setQueryData<TMessage[]>([QueryKeys.messages, conversationId], messages);
       }
     },

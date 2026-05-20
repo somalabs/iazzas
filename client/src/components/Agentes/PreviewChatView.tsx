@@ -48,7 +48,7 @@ export default function PreviewChatView({
         title: base?.title ?? '',
         createdAt: base?.createdAt ?? '',
         updatedAt: base?.updatedAt ?? '',
-        endpoint: (draftParams.provider || base?.endpoint) ?? null,
+        endpoint: (draftParams.provider || base?.endpoint) ?? 'agents',
         model: draftParams.model || base?.model,
         agent_id: Constants.EPHEMERAL_AGENT_ID,
         promptPrefix: draftParams.instructions || undefined,
@@ -82,7 +82,9 @@ export default function PreviewChatView({
 
   useAdaptiveSSE(rootSubmission, chatHelpers, false, PREVIEW_CHAT_INDEX);
 
-  const { data: messagesTree = null } = useGetMessagesByConvoId(activeConvoId, {
+  const messagesKey =
+    activeConvoId === Constants.NEW_CONVO ? `new-${PREVIEW_CHAT_INDEX}` : activeConvoId;
+  const { data: messagesTree = null } = useGetMessagesByConvoId(messagesKey, {
     select: useCallback(
       (data: TMessage[]) => {
         const tree = buildTree({ messages: data, fileMap });

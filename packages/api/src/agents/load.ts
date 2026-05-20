@@ -6,7 +6,9 @@ import {
   isAgentsEndpoint,
   isEphemeralAgentId,
   encodeEphemeralAgentId,
+  replaceSpecialVars,
 } from 'librechat-data-provider';
+import { loadConstrutorAgent } from './construtor';
 import type {
   AgentModelParameters,
   TEphemeralAgent,
@@ -138,9 +140,11 @@ export async function loadEphemeralAgent(
     }
   }
 
-  const instructions =
+  const rawInstructions =
     req.body?.promptPrefix ??
     (modelSpec?.preset as { promptPrefix?: string } | undefined)?.promptPrefix;
+  const dateLine = `Data e hora atuais: ${replaceSpecialVars({ text: '{{current_datetime}}' })}.`;
+  const instructions = rawInstructions ? `${rawInstructions}\n\n${dateLine}` : dateLine;
 
   // Get endpoint config for modelDisplayLabel fallback
   const appConfig = req.config;
@@ -199,6 +203,9 @@ export async function loadAgent(
   const { req, spec, agent_id, endpoint, model_parameters } = params;
   if (!agent_id) {
     return null;
+  }
+  if (agent_id === Constants.CONSTRUTOR_AGENT_ID) {
+    return loadConstrutorAgent({ draftPromptPrefix: req.body?.promptPrefix });
   }
   if (isEphemeralAgentId(agent_id)) {
     return loadEphemeralAgent({ req, spec, endpoint, model_parameters }, deps);

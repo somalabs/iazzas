@@ -20,9 +20,11 @@ ui_defaults:
 
 image_slots:
   - id: garment_image
-    label: "Produto"
-    description: "Peça de roupa a exibir no modelo"
+    label: "Peças do look"
+    description: "Cada foto é uma peça DIFERENTE para compor o look no modelo (ex: blusa + calça + acessório)"
     required: true
+    multiple: true
+    max_count: 5
     accepts: [jpg, jpeg, png, webp]
     max_size_mb: 10
 

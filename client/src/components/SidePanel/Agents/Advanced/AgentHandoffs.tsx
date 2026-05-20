@@ -119,7 +119,7 @@ const AgentHandoffs: React.FC<AgentHandoffsProps> = ({ field, currentAgentId }) 
     <HoverCard openDelay={50}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <label className="font-semibold text-text-primary">
+          <label className="text-token-text-primary block text-sm font-medium">
             {localize('com_ui_agent_handoffs')}
           </label>
           <HoverCardTrigger>
