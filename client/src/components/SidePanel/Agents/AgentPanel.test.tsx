@@ -18,6 +18,12 @@ jest.mock('~/common/types', () => ({
     INFO: 'info',
     WARNING: 'warning',
   },
+  IconContext: {
+    landing: 'landing',
+    menuItem: 'menu-item',
+    nav: 'nav',
+    message: 'message',
+  },
 }));
 
 // Mock store to prevent import errors
@@ -119,6 +125,25 @@ jest.mock('~/Providers/AgentPanelContext', () => ({
   }),
 }));
 
+jest.mock('~/Providers', () => ({
+  useAgentDraftContext: () => ({
+    draftParams: {
+      name: '',
+      category: '',
+      provider: '',
+      model: '',
+      instructions: '',
+      webSearch: false,
+      fileSearch: false,
+      executeCode: false,
+      mcpServers: [],
+    },
+    setDraftParams: jest.fn(),
+    registerFormSetValue: jest.fn(),
+    setFormValue: null,
+  }),
+}));
+
 jest.mock('~/common', () => ({
   isEphemeralAgent: (agentId: string | null | undefined): boolean => {
     return agentId == null || agentId === '' || agentId === 'ephemeral';
@@ -127,6 +152,12 @@ jest.mock('~/common', () => ({
     model: 'model',
     builder: 'builder',
     advanced: 'advanced',
+  },
+  IconContext: {
+    landing: 'landing',
+    menuItem: 'menu-item',
+    nav: 'nav',
+    message: 'message',
   },
 }));
 

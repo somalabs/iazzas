@@ -474,8 +474,7 @@
   "com_nav_auto_transcribe_audio": "Auto transcribe audio",
   "com_nav_automatic_playback": "Autoplay Latest Message",
   "com_nav_balance": "Balance",
-  "com_nav_balance_auto_refill_disabled": "Auto-Refill is disabled.",
-  "com_nav_balance_auto_refill_error": "Error loading auto-refill settings.",
+
   "com_nav_balance_day": "day",
   "com_nav_balance_days": "days",
   "com_nav_balance_hour": "hour",
@@ -502,7 +501,7 @@
   "com_nav_clear_conversation": "Clear conversations",
   "com_nav_clear_conversation_confirm_message": "Are you sure you want to clear all conversations? This is irreversible.",
   "com_nav_close_sidebar": "Close sidebar",
-  "com_nav_commands": "Commands",
+
   "com_nav_confirm_clear": "Confirm Clear",
   "com_nav_control_panel": "Control Panel",
   "com_nav_conversation_mode": "Conversation Mode",
@@ -536,7 +535,7 @@
   "com_nav_font_size_sm": "Small",
   "com_nav_font_size_xl": "Extra Large",
   "com_nav_font_size_xs": "Extra Small",
-  "com_nav_help_faq": "Help & FAQ",
+
   "com_nav_info_balance": "Balance shows how many token credits you have left to use. Token credits translate to monetary value (e.g., 1000 credits = $0.001 USD)",
   "com_nav_info_code_artifacts": "Enables the display of experimental code artifacts next to the chat",
   "com_nav_info_code_artifacts_agent": "Enables the use of code artifacts for this agent. By default, additional instructions specific to the use of artifacts are added, unless \"Custom Prompt Mode\" is enabled.",
@@ -634,8 +633,7 @@
   "com_nav_setting_delay": "Delay (s)",
   "com_nav_setting_general": "General",
   "com_nav_setting_mcp": "MCP Settings",
-  "com_nav_setting_personalization": "Personalization",
-  "com_nav_setting_speech": "Speech",
+
   "com_nav_settings": "Settings",
   "com_nav_shared_links": "Shared links",
   "com_nav_show_thinking": "Open Thinking Dropdowns by Default",
