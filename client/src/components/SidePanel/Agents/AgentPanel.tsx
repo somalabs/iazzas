@@ -12,7 +12,7 @@ import {
   AgentCapabilities,
   isAssistantsEndpoint,
 } from 'librechat-data-provider';
-import type { FieldNamesMarkedBoolean } from 'react-hook-form';
+import type { FieldNamesMarkedBoolean, Path } from 'react-hook-form';
 import type { Agent } from 'librechat-data-provider';
 import type { TranslationKeys } from '~/hooks/useLocalize';
 import type { AgentForm, StringOption } from '~/common';
@@ -308,7 +308,15 @@ export default function AgentPanel() {
   const { setDraftParams, registerFormSetValue } = useAgentDraftContext();
 
   useEffect(() => {
-    registerFormSetValue((field, value, options) => setValue(field as any, value, options));
+    registerFormSetValue((field, value, options) =>
+      setValue(
+        field as Path<AgentForm>,
+        value as AgentForm[keyof AgentForm],
+        options as Record<string, boolean>,
+      ),
+    );
+    // Mount-only: setValue is stable (RHF guarantee) and registerFormSetValue
+    // is stable by construction (defined in provider, not remounted).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 export type AgentDraftParams = {
   name: string;
@@ -41,11 +41,10 @@ const AgentDraftContext = createContext<AgentDraftContextValue | null>(null);
 
 export function AgentDraftProvider({ children }: { children: React.ReactNode }) {
   const [draftParams, setDraftParams] = useState<AgentDraftParams>(defaultDraftParams);
-  const formSetValueRef = useRef<FormSetValue | null>(null);
   const [setFormValue, setSetFormValue] = useState<FormSetValue | null>(null);
 
   const registerFormSetValue = (fn: FormSetValue) => {
-    formSetValueRef.current = fn;
+    // Pass a function-returning-function so React doesn't invoke fn as a state initializer.
     setSetFormValue(() => fn);
   };
 
