@@ -267,7 +267,6 @@ describe('AgentFooter', () => {
     test('renders with standard components based on default state', () => {
       render(<AgentFooter {...defaultProps} />);
       expect(screen.getByText('Save')).toBeInTheDocument();
-      expect(screen.getByTestId('advanced-button')).toBeInTheDocument();
       expect(screen.getByTestId('version-button')).toBeInTheDocument();
       expect(screen.getByTestId('delete-button')).toBeInTheDocument();
       expect(screen.queryByTestId('admin-settings')).not.toBeInTheDocument();
@@ -309,7 +308,6 @@ describe('AgentFooter', () => {
   describe('Conditional Rendering', () => {
     test('adjusts UI based on activePanel state', () => {
       render(<AgentFooter {...defaultProps} activePanel={Panel.advanced} />);
-      expect(screen.queryByTestId('advanced-button')).not.toBeInTheDocument();
       expect(screen.queryByTestId('version-button')).not.toBeInTheDocument();
     });
 

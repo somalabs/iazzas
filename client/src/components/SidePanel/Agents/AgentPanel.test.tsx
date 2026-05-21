@@ -91,6 +91,7 @@ jest.mock('librechat-data-provider/react-query', () => ({
 }));
 
 jest.mock('~/utils', () => ({
+  cn: (...args: unknown[]) => args.filter(Boolean).join(' '),
   createProviderOption: jest.fn((provider: string) => ({ value: provider, label: provider })),
   getDefaultAgentFormValues: jest.fn(() => ({
     id: '',
@@ -141,6 +142,10 @@ jest.mock('~/Providers', () => ({
     setDraftParams: jest.fn(),
     registerFormSetValue: jest.fn(),
     setFormValue: null,
+    registerSaveAgent: jest.fn(),
+    saveAgent: null,
+    creationMode: 'manual',
+    setCreationMode: jest.fn(),
   }),
 }));
 
@@ -185,6 +190,11 @@ jest.mock('./AgentSelect', () => ({
 jest.mock('./ModelPanel', () => ({
   __esModule: true,
   default: () => <div>{`Model Panel`}</div>,
+}));
+
+jest.mock('~/components/Agentes/BuilderChatView', () => ({
+  __esModule: true,
+  default: () => <div>{`Builder Chat View`}</div>,
 }));
 
 // Mock AgentFooter to provide a save button
