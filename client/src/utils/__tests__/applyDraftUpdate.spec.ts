@@ -1,3 +1,4 @@
+import type React from 'react';
 import { AgentCapabilities } from 'librechat-data-provider';
 import type { AgentDraftParams } from '~/Providers/AgentDraftContext';
 import { applyDraftUpdate, DRAFT_FORM_FIELD_MAP } from '../applyDraftUpdate';
@@ -17,9 +18,11 @@ describe('applyDraftUpdate', () => {
 
   it('merges partial args onto draftParams', () => {
     let captured: AgentDraftParams | null = null;
-    const setDraftParams = jest.fn((fn: (prev: AgentDraftParams) => AgentDraftParams) => {
-      captured = fn(baseParams);
-    });
+    const setDraftParams: React.Dispatch<React.SetStateAction<AgentDraftParams>> = jest.fn(
+      (value) => {
+        captured = typeof value === 'function' ? value(baseParams) : value;
+      },
+    );
     const setFormValue = jest.fn();
 
     applyDraftUpdate({ name: 'New Name', webSearch: true }, setDraftParams, setFormValue);
@@ -66,14 +69,16 @@ describe('applyDraftUpdate', () => {
   });
 
   it('ignores undefined values — does not override existing params', () => {
-    let captured: AgentDraftParams | null = null;
-    const setDraftParams = jest.fn((fn: any) => {
-      captured = fn(baseParams);
-    });
+    const captured: { value: AgentDraftParams | null } = { value: null };
+    const setDraftParams: React.Dispatch<React.SetStateAction<AgentDraftParams>> = jest.fn(
+      (value) => {
+        captured.value = typeof value === 'function' ? value(baseParams) : value;
+      },
+    );
 
     applyDraftUpdate({ name: 'New', instructions: undefined }, setDraftParams, null);
 
-    expect(captured?.instructions).toBe('Old instructions');
+    expect(captured.value?.instructions).toBe('Old instructions');
   });
 
   it('exports DRAFT_FORM_FIELD_MAP with expected keys', () => {

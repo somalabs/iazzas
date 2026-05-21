@@ -22,9 +22,10 @@ export default function ImageDetail() {
   const [imageIdx, setImageIdx] = useState(0);
 
   if (!selectedCreation) return null;
+  const creation = selectedCreation;
 
   const isEditing = mode === 'editing';
-  const model = MODEL_DISPLAY_NAMES[selectedCreation.model] ?? selectedCreation.model;
+  const model = MODEL_DISPLAY_NAMES[creation.model] ?? creation.model;
   const date = formatStudioDate(selectedCreation.createdAt, true);
   const prompt = selectedCreation.prompt;
   const truncated = prompt.length > 140 && !promptExpanded;
@@ -44,7 +45,7 @@ export default function ImageDetail() {
     if (deleteMutation.isLoading) {
       return;
     }
-    const id = selectedCreation.id;
+    const id = creation.id;
     if (!window.confirm(localize('com_studio_delete_confirm'))) {
       return;
     }
@@ -80,7 +81,7 @@ export default function ImageDetail() {
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = objectUrl;
-      a.download = `studio-${selectedCreation.id}.png`;
+      a.download = `studio-${creation.id}.png`;
       document.body.appendChild(a);
       a.click();
       a.remove();

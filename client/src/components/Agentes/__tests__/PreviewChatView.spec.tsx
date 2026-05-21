@@ -96,6 +96,8 @@ import PreviewChatView from '../PreviewChatView';
 import type { AgentDraftParams } from '~/Providers/AgentDraftContext';
 
 const draftParams: AgentDraftParams = {
+  name: '',
+  category: '',
   provider: 'openAI',
   model: 'gpt-4o',
   instructions: 'Be helpful',

@@ -594,9 +594,7 @@ export default function AgentPanel() {
 
   const isPromptMode = creationMode === 'prompt';
   const ContainerTag = isPromptMode ? 'div' : 'form';
-  const containerProps = isPromptMode
-    ? {}
-    : { onSubmit: handleSubmit(onSubmit) };
+  const containerProps = isPromptMode ? {} : { onSubmit: handleSubmit(onSubmit) };
   return (
     <FormProvider {...methods}>
       <ContainerTag

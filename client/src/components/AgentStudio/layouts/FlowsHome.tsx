@@ -122,7 +122,7 @@ function FlowCard({ flow }: { flow: Flow }) {
   const open = () => navigate(`/d/flows/${flow._id}`);
 
   return (
-    <article
+    <div
       className={cn(
         'group relative flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4',
         'cursor-pointer transition-colors hover:border-border-medium hover:bg-surface-tertiary',
@@ -168,7 +168,7 @@ function FlowCard({ flow }: { flow: Flow }) {
           }}
         />
       </OGDialog>
-    </article>
+    </div>
   );
 }
 

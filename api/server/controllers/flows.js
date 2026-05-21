@@ -8,14 +8,7 @@ const { runAgent } = require('~/server/services/Flows/runAgent');
 const { runJudge } = require('~/server/services/Flows/runJudge');
 const db = require('~/models');
 
-const NODE_TYPES = new Set([
-  'trigger',
-  'agent',
-  'condition',
-  'http',
-  'human_approval',
-  'output',
-]);
+const NODE_TYPES = new Set(['trigger', 'agent', 'condition', 'http', 'human_approval', 'output']);
 const PAGE_LIMIT = 20;
 
 /** Structural errors that must block persistence (mirrors client hasBlockingErrors). */
@@ -323,12 +316,7 @@ const resumeRun = async (req, res) => {
 
     res.json({ runId: String(run._id), status: 'running' });
 
-    const runner = new FlowRunner(
-      run.flowSnapshot,
-      deps,
-      makeSink(req, run._id),
-      run.nodeRuns,
-    );
+    const runner = new FlowRunner(run.flowSnapshot, deps, makeSink(req, run._id), run.nodeRuns);
     runner
       .resume({
         context: run.context || {},

@@ -4,13 +4,7 @@ import { PermissionBits } from 'librechat-data-provider';
 import { useLocalize } from '~/hooks';
 import { useListAgentsQuery } from '~/data-provider';
 import { useFlowContext } from '../context';
-import {
-  FieldGroup,
-  FieldLabel,
-  FieldHint,
-  InspectorSelect,
-  InspectorTextarea,
-} from './shared';
+import { FieldGroup, FieldLabel, FieldHint, InspectorSelect, InspectorTextarea } from './shared';
 import type { AgentNodeData } from 'librechat-data-provider';
 
 export default function AgentInspector({ nodeId, data }: { nodeId: string; data: AgentNodeData }) {

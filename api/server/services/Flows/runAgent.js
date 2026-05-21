@@ -103,10 +103,7 @@ async function runAgent({ req, agentId, input, instructionsOverride, modelOverri
     client.responseMessageId = randomUUID();
     client.conversationId = randomUUID();
     client.parentMessageId = randomUUID();
-    const { completion } = await client.sendCompletion(
-      [{ role: 'user', content: input }],
-      {},
-    );
+    const { completion } = await client.sendCompletion([{ role: 'user', content: input }], {});
     return { output: collectText(completion) };
   } catch (err) {
     logger.error('[Flows.runAgent] agent invocation failed', err);

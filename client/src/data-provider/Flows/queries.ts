@@ -18,22 +18,22 @@ import type {
 export const useFlowsQuery = (
   config?: UseQueryOptions<TFlowListResponse>,
 ): QueryObserverResult<TFlowListResponse> => {
-  return useQuery<TFlowListResponse>(
-    [QueryKeys.flows],
-    () => dataService.getFlows(),
-    { refetchOnWindowFocus: false, refetchOnReconnect: false, ...config },
-  );
+  return useQuery<TFlowListResponse>([QueryKeys.flows], () => dataService.getFlows(), {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    ...config,
+  });
 };
 
 export const useFlowQuery = (
   id: string,
   config?: UseQueryOptions<TFlowResponse>,
 ): QueryObserverResult<TFlowResponse> => {
-  return useQuery<TFlowResponse>(
-    [QueryKeys.flow, id],
-    () => dataService.getFlow(id),
-    { enabled: !!id, refetchOnWindowFocus: false, ...config },
-  );
+  return useQuery<TFlowResponse>([QueryKeys.flow, id], () => dataService.getFlow(id), {
+    enabled: !!id,
+    refetchOnWindowFocus: false,
+    ...config,
+  });
 };
 
 export const useFlowRunsQuery = (

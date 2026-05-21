@@ -47,7 +47,9 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
   /** When rendered inside the Agentes draft context (Testar/Criar via IA panels),
    * restrict capabilities to what the draft agent actually enables. */
   const draftCtx = useAgentDraftContextOptional();
-  const codeEnabled = draftCtx ? rawCodeEnabled && draftCtx.draftParams.executeCode : rawCodeEnabled;
+  const codeEnabled = draftCtx
+    ? rawCodeEnabled && draftCtx.draftParams.executeCode
+    : rawCodeEnabled;
   const webSearchEnabled = draftCtx
     ? rawWebSearchEnabled && draftCtx.draftParams.webSearch
     : rawWebSearchEnabled;

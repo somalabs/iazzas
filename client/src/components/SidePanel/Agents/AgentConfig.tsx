@@ -46,12 +46,8 @@ export default function AgentConfig() {
   const fileMap = useFileMapContext();
   const methods = useFormContext<AgentForm>();
   const [showMCPToolDialog, setShowMCPToolDialog] = useState(false);
-  const {
-    agentsConfig,
-    availableMCPServers,
-    mcpServersMap,
-    endpointsConfig,
-  } = useAgentPanelContext();
+  const { agentsConfig, availableMCPServers, mcpServersMap, endpointsConfig } =
+    useAgentPanelContext();
 
   const {
     control,
@@ -102,13 +98,8 @@ export default function AgentConfig() {
     return newFileMap;
   }, [fileMap, agentFiles]);
 
-  const {
-    codeEnabled,
-    contextEnabled,
-    artifactsEnabled,
-    webSearchEnabled,
-    fileSearchEnabled,
-  } = useAgentCapabilities(agentsConfig?.capabilities);
+  const { codeEnabled, contextEnabled, artifactsEnabled, webSearchEnabled, fileSearchEnabled } =
+    useAgentCapabilities(agentsConfig?.capabilities);
 
   const chainEnabled = useMemo(
     () => agentsConfig?.capabilities.includes(AgentCapabilities.chain) ?? false,

@@ -1417,6 +1417,7 @@ const buildFeedbackQuery = (params: TListFeedbackEntriesParams = {}): string => 
   if (params.category) parts.push(`category=${encodeURIComponent(params.category)}`);
   if (params.trigger) parts.push(`trigger=${encodeURIComponent(params.trigger)}`);
   if (params.modelName) parts.push(`modelName=${encodeURIComponent(params.modelName)}`);
+  if (params.userEmail) parts.push(`userEmail=${encodeURIComponent(params.userEmail)}`);
   if (params.from) parts.push(`from=${encodeURIComponent(params.from)}`);
   if (params.to) parts.push(`to=${encodeURIComponent(params.to)}`);
   return parts.join('&');

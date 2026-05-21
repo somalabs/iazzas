@@ -41,6 +41,7 @@ export default function Retrieval({ retrievalModels }: { retrievalModels: Set<st
             render={({ field }) => (
               <Checkbox
                 {...field}
+                aria-label={localize('com_assistants_file_search')}
                 checked={field.value as boolean}
                 disabled={isDisabled}
                 onCheckedChange={field.onChange}

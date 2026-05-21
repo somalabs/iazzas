@@ -43,7 +43,10 @@ export default function AgentesHome() {
       aria-label={localize('com_ui_ux_nav_agentes')}
     >
       <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
-        <Header onCreate={() => navigate('/d/agentes/novo')} onMarketplace={() => navigate('/agents')} />
+        <Header
+          onCreate={() => navigate('/d/agentes/novo')}
+          onMarketplace={() => navigate('/agents')}
+        />
         <AgentsGrid agents={agents ?? null} />
       </div>
     </main>
@@ -150,7 +153,7 @@ function AgentCard({ agent }: { agent: Agent }) {
   const goEdit = () => navigate(`/d/agentes/${agent.id}`);
 
   return (
-    <article
+    <div
       className={cn(
         'group relative flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4',
         'cursor-pointer transition-colors hover:border-border-medium hover:bg-surface-tertiary',
@@ -170,9 +173,13 @@ function AgentCard({ agent }: { agent: Agent }) {
       })}
     >
       <div className="flex items-start gap-3">
-        <div className="shrink-0">{renderAgentAvatar(agent, { size: 'sm', showBorder: false })}</div>
+        <div className="shrink-0">
+          {renderAgentAvatar(agent, { size: 'sm', showBorder: false })}
+        </div>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-medium text-text-primary">{agent.name || agent.id}</h3>
+          <h3 className="truncate text-sm font-medium text-text-primary">
+            {agent.name || agent.id}
+          </h3>
           {agent.description ? (
             <p className="mt-1 line-clamp-2 text-xs text-text-secondary">{agent.description}</p>
           ) : null}
@@ -201,7 +208,7 @@ function AgentCard({ agent }: { agent: Agent }) {
           }}
         />
       </OGDialog>
-    </article>
+    </div>
   );
 }
 

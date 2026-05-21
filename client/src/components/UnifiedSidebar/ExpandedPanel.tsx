@@ -15,8 +15,7 @@ const ROW_BASE = 'group flex w-full items-center rounded-lg text-left transition
 const ROW_EXPANDED = 'h-auto justify-start gap-3 px-2 py-2 hover:!bg-transparent';
 const ROW_COLLAPSED = 'h-9 w-9 justify-center p-0 hover:bg-surface-hover';
 const ICON_SLOT = 'flex h-6 w-6 flex-shrink-0 items-center justify-center';
-const ICON_HIGHLIGHT_EXPANDED =
-  'rounded-md transition-colors group-hover:bg-surface-hover h-8 w-8';
+const ICON_HIGHLIGHT_EXPANDED = 'rounded-md transition-colors group-hover:bg-surface-hover h-8 w-8';
 
 const NavRouteButton = memo(function NavRouteButton({
   link,
@@ -50,7 +49,9 @@ const NavRouteButton = memo(function NavRouteButton({
       className={cn(
         ROW_BASE,
         expanded ? ROW_EXPANDED : ROW_COLLAPSED,
-        isNavActive && !expanded ? 'bg-surface-active-alt text-text-primary' : 'text-text-secondary',
+        isNavActive && !expanded
+          ? 'bg-surface-active-alt text-text-primary'
+          : 'text-text-secondary',
       )}
       onClick={handleClick}
     >

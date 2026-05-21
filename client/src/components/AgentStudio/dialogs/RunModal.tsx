@@ -17,9 +17,8 @@ export default function RunModal() {
   const [input, setInput] = useState('');
 
   const handleError = (error: unknown, fallbackKey: TranslationKeys) => {
-    const details = (
-      error as { response?: { data?: { details?: Array<{ code: string }> } } }
-    )?.response?.data?.details;
+    const details = (error as { response?: { data?: { details?: Array<{ code: string }> } } })
+      ?.response?.data?.details;
     const firstCode = Array.isArray(details) && details.length > 0 ? details[0].code : null;
     const msgKey = firstCode ? `com_studio_flow_run_error_${firstCode}` : null;
     showToast({
@@ -95,7 +94,6 @@ export default function RunModal() {
             onChange={(e) => setInput(e.target.value)}
             placeholder={localize('com_studio_flow_run_input_placeholder')}
             rows={4}
-            autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleRun();
             }}
@@ -105,7 +103,7 @@ export default function RunModal() {
 
           <div className="flex justify-end gap-2">
             <Dialog.Close className="rounded-xl border border-border-medium px-4 py-2 text-xs text-text-secondary hover:bg-surface-hover">
-              Cancelar
+              {localize('com_ui_cancel')}
             </Dialog.Close>
             <button
               type="button"

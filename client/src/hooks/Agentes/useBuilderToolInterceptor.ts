@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ContentTypes } from 'librechat-data-provider';
-import type { TMessage } from 'librechat-data-provider';
+import type { TMessage, Agents } from 'librechat-data-provider';
 import type { AgentDraftParams } from '~/Providers/AgentDraftContext';
 import { applyDraftUpdate } from '~/utils/applyDraftUpdate';
 
@@ -8,6 +8,14 @@ type FormSetValue = ((field: string, value: unknown, options?: object) => void) 
 
 const UPDATE_TOOL = 'atualizar_rascunho';
 const SAVE_TOOL = 'salvar_agente';
+
+function isAgentToolCall(call: unknown): call is Agents.ToolCall {
+  return (
+    typeof call === 'object' &&
+    call !== null &&
+    typeof (call as { name?: unknown }).name === 'string'
+  );
+}
 
 export function useBuilderToolInterceptor(
   messages: TMessage[],
@@ -21,14 +29,14 @@ export function useBuilderToolInterceptor(
     const last = messages[messages.length - 1];
     if (!last?.content) return;
     for (const part of last.content) {
-      if (part.type !== ContentTypes.TOOL_CALL || part.tool_call?.output == null) {
-        continue;
-      }
-      const toolName = part.tool_call.name;
+      if (part.type !== ContentTypes.TOOL_CALL) continue;
+      const call = part.tool_call;
+      if (!isAgentToolCall(call) || call.output == null) continue;
+      const toolName = call.name;
       if (toolName === UPDATE_TOOL) {
         const args = (() => {
           try {
-            return JSON.parse((part.tool_call.args as string) ?? '{}');
+            return JSON.parse((call.args as string) ?? '{}');
           } catch {
             return {};
           }
@@ -37,7 +45,7 @@ export function useBuilderToolInterceptor(
         continue;
       }
       if (toolName === SAVE_TOOL && saveAgent) {
-        const id = `${last.messageId ?? ''}:${part.tool_call.id ?? part.tool_call.name}`;
+        const id = `${last.messageId ?? ''}:${call.id ?? call.name}`;
         if (processedSaveIds.current.has(id)) continue;
         processedSaveIds.current.add(id);
         saveAgent();

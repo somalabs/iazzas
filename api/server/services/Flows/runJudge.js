@@ -47,7 +47,10 @@ function pickDefaultSpec(req) {
 }
 
 function parseAnswer(raw) {
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+  const cleaned = raw
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
   let obj;
   try {
     obj = JSON.parse(cleaned);

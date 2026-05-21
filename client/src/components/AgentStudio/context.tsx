@@ -70,9 +70,7 @@ function reducer(state: FlowState, action: FlowAction): FlowState {
       return {
         ...state,
         nodes: state.nodes.map((n) =>
-          n.id === action.payload.id
-            ? { ...n, data: { ...n.data, ...action.payload.data } }
-            : n,
+          n.id === action.payload.id ? { ...n, data: { ...n.data, ...action.payload.data } } : n,
         ),
       };
     case 'ADD_NODE': {

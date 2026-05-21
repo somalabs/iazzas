@@ -144,7 +144,8 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
     uiDefaults: { aspectRatio: '2:3', imageCount: 4, resolution: '2K' },
     compliance: {
       requiresHumanReview: true,
-      reviewReason: 'Likeness e fidelidade da peça requerem aprovação humana antes do uso comercial',
+      reviewReason:
+        'Likeness e fidelidade da peça requerem aprovação humana antes do uso comercial',
     },
     imageSlots: [
       {
@@ -207,12 +208,14 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
   {
     id: 'multi_reference',
     displayName: 'Múltiplas Referências',
-    description: 'Crie composições a partir de múltiplas referências de estilo, peças ou personagem.',
+    description:
+      'Crie composições a partir de múltiplas referências de estilo, peças ou personagem.',
     defaultModel: 'nano-banana-pro',
     uiDefaults: { aspectRatio: '4:5', imageCount: 4, resolution: '2K' },
     compliance: {
       requiresHumanReview: true,
-      reviewReason: 'Composições multi-referência de assets de marca requerem aprovação antes do uso comercial',
+      reviewReason:
+        'Composições multi-referência de assets de marca requerem aprovação antes do uso comercial',
     },
     imageSlots: [
       {
@@ -270,7 +273,8 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
         id: 'creative_direction',
         type: 'textarea',
         label: 'Direção criativa',
-        placeholder: 'ex: manter bordados maximalistas, paleta terrosa, inserir todas as peças no expositor',
+        placeholder:
+          'ex: manter bordados maximalistas, paleta terrosa, inserir todas as peças no expositor',
         required: false,
         maxLength: 500,
       },
