@@ -12,6 +12,7 @@ services:
       - mongodb
       - rag_api
       - code-gateway
+      - ms365-mcp
     restart: always
     extra_hosts:
     - "host.docker.internal:host-gateway"
@@ -44,6 +45,28 @@ services:
       - PORT=8080
       - EXEC_TIMEOUT_MS=30000
     restart: always
+
+  ms365-mcp:
+    container_name: ms365-mcp
+    image: ghcr.io/somalabs/iazzas-ms365-mcp:latest
+    command:
+      - "--http"
+      - "3000"
+      - "--org-mode"
+    environment:
+      - MS365_MCP_CLIENT_ID=${MS365_CLIENT_ID}
+      - MS365_MCP_CLIENT_SECRET=${MS365_CLIENT_SECRET}
+      - MS365_MCP_TENANT_ID=${MS365_TENANT_ID}
+      - MS365_MCP_PUBLIC_URL=${DOMAIN_SERVER}/ms365
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - node -e "require('http').get('http://localhost:3000/', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   client:
     image: nginx:1.27.0-alpine

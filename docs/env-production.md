@@ -112,6 +112,49 @@ O code interpreter roda **localmente no cluster** via `code-gateway`, um serviç
 | `USE_LOCAL_EXEC` | `true` | Executa código localmente (sem Piston) |
 | `EXEC_TIMEOUT_MS` | `30000` | Timeout de execução (30s default) |
 
+## MCP — Microsoft 365 (Outlook, Teams, Calendar, OneDrive)
+
+O MCP `microsoft365` é servido pelo container `ms365-mcp` (imagem
+`ghcr.io/somalabs/iazzas-ms365-mcp`, build do `softeria/ms-365-mcp-server`).
+OAuth é per-user — cada colaborador vincula a própria conta @azzas2154.com.br.
+
+**Pré-requisito Fase 0 (uma vez só, no Entra ID Azzas):**
+
+Microsoft não suporta Dynamic Client Registration, então é preciso criar uma
+App Registration única no tenant Azzas. Passo a passo:
+
+1. Portal Azure → **Entra ID** → **App registrations** → **New registration**
+2. Nome: `IAzzas M365 Connector`
+3. Account types: **Single tenant**
+4. Redirect URI (Web): `${DOMAIN_SERVER}/ms365/auth/callback`
+   (ex: `https://iazzas.azzas2154.com.br/ms365/auth/callback`)
+5. Após criar, ir em **API permissions** → **Add a permission** → **Microsoft Graph** → **Delegated permissions** e adicionar:
+   - `User.Read`
+   - `offline_access`
+   - `Mail.ReadWrite`, `Mail.Send`
+   - `Calendars.ReadWrite`
+   - `Chat.ReadWrite`, `ChannelMessage.Read.All`, `OnlineMeetings.ReadWrite`
+   - `Files.ReadWrite.All`
+   - `Notes.ReadWrite.All`
+6. **Grant admin consent for Azzas** (botão no topo) — necessário pros scopes Teams.
+7. Em **Certificates & secrets** → **New client secret** (12 meses). Copiar **value** (não o ID).
+8. Em **Overview**, copiar **Application (client) ID** e **Directory (tenant) ID**.
+
+**Variáveis no `.env` de prod:**
+
+| Variável | Valor | Descrição |
+|---|---|---|
+| `MS365_CLIENT_ID` * | GUID | Application (client) ID da App Registration |
+| `MS365_CLIENT_SECRET` * | string secreta | Client secret value (não o ID) |
+| `MS365_TENANT_ID` * | GUID | Directory (tenant) ID — o tenant Azzas |
+
+A `MS365_MCP_PUBLIC_URL` que o container recebe é derivada automaticamente de
+`${DOMAIN_SERVER}/ms365` no `deploy-compose.yml` — não precisa setar separado.
+
+**Rotação do secret:** quando o client secret expirar (12 meses), gerar novo em
+Certificates & secrets, atualizar `MS365_CLIENT_SECRET` no `.env` e
+`docker compose up -d --no-deps --force-recreate ms365-mcp`.
+
 ## Rate Limiting / Moderação
 
 | Variável | Valor | Descrição |

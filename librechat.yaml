@@ -275,6 +275,20 @@ mcpServers:
     requiresOAuth: true
     oauth: {}
 
+  # Microsoft 365 (Outlook Mail/Calendar, Teams, OneDrive, OneNote, Excel) via
+  # softeria/ms-365-mcp-server self-hospedado. Pré-requisito: App Registration
+  # no Entra ID Azzas com delegated permissions Graph (ver docs/env-production.md).
+  # OAuth per-user via DCR contra o próprio ms365-mcp; LibreChat e usuário
+  # tratam exatamente como Notion/Atlassian/Miro acima. URL interna pra
+  # MCP-RPC; metadata OAuth aponta pra MS365_PUBLIC_URL.
+  microsoft365:
+    type: streamable-http
+    url: http://ms365-mcp:3000/mcp
+    timeout: 60000
+    startup: false
+    requiresOAuth: true
+    oauth: {}
+
   # Rollback: descomente o bloco abaixo e remova os 4 acima pra voltar ao stdio.
   # azzas:
   #   type: stdio
