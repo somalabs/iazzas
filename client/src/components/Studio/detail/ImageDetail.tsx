@@ -22,9 +22,10 @@ export default function ImageDetail() {
   const [imageIdx, setImageIdx] = useState(0);
 
   if (!selectedCreation) return null;
+  const creation = selectedCreation;
 
   const isEditing = mode === 'editing';
-  const model = MODEL_DISPLAY_NAMES[selectedCreation.model] ?? selectedCreation.model;
+  const model = MODEL_DISPLAY_NAMES[creation.model] ?? creation.model;
   const date = formatStudioDate(selectedCreation.createdAt, true);
   const prompt = selectedCreation.prompt;
   const truncated = prompt.length > 140 && !promptExpanded;
@@ -44,7 +45,7 @@ export default function ImageDetail() {
     if (deleteMutation.isLoading) {
       return;
     }
-    const id = selectedCreation.id;
+    const id = creation.id;
     if (!window.confirm(localize('com_studio_delete_confirm'))) {
       return;
     }
@@ -54,8 +55,7 @@ export default function ImageDetail() {
         showToast({ status: 'success', message: localize('com_studio_deleted') });
       },
       onError: (err: unknown) => {
-        const status = (err as { response?: { status?: number } })?.response
-          ?.status;
+        const status = (err as { response?: { status?: number } })?.response?.status;
         if (status === 404) {
           // Nothing exists server-side under this id (a still-optimistic
           // card from a failed generation, or already deleted). Clearing
@@ -80,7 +80,7 @@ export default function ImageDetail() {
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = objectUrl;
-      a.download = `studio-${selectedCreation.id}.png`;
+      a.download = `studio-${creation.id}.png`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -113,9 +113,7 @@ export default function ImageDetail() {
         ) : selectedCreation.status === 'error' ? (
           <div className="flex max-w-xs flex-col items-center gap-3 px-6 text-center text-text-secondary">
             <AlertCircle className="h-8 w-8 text-red-500" />
-            <span className="text-sm font-medium">
-              {localize('com_studio_generation_failed')}
-            </span>
+            <span className="text-sm font-medium">{localize('com_studio_generation_failed')}</span>
             <span className="text-xs text-text-tertiary">
               {localize('com_studio_generation_failed_hint')}
             </span>
@@ -130,7 +128,7 @@ export default function ImageDetail() {
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-surface-primary/70 text-text-secondary backdrop-blur-sm transition-colors hover:bg-surface-hover"
+          className="bg-surface-primary/70 absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-text-secondary backdrop-blur-sm transition-colors hover:bg-surface-hover"
           aria-label={localize('com_studio_close_detail')}
         >
           <X className="h-4 w-4" />
@@ -138,7 +136,7 @@ export default function ImageDetail() {
 
         {/* Image picker — shows every image the creation generated */}
         {images.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium bg-surface-primary/80 px-2 py-1.5 backdrop-blur-sm">
+          <div className="bg-surface-primary/80 absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium px-2 py-1.5 backdrop-blur-sm">
             {images.map((img, i) => (
               <button
                 key={img.id}
@@ -146,7 +144,9 @@ export default function ImageDetail() {
                 onClick={() => setImageIdx(i)}
                 className={cn(
                   'h-10 w-10 overflow-hidden rounded-md border-2 transition-colors',
-                  i === imageIdx ? 'border-text-primary' : 'border-transparent opacity-60 hover:opacity-100',
+                  i === imageIdx
+                    ? 'border-text-primary'
+                    : 'border-transparent opacity-60 hover:opacity-100',
                 )}
                 aria-label={`Imagem ${i + 1} de ${images.length}`}
                 aria-pressed={i === imageIdx}
@@ -242,14 +242,18 @@ export default function ImageDetail() {
         </div>
 
         {/* Tab content */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-3">
           {tab === 'details' && (
             <>
               {/* Author / collection */}
               <div className="text-xs text-text-tertiary">
                 {date}
                 {selectedCreation.collectionName && (
-                  <> · {localize('com_studio_saved_in')} <span className="text-text-secondary">{selectedCreation.collectionName}</span></>
+                  <>
+                    {' '}
+                    · {localize('com_studio_saved_in')}{' '}
+                    <span className="text-text-secondary">{selectedCreation.collectionName}</span>
+                  </>
                 )}
               </div>
 
@@ -267,9 +271,7 @@ export default function ImageDetail() {
                     onClick={() => setPromptExpanded((v) => !v)}
                     className="text-[11px] text-text-tertiary underline hover:text-text-secondary"
                   >
-                    {promptExpanded
-                      ? 'See less'
-                      : localize('com_studio_see_more')}
+                    {promptExpanded ? 'See less' : localize('com_studio_see_more')}
                   </button>
                 )}
               </div>
@@ -299,7 +301,12 @@ export default function ImageDetail() {
                     {localize('com_studio_references_label')}
                   </p>
                   <p className="text-xs text-text-secondary">
-                    {selectedCreation.referenceCount} referência{selectedCreation.referenceCount !== 1 ? 's' : ''}
+                    {localize(
+                      selectedCreation.referenceCount === 1
+                        ? 'com_studio_references_count_one'
+                        : 'com_studio_references_count_other',
+                      { count: selectedCreation.referenceCount },
+                    )}
                   </p>
                 </div>
               )}

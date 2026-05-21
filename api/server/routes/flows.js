@@ -2,7 +2,7 @@ const express = require('express');
 const { generateCheckAccess } = require('@librechat/api');
 const { PermissionTypes, Permissions } = require('librechat-data-provider');
 const { getRoleByName } = require('~/models');
-const { requireJwtAuth, checkBan } = require('~/server/middleware');
+const { requireJwtAuth, checkBan, configMiddleware } = require('~/server/middleware');
 const {
   listFlows,
   getFlow,
@@ -42,6 +42,7 @@ const checkFlowRun = generateCheckAccess({
 
 router.use(requireJwtAuth);
 router.use(checkBan);
+router.use(configMiddleware);
 
 router.get('/', checkFlowRead, listFlows);
 router.post('/', flowPayloadLimit, checkFlowCreate, createFlow);

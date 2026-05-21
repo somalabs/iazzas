@@ -1,15 +1,7 @@
-import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
 import { useFlowContext } from '../context';
-import { FieldGroup, FieldLabel, FieldHint, InspectorInput, InspectorSelect } from './shared';
-import type { ConditionNodeData, ConditionOperator } from 'librechat-data-provider';
-
-const OPERATORS: { value: ConditionOperator; labelKey: TranslationKeys }[] = [
-  { value: 'equals', labelKey: 'com_studio_flow_condition_op_equals' },
-  { value: 'contains', labelKey: 'com_studio_flow_condition_op_contains' },
-  { value: 'regex', labelKey: 'com_studio_flow_condition_op_regex' },
-  { value: 'jsonpath_exists', labelKey: 'com_studio_flow_condition_op_jsonpath' },
-];
+import { FieldGroup, FieldLabel, FieldHint, InspectorTextarea } from './shared';
+import type { ConditionNodeData } from 'librechat-data-provider';
 
 export default function ConditionInspector({
   nodeId,
@@ -27,44 +19,21 @@ export default function ConditionInspector({
   return (
     <div className="flex flex-col gap-4">
       <FieldGroup>
-        <FieldLabel htmlFor={`cond-field-${nodeId}`}>Campo</FieldLabel>
-        <InspectorInput
-          id={`cond-field-${nodeId}`}
-          value={data.field}
-          onChange={(v) => update({ field: v })}
-          placeholder="{{trigger.input}}"
-        />
-        <FieldHint>{localize('com_studio_flow_condition_value_hint')}</FieldHint>
-      </FieldGroup>
-
-      <FieldGroup>
-        <FieldLabel htmlFor={`cond-op-${nodeId}`}>
-          {localize('com_studio_flow_condition_operator_label')}
+        <FieldLabel htmlFor={`cond-criterio-${nodeId}`}>
+          {localize('com_studio_flow_condition_criterio_label')}
         </FieldLabel>
-        <InspectorSelect
-          id={`cond-op-${nodeId}`}
-          value={data.operator}
-          onChange={(v) => update({ operator: v })}
-          options={OPERATORS.map((o) => ({ value: o.value, label: localize(o.labelKey) }))}
+        <InspectorTextarea
+          id={`cond-criterio-${nodeId}`}
+          value={data.criterio ?? ''}
+          onChange={(v) => update({ criterio: v })}
+          placeholder={localize('com_studio_flow_condition_criterio_placeholder')}
         />
-      </FieldGroup>
-
-      <FieldGroup>
-        <FieldLabel htmlFor={`cond-value-${nodeId}`}>
-          {localize('com_studio_flow_condition_value_label')}
-        </FieldLabel>
-        <InspectorInput
-          id={`cond-value-${nodeId}`}
-          value={data.value}
-          onChange={(v) => update({ value: v })}
-          placeholder="{{nodeId.output}}"
-        />
-        <FieldHint>{localize('com_studio_flow_condition_value_hint')}</FieldHint>
+        <FieldHint>{localize('com_studio_flow_condition_criterio_hint')}</FieldHint>
       </FieldGroup>
 
       <div className="rounded-lg border border-border-light bg-surface-secondary p-3">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
-          Saídas
+          {localize('com_studio_flow_condition_outputs_title')}
         </p>
         <div className="flex justify-between text-xs">
           <span className="flex items-center gap-1">

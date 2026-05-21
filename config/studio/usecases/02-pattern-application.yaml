@@ -20,8 +20,10 @@ ui_defaults:
 image_slots:
   - id: product_image
     label: "Produto"
-    description: "Peça de roupa que receberá a estampa"
+    description: "Uma ou mais fotos da MESMA peça que receberá a estampa (frente, costas, detalhes)"
     required: true
+    multiple: true
+    max_count: 4
     accepts: [jpg, jpeg, png, webp]
     max_size_mb: 10
 

@@ -1,7 +1,4 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { PermissionTypes, Permissions } from 'librechat-data-provider';
 import { useToastContext, useMediaQuery } from '@librechat/client';
 import {
   useAutomationsQuery,
@@ -10,7 +7,7 @@ import {
   useRunAutomationMutation,
   useDeleteAutomationMutation,
 } from '~/data-provider';
-import { useHasAccess, useLocalize } from '~/hooks';
+import { useGoToNewChat, useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { AutomacoesProvider, useAutomacoesContext } from './context';
 import AutomationList from './AutomationList';
@@ -30,15 +27,12 @@ function EmptyEditorState() {
 
 function AutomacoesView() {
   const localize = useLocalize();
-  const navigate = useNavigate();
+  const goToNewChat = useGoToNewChat();
   const { showToast } = useToastContext();
   const { state, dispatch } = useAutomacoesContext();
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  const canCreate = useHasAccess({
-    permissionType: PermissionTypes.AUTOMATIONS,
-    permission: Permissions.CREATE,
-  });
+  const canCreate = true;
 
   const { data: automationsData } = useAutomationsQuery();
   const automations: Automation[] = automationsData?.automations ?? [];
@@ -105,7 +99,7 @@ function AutomacoesView() {
       >
         <button
           type="button"
-          onClick={() => (backToList ? dispatch({ type: 'CANCEL' }) : navigate('/c/new'))}
+          onClick={() => (backToList ? dispatch({ type: 'CANCEL' }) : goToNewChat())}
           className="rounded-lg p-1.5 text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
           aria-label={backToList ? localize('com_automacoes_back_to_list') : 'Voltar ao chat'}
         >
@@ -159,21 +153,6 @@ function AutomacoesView() {
 }
 
 export default function AutomacoesScreen() {
-  const navigate = useNavigate();
-  const hasAccess = useHasAccess({
-    permissionType: PermissionTypes.AUTOMATIONS,
-    permission: Permissions.USE,
-  });
-
-  useEffect(() => {
-    if (!hasAccess) {
-      const id = setTimeout(() => navigate('/c/new'), 1000);
-      return () => clearTimeout(id);
-    }
-  }, [hasAccess, navigate]);
-
-  if (!hasAccess) return null;
-
   return (
     <AutomacoesProvider>
       <AutomacoesView />

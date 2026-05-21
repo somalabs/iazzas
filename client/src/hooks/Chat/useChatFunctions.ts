@@ -154,7 +154,9 @@ export default function useChatFunctions({
       parentMessageId = Constants.NO_PARENT;
       currentMessages = [];
       conversationId = null;
-      navigate('/c/new', { state: { focusChat: true } });
+      if (!window.location.pathname.startsWith('/d/agentes')) {
+        navigate('/c/new', { state: { focusChat: true } });
+      }
     }
 
     const targetParentMessageId = isRegenerate ? messageId : latestMessage?.parentMessageId;
@@ -328,7 +330,7 @@ export default function useChatFunctions({
       isContinued,
       isRegenerate,
       initialResponse,
-      isTemporary,
+      isTemporary: isTemporary || window.location.pathname.startsWith('/d/agentes'),
       ephemeralAgent,
       editedContent,
       addedConvo,

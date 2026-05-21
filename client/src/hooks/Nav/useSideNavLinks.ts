@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Blocks, MCPIcon, AttachmentIcon } from '@librechat/client';
-import { Database, Bookmark, Settings2, ArrowRightToLine, MessageSquareQuote } from 'lucide-react';
+import { Blocks } from '@librechat/client';
+import { Bookmark, Settings2, ArrowRightToLine } from 'lucide-react';
 import {
   Permissions,
   EModelEndpoint,
@@ -11,15 +11,10 @@ import {
 } from 'librechat-data-provider';
 import type { TInterfaceConfig, TEndpointsConfig } from 'librechat-data-provider';
 import type { NavLink } from '~/common';
-import MCPBuilderPanel from '~/components/SidePanel/MCPBuilder/MCPBuilderPanel';
-import AgentPanelSwitch from '~/components/SidePanel/Agents/AgentPanelSwitch';
 import BookmarkPanel from '~/components/SidePanel/Bookmarks/BookmarkPanel';
 import PanelSwitch from '~/components/SidePanel/Builder/PanelSwitch';
 import Parameters from '~/components/SidePanel/Parameters/Panel';
-import { MemoryPanel } from '~/components/SidePanel/Memories';
-import FilesPanel from '~/components/SidePanel/Files/Panel';
-import { useHasAccess, useMCPServerManager } from '~/hooks';
-import { PromptsAccordion } from '~/components/Prompts';
+import { useHasAccess } from '~/hooks';
 
 export default function useSideNavLinks({
   hidePanel,
@@ -38,39 +33,10 @@ export default function useSideNavLinks({
   endpointsConfig: TEndpointsConfig;
   includeHidePanel?: boolean;
 }) {
-  const hasAccessToPrompts = useHasAccess({
-    permissionType: PermissionTypes.PROMPTS,
-    permission: Permissions.USE,
-  });
   const hasAccessToBookmarks = useHasAccess({
     permissionType: PermissionTypes.BOOKMARKS,
     permission: Permissions.USE,
   });
-  const hasAccessToMemories = useHasAccess({
-    permissionType: PermissionTypes.MEMORIES,
-    permission: Permissions.USE,
-  });
-  const hasAccessToReadMemories = useHasAccess({
-    permissionType: PermissionTypes.MEMORIES,
-    permission: Permissions.READ,
-  });
-  const hasAccessToAgents = useHasAccess({
-    permissionType: PermissionTypes.AGENTS,
-    permission: Permissions.USE,
-  });
-  const hasAccessToCreateAgents = useHasAccess({
-    permissionType: PermissionTypes.AGENTS,
-    permission: Permissions.CREATE,
-  });
-  const hasAccessToUseMCPSettings = useHasAccess({
-    permissionType: PermissionTypes.MCP_SERVERS,
-    permission: Permissions.USE,
-  });
-  const hasAccessToCreateMCP = useHasAccess({
-    permissionType: PermissionTypes.MCP_SERVERS,
-    permission: Permissions.CREATE,
-  });
-  const { availableMCPServers } = useMCPServerManager();
 
   const Links = useMemo(() => {
     const links: NavLink[] = [];
@@ -94,41 +60,6 @@ export default function useSideNavLinks({
     }
 
     if (
-      endpointsConfig?.[EModelEndpoint.agents] &&
-      hasAccessToAgents &&
-      hasAccessToCreateAgents &&
-      endpointsConfig[EModelEndpoint.agents].disableBuilder !== true
-    ) {
-      links.push({
-        title: 'com_sidepanel_agent_builder',
-        label: '',
-        icon: Blocks,
-        id: EModelEndpoint.agents,
-        Component: AgentPanelSwitch,
-      });
-    }
-
-    if (hasAccessToPrompts) {
-      links.push({
-        title: 'com_ui_prompts',
-        label: '',
-        icon: MessageSquareQuote,
-        id: 'prompts',
-        Component: PromptsAccordion,
-      });
-    }
-
-    if (hasAccessToMemories && hasAccessToReadMemories) {
-      links.push({
-        title: 'com_ui_memories',
-        label: '',
-        icon: Database,
-        id: 'memories',
-        Component: MemoryPanel,
-      });
-    }
-
-    if (
       interfaceConfig.parameters === true &&
       isParamEndpoint(endpoint ?? '', endpointType ?? '') === true &&
       !isAgentsEndpoint(endpoint) &&
@@ -143,14 +74,6 @@ export default function useSideNavLinks({
       });
     }
 
-    links.push({
-      title: 'com_sidepanel_attach_files',
-      label: '',
-      icon: AttachmentIcon,
-      id: 'files',
-      Component: FilesPanel,
-    });
-
     if (hasAccessToBookmarks) {
       links.push({
         title: 'com_sidepanel_conversation_tags',
@@ -158,19 +81,6 @@ export default function useSideNavLinks({
         icon: Bookmark,
         id: 'bookmarks',
         Component: BookmarkPanel,
-      });
-    }
-
-    if (
-      (hasAccessToUseMCPSettings && availableMCPServers && availableMCPServers.length > 0) ||
-      hasAccessToCreateMCP
-    ) {
-      links.push({
-        title: 'com_nav_setting_mcp',
-        label: '',
-        icon: MCPIcon,
-        id: 'mcp-builder',
-        Component: MCPBuilderPanel,
       });
     }
 
@@ -189,17 +99,9 @@ export default function useSideNavLinks({
     endpoint,
     endpointsConfig,
     keyProvided,
-    hasAccessToAgents,
-    hasAccessToCreateAgents,
-    hasAccessToPrompts,
-    hasAccessToMemories,
-    hasAccessToReadMemories,
     interfaceConfig.parameters,
     endpointType,
     hasAccessToBookmarks,
-    availableMCPServers,
-    hasAccessToUseMCPSettings,
-    hasAccessToCreateMCP,
     includeHidePanel,
     hidePanel,
   ]);

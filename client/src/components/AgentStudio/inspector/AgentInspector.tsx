@@ -1,19 +1,15 @@
+import { Bot } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { PermissionBits } from 'librechat-data-provider';
 import { useLocalize } from '~/hooks';
 import { useListAgentsQuery } from '~/data-provider';
 import { useFlowContext } from '../context';
-import {
-  FieldGroup,
-  FieldLabel,
-  FieldHint,
-  InspectorInput,
-  InspectorSelect,
-  InspectorTextarea,
-} from './shared';
+import { FieldGroup, FieldLabel, FieldHint, InspectorSelect, InspectorTextarea } from './shared';
 import type { AgentNodeData } from 'librechat-data-provider';
 
 export default function AgentInspector({ nodeId, data }: { nodeId: string; data: AgentNodeData }) {
   const localize = useLocalize();
+  const navigate = useNavigate();
   const { dispatch } = useFlowContext();
   const { data: agentsList } = useListAgentsQuery({
     limit: 100,
@@ -23,6 +19,22 @@ export default function AgentInspector({ nodeId, data }: { nodeId: string; data:
 
   const update = (patch: Partial<AgentNodeData>) =>
     dispatch({ type: 'UPDATE_NODE_DATA', payload: { id: nodeId, data: patch } });
+
+  if (agents.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-lg border border-border-light bg-surface-secondary p-6 text-center">
+        <Bot className="h-6 w-6 text-text-tertiary" aria-hidden="true" />
+        <p className="text-sm text-text-secondary">{localize('com_ui_ux_flows_empty_agent')}</p>
+        <button
+          type="button"
+          onClick={() => navigate('/c/new')}
+          className="text-sm text-ring-primary underline hover:no-underline"
+        >
+          {localize('com_ui_ux_flows_criar_agente')}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -58,19 +70,6 @@ export default function AgentInspector({ nodeId, data }: { nodeId: string; data:
           placeholder="{{trigger.input}}"
         />
         <FieldHint>{localize('com_studio_flow_agent_instructions_hint')}</FieldHint>
-      </FieldGroup>
-
-      <FieldGroup>
-        <FieldLabel htmlFor={`agent-model-${nodeId}`}>
-          {localize('com_studio_flow_agent_model_label')}
-        </FieldLabel>
-        <InspectorInput
-          id={`agent-model-${nodeId}`}
-          value={data.modelOverride ?? ''}
-          onChange={(v) => update({ modelOverride: v || undefined })}
-          placeholder="gpt-4o"
-        />
-        <FieldHint>{localize('com_studio_flow_agent_model_hint')}</FieldHint>
       </FieldGroup>
     </div>
   );

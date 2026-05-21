@@ -64,7 +64,19 @@ describe('OpenAIImageGen', () => {
 
   describe('image preloading', () => {
     it('keeps Image mounted during generation (progress < 1)', () => {
-      render(<OpenAIImageGen {...defaultProps} initialProgress={0.5} />);
+      render(
+        <OpenAIImageGen
+          {...defaultProps}
+          initialProgress={0.5}
+          attachments={[
+            {
+              filename: 'cat.png',
+              filepath: '/images/cat.png',
+              conversationId: 'conv1',
+            } as never,
+          ]}
+        />,
+      );
       expect(screen.getByTestId('image-component')).toBeInTheDocument();
     });
 
@@ -127,7 +139,7 @@ describe('OpenAIImageGen', () => {
 
     it('handles invalid JSON args gracefully', () => {
       render(<OpenAIImageGen {...defaultProps} args="invalid json" />);
-      expect(screen.getByTestId('image-component')).toBeInTheDocument();
+      expect(screen.getByTestId('progress-text')).toBeInTheDocument();
     });
 
     it('handles object args', () => {
@@ -137,7 +149,7 @@ describe('OpenAIImageGen', () => {
           args={{ prompt: 'a dog', quality: 'low', size: '512x512' }}
         />,
       );
-      expect(screen.getByTestId('image-component')).toBeInTheDocument();
+      expect(screen.getByTestId('progress-text')).toBeInTheDocument();
     });
   });
 

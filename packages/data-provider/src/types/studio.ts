@@ -3,7 +3,8 @@ export type StudioUseCase =
   | 'pattern_application'
   | 'virtual_tryon'
   | 'multi_reference'
-  | 'sketch_to_render';
+  | 'sketch_to_render'
+  | 'render_to_sketch';
 
 export type AspectRatio =
   | '1:1'

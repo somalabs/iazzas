@@ -13,7 +13,7 @@ ui_defaults:
 image_slots:
   - id: product_image
     label: "Produto"
-    description: "Foto do produto original para recolorir"
+    description: "Foto do produto a recolorir (uma foto, preferencialmente frontal)"
     required: true
     accepts: [jpg, jpeg, png, webp]
     max_size_mb: 10

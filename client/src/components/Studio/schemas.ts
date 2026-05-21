@@ -11,14 +11,15 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
       {
         id: 'product_image',
         label: 'Produto',
-        description: 'Foto do produto original para recolorir',
+        description: 'Foto do produto a recolorir (uma foto, preferencialmente frontal e nítida).',
         required: true,
         accepts: ['jpg', 'jpeg', 'png', 'webp'],
       },
       {
         id: 'color_reference',
-        label: 'Referência de cor',
-        description: 'Imagem com a paleta ou colorway desejado (opcional)',
+        label: 'Cor de referência',
+        description:
+          'Imagem só para indicar a paleta ou colorway desejado (NÃO é um segundo produto). Opcional.',
         required: false,
         accepts: ['jpg', 'jpeg', 'png', 'webp'],
       },
@@ -60,14 +61,18 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
       {
         id: 'product_image',
         label: 'Produto',
-        description: 'Peça de roupa que receberá a estampa',
+        description:
+          'Peça que vai receber a estampa. Toque no + para adicionar mais ângulos da MESMA peça (frente, costas, detalhes) — ajuda a aplicar a arte de forma consistente.',
         required: true,
+        multiple: true,
+        maxCount: 4,
         accepts: ['jpg', 'jpeg', 'png', 'webp'],
       },
       {
         id: 'pattern_image',
-        label: 'Estampa / Artwork',
-        description: 'A arte, motivo ou estampa a aplicar na peça',
+        label: 'Estampa',
+        description:
+          'A arte, motivo ou estampa que será aplicada na peça (NÃO uma foto de outro produto).',
         required: true,
         accepts: ['jpg', 'jpeg', 'png', 'webp'],
       },
@@ -139,20 +144,25 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
     uiDefaults: { aspectRatio: '2:3', imageCount: 4, resolution: '2K' },
     compliance: {
       requiresHumanReview: true,
-      reviewReason: 'Likeness e fidelidade da peça requerem aprovação humana antes do uso comercial',
+      reviewReason:
+        'Likeness e fidelidade da peça requerem aprovação humana antes do uso comercial',
     },
     imageSlots: [
       {
         id: 'garment_image',
-        label: 'Produto',
-        description: 'Peça de roupa a exibir no modelo',
+        label: 'Peças do look',
+        description:
+          'Cada foto é uma peça DIFERENTE para vestir o modelo no mesmo look (ex: blusa + calça + acessório). Toque no + para adicionar outra peça.',
         required: true,
+        multiple: true,
+        maxCount: 5,
         accepts: ['jpg', 'jpeg', 'png', 'webp'],
       },
       {
         id: 'model_reference',
-        label: 'Referência de modelo',
-        description: 'Foto de referência para consistência do modelo (opcional)',
+        label: 'Modelo',
+        description:
+          'Foto de uma pessoa só para indicar quem veste o look (consistência de modelo). NÃO é uma peça do look. Opcional.',
         required: false,
         accepts: ['jpg', 'jpeg', 'png', 'webp'],
       },
@@ -198,12 +208,14 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
   {
     id: 'multi_reference',
     displayName: 'Múltiplas Referências',
-    description: 'Crie composições a partir de múltiplas referências de estilo, peças ou personagem.',
+    description:
+      'Crie composições a partir de múltiplas referências de estilo, peças ou personagem.',
     defaultModel: 'nano-banana-pro',
     uiDefaults: { aspectRatio: '4:5', imageCount: 4, resolution: '2K' },
     compliance: {
       requiresHumanReview: true,
-      reviewReason: 'Composições multi-referência de assets de marca requerem aprovação antes do uso comercial',
+      reviewReason:
+        'Composições multi-referência de assets de marca requerem aprovação antes do uso comercial',
     },
     imageSlots: [
       {
@@ -261,7 +273,8 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
         id: 'creative_direction',
         type: 'textarea',
         label: 'Direção criativa',
-        placeholder: 'ex: manter bordados maximalistas, paleta terrosa, inserir todas as peças no expositor',
+        placeholder:
+          'ex: manter bordados maximalistas, paleta terrosa, inserir todas as peças no expositor',
         required: false,
         maxLength: 500,
       },
@@ -277,14 +290,18 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
       {
         id: 'sketch_image',
         label: 'Sketch / Flat',
-        description: 'Desenho de moda, flat técnico ou CAD da peça',
+        description:
+          'Desenho, flat técnico ou CAD da peça. Toque no + para adicionar mais vistas do MESMO desenho (frente, costas, lateral, detalhes).',
         required: true,
+        multiple: true,
+        maxCount: 4,
         accepts: ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
       },
       {
         id: 'style_reference',
-        label: 'Referência de estilo',
-        description: 'Imagem de mood ou referência visual para o render (opcional)',
+        label: 'Mood / estilo',
+        description:
+          'Imagem só para indicar mood, iluminação ou direção visual do render (NÃO é outra peça). Opcional.',
         required: false,
         accepts: ['jpg', 'jpeg', 'png', 'webp'],
       },
@@ -328,6 +345,90 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
           { value: 'studio-white', label: 'Estúdio fundo branco' },
           { value: 'editorial-environment', label: 'Ambiente editorial' },
         ],
+      },
+    ],
+  },
+  {
+    id: 'render_to_sketch',
+    displayName: 'Foto → Desenho Técnico',
+    description:
+      'A partir de uma foto de produto, gere um desenho técnico de moda (flat/CAD) como ponto de partida para desenvolvimento.',
+    defaultModel: 'nano-banana-pro',
+    uiDefaults: { aspectRatio: '4:5', imageCount: 2, resolution: '2K' },
+    imageSlots: [
+      {
+        id: 'product_image',
+        label: 'Foto do produto',
+        description:
+          'Foto real do produto, preferencialmente de frente. Toque no + para adicionar mais ângulos do MESMO produto (costas, lateral, close de detalhes) — quanto mais ângulos, mais preciso o desenho técnico.',
+        required: true,
+        multiple: true,
+        maxCount: 5,
+        accepts: ['jpg', 'jpeg', 'png', 'webp'],
+      },
+    ],
+    formFields: [
+      {
+        id: 'sketch_style',
+        type: 'select',
+        label: 'Estilo do desenho',
+        required: true,
+        default: 'technical-flat',
+        options: [
+          { value: 'technical-flat', label: 'Flat técnico (linha limpa, frente + costas)' },
+          { value: 'cad-spec', label: 'CAD / Spec sheet (linhas precisas, sem sombreamento)' },
+          { value: 'fashion-illustration', label: 'Croqui de moda (ilustração estilizada)' },
+        ],
+      },
+      {
+        id: 'views',
+        type: 'select',
+        label: 'Vistas',
+        required: true,
+        default: 'front-back',
+        options: [
+          { value: 'front-only', label: 'Apenas frente' },
+          { value: 'front-back', label: 'Frente e costas' },
+          { value: 'front-back-side', label: 'Frente, costas e lateral' },
+        ],
+      },
+      {
+        id: 'line_weight',
+        type: 'toggle',
+        label: 'Traço',
+        required: true,
+        default: 'medium',
+        options: [
+          { value: 'thin', label: 'Fino' },
+          { value: 'medium', label: 'Médio' },
+        ],
+      },
+      {
+        id: 'include_stitching',
+        type: 'boolean',
+        label: 'Mostrar costuras e pespontos',
+        description: 'Desenhar linhas de costura, pespontos e detalhes construtivos',
+        required: false,
+        default: true,
+      },
+      {
+        id: 'background',
+        type: 'toggle',
+        label: 'Fundo',
+        required: true,
+        default: 'white',
+        options: [
+          { value: 'white', label: 'Branco' },
+          { value: 'transparent', label: 'Transparente' },
+        ],
+      },
+      {
+        id: 'notes',
+        type: 'text',
+        label: 'Observações',
+        placeholder: 'ex: destacar zíper frontal, cós elástico, bolsos chapados',
+        required: false,
+        maxLength: 300,
       },
     ],
   },

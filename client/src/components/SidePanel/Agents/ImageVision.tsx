@@ -19,6 +19,7 @@ export default function ImageVision() {
         render={({ field }) => (
           <Checkbox
             {...field}
+            aria-label={localize('com_assistants_image_vision')}
             checked={field.value as boolean}
             onCheckedChange={field.onChange}
             className="relative float-left mr-2 inline-flex h-4 w-4 cursor-pointer"

@@ -20,10 +20,13 @@ interface VariableOption {
   value: string;
 }
 
-const variableOptions: VariableOption[] = Object.keys(specialVariables).map((key) => ({
-  label: `com_ui_special_var_${key}` as TSpecialVarLabel,
-  value: `{{${key}}}`,
-}));
+const EXCLUDED_VARS = new Set(['iso_datetime', 'current_date']);
+const variableOptions: VariableOption[] = Object.keys(specialVariables)
+  .filter((key) => !EXCLUDED_VARS.has(key))
+  .map((key) => ({
+    label: `com_ui_special_var_${key}` as TSpecialVarLabel,
+    value: `{{${key}}}`,
+  }));
 
 export default function Instructions() {
   const menuId = useId();
@@ -48,7 +51,7 @@ export default function Instructions() {
           className="text-token-text-primary flex-grow text-sm font-medium"
           htmlFor="instructions"
         >
-          {localize('com_ui_instructions')}
+          {localize('com_ui_ux_agent_o_que_faz')}
         </label>
         <div className="ml-auto" title="Add variables to instructions">
           <DropdownPopup
@@ -87,9 +90,9 @@ export default function Instructions() {
               value={field.value ?? ''}
               className={cn(inputClass, 'min-h-[100px] resize-y')}
               id="instructions"
-              placeholder={localize('com_agents_instructions_placeholder')}
+              placeholder={localize('com_ui_ux_agent_o_que_faz_ph')}
               rows={3}
-              aria-label="Agent instructions"
+              aria-label={localize('com_ui_ux_agent_o_que_faz')}
               aria-required="true"
               aria-invalid={error ? 'true' : 'false'}
             />

@@ -1,6 +1,7 @@
 import debounce from 'lodash/debounce';
 import { useEffect, useRef, useCallback } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
+import { Constants } from 'librechat-data-provider';
 import type { TEndpointOption } from 'librechat-data-provider';
 import type { KeyboardEvent } from 'react';
 import {
@@ -81,6 +82,12 @@ export default function useTextarea({
       const currentEndpoint = conversation?.endpoint ?? '';
       const currentAgentId = conversation?.agent_id ?? '';
       const currentAssistantId = conversation?.assistant_id ?? '';
+      if (currentAgentId === Constants.CONSTRUTOR_AGENT_ID) {
+        return localize('com_ui_ux_placeholder_construtor');
+      }
+      if (currentAgentId === Constants.EPHEMERAL_AGENT_ID) {
+        return localize('com_ui_ux_placeholder_testar');
+      }
       if (isAgent && (!currentAgentId || !agentsMap?.[currentAgentId])) {
         return localize('com_endpoint_agent_placeholder');
       } else if (
@@ -97,7 +104,9 @@ export default function useTextarea({
       const sender =
         isAssistant || isAgent
           ? getEntityName({ name: entityName, isAgent, localize })
-          : getSender(conversation as TEndpointOption);
+          : conversation != null
+            ? getSender(conversation as TEndpointOption)
+            : '';
 
       return `${localize('com_endpoint_message_new', {
         0: sender ? sender : localize('com_endpoint_ai'),

@@ -1,10 +1,8 @@
-import { memo, useMemo, useState, useCallback, useRef, useId } from 'react';
-import { useAtomValue } from 'jotai';
+import { memo, useMemo, useState, useEffect, useCallback, useRef, useId } from 'react';
 import { ContentTypes } from 'librechat-data-provider';
 import type { MouseEvent, FocusEvent } from 'react';
 import { ThinkingContent, ThinkingButton, FloatingThinkingBar } from './Thinking';
 import { useLocalize, useExpandCollapse } from '~/hooks';
-import { showThinkingAtom } from '~/store/showThinking';
 import { useMessageContext } from '~/Providers';
 import { cn } from '~/utils';
 
@@ -38,12 +36,18 @@ type ReasoningProps = {
 const Reasoning = memo(({ reasoning, isLast }: ReasoningProps) => {
   const contentId = useId();
   const localize = useLocalize();
-  const showThinking = useAtomValue(showThinkingAtom);
-  const [isExpanded, setIsExpanded] = useState(showThinking);
+  const { isSubmitting, isLatestMessage, nextType } = useMessageContext();
+  const effectiveIsSubmitting = isLatestMessage ? isSubmitting : false;
+  const [isExpanded, setIsExpanded] = useState(() => Boolean(effectiveIsSubmitting && isLast));
   const [isBarVisible, setIsBarVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { style: expandStyle, ref: expandRef } = useExpandCollapse(isExpanded);
-  const { isSubmitting, isLatestMessage, nextType } = useMessageContext();
+
+  useEffect(() => {
+    if (!effectiveIsSubmitting && isLast) {
+      setIsExpanded(false);
+    }
+  }, [effectiveIsSubmitting, isLast]);
 
   // Strip <think> tags from the reasoning content (modern format)
   const reasoningText = useMemo(() => {
@@ -78,13 +82,14 @@ const Reasoning = memo(({ reasoning, isLast }: ReasoningProps) => {
     }
   }, []);
 
-  const effectiveIsSubmitting = isLatestMessage ? isSubmitting : false;
-
-  const label = useMemo(
-    () =>
-      effectiveIsSubmitting && isLast ? localize('com_ui_thinking') : localize('com_ui_thoughts'),
-    [effectiveIsSubmitting, localize, isLast],
-  );
+  const label = useMemo(() => {
+    if (effectiveIsSubmitting && isLast) {
+      return localize('com_ui_ux_reasoning_analisando');
+    }
+    return isExpanded
+      ? localize('com_ui_ux_reasoning_ocultar')
+      : localize('com_ui_ux_reasoning_ver');
+  }, [effectiveIsSubmitting, isLast, isExpanded, localize]);
 
   if (!reasoningText) {
     return null;
@@ -107,6 +112,7 @@ const Reasoning = memo(({ reasoning, isLast }: ReasoningProps) => {
             label={label}
             content={reasoningText}
             contentId={contentId}
+            isStreaming={effectiveIsSubmitting && isLast}
           />
         </div>
         <div

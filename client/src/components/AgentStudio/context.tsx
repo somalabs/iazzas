@@ -38,7 +38,7 @@ const defaultDataForType = (nodeType: FlowNodeType): FlowNodeData => {
     case 'agent':
       return { type: 'agent', agentId: '' };
     case 'condition':
-      return { type: 'condition', field: '{{trigger.input}}', operator: 'equals', value: '' };
+      return { type: 'condition', criterio: '' };
     case 'http':
       return { type: 'http', method: 'GET', url: '', headers: [], timeout: 10000 };
     case 'human_approval':
@@ -70,9 +70,7 @@ function reducer(state: FlowState, action: FlowAction): FlowState {
       return {
         ...state,
         nodes: state.nodes.map((n) =>
-          n.id === action.payload.id
-            ? { ...n, data: { ...n.data, ...action.payload.data } }
-            : n,
+          n.id === action.payload.id ? { ...n, data: { ...n.data, ...action.payload.data } } : n,
         ),
       };
     case 'ADD_NODE': {

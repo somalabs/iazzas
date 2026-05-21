@@ -18,22 +18,22 @@ import type {
 export const useFlowsQuery = (
   config?: UseQueryOptions<TFlowListResponse>,
 ): QueryObserverResult<TFlowListResponse> => {
-  return useQuery<TFlowListResponse>(
-    [QueryKeys.flows],
-    () => dataService.getFlows(),
-    { refetchOnWindowFocus: false, refetchOnReconnect: false, ...config },
-  );
+  return useQuery<TFlowListResponse>([QueryKeys.flows], () => dataService.getFlows(), {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    ...config,
+  });
 };
 
 export const useFlowQuery = (
   id: string,
   config?: UseQueryOptions<TFlowResponse>,
 ): QueryObserverResult<TFlowResponse> => {
-  return useQuery<TFlowResponse>(
-    [QueryKeys.flow, id],
-    () => dataService.getFlow(id),
-    { enabled: !!id, refetchOnWindowFocus: false, ...config },
-  );
+  return useQuery<TFlowResponse>([QueryKeys.flow, id], () => dataService.getFlow(id), {
+    enabled: !!id,
+    refetchOnWindowFocus: false,
+    ...config,
+  });
 };
 
 export const useFlowRunsQuery = (
@@ -76,6 +76,24 @@ export const useUpdateFlowMutation = (
       onSuccess: (res, vars, ctx) => {
         queryClient.invalidateQueries([QueryKeys.flows]);
         queryClient.invalidateQueries([QueryKeys.flow, vars.id]);
+        options?.onSuccess?.(res, vars, ctx);
+      },
+    },
+  );
+};
+
+export const useDeleteFlowMutation = (
+  options?: UseMutationOptions<{ deleted: boolean }, Error, { id: string }>,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation<{ deleted: boolean }, Error, { id: string }>(
+    [MutationKeys.deleteFlow],
+    ({ id }) => dataService.deleteFlow(id),
+    {
+      ...options,
+      onSuccess: (res, vars, ctx) => {
+        queryClient.invalidateQueries([QueryKeys.flows]);
+        queryClient.removeQueries([QueryKeys.flow, vars.id]);
         options?.onSuccess?.(res, vars, ctx);
       },
     },

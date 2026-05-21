@@ -51,6 +51,10 @@ export async function agentNode(
     if (err instanceof FlowRunError) {
       throw err;
     }
+    /** Scrubbed at this layer too: never re-surface upstream provider strings. */
+    if (err instanceof Error) {
+      deps.logger.error(`[agentNode] underlying error (scrubbed in UI): ${err.message}`);
+    }
     throw new FlowRunError('Agent execution failed', { retryable: false, nodeId: node.id });
   }
 }

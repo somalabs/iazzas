@@ -8,10 +8,20 @@ const { Automation, AgentFlow, AgentFlowRun } = require('~/db/models');
  * requireJwtAuth's context; the scheduler wraps each run in
  * `tenantStorage.run({ tenantId })`). `tenantId` is also passed explicitly so
  * the contract is readable at the call site.
+ *
+ * Owner isolation: in the iazzas single-instance deployment users have no
+ * `tenantId` (SSO tenants are optional), so tenant scoping alone collapses to
+ * "everyone shares one bucket" — every user would see and mutate every other
+ * user's automations. `createdBy` (the owner's user id) is therefore filtered
+ * in every owner-facing query as defense-in-depth: list, read, update and
+ * delete stay private to their creator regardless of tenant. Added to the
+ * query only when present so an absent owner never widens into a null scan.
  */
 
-const listAutomations = ({ tenantId, cursor, limit }) => {
-  const query = { tenantId };
+const ownerScope = (createdBy) => (createdBy ? { createdBy } : {});
+
+const listAutomations = ({ tenantId, createdBy, cursor, limit }) => {
+  const query = { tenantId, ...ownerScope(createdBy) };
   if (cursor) {
     query._id = { $lt: cursor };
   }
@@ -21,19 +31,25 @@ const listAutomations = ({ tenantId, cursor, limit }) => {
     .lean();
 };
 
-const getAutomation = ({ tenantId, id }) => Automation.findOne({ _id: id, tenantId }).lean();
+const getAutomation = ({ tenantId, createdBy, id }) =>
+  Automation.findOne({ _id: id, tenantId, ...ownerScope(createdBy) }).lean();
 
 const createAutomation = (data) => Automation.create(data);
 
-const updateAutomation = ({ tenantId, id, patch }) =>
-  Automation.findOneAndUpdate({ _id: id, tenantId }, { $set: patch }, { new: true }).lean();
+const updateAutomation = ({ tenantId, createdBy, id, patch }) =>
+  Automation.findOneAndUpdate(
+    { _id: id, tenantId, ...ownerScope(createdBy) },
+    { $set: patch },
+    { new: true },
+  ).lean();
 
-const deleteAutomation = async ({ tenantId, id }) => {
-  const res = await Automation.deleteOne({ _id: id, tenantId });
+const deleteAutomation = async ({ tenantId, createdBy, id }) => {
+  const res = await Automation.deleteOne({ _id: id, tenantId, ...ownerScope(createdBy) });
   return res.deletedCount > 0;
 };
 
-const countEnabled = ({ tenantId }) => Automation.countDocuments({ tenantId, enabled: true });
+const countEnabled = ({ tenantId, createdBy }) =>
+  Automation.countDocuments({ tenantId, ...ownerScope(createdBy), enabled: true });
 
 const getFlow = ({ tenantId, id }) => AgentFlow.findOne({ _id: id, tenantId }).lean();
 

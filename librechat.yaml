@@ -3,6 +3,12 @@ cache: true
 
 interface:
   webSearch: false
+  bookmarks: false
+  multiConvo: false
+  temporaryChat: false
+  peoplePicker: { users: false, groups: false, roles: false }
+  marketplace: { use: false }
+  remoteAgents: { use: false }
   customWelcome: "Olá! Sou o IAzzas, o assistente de IA da Azzas 2154. Posso te ajudar com pesquisa, análise de dados, criação de textos, geração de imagens e muito mais. Como posso ajudar?"
 
 registration:
@@ -21,6 +27,14 @@ modelSpecs:
       description: "Assistente oficial da Azzas 2154 - rapido"
       default: true
       iconURL: "/assets/a2154.png"
+      webSearch: true
+      fileSearch: true
+      executeCode: true
+      mcpServers:
+        - "azzas_vendas_linx"
+        - "azzas_devolucoes"
+        - "azzas_ciclo"
+        - "azzas_clientes"
       tools:
         - "web_search"
         - "gemini_image_gen"
@@ -63,6 +77,14 @@ modelSpecs:
       label: "IAzzas (Pro)"
       description: "Assistente oficial da Azzas 2154 - poderoso"
       iconURL: "/assets/a2154.png"
+      webSearch: true
+      fileSearch: true
+      executeCode: true
+      mcpServers:
+        - "azzas_vendas_linx"
+        - "azzas_devolucoes"
+        - "azzas_ciclo"
+        - "azzas_clientes"
       tools:
         - "web_search"
         - "gemini_image_gen"

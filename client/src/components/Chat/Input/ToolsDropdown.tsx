@@ -14,7 +14,7 @@ import { useLocalize, useHasAccess, useAgentCapabilities } from '~/hooks';
 import ArtifactsSubMenu from '~/components/Chat/Input/ArtifactsSubMenu';
 import MCPSubMenu from '~/components/Chat/Input/MCPSubMenu';
 import { useGetStartupConfig } from '~/data-provider';
-import { useBadgeRowContext } from '~/Providers';
+import { useBadgeRowContext, useAgentDraftContextOptional } from '~/Providers';
 import { cn } from '~/utils';
 
 interface ToolsDropdownProps {
@@ -37,8 +37,26 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
   } = useBadgeRowContext();
   const { data: startupConfig } = useGetStartupConfig();
 
-  const { codeEnabled, webSearchEnabled, artifactsEnabled, fileSearchEnabled } =
-    useAgentCapabilities(agentsConfig?.capabilities ?? defaultAgentCapabilities);
+  const {
+    codeEnabled: rawCodeEnabled,
+    webSearchEnabled: rawWebSearchEnabled,
+    artifactsEnabled,
+    fileSearchEnabled: rawFileSearchEnabled,
+  } = useAgentCapabilities(agentsConfig?.capabilities ?? defaultAgentCapabilities);
+
+  /** When rendered inside the Agentes draft context (Testar/Criar via IA panels),
+   * restrict capabilities to what the draft agent actually enables. */
+  const draftCtx = useAgentDraftContextOptional();
+  const codeEnabled = draftCtx
+    ? rawCodeEnabled && draftCtx.draftParams.executeCode
+    : rawCodeEnabled;
+  const webSearchEnabled = draftCtx
+    ? rawWebSearchEnabled && draftCtx.draftParams.webSearch
+    : rawWebSearchEnabled;
+  const fileSearchEnabled = draftCtx
+    ? rawFileSearchEnabled && draftCtx.draftParams.fileSearch
+    : rawFileSearchEnabled;
+  const mcpAllowed = draftCtx ? draftCtx.draftParams.mcpServers.length > 0 : true;
 
   const { setIsDialogOpen: setIsCodeDialogOpen, menuTriggerRef: codeMenuTriggerRef } =
     codeApiKeyForm;
@@ -292,7 +310,7 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
   }
 
   const { availableMCPServers } = mcpServerManager;
-  if (canUseMcp && availableMCPServers && availableMCPServers.length > 0) {
+  if (canUseMcp && mcpAllowed && availableMCPServers && availableMCPServers.length > 0) {
     dropdownItems.push({
       hideOnClick: false,
       render: (props) => <MCPSubMenu {...props} placeholder={mcpPlaceholder} />,

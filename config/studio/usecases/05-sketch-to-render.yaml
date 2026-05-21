@@ -13,8 +13,10 @@ ui_defaults:
 image_slots:
   - id: sketch_image
     label: "Sketch / Flat"
-    description: "Desenho de moda, flat técnico ou CAD da peça"
+    description: "Uma ou mais vistas do MESMO desenho/flat (frente, costas, lateral, detalhes)"
     required: true
+    multiple: true
+    max_count: 4
     accepts: [jpg, jpeg, png, webp, pdf]
     max_size_mb: 15
 

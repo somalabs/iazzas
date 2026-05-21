@@ -18,6 +18,12 @@ jest.mock('~/common/types', () => ({
     INFO: 'info',
     WARNING: 'warning',
   },
+  IconContext: {
+    landing: 'landing',
+    menuItem: 'menu-item',
+    nav: 'nav',
+    message: 'message',
+  },
 }));
 
 // Mock store to prevent import errors
@@ -85,6 +91,7 @@ jest.mock('librechat-data-provider/react-query', () => ({
 }));
 
 jest.mock('~/utils', () => ({
+  cn: (...args: unknown[]) => args.filter(Boolean).join(' '),
   createProviderOption: jest.fn((provider: string) => ({ value: provider, label: provider })),
   getDefaultAgentFormValues: jest.fn(() => ({
     id: '',
@@ -119,6 +126,29 @@ jest.mock('~/Providers/AgentPanelContext', () => ({
   }),
 }));
 
+jest.mock('~/Providers', () => ({
+  useAgentDraftContext: () => ({
+    draftParams: {
+      name: '',
+      category: '',
+      provider: '',
+      model: '',
+      instructions: '',
+      webSearch: false,
+      fileSearch: false,
+      executeCode: false,
+      mcpServers: [],
+    },
+    setDraftParams: jest.fn(),
+    registerFormSetValue: jest.fn(),
+    setFormValue: null,
+    registerSaveAgent: jest.fn(),
+    saveAgent: null,
+    creationMode: 'manual',
+    setCreationMode: jest.fn(),
+  }),
+}));
+
 jest.mock('~/common', () => ({
   isEphemeralAgent: (agentId: string | null | undefined): boolean => {
     return agentId == null || agentId === '' || agentId === 'ephemeral';
@@ -127,6 +157,12 @@ jest.mock('~/common', () => ({
     model: 'model',
     builder: 'builder',
     advanced: 'advanced',
+  },
+  IconContext: {
+    landing: 'landing',
+    menuItem: 'menu-item',
+    nav: 'nav',
+    message: 'message',
   },
 }));
 
@@ -154,6 +190,11 @@ jest.mock('./AgentSelect', () => ({
 jest.mock('./ModelPanel', () => ({
   __esModule: true,
   default: () => <div>{`Model Panel`}</div>,
+}));
+
+jest.mock('~/components/Agentes/BuilderChatView', () => ({
+  __esModule: true,
+  default: () => <div>{`Builder Chat View`}</div>,
 }));
 
 // Mock AgentFooter to provide a save button

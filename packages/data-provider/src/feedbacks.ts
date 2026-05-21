@@ -62,6 +62,7 @@ export interface TListFeedbackEntriesParams {
   category?: TFeedbackEntryCategory;
   trigger?: TFeedbackEntryTrigger;
   modelName?: string;
+  userEmail?: string;
   from?: string;
   to?: string;
 }

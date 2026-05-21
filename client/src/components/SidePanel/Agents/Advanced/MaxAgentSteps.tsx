@@ -27,9 +27,9 @@ export default function AdvancedPanel() {
             containerClass="w-1/2"
             inputClass="w-full"
             label={localize('com_ui_agent_recursion_limit')}
-            placeholder={localize('com_nav_theme_system')}
+            placeholder="25"
             type="number"
-            labelClass="w-fit"
+            labelClass="w-fit text-sm font-medium"
             labelAdjacent={
               <HoverCardTrigger>
                 <CircleHelpIcon className="h-4 w-4 text-text-tertiary" />

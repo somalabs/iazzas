@@ -22,6 +22,7 @@ import {
 } from '~/hooks';
 import { useGetConvoIdQuery, useGetStartupConfig, useGetEndpointsQuery } from '~/data-provider';
 import { ToolCallsMapProvider } from '~/Providers';
+import ConversationsColumn from '~/components/Chat/ConversationsColumn';
 import ChatView from '~/components/Chat/ChatView';
 import { NotificationSeverity } from '~/common';
 import useAuthRedirect from './useAuthRedirect';
@@ -219,7 +220,12 @@ export default function ChatRoute() {
 
   return (
     <ToolCallsMapProvider conversationId={conversation.conversationId ?? ''}>
-      <ChatView index={index} />
+      <div className="flex h-full w-full overflow-hidden">
+        <ConversationsColumn />
+        <div className="relative flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+          <ChatView index={index} />
+        </div>
+      </div>
     </ToolCallsMapProvider>
   );
 }

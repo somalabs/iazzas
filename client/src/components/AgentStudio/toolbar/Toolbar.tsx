@@ -1,5 +1,5 @@
-import { Save, Play, History, ArrowLeft, Loader } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Save, Play, History, Loader } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useToastContext } from '@librechat/client';
 import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
@@ -32,6 +32,7 @@ export default function Toolbar() {
       nodes: serializeNodes(state.nodes),
       edges: serializeEdges(state.edges),
     };
+    const wasNew = !state.flowId;
     const onSuccess = (flowId: string, name: string) => {
       dispatch({
         type: 'SET_FLOW',
@@ -39,12 +40,14 @@ export default function Toolbar() {
       });
       dispatch({ type: 'SET_SAVING', payload: false });
       showToast({ message: localize('com_studio_flow_save_success'), status: 'success' });
+      if (wasNew) {
+        navigate(`/d/flows/${flowId}`, { replace: true });
+      }
     };
     const onError = (error: unknown) => {
       dispatch({ type: 'SET_SAVING', payload: false });
-      const details = (
-        error as { response?: { data?: { details?: Array<{ code: string }> } } }
-      )?.response?.data?.details;
+      const details = (error as { response?: { data?: { details?: Array<{ code: string }> } } })
+        ?.response?.data?.details;
       const firstCode = Array.isArray(details) && details.length > 0 ? details[0].code : null;
       const msgKey = firstCode ? `com_studio_flow_run_error_${firstCode}` : null;
       showToast({
@@ -73,14 +76,16 @@ export default function Toolbar() {
       className="flex h-12 flex-shrink-0 items-center justify-between border-b border-border-light bg-surface-primary px-4"
     >
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => navigate('/c/new')}
-          className="rounded-lg p-1.5 text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-          aria-label="Voltar ao chat"
+        <Link
+          to="/d/flows"
+          className="select-none rounded text-sm font-semibold text-text-primary hover:text-text-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
+          aria-label={localize('com_ui_ux_nav_flows')}
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        </button>
+          {localize('com_ui_ux_nav_flows')}
+        </Link>
+        <span className="text-text-tertiary" aria-hidden="true">
+          /
+        </span>
         <input
           type="text"
           value={state.flowName}
@@ -132,7 +137,7 @@ export default function Toolbar() {
             'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
             canRun
               ? 'bg-surface-submit text-white hover:bg-surface-submit-hover'
-              : 'cursor-not-allowed bg-surface-submit/40 text-white/60',
+              : 'bg-surface-submit/40 cursor-not-allowed text-white/60',
           )}
         >
           <Play className="h-3.5 w-3.5" aria-hidden="true" />

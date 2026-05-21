@@ -109,7 +109,8 @@ describe('loadAgent', () => {
     if (result) {
       // Ephemeral agent ID is encoded with endpoint and model
       expect(result.id).toBe('openai__gpt-4');
-      expect(result.instructions).toBe('Test instructions');
+      expect(result.instructions).toContain('Test instructions');
+      expect(result.instructions).toContain('Data e hora atuais:');
       expect(result.provider).toBe('openai');
       expect(result.model).toBe('gpt-4');
       expect(result.model_parameters.temperature).toBe(0.7);
@@ -227,7 +228,8 @@ describe('loadAgent', () => {
 
     if (result) {
       expect(result.tools).toEqual([]);
-      expect(result.instructions).toBe('Simple instructions');
+      expect(result.instructions).toContain('Simple instructions');
+      expect(result.instructions).toContain('Data e hora atuais:');
     } else {
       expect(result).toBeFalsy();
     }

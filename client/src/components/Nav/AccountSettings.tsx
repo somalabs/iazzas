@@ -1,43 +1,35 @@
-import { useState, memo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, memo, useRef, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import * as Menu from '@ariakit/react/menu';
-import {
-  FileText,
-  LogOut,
-  ShieldCheck,
-  Workflow,
-  CalendarClock,
-  Image as ImageIcon,
-} from 'lucide-react';
-import { SystemRoles, PermissionTypes, Permissions } from 'librechat-data-provider';
-import { LinkIcon, GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
-import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
+import { LogOut } from 'lucide-react';
+import { SettingsTabValues } from 'librechat-data-provider';
+import { GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
+import { openSettingsTabAtom } from '~/store/settingsTab';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { formatDisplayCredits } from '~/utils/credits';
-import { useLocalize, useHasAccess } from '~/hooks';
+import { useLocalize } from '~/hooks';
 import Settings from './Settings';
 
 function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const localize = useLocalize();
-  const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuthContext();
-  const isAdmin = user?.role === SystemRoles.ADMIN;
-  const canUseAgentStudio = useHasAccess({
-    permissionType: PermissionTypes.AGENTS,
-    permission: Permissions.USE,
-  });
-  const canUseAutomacoes = useHasAccess({
-    permissionType: PermissionTypes.AUTOMATIONS,
-    permission: Permissions.USE,
-  });
   const { data: startupConfig } = useGetStartupConfig();
   const balanceQuery = useGetUserBalance({
     enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
   });
   const [showSettings, setShowSettings] = useState(false);
-  const [showFiles, setShowFiles] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsTabValues | undefined>(undefined);
+  const [requestedTab, setRequestedTab] = useAtom(openSettingsTabAtom);
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (requestedTab != null) {
+      setSettingsTab(requestedTab);
+      setShowSettings(true);
+      setRequestedTab(null);
+    }
+  }, [requestedTab, setRequestedTab]);
 
   return (
     <Menu.MenuProvider placement={collapsed ? 'right-end' : undefined}>
@@ -87,64 +79,25 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             <DropdownMenuSeparator />
           </>
         )}
-        <Menu.MenuItem onClick={() => setShowFiles(true)} className="select-item text-sm">
-          <FileText className="icon-md" aria-hidden="true" />
-          {localize('com_nav_my_files')}
-        </Menu.MenuItem>
-        {startupConfig?.helpAndFaqURL !== '/' && (
-          <Menu.MenuItem
-            onClick={() => window.open(startupConfig?.helpAndFaqURL, '_blank')}
-            className="select-item text-sm"
-          >
-            <LinkIcon aria-hidden="true" />
-            {localize('com_nav_help_faq')}
-          </Menu.MenuItem>
-        )}
-        <Menu.MenuItem onClick={() => setShowSettings(true)} className="select-item text-sm">
+        <Menu.MenuItem
+          onClick={() => {
+            setSettingsTab(undefined);
+            setShowSettings(true);
+          }}
+          className="select-item text-sm"
+        >
           <GearIcon className="icon-md" aria-hidden="true" />
           {localize('com_nav_settings')}
         </Menu.MenuItem>
-        {canUseAgentStudio && (
-          <Menu.MenuItem onClick={() => navigate('/d/studio')} className="select-item text-sm">
-            <ImageIcon className="icon-md" aria-hidden="true" />
-            {localize('com_studio_image_nav')}
-          </Menu.MenuItem>
-        )}
-        {canUseAgentStudio && (
-          <Menu.MenuItem
-            onClick={() => navigate('/d/agent-studio')}
-            className="select-item text-sm"
-          >
-            <Workflow className="icon-md" aria-hidden="true" />
-            {localize('com_studio_flow_nav')}
-          </Menu.MenuItem>
-        )}
-        {canUseAutomacoes && (
-          <Menu.MenuItem onClick={() => navigate('/d/automacoes')} className="select-item text-sm">
-            <CalendarClock className="icon-md" aria-hidden="true" />
-            {localize('com_automacoes_nav_label')}
-          </Menu.MenuItem>
-        )}
-        {isAdmin && (
-          <Menu.MenuItem onClick={() => navigate('/d/admin')} className="select-item text-sm">
-            <ShieldCheck className="icon-md" aria-hidden="true" />
-            {localize('com_admin_panel')}
-          </Menu.MenuItem>
-        )}
         <DropdownMenuSeparator />
         <Menu.MenuItem onClick={() => logout()} className="select-item text-sm">
           <LogOut className="icon-md" aria-hidden="true" />
           {localize('com_nav_log_out')}
         </Menu.MenuItem>
       </Menu.Menu>
-      {showFiles && (
-        <MyFilesModal
-          open={showFiles}
-          onOpenChange={setShowFiles}
-          triggerRef={accountSettingsButtonRef}
-        />
+      {showSettings && (
+        <Settings open={showSettings} onOpenChange={setShowSettings} initialTab={settingsTab} />
       )}
-      {showSettings && <Settings open={showSettings} onOpenChange={setShowSettings} />}
     </Menu.MenuProvider>
   );
 }

@@ -20,6 +20,7 @@ const STUDIO_USE_CASES = [
   'virtual_tryon',
   'multi_reference',
   'sketch_to_render',
+  'render_to_sketch',
 ];
 const STUDIO_ASPECT_RATIOS = [
   '1:1',
@@ -36,8 +37,7 @@ const STUDIO_ASPECT_RATIOS = [
 const STUDIO_RESOLUTIONS = ['1K', '2K', '4K'];
 const STUDIO_MODELS = ['flux-kontext', 'nano-banana-2', 'nano-banana-pro'];
 
-const isModelOverrideValid = (value) =>
-  value == null || STUDIO_MODELS.includes(value);
+const isModelOverrideValid = (value) => value == null || STUDIO_MODELS.includes(value);
 
 const validateGenerateBody = (body) => {
   if (!body || typeof body !== 'object') {
@@ -120,21 +120,23 @@ const buildReferenceResolver = (req) => async (fileId) => {
 // `{ px }` only caps (Math.min, withoutEnlargement), so 1K stays 1K.
 const RESOLUTION_PX = { '1K': 1024, '2K': 2048, '4K': 4096 };
 
-const buildImagePersister = (req) => async ({ base64, mimeType, filename }) => {
-  const dataUrl = `data:${mimeType};base64,${base64}`;
-  const px = RESOLUTION_PX[req.body?.resolution] ?? 4096;
-  const saved = await saveBase64Image(dataUrl, {
-    req,
-    filename,
-    context: FileContext.image_generation,
-    resolution: { px },
-  });
-  return {
-    id: saved.file_id,
-    url: saved.filepath,
-    thumbnailUrl: saved.filepath,
+const buildImagePersister =
+  (req) =>
+  async ({ base64, mimeType, filename }) => {
+    const dataUrl = `data:${mimeType};base64,${base64}`;
+    const px = RESOLUTION_PX[req.body?.resolution] ?? 4096;
+    const saved = await saveBase64Image(dataUrl, {
+      req,
+      filename,
+      context: FileContext.image_generation,
+      resolution: { px },
+    });
+    return {
+      id: saved.file_id,
+      url: saved.filepath,
+      thumbnailUrl: saved.filepath,
+    };
   };
-};
 
 const toRecord = (doc) => ({
   id: String(doc._id),

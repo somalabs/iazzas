@@ -77,7 +77,7 @@ describe('FileSearch', () => {
         <FileSearch agent_id="agent-1" />
       </Wrapper>,
     );
-    expect(screen.getByText('com_assistants_file_search')).toBeInTheDocument();
+    expect(screen.getAllByText('com_ui_upload_file_search').length).toBeGreaterThan(0);
   });
 
   it('returns null when file config is disabled for provider', () => {
@@ -142,6 +142,6 @@ describe('FileSearch', () => {
         <FileSearch agent_id="agent-1" />
       </Wrapper>,
     );
-    expect(screen.getByText('com_assistants_file_search')).toBeInTheDocument();
+    expect(screen.getAllByText('com_ui_upload_file_search').length).toBeGreaterThan(0);
   });
 });

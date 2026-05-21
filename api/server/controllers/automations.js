@@ -77,7 +77,13 @@ const listAutomations = async (req, res) => {
   }
   try {
     const tenantId = req.user.tenantId;
-    const rows = await repo.listAutomations({ tenantId, cursor: cur.value, limit: PAGE_LIMIT });
+    const createdBy = req.user.id;
+    const rows = await repo.listAutomations({
+      tenantId,
+      createdBy,
+      cursor: cur.value,
+      limit: PAGE_LIMIT,
+    });
     const { items, nextCursor } = page(rows, PAGE_LIMIT);
     res.json({ automations: items, nextCursor });
   } catch (error) {
@@ -90,6 +96,7 @@ const getAutomation = async (req, res) => {
   try {
     const automation = await repo.getAutomation({
       tenantId: req.user.tenantId,
+      createdBy: req.user.id,
       id: req.params.id,
     });
     if (!automation) {
@@ -108,6 +115,7 @@ const createAutomation = async (req, res) => {
     return res.status(400).json({ error: invalid });
   }
   const tenantId = req.user.tenantId;
+  const createdBy = req.user.id;
   const timezone = req.body.timezone || 'America/Sao_Paulo';
   const enabled = req.body.enabled !== false;
 
@@ -130,7 +138,7 @@ const createAutomation = async (req, res) => {
       return res.status(422).json({ error: 'approvalNodeIncompatible' });
     }
     if (enabled) {
-      const active = await repo.countEnabled({ tenantId });
+      const active = await repo.countEnabled({ tenantId, createdBy });
       if (active >= maxActivePerTenant()) {
         return res.status(422).json({ error: 'automationLimitReached' });
       }
@@ -144,7 +152,7 @@ const createAutomation = async (req, res) => {
       enabled,
       triggerInput: req.body.triggerInput,
       outputTargets: ['conversation', 'notification'],
-      createdBy: req.user.id,
+      createdBy,
       nextRunAt,
     });
     if (enabled) {
@@ -163,8 +171,9 @@ const updateAutomation = async (req, res) => {
     return res.status(400).json({ error: invalid });
   }
   const tenantId = req.user.tenantId;
+  const createdBy = req.user.id;
   try {
-    const current = await repo.getAutomation({ tenantId, id: req.params.id });
+    const current = await repo.getAutomation({ tenantId, createdBy, id: req.params.id });
     if (!current) {
       return res.status(404).json({ error: 'Automation not found' });
     }
@@ -196,7 +205,7 @@ const updateAutomation = async (req, res) => {
     if (req.body.triggerInput !== undefined) {
       patch.triggerInput = req.body.triggerInput;
     }
-    const updated = await repo.updateAutomation({ tenantId, id: req.params.id, patch });
+    const updated = await repo.updateAutomation({ tenantId, createdBy, id: req.params.id, patch });
     if (!updated) {
       return res.status(404).json({ error: 'Automation not found' });
     }
@@ -214,6 +223,7 @@ const deleteAutomation = async (req, res) => {
   try {
     const ok = await repo.deleteAutomation({
       tenantId: req.user.tenantId,
+      createdBy: req.user.id,
       id: req.params.id,
     });
     if (!ok) {
@@ -232,14 +242,15 @@ const toggleEnabled = async (req, res) => {
     return res.status(422).json({ error: 'enabled must be a boolean' });
   }
   const tenantId = req.user.tenantId;
+  const createdBy = req.user.id;
   try {
-    const current = await repo.getAutomation({ tenantId, id: req.params.id });
+    const current = await repo.getAutomation({ tenantId, createdBy, id: req.params.id });
     if (!current) {
       return res.status(404).json({ error: 'Automation not found' });
     }
     const enabled = req.body.enabled;
     if (enabled && !current.enabled) {
-      const active = await repo.countEnabled({ tenantId });
+      const active = await repo.countEnabled({ tenantId, createdBy });
       if (active >= maxActivePerTenant()) {
         return res.status(422).json({ error: 'automationLimitReached' });
       }
@@ -257,6 +268,7 @@ const toggleEnabled = async (req, res) => {
     }
     const updated = await repo.updateAutomation({
       tenantId,
+      createdBy,
       id: req.params.id,
       patch: { enabled, nextRunAt },
     });
@@ -278,11 +290,12 @@ const toggleEnabled = async (req, res) => {
 
 const runNow = async (req, res) => {
   const tenantId = req.user.tenantId;
+  const createdBy = req.user.id;
   if (req.body?.triggerInput !== undefined && typeof req.body.triggerInput !== 'string') {
     return res.status(422).json({ error: 'triggerInput must be a string' });
   }
   try {
-    const automation = await repo.getAutomation({ tenantId, id: req.params.id });
+    const automation = await repo.getAutomation({ tenantId, createdBy, id: req.params.id });
     if (!automation) {
       return res.status(404).json({ error: 'Automation not found' });
     }
@@ -316,8 +329,9 @@ const listRuns = async (req, res) => {
     return;
   }
   const tenantId = req.user.tenantId;
+  const createdBy = req.user.id;
   try {
-    const automation = await repo.getAutomation({ tenantId, id: req.params.id });
+    const automation = await repo.getAutomation({ tenantId, createdBy, id: req.params.id });
     if (!automation) {
       return res.status(404).json({ error: 'Automation not found' });
     }

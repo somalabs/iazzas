@@ -16,7 +16,8 @@ import {
   FeedbacksView,
 } from '~/components/Admin';
 import StudioScreen from '~/components/Studio/StudioScreen';
-import { AgentStudioView } from '~/components/AgentStudio';
+import { AgentStudioView, FlowsHome } from '~/components/AgentStudio';
+import { AgentesHome, AgentesView } from '~/components/Agentes';
 import { AutomacoesScreen } from '~/components/Automacoes';
 import DashboardRoute from './Layouts/Dashboard';
 
@@ -90,8 +91,32 @@ const dashboardRoutes = {
       ],
     },
     {
-      path: 'agent-studio',
+      path: 'flows',
+      element: <FlowsHome />,
+    },
+    {
+      path: 'flows/novo',
       element: <AgentStudioView />,
+    },
+    {
+      path: 'flows/:flowId',
+      element: <AgentStudioView />,
+    },
+    {
+      path: 'agentes',
+      element: <AgentesHome />,
+    },
+    {
+      path: 'agentes/novo',
+      element: <AgentesView />,
+    },
+    {
+      path: 'agentes/:agentId',
+      element: <AgentesView />,
+    },
+    {
+      path: 'agent-studio',
+      element: <Navigate to="/d/flows" replace={true} />,
     },
     {
       path: 'automacoes',
@@ -115,7 +140,7 @@ const dashboardRoutes = {
     },
     {
       path: '*',
-      element: <Navigate to="/d/files" replace={true} />,
+      element: <Navigate to="/d/studio" replace={true} />,
     },
   ],
 };

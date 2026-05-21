@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { AgentPanelProvider, useAgentPanelContext } from '~/Providers/AgentPanelContext';
 import { Panel, isEphemeralAgent } from '~/common';
@@ -17,14 +18,15 @@ export default function AgentPanelSwitch() {
 
 function AgentPanelSwitchWithContext() {
   const { activePanel, setCurrentAgentId } = useAgentPanelContext();
-  const agentId = useRecoilValue(store.conversationAgentIdByIndex(0));
+  const recoilAgentId = useRecoilValue(store.conversationAgentIdByIndex(0));
+  const { agentId: urlAgentId } = useParams<{ agentId?: string }>();
 
   useEffect(() => {
-    const agent_id = agentId ?? '';
+    const agent_id = urlAgentId ?? recoilAgentId ?? '';
     if (!isEphemeralAgent(agent_id)) {
       setCurrentAgentId(agent_id);
     }
-  }, [setCurrentAgentId, agentId]);
+  }, [setCurrentAgentId, urlAgentId, recoilAgentId]);
 
   if (activePanel === Panel.actions) {
     return <ActionsPanel />;

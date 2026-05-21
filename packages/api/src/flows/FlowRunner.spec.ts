@@ -20,6 +20,10 @@ const mkDeps = (over: Partial<FlowRunnerDeps> = {}): FlowRunnerDeps =>
     now: () => new Date('2026-01-01T00:00:00Z'),
     checkAgentAccess: async () => true,
     invokeAgent: async ({ input }: { input: string }) => ({ output: `agent(${input})` }),
+    invokeJudge: async ({ criterio }: { criterio: string }) => ({
+      answer: criterio.toLowerCase().includes('yes'),
+      reasoning: 'spec',
+    }),
     httpFetch: async () => ({ status: 200, text: async () => 'http-body' }),
     ...over,
   }) as unknown as FlowRunnerDeps;
@@ -56,7 +60,7 @@ describe('FlowRunner.run', () => {
       name: 'F',
       nodes: [
         n('t', 'trigger'),
-        n('c', 'condition', { field: '{{trigger.input}}', operator: 'equals', value: 'yes' }),
+        n('c', 'condition', { criterio: 'is yes?' }),
         n('ok', 'output', { template: 'approved' }),
         n('no', 'output', { template: 'denied' }),
       ],
@@ -64,7 +68,10 @@ describe('FlowRunner.run', () => {
     };
     const yes = await new FlowRunner(snap, mkDeps(), mkSink().sink).run('yes');
     expect(yes.output).toBe('approved');
-    const no = await new FlowRunner(snap, mkDeps(), mkSink().sink).run('no');
+    const noDeps = mkDeps({
+      invokeJudge: async () => ({ answer: false, reasoning: 'no' }),
+    });
+    const no = await new FlowRunner(snap, noDeps, mkSink().sink).run('no');
     expect(no.output).toBe('denied');
   });
 
@@ -73,12 +80,15 @@ describe('FlowRunner.run', () => {
       name: 'F',
       nodes: [
         n('t', 'trigger'),
-        n('c', 'condition', { field: 'x', operator: 'equals', value: 'y' }),
+        n('c', 'condition', { criterio: 'is yes?' }),
         n('ok', 'output'),
       ],
       edges: [e('t', 'c'), e('c', 'ok', 'true')],
     };
-    const res = await new FlowRunner(snap, mkDeps(), mkSink().sink).run('x');
+    const noDeps = mkDeps({
+      invokeJudge: async () => ({ answer: false, reasoning: 'no' }),
+    });
+    const res = await new FlowRunner(snap, noDeps, mkSink().sink).run('x');
     expect(res.status).toBe('skipped');
   });
 

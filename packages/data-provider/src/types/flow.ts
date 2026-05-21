@@ -16,7 +16,6 @@ export type FlowNodeRunStatus =
   | 'waiting';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-export type ConditionOperator = 'equals' | 'contains' | 'regex' | 'jsonpath_exists';
 
 export type TriggerNodeData = { type: 'trigger'; label?: string };
 
@@ -31,9 +30,7 @@ export type AgentNodeData = {
 
 export type ConditionNodeData = {
   type: 'condition';
-  field: string;
-  operator: ConditionOperator;
-  value: string;
+  criterio: string;
 };
 
 export type HttpHeader = { key: string; value: string };

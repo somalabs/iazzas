@@ -72,6 +72,7 @@ jest.mock('~/hooks', () => ({
     const translations = {
       com_ui_save: 'Save',
       com_ui_create: 'Create',
+      com_ui_ux_publicar_agente: 'Publicar',
     };
     return translations[key] || key;
   },
@@ -266,7 +267,6 @@ describe('AgentFooter', () => {
     test('renders with standard components based on default state', () => {
       render(<AgentFooter {...defaultProps} />);
       expect(screen.getByText('Save')).toBeInTheDocument();
-      expect(screen.getByTestId('advanced-button')).toBeInTheDocument();
       expect(screen.getByTestId('version-button')).toBeInTheDocument();
       expect(screen.getByTestId('delete-button')).toBeInTheDocument();
       expect(screen.queryByTestId('admin-settings')).not.toBeInTheDocument();
@@ -308,7 +308,6 @@ describe('AgentFooter', () => {
   describe('Conditional Rendering', () => {
     test('adjusts UI based on activePanel state', () => {
       render(<AgentFooter {...defaultProps} activePanel={Panel.advanced} />);
-      expect(screen.queryByTestId('advanced-button')).not.toBeInTheDocument();
       expect(screen.queryByTestId('version-button')).not.toBeInTheDocument();
     });
 
@@ -331,7 +330,7 @@ describe('AgentFooter', () => {
       });
 
       render(<AgentFooter {...defaultProps} />);
-      expect(screen.getByText('Create')).toBeInTheDocument();
+      expect(screen.getByText('Publicar')).toBeInTheDocument();
       expect(screen.queryByTestId('version-button')).not.toBeInTheDocument();
       expect(screen.queryByTestId('delete-button')).not.toBeInTheDocument();
       expect(screen.queryByTestId('grant-access-dialog-agent')).not.toBeInTheDocument();

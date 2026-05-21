@@ -16,7 +16,7 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from '@xyflow/react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Workflow } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { useFlowContext } from '../context';
 import { cn } from '~/utils';
@@ -26,8 +26,8 @@ import { validateFlow } from './validation';
 import type { FlowNodeType } from 'librechat-data-provider';
 
 const HANDLE_LABELS: Record<string, string> = {
-  true: 'Verdadeiro',
-  false: 'Falso',
+  true: 'Sim',
+  false: 'Não',
   approved: 'Aprovado',
   rejected: 'Rejeitado',
 };
@@ -106,11 +106,7 @@ export default function Canvas() {
   const errors = state.validationErrors;
 
   return (
-    <div
-      ref={reactFlowWrapper}
-      className="relative h-full w-full"
-      aria-label="Canvas do flow"
-    >
+    <div ref={reactFlowWrapper} className="relative h-full w-full" aria-label="Canvas do flow">
       <ReactFlow
         nodes={state.nodes}
         edges={state.edges}
@@ -135,22 +131,24 @@ export default function Canvas() {
           className="!fill-border-light"
         />
         <Controls
-          className="!rounded-xl !border !border-border-medium !bg-surface-secondary [&>button]:!border-border-light [&>button]:!bg-surface-secondary [&>button]:!text-text-secondary [&>button:hover]:!bg-surface-hover"
+          className="!rounded-xl !border !border-border-medium !bg-surface-secondary [&>button:hover]:!bg-surface-hover [&>button]:!border-border-light [&>button]:!bg-surface-secondary [&>button]:!text-text-secondary"
           aria-label="Controles do canvas"
         />
-        <MiniMap
-          className="!rounded-xl !border !border-border-medium !bg-surface-secondary"
-          nodeColor="var(--surface-tertiary)"
-          maskColor="rgba(0,0,0,0.1)"
-          aria-label="Mini-mapa do flow"
-        />
+        {state.nodes.length > 0 && (
+          <MiniMap
+            className="!rounded-xl !border !border-border-medium !bg-surface-secondary"
+            nodeColor="var(--surface-tertiary)"
+            maskColor="rgba(0,0,0,0.1)"
+            aria-label="Mini-mapa do flow"
+          />
+        )}
       </ReactFlow>
 
       {state.nodes.length === 0 && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <p className="text-sm text-text-tertiary">
-            {localize('com_studio_flow_canvas_empty')}
-          </p>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
+          <Workflow className="h-8 w-8 text-text-tertiary" aria-hidden="true" />
+          <p className="text-sm text-text-secondary">{localize('com_ui_ux_flows_canvas_vazio')}</p>
+          <p className="text-xs text-text-tertiary">{localize('com_ui_ux_flows_canvas_hint')}</p>
         </div>
       )}
 
@@ -172,7 +170,11 @@ export default function Canvas() {
                 role={clickable ? 'button' : undefined}
                 tabIndex={clickable ? 0 : undefined}
                 aria-label={clickable ? `Ir para nó com erro: ${msg}` : undefined}
-                onClick={clickable ? () => dispatch({ type: 'SELECT_NODE', payload: err.nodeId ?? null }) : undefined}
+                onClick={
+                  clickable
+                    ? () => dispatch({ type: 'SELECT_NODE', payload: err.nodeId ?? null })
+                    : undefined
+                }
                 onKeyDown={
                   clickable
                     ? (e) => {
@@ -192,9 +194,7 @@ export default function Canvas() {
               >
                 <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
                 <span>{msg}</span>
-                {clickable && (
-                  <span className="ml-auto text-[10px] opacity-60">↗</span>
-                )}
+                {clickable && <span className="ml-auto text-[10px] opacity-60">↗</span>}
               </div>
             );
           })}
