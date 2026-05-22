@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Tag of softeria/ms-365-mcp-server to build (e.g. v0.111.0)'
+        description: 'Tag of softeria/ms-365-mcp-server to build (e.g. v0.112.2)'
         required: true
-        default: 'v0.111.0'
+        default: 'v0.112.2'
 
 jobs:
   build:
@@ -21,6 +21,9 @@ jobs:
         with:
           repository: softeria/ms-365-mcp-server
           ref: ${{ github.event.inputs.version }}
+
+      - name: Align release stage Node version with builder
+        run: sed -i 's|FROM node:20-alpine AS release|FROM node:24-alpine AS release|' Dockerfile
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
