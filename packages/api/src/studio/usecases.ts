@@ -1,7 +1,8 @@
 import { readFileSync, readdirSync } from 'fs';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import yaml from 'js-yaml';
 import type { StudioModel, StudioUseCase } from 'librechat-data-provider';
+import { getStudioConfigDir } from './paths';
 
 export type UseCaseImageSlot = {
   id: string;
@@ -55,11 +56,6 @@ type RawUseCase = {
   post_processing?: { upscale_if_below?: number; apply_watermark?: string };
 };
 
-const configDir = (): string =>
-  process.env.STUDIO_CONFIG_DIR
-    ? resolve(process.env.STUDIO_CONFIG_DIR)
-    : resolve(process.cwd(), 'config/studio');
-
 let cache: Map<StudioUseCase, UseCaseConfig> | null = null;
 
 const parseUseCase = (raw: RawUseCase): UseCaseConfig => ({
@@ -91,7 +87,7 @@ export const loadUseCases = (): Map<StudioUseCase, UseCaseConfig> => {
   if (cache) {
     return cache;
   }
-  const dir = join(configDir(), 'usecases');
+  const dir = join(getStudioConfigDir(), 'usecases');
   const files = readdirSync(dir).filter((name) => name.endsWith('.yaml'));
   const map = new Map<StudioUseCase, UseCaseConfig>();
   for (const file of files) {

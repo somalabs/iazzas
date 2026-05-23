@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from 'react';
 import type { Dispatch, ReactNode } from 'react';
 import { useToastContext } from '@librechat/client';
 import type {
@@ -186,9 +194,19 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
         : state.creations.filter(
             (c) => c.status === 'generating' && !serverIds.has(c.id),
           );
+      // Polling refreshes the list while a generation is in flight; if the
+      // user is sitting on the detail of that creation, the snapshot in
+      // selectedCreation goes stale (still shows the spinner after the
+      // server flips to done). Re-sync it from the same payload so the
+      // detail panel updates without requiring a manual reselect.
+      const refreshedSelection =
+        state.selectedCreation &&
+        (action.payload.find((c) => c.id === state.selectedCreation!.id) ??
+          state.selectedCreation);
       return {
         ...state,
         creations: [...localOnly, ...action.payload],
+        selectedCreation: refreshedSelection ?? state.selectedCreation,
       };
     }
     default:
@@ -241,6 +259,7 @@ export function useStudioDispatch() {
 }
 
 export function useStudioHistory() {
+  const { selectedCreation } = useStudio();
   const dispatch = useStudioDispatch();
   const { data } = useStudioCreationsQuery(
     { limit: 30 },
@@ -251,11 +270,22 @@ export function useStudioHistory() {
         d?.items?.some((i) => i.status === 'generating') ? 4000 : false,
     },
   );
+  // On a fresh mount (e.g. after F5 mid-generation) the optimistic local
+  // card is gone but the server's in-progress row will arrive via this
+  // query. Auto-select it on the first hydrate so the user lands back on
+  // the detail view of their pending generation instead of the form.
+  const hasAutoSelected = useRef(false);
   useEffect(() => {
-    if (data?.items) {
-      dispatch({ type: 'HYDRATE_CREATIONS', payload: data.items });
+    if (!data?.items) return;
+    dispatch({ type: 'HYDRATE_CREATIONS', payload: data.items });
+    if (!hasAutoSelected.current && !selectedCreation) {
+      const inProgress = data.items.find((c) => c.status === 'generating');
+      if (inProgress) {
+        dispatch({ type: 'SELECT_CREATION', payload: inProgress });
+      }
+      hasAutoSelected.current = true;
     }
-  }, [data, dispatch]);
+  }, [data, dispatch, selectedCreation]);
 }
 
 export function useGenerateImages() {

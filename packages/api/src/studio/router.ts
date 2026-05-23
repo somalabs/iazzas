@@ -1,9 +1,10 @@
 import { readFileSync } from 'fs';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import yaml from 'js-yaml';
 import type { Resolution, StudioModel } from 'librechat-data-provider';
 import type { RouterDecision, RouterInput } from './types';
 import type { UseCaseConfig } from './usecases';
+import { getStudioConfigDir } from './paths';
 
 const RESOLUTION_PIXELS: Record<Resolution, number> = {
   '1K': 1024,
@@ -22,11 +23,6 @@ type RawRouter = {
   rules: RawRule[];
 };
 
-const configDir = (): string =>
-  process.env.STUDIO_CONFIG_DIR
-    ? resolve(process.env.STUDIO_CONFIG_DIR)
-    : resolve(process.cwd(), 'config/studio');
-
 let rulesCache: RawRule[] | null = null;
 
 const loadRules = (): RawRule[] => {
@@ -34,7 +30,7 @@ const loadRules = (): RawRule[] => {
     return rulesCache;
   }
   const raw = yaml.load(
-    readFileSync(join(configDir(), 'router.yaml'), 'utf8'),
+    readFileSync(join(getStudioConfigDir(), 'router.yaml'), 'utf8'),
   ) as RawRouter;
   rulesCache = [...raw.rules].sort((a, b) => a.priority - b.priority);
   return rulesCache;
