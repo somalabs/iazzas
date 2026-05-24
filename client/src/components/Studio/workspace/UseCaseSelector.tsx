@@ -18,7 +18,7 @@ export default function UseCaseSelector() {
   }
 
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex items-center gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {USE_CASE_SCHEMAS.map((schema) => (
         <button
           key={schema.id}
