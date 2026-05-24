@@ -53,23 +53,23 @@ export default function Workspace() {
 
       {/* Bottom toolbar + generate */}
       <div className="sticky bottom-0 border-t border-border-medium bg-surface-primary/95 px-4 py-3 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <ImageCount />
-          <AspectRatioSelector />
-          <ResolutionSelector />
-          <ModelSelector />
-          <div className="ml-auto">
-            <button
-              type="button"
-              onClick={generate}
-              disabled={isGenerating}
-              className="flex items-center gap-2 rounded-lg bg-surface-submit px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-surface-submit-hover disabled:opacity-50"
-              aria-label={isGenerating ? localize('com_studio_generating') : localize('com_studio_generate')}
-            >
-              <Zap className="h-4 w-4" strokeWidth={2} />
-              {isGenerating ? localize('com_studio_generating') : localize('com_studio_generate')}
-            </button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-2">
+            <ImageCount />
+            <AspectRatioSelector />
+            <ResolutionSelector />
+            <ModelSelector />
           </div>
+          <button
+            type="button"
+            onClick={generate}
+            disabled={isGenerating}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-surface-submit px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-surface-submit-hover disabled:opacity-50 sm:ml-auto sm:w-auto"
+            aria-label={isGenerating ? localize('com_studio_generating') : localize('com_studio_generate')}
+          >
+            <Zap className="h-4 w-4" strokeWidth={2} />
+            {isGenerating ? localize('com_studio_generating') : localize('com_studio_generate')}
+          </button>
         </div>
       </div>
     </div>

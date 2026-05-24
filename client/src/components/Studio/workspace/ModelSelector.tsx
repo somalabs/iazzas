@@ -51,8 +51,8 @@ export default function ModelSelector() {
         aria-label={localize('com_studio_model_label')}
         title={localize('com_studio_model_override_help')}
       >
-        <Cpu className="h-3.5 w-3.5 text-text-tertiary" strokeWidth={1.5} />
-        {current}
+        <Cpu className="h-3.5 w-3.5 flex-shrink-0 text-text-tertiary" strokeWidth={1.5} />
+        <span className="hidden sm:inline">{current}</span>
       </button>
 
       {open && (

@@ -14,7 +14,7 @@ export default function ImageCount() {
 
   return (
     <div className="flex items-center gap-1 rounded-lg border border-border-medium bg-surface-secondary px-2 py-1.5">
-      <LayoutGrid className="h-3.5 w-3.5 text-text-tertiary" strokeWidth={1.5} />
+      <LayoutGrid className="hidden h-3.5 w-3.5 text-text-tertiary sm:block" strokeWidth={1.5} />
       <button
         type="button"
         onClick={decrement}

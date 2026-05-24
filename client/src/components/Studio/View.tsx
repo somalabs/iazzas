@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
 import { useMediaQuery } from '@librechat/client';
-import { PanelLeftOpen } from 'lucide-react';
-import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
+import { Menu, PanelLeftOpen } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
+import store from '~/store';
 import { useStudio } from './context';
 import Creations from './creations/Creations';
 import Workspace from './workspace/Workspace';
@@ -14,6 +15,7 @@ const PANEL_WIDTH = 340;
 export default function StudioView() {
   const localize = useLocalize();
   const { mode } = useStudio();
+  const setSidebarExpanded = useSetRecoilState(store.sidebarExpanded);
   const isMobile = useMediaQuery('(max-width: 768px)');
   // Start closed — useEffect below resolves to !isMobile once the media query settles,
   // avoiding the useState(!isMobile) pitfall where isMobile=false on first render
@@ -94,9 +96,14 @@ export default function StudioView() {
           <h1 className="font-editorial text-sm font-semibold text-text-primary">
             {localize('com_studio_title')}
           </h1>
-          <div className="ml-auto md:hidden">
-            <OpenSidebar />
-          </div>
+          <button
+            type="button"
+            onClick={() => startTransition(() => setSidebarExpanded(true))}
+            className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover md:hidden"
+            aria-label={localize('com_nav_open_sidebar')}
+          >
+            <Menu className="h-4 w-4" />
+          </button>
         </div>
 
         {/* Content */}
