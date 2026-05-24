@@ -4,6 +4,7 @@ import { PanelLeftOpen } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { useStudio } from './context';
+import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import Creations from './creations/Creations';
 import Workspace from './workspace/Workspace';
 import ImageDetail from './detail/ImageDetail';
@@ -93,6 +94,9 @@ export default function StudioView() {
           <h1 className="font-editorial text-sm font-semibold text-text-primary">
             {localize('com_studio_title')}
           </h1>
+          <div className="ml-auto md:hidden">
+            <OpenSidebar />
+          </div>
         </div>
 
         {/* Content */}
