@@ -93,6 +93,7 @@ function ExpandedPanel({
   onToggle?: () => void;
 }) {
   const localize = useLocalize();
+  const navigate = useNavigate();
   const { user } = useAuthContext();
   const isAdmin = user?.role === SystemRoles.ADMIN;
   const onNavChats = useGoToNewChat();
@@ -137,12 +138,26 @@ function ExpandedPanel({
               />
             );
           }
+
+          let clickOverride: (() => void) | undefined;
+          if (link.id === 'nav-chats') {
+            clickOverride = () => {
+              onNavChats();
+              onToggle?.();
+            };
+          } else if (link.href && onToggle) {
+            clickOverride = () => {
+              navigate(link.href!);
+              onToggle();
+            };
+          }
+
           return (
             <NavRouteButton
               key={link.id}
               link={link}
               expanded={expanded}
-              onClickOverride={link.id === 'nav-chats' ? onNavChats : undefined}
+              onClickOverride={clickOverride}
             />
           );
         })}
