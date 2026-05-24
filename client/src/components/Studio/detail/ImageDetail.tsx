@@ -192,8 +192,8 @@ export default function ImageDetail() {
           <X className="h-4 w-4" />
         </button>
 
-        {/* Image picker */}
-        {images.length > 1 && (
+        {/* Image picker — hidden when sheet is expanded to avoid overlap */}
+        {images.length > 1 && !sheetExpanded && (
           <div
             className="absolute left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium bg-surface-primary/80 px-2 py-1.5 backdrop-blur-sm"
             style={{ bottom: SHEET_PEEK_HEIGHT }}
