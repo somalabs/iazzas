@@ -143,15 +143,12 @@ export default function InlineEditor() {
       },
       {
         onSuccess: (creation) => {
-          dispatch({ type: 'UPDATE_CREATION', payload: { id: optimisticId, creation } });
+          dispatch({ type: 'REPLACE_CREATION', payload: { fromId: optimisticId, creation } });
           dispatch({ type: 'SELECT_CREATION', payload: creation });
         },
         onError: () => {
           const errored = { ...optimistic, status: 'error' as const };
-          dispatch({
-            type: 'UPDATE_CREATION',
-            payload: { id: optimisticId, creation: errored },
-          });
+          dispatch({ type: 'REPLACE_CREATION', payload: { fromId: optimisticId, creation: errored } });
           dispatch({ type: 'SELECT_CREATION', payload: errored });
           showToast({ status: 'error', message: localize('com_studio_edit_failed') });
         },
