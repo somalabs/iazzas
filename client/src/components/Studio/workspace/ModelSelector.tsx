@@ -59,7 +59,7 @@ export default function ModelSelector() {
         <div
           role="listbox"
           aria-label={localize('com_studio_model_label')}
-          className="absolute bottom-full left-0 z-50 mb-1 min-w-[200px] rounded-xl border border-border-medium bg-surface-dialog py-1 shadow-xl"
+          className="absolute bottom-full right-0 z-50 mb-1 min-w-[200px] rounded-xl border border-border-medium bg-surface-dialog py-1 shadow-xl"
         >
           <button
             role="option"
