@@ -3,6 +3,7 @@ import { useLocalize } from '~/hooks';
 import AtelierDrawer from '~/components/ui/AtelierDrawer';
 import AtelierTrigger from '~/components/ui/AtelierTrigger';
 import { useStudio } from './context';
+import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import Creations from './creations/Creations';
 import Workspace from './workspace/Workspace';
 import ImageDetail from './detail/ImageDetail';
@@ -23,10 +24,13 @@ export default function StudioView() {
           <h1 className="text-sm font-semibold text-text-primary">
             {localize('com_studio_title')}
           </h1>
+          <div className="ml-auto md:hidden">
+            <OpenSidebar />
+          </div>
           <AtelierTrigger
             open={atelierOpen}
             onToggle={() => setAtelierOpen((prev) => !prev)}
-            className="ml-auto"
+            className="md:ml-auto"
           />
         </div>
 
