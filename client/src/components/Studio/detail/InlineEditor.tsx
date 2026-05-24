@@ -90,11 +90,12 @@ export default function InlineEditor({ imageIdx = 0 }: { imageIdx?: number }) {
     setAttachments((prev) => prev.filter((a) => a.id !== id));
   }
 
+  const sourceImage = selectedCreation.images[imageIdx] ?? selectedCreation.images[0];
+
   function handleSubmit() {
     if (!selectedCreation || !value.trim() || editMutation.isLoading) {
       return;
     }
-    const sourceImage = selectedCreation.images[imageIdx] ?? selectedCreation.images[0];
     if (!sourceImage) {
       return;
     }
