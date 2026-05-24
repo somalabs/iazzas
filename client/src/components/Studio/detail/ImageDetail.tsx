@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2, Heart, FolderOpen, Download, X, Pencil, AlertCircle } from 'lucide-react';
 import { useToastContext, useMediaQuery } from '@librechat/client';
 import { useLocalize } from '~/hooks';
@@ -23,6 +23,12 @@ export default function ImageDetail() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [sheetExpanded, setSheetExpanded] = useState(false);
 
+  useEffect(() => {
+    setSheetExpanded(false);
+    setPromptExpanded(false);
+    setImageIdx(0);
+  }, [selectedCreation?.id]);
+
   if (!selectedCreation) return null;
   const creation = selectedCreation;
 
@@ -34,6 +40,7 @@ export default function ImageDetail() {
   const comingSoon = localize('com_studio_coming_soon');
   const images = selectedCreation.images;
   const currentImage = images[imageIdx] ?? images[0];
+  const SHEET_PEEK_HEIGHT = 84;
 
   function handleClose() {
     dispatch({ type: 'SELECT_CREATION', payload: null });
@@ -187,7 +194,10 @@ export default function ImageDetail() {
 
         {/* Image picker */}
         {images.length > 1 && (
-          <div className="absolute bottom-[84px] left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium bg-surface-primary/80 px-2 py-1.5 backdrop-blur-sm">
+          <div
+            className="absolute left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium bg-surface-primary/80 px-2 py-1.5 backdrop-blur-sm"
+            style={{ bottom: SHEET_PEEK_HEIGHT }}
+          >
             {images.map((img, i) => (
               <button
                 key={img.id}
@@ -251,7 +261,7 @@ export default function ImageDetail() {
                     onClick={() => setPromptExpanded((v) => !v)}
                     className="text-[11px] text-text-tertiary underline hover:text-text-secondary"
                   >
-                    {promptExpanded ? 'See less' : localize('com_studio_see_more')}
+                    {promptExpanded ? localize('com_studio_see_less') : localize('com_studio_see_more')}
                   </button>
                 )}
               </div>
@@ -414,7 +424,7 @@ export default function ImageDetail() {
                     onClick={() => setPromptExpanded((v) => !v)}
                     className="text-[11px] text-text-tertiary underline hover:text-text-secondary"
                   >
-                    {promptExpanded ? 'See less' : localize('com_studio_see_more')}
+                    {promptExpanded ? localize('com_studio_see_less') : localize('com_studio_see_more')}
                   </button>
                 )}
               </div>
