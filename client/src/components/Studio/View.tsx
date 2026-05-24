@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMediaQuery } from '@librechat/client';
 import { PanelLeftOpen } from 'lucide-react';
+import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { useStudio } from './context';
-import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import Creations from './creations/Creations';
 import Workspace from './workspace/Workspace';
 import ImageDetail from './detail/ImageDetail';
