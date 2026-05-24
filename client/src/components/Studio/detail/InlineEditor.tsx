@@ -34,7 +34,7 @@ function readImageSize(file: File): Promise<{ width: number; height: number }> {
   });
 }
 
-export default function InlineEditor() {
+export default function InlineEditor({ imageIdx = 0 }: { imageIdx?: number }) {
   const localize = useLocalize();
   const { showToast } = useToastContext();
   const dispatch = useStudioDispatch();
@@ -94,7 +94,7 @@ export default function InlineEditor() {
     if (!selectedCreation || !value.trim() || editMutation.isLoading) {
       return;
     }
-    const sourceImage = selectedCreation.images[0];
+    const sourceImage = selectedCreation.images[imageIdx] ?? selectedCreation.images[0];
     if (!sourceImage) {
       return;
     }
@@ -160,9 +160,9 @@ export default function InlineEditor() {
     <div className="flex h-full flex-col border-t border-border-medium bg-surface-primary">
       {/* Full-screen image area */}
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-chat">
-        {selectedCreation.images[0] ? (
+        {sourceImage ? (
           <img
-            src={selectedCreation.images[0].url}
+            src={sourceImage.url}
             alt="Selected creation"
             className="max-h-full max-w-full object-contain"
           />

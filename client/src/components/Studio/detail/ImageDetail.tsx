@@ -103,7 +103,7 @@ export default function ImageDetail() {
     return (
       <div className="flex h-full flex-col">
         <div className="flex-1 overflow-hidden">
-          <InlineEditor />
+          <InlineEditor imageIdx={imageIdx} />
         </div>
       </div>
     );
