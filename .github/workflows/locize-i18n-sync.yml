@@ -10,6 +10,7 @@ jobs:
   sync-translations:
     name: Sync Translation Keys with Locize
     runs-on: ubuntu-latest
+    if: github.repository == 'danny-avila/LibreChat'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -38,6 +39,7 @@ jobs:
     name: Create Translation PR on Version Published
     runs-on: ubuntu-latest
     needs: sync-translations
+    if: github.repository == 'danny-avila/LibreChat'
     permissions:
       contents: write
       pull-requests: write
