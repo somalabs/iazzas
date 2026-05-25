@@ -2436,4 +2436,134 @@ describe('normalizeJsonSchema', () => {
       type: 'string',
     });
   });
+
+  describe('unresolved $ref handling (MS Graph regression)', () => {
+    it('collapses a node with a surviving $ref to an empty schema', () => {
+      const result = normalizeJsonSchema({
+        $ref: '#/components/schemas/Message',
+      } as any);
+      expect(result).toEqual({});
+    });
+
+    it('strips $ref nested inside properties', () => {
+      const result = normalizeJsonSchema({
+        type: 'object',
+        properties: {
+          body: { $ref: '#/components/schemas/ItemBody' },
+          subject: { type: 'string' },
+        },
+      } as any);
+
+      expect(result).toEqual({
+        type: 'object',
+        properties: {
+          body: {},
+          subject: { type: 'string' },
+        },
+      });
+    });
+
+    it('strips $ref inside array items', () => {
+      const result = normalizeJsonSchema({
+        type: 'array',
+        items: { $ref: '#/components/schemas/Recipient' },
+      } as any);
+
+      expect(result).toEqual({ type: 'array', items: {} });
+    });
+
+    it('strips $ref inside anyOf branches', () => {
+      const result = normalizeJsonSchema({
+        anyOf: [{ type: 'string' }, { $ref: '#/components/schemas/Foo' }],
+      } as any);
+
+      expect(result).toEqual({ anyOf: [{ type: 'string' }, {}] });
+    });
+  });
+
+  describe('type union handling (MS Graph regression)', () => {
+    it('flattens ["string", "null"] to type: "string" + nullable: true', () => {
+      const result = normalizeJsonSchema({ type: ['string', 'null'] } as any);
+      expect(result).toEqual({ type: 'string', nullable: true });
+    });
+
+    it('flattens ["null", "integer"] to type: "integer" + nullable: true', () => {
+      const result = normalizeJsonSchema({ type: ['null', 'integer'] } as any);
+      expect(result).toEqual({ type: 'integer', nullable: true });
+    });
+
+    it('picks the first concrete type for non-null unions', () => {
+      const result = normalizeJsonSchema({ type: ['string', 'number'] } as any);
+      expect(result).toEqual({ type: 'string' });
+    });
+
+    it('falls back to type: object for ["null"] alone', () => {
+      const result = normalizeJsonSchema({ type: ['null'] } as any);
+      expect(result).toEqual({ type: 'object', nullable: true });
+    });
+
+    it('preserves an explicit nullable already on the schema', () => {
+      const result = normalizeJsonSchema({
+        type: ['string', 'null'],
+        nullable: false,
+      } as any);
+      expect(result).toEqual({ type: 'string', nullable: false });
+    });
+
+    it('handles nested type unions inside properties', () => {
+      const result = normalizeJsonSchema({
+        type: 'object',
+        properties: {
+          email: { type: ['string', 'null'] },
+          count: { type: ['integer', 'null'] },
+        },
+      } as any);
+
+      expect(result.properties).toEqual({
+        email: { type: 'string', nullable: true },
+        count: { type: 'integer', nullable: true },
+      });
+    });
+
+    it('leaves scalar type unchanged', () => {
+      const result = normalizeJsonSchema({ type: 'string' } as any);
+      expect(result).toEqual({ type: 'string' });
+    });
+  });
+
+  it('handles a realistic MS Graph-style schema combining $ref and nullable unions', () => {
+    const input = {
+      type: 'object',
+      properties: {
+        subject: { type: ['string', 'null'] },
+        body: { $ref: '#/components/schemas/ItemBody' },
+        toRecipients: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/Recipient' },
+        },
+        importance: {
+          type: ['string', 'null'],
+          enum: ['low', 'normal', 'high'],
+        },
+      },
+      required: ['subject'],
+    } as any;
+
+    const result = normalizeJsonSchema(input);
+
+    expect(result).toEqual({
+      type: 'object',
+      properties: {
+        subject: { type: 'string', nullable: true },
+        body: {},
+        toRecipients: { type: 'array', items: {} },
+        importance: {
+          type: 'string',
+          nullable: true,
+          enum: ['low', 'normal', 'high'],
+        },
+      },
+      required: ['subject'],
+    });
+  });
 });

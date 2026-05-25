@@ -279,6 +279,10 @@ const GEMINI_UNSUPPORTED_KEYS = new Set([
  * - Strips vendor extension fields (`x-*` prefixed keys, e.g. `x-google-enum-descriptions`)
  * - Strips leftover `$defs`/`definitions` blocks that may survive ref resolution
  * - Strips JSON Schema 2019-09+ keywords not supported by Gemini (see GEMINI_UNSUPPORTED_KEYS)
+ * - Strips `$ref` that survived resolution (external/unresolvable refs) — Gemini/OpenAI/Anthropic
+ *   tool schemas only accept inlined schemas, so an unresolved ref always breaks the request.
+ * - Flattens type unions (`type: ["X", "null"]` → `type: "X"` + `nullable: true`; `type: ["X", "Y"]`
+ *   → first concrete type), since Gemini accepts only OpenAPI 3.0 scalar `type` values.
  *
  * @param schema - The JSON schema to normalize
  * @returns The normalized schema
@@ -292,6 +296,12 @@ export function normalizeJsonSchema<T extends Record<string, unknown>>(schema: T
     return schema.map((item) =>
       item && typeof item === 'object' ? normalizeJsonSchema(item) : item,
     ) as unknown as T;
+  }
+
+  // Drop unresolved $ref: collapse the node to a permissive empty schema rather than
+  // emit `$ref` (Gemini/OpenAI/Anthropic all reject it in tool parameters).
+  if (typeof schema.$ref === 'string') {
+    return {} as T;
   }
 
   const result: Record<string, unknown> = {};
@@ -320,6 +330,24 @@ export function normalizeJsonSchema<T extends Record<string, unknown>>(schema: T
 
     if (key === 'const' && 'enum' in schema) {
       // Skip `const` when `enum` already exists
+      continue;
+    }
+
+    if (key === 'type' && Array.isArray(value)) {
+      const types = value.filter((t): t is string => typeof t === 'string');
+      const hasNull = types.includes('null');
+      const concrete = types.filter((t) => t !== 'null');
+      if (concrete.length === 0) {
+        // `type: ["null"]` — fall back to a permissive type rather than no type at all.
+        result[key] = 'object';
+      } else {
+        // Gemini's OpenAPI 3.0 subset wants a single scalar `type`; pick the first
+        // concrete value and capture nullability via the `nullable` keyword.
+        result[key] = concrete[0];
+      }
+      if (hasNull && !('nullable' in schema)) {
+        result['nullable'] = true;
+      }
       continue;
     }
 
