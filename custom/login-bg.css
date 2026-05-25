@@ -1,0 +1,27 @@
+.flex.min-h-screen,
+main.flex.min-h-screen,
+.bg-white.dark\:bg-gray-900 {
+    background-image: url("/custom/login-bg.jpg") !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
+.flex.min-h-screen > div,
+main.flex.min-h-screen > div {
+    background-color: rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    padding: 2rem;
+}
+h1.text-3xl { font-size: 0 !important; line-height: 0 !important; }
+h1.text-3xl::before {
+    content: "iAZZAS";
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 600;
+    display: block;
+    color: #ffffff;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
