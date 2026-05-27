@@ -27,13 +27,18 @@ const TEXT_COLOR = {
 
 function BalanceMenuRow({
   balance,
+  configStartBalance,
   onClick,
 }: {
   balance: TBalanceResponse;
+  configStartBalance?: number;
   onClick: () => void;
 }) {
   const localize = useLocalize();
-  const { pct, colorState, hoursUntilRenewal, hasCycle } = getCycleInfo(balance);
+  const { pct, colorState, hoursUntilRenewal, hasCycle } = getCycleInfo({
+    ...balance,
+    configStartBalance,
+  });
 
   if (!hasCycle) {
     return (
@@ -144,6 +149,7 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           <>
             <BalanceMenuRow
               balance={balanceQuery.data}
+              configStartBalance={startupConfig?.balance?.startBalance}
               onClick={() => {
                 setSettingsTab(SettingsTabValues.BALANCE);
                 setShowSettings(true);

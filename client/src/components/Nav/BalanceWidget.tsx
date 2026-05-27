@@ -59,7 +59,10 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
   }
 
   const balance = balanceQuery.data;
-  const { pct, colorState, hoursUntilRenewal, hasCycle } = getCycleInfo(balance);
+  const { pct, colorState, hoursUntilRenewal, hasCycle } = getCycleInfo({
+    ...balance,
+    configStartBalance: startupConfig?.balance?.startBalance,
+  });
   const iconColor = ICON_COLOR[colorState];
   const barColor = BAR_COLOR[colorState];
   const renewalText =

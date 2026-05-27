@@ -39,6 +39,7 @@ function Balance() {
     tokenCredits,
     autoRefillEnabled,
     refillAmount,
+    configStartBalance: startupConfig?.balance?.startBalance,
   });
 
   if (!hasCycle) {

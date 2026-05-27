@@ -108,21 +108,33 @@ type CycleInput = {
   lastRefill?: Date | string;
   refillIntervalUnit?: RefillIntervalUnit;
   refillIntervalValue?: number;
+  /** Ceiling vindo do startup config (`startBalance` em raw). Em IAzzas,
+   *  o BalanceScheduler reseta todos os saldos pra este valor à meia-noite
+   *  São Paulo, então funciona como teto do ciclo mesmo sem autoRefill. */
+  configStartBalance?: number;
 };
 
-/** Derives daily-cycle progress (percent, color, renewal countdown). */
+/** Derives daily-cycle progress (percent, color, renewal countdown).
+ *
+ *  Reconhece ciclo de duas formas:
+ *  - LibreChat padrão: `autoRefillEnabled && refillAmount > 0` (refillAmount em display credits)
+ *  - IAzzas: `configStartBalance` presente (raw tokenCredits); scheduler reseta diariamente */
 export function getCycleInfo(balance: CycleInput): CycleInfo {
-  const { tokenCredits, autoRefillEnabled, refillAmount } = balance;
+  const { tokenCredits, autoRefillEnabled, refillAmount, configStartBalance } = balance;
 
-  const hasCycle = !!autoRefillEnabled && refillAmount !== undefined && refillAmount > 0;
+  const refillCeiling =
+    autoRefillEnabled && refillAmount !== undefined && refillAmount > 0 ? refillAmount : null;
+  const configCeiling =
+    configStartBalance !== undefined && configStartBalance > 0
+      ? toDisplayCredits(configStartBalance)
+      : null;
+  const ceiling = refillCeiling ?? configCeiling;
+  const hasCycle = ceiling !== null;
 
   const pct = hasCycle
     ? Math.min(
         100,
-        Math.max(
-          0,
-          Math.round(((refillAmount! - toDisplayCredits(tokenCredits)) / refillAmount!) * 100),
-        ),
+        Math.max(0, Math.round(((ceiling! - toDisplayCredits(tokenCredits)) / ceiling!) * 100)),
       )
     : 0;
 
@@ -132,7 +144,7 @@ export function getCycleInfo(balance: CycleInput): CycleInfo {
     pct,
     colorState,
     hoursUntilRenewal: hasCycle ? hoursUntilSaoPauloMidnight() : null,
-    displayCeiling: refillAmount ?? null,
+    displayCeiling: ceiling,
     hasCycle,
   };
 }
