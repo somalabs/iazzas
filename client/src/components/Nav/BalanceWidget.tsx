@@ -4,7 +4,7 @@ import { useSetAtom } from 'jotai';
 import { SettingsTabValues } from 'librechat-data-provider';
 import { Skeleton, TooltipAnchor } from '@librechat/client';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
-import { getCycleInfo } from '~/utils/credits';
+import { formatDisplayCredits, getCycleInfo } from '~/utils/credits';
 import { openSettingsTabAtom } from '~/store/settingsTab';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { useLocalize } from '~/hooks';
@@ -69,15 +69,16 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
   // Claude-style: surface the cycle as a clean label + progress, never the raw
   // internal credit number (the user sees usage, not the $-proxy ledger).
   const usageLabel = localize('com_ui_ux_balance_cycle');
+  const rawBalanceLabel = `${localize('com_nav_balance')} ${formatDisplayCredits(balance.tokenCredits)}`;
 
   const ariaLabel = hasCycle
     ? `${usageLabel} ${pct}%${renewalText ? ` · ${renewalText}` : ''}`
-    : localize('com_nav_balance');
+    : rawBalanceLabel;
 
   if (collapsed) {
     const tooltip = hasCycle
       ? `${usageLabel} ${pct}%${renewalText ? ` · ${renewalText}` : ''}`
-      : localize('com_nav_balance');
+      : rawBalanceLabel;
 
     return (
       <TooltipAnchor
@@ -141,25 +142,34 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
     >
       <Coins size={14} className={cn('flex-shrink-0', iconColor)} aria-hidden="true" />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="truncate text-left font-medium text-text-primary">
-          {hasCycle ? usageLabel : localize('com_nav_balance')}
-        </span>
-        {hasCycle && (
-          <div className="flex items-center gap-1.5">
-            <div
-              className="h-1 flex-1 overflow-hidden rounded-full bg-surface-tertiary"
-              role="progressbar"
-              aria-valuenow={pct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
+        {hasCycle ? (
+          <>
+            <span className="truncate text-left font-medium text-text-primary">{usageLabel}</span>
+            <div className="flex items-center gap-1.5">
               <div
-                className={cn('h-full rounded-full transition-all duration-300', barColor)}
-                style={{ width: `${pct}%` }}
-              />
+                className="h-1 flex-1 overflow-hidden rounded-full bg-surface-tertiary"
+                role="progressbar"
+                aria-valuenow={pct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <div
+                  className={cn('h-full rounded-full transition-all duration-300', barColor)}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <span className={cn('flex-shrink-0 font-medium tabular-nums', iconColor)}>
+                {pct}%
+              </span>
             </div>
-            <span className={cn('flex-shrink-0 font-medium tabular-nums', iconColor)}>
-              {pct}%
+          </>
+        ) : (
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate text-left font-medium text-text-primary">
+              {localize('com_nav_balance')}
+            </span>
+            <span className="flex-shrink-0 tabular-nums text-text-secondary">
+              {formatDisplayCredits(balance.tokenCredits)}
             </span>
           </div>
         )}
