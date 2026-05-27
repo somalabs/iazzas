@@ -33,9 +33,29 @@ export function formatDisplayCredits(raw: number): string {
   return display.toFixed(2);
 }
 
-/** Format raw tokenCredits as a USD string (e.g. "$1.23"). */
+/** Format raw tokenCredits as a USD string in pt-BR style (e.g. "$1,23"). */
 export function formatUSD(raw: number): string {
-  return `$${toUSD(raw).toFixed(2)}`;
+  return `$${toUSD(raw).toFixed(2).replace('.', ',')}`;
+}
+
+/** Estimativa de tokens equivalentes ao saldo bruto.
+ *  Ancorada no IAzzas Flash (blended input/output ~$1/MTok), o que dá
+ *  1 crédito de display ≈ 10K tokens. Varia bastante por modelo (Pro
+ *  cai pra ~2.5K/crédito) e MCPs conectados — é ordem de grandeza. */
+export function estimateTokens(raw: number): number {
+  return Math.round(toDisplayCredits(raw) * 10_000);
+}
+
+/** Format the token estimate with K/M abbreviations. */
+export function formatTokenEstimate(raw: number): string {
+  const tokens = estimateTokens(raw);
+  if (tokens >= 1_000_000) {
+    return `${(tokens / 1_000_000).toFixed(1)}M`;
+  }
+  if (tokens >= 1_000) {
+    return `${Math.round(tokens / 1_000)}K`;
+  }
+  return new Intl.NumberFormat().format(tokens);
 }
 
 export type CycleColorState = 'safe' | 'warning' | 'danger';

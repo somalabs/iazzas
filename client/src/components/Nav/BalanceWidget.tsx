@@ -132,22 +132,22 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
     );
   }
 
-  return (
+  const expandedButton = (
     <button
       type="button"
       onClick={() => openSettingsTab(SettingsTabValues.BALANCE)}
-      className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-xs hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
+      className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-left text-xs hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
       aria-label={ariaLabel}
     >
       <Coins size={14} className={cn('flex-shrink-0', iconColor)} aria-hidden="true" />
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate font-medium text-text-primary">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="truncate text-left font-medium text-text-primary">
           {hasCycle ? usageLabel : localize('com_nav_balance')}
         </span>
         {hasCycle && (
           <div className="flex items-center gap-1.5">
             <div
-              className="h-1 w-20 flex-shrink-0 overflow-hidden rounded-full bg-surface-tertiary"
+              className="h-1 flex-1 overflow-hidden rounded-full bg-surface-tertiary"
               role="progressbar"
               aria-valuenow={pct}
               aria-valuemin={0}
@@ -158,18 +158,20 @@ function BalanceWidget({ collapsed = false }: { collapsed?: boolean }) {
                 style={{ width: `${pct}%` }}
               />
             </div>
-            {renewalText && (
-              <span
-                className={cn('truncate text-text-tertiary', colorState !== 'safe' && iconColor)}
-              >
-                {renewalText}
-              </span>
-            )}
+            <span className={cn('flex-shrink-0 font-medium tabular-nums', iconColor)}>
+              {pct}%
+            </span>
           </div>
         )}
       </div>
     </button>
   );
+
+  if (hasCycle && renewalText) {
+    return <TooltipAnchor side="top" description={renewalText} render={expandedButton} />;
+  }
+
+  return expandedButton;
 }
 
 export default memo(BalanceWidget);

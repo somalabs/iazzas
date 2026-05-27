@@ -229,24 +229,100 @@ mcpServers:
     headers:
       Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
+    title: "Vendas Linx"
+    description: |
+      Consulta na silver Linx do BigQuery os KPIs comerciais das 9 marcas da BU Varejo direto do chat, sem abrir o BI.
+
+      KPIs disponíveis:
+      • Venda líquida e bruta, CMV, markup, margem bruta, taxa de desconto, ticket médio, PA, quebra
+      • Comparativos YoY e MoM, SSS / Loja Nova / Sem classificação (com snapshot único por período)
+
+      Dimensões:
+      • Marca, loja (5 contextos: atendimento, faturamento, origem, destino, vendedor), produto/cor/tamanho/grade
+      • Coleção e fase (ON / SALE / OFF) — com alerta automático de MACO inflado em OFF
+      • Canal: Físico, Online, Omni, Vitrine
+
+      Exemplos:
+      • "Venda líquida da Animale por loja em setembro/2025"
+      • "Top 10 produtos por ticket médio na fase ON da coleção VER25"
+      • "Markup das marcas no semestre com aviso de fase OFF"
+      • "SSS comparable por marca nos últimos 3 meses"
+    iconPath: "/assets/a2154.png"
   azzas_devolucoes:
     type: streamable-http
     url: https://analista-devolucoes-production.up.railway.app/mcp
     headers:
       Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
+    title: "Devoluções"
+    description: |
+      Analisa a tabela CDC de trocas e devoluções das 9 marcas do grupo, com regras de "foto corrente" já aplicadas (sem precisar saber de status histórico).
+
+      O que entrega:
+      • Volume e taxa de reversa por marca, loja, produto, estado e cidade
+      • Motivos de devolução agregados ou abertos
+      • SLA logístico reverso: previsto vs. realizado, atrasos por marca/loja/transportadora
+      • Análise qualitativa: parsing dos comentários de clientes
+      • Distinção entre estorno puro, reversa total e troca
+
+      Diferencial: rankings de produto saem com a foto do item inline, sem precisar abrir o ERP.
+
+      Exemplos:
+      • "Principais motivos de devolução em julho na Animale"
+      • "Top 20 produtos com maior taxa de devolução no último trimestre"
+      • "SLA reverso médio por marca, com casos acima de 7 dias destacados"
+      • "Análise qualitativa dos comentários em devoluções de calçado"
+    iconPath: "/assets/a2154.png"
   azzas_ciclo:
     type: streamable-http
     url: https://agent-atacado-production.up.railway.app/mcp
     headers:
       Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
+    title: "Ciclo de Venda Atacado"
+    description: |
+      Cobre 19 tabelas do canal Atacado (BU Fashion & Lifestyle), organizadas em 7 sub-sistemas que dialogam entre si:
+
+      • Ciclo de venda: pedido, cancelamento, embalado (status de caixa no CD), faturamento (NF), devolução, metas e quebra
+      • Financeiro: inadimplência, bloqueio, aging por cliente, histórico de bloqueios
+      • Somaplace (marketplace): adesão de multimarcas e GMV por produto/marca
+      • Afiliados: vendedoras digitais, comissão e venda gerada por canal
+      • E-commerce: eventos de venda (uso restrito — só quando o termo "e-commerce" for explícito)
+      • Prateleira Infinita: estoque do programa para recomendação e mix por linha/segmento
+      • Cessão Varejo: snapshot de venda a entregar, produção prevista e atraso por produto/tamanho
+
+      Dimensões: representante, coordenador, coleção (VER/AV/INV/AI), marca, cluster de cliente, exclusividade atacado, venda aberta/fechada.
+
+      Exemplos:
+      • "Atingimento de meta dos top 20 representantes na coleção VER25"
+      • "GMV Somaplace por marca no último trimestre"
+      • "Quebra de embalado vs. quebra financeira na AV25"
+      • "Carteira de clientes com bloqueio financeiro ativo por cluster"
+    iconPath: "/assets/a2154.png"
   azzas_clientes:
     type: streamable-http
     url: https://agent-clientes-production.up.railway.app/mcp
     headers:
       Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
+    title: "Clientes"
+    description: |
+      Análise da base de clientes do grupo sob duas perspectivas independentes: ano de competência (tabela agregada, queries baratas) e janela móvel de 12 meses (view com fato CRM). Cobertura desde 2019.
+
+      O que entrega:
+      • Segmentação Novo / Retido / Reativado, com sub-status Compra Única / Recorrente
+      • Base ativa por marca, recência (90d e 365d), frequência e cluster de frequência
+      • LTV, ticket médio, PA e PM por marca, loja, canal de entrada e canal do cliente
+      • Tratamento correto de Multicanal e Multicanal c/ Franquia (com dedup)
+
+      Exemplos:
+      • "Distribuição Novo/Retido/Reativado por marca em 2026"
+      • "Base ativa Multicanal nos últimos 12 meses"
+      • "Recência média de clientes Animale e Farm em janela móvel"
+      • "Cluster de frequência por marca no ano de competência"
+
+      ⚠ A receita aqui não bate com Vendas Linx por desenho: marketplaces (ex.: Mercado Livre) geram receita para a Azzas mas o cliente final pertence ao marketplace e fica fora deste universo.
+    iconPath: "/assets/a2154.png"
 
   # MCPs externos SaaS — OAuth per-user com Dynamic Client Registration (RFC 7591).
   # Não tem app pré-registrado; LibreChat se registra no provider na primeira conexão.
@@ -260,6 +336,25 @@ mcpServers:
     startup: false
     requiresOAuth: true
     oauth: {}
+    title: "Notion"
+    description: |
+      Conecta com seu workspace pessoal do Notion e transforma páginas, bases de dados, blocos e comentários em contexto utilizável direto no chat.
+
+      O que faz:
+      • Busca livre em todo o workspace ou query estruturada em bases (filter/sort)
+      • Leitura completa de páginas, blocos aninhados e propriedades (com paginação automática)
+      • Criação e edição de páginas e blocos (texto vira blocos nativos do Notion)
+      • Comentários em páginas e blocos específicos
+      • Listagem de usuários e info do workspace
+
+      Exemplos:
+      • "Resume a página de arquitetura do projeto X"
+      • "Lista as decisões registradas na base 'Roadmap' nos últimos 30 dias"
+      • "Cria uma página com o resumo desta conversa no espaço Y"
+      • "Adiciona o comentário 'revisar com o time de dados' na página Z"
+
+      Requer login pessoal Notion via OAuth.
+    iconPath: "/assets/notion.svg"
   atlassian:
     type: streamable-http
     url: https://mcp.atlassian.com/v1/mcp/authv2
@@ -267,6 +362,30 @@ mcpServers:
     startup: false
     requiresOAuth: true
     oauth: {}
+    title: "Atlassian"
+    description: |
+      Acesso integrado a Jira e Confluence direto do chat — consulta, busca, criação e atualização sem sair da conversa.
+
+      Jira:
+      • Busca por JQL avançado, listagem de projetos visíveis e tipos de issue
+      • Leitura completa de issues, remote links e tipos de link permitidos
+      • Criação, edição e transição de status (com validação de workflow)
+      • Comentários, worklog e criação de links entre issues (blocks, relates, depends on)
+
+      Confluence:
+      • Listagem de espaços, páginas e descendentes hierárquicos
+      • Busca por CQL
+      • Criação, edição e leitura de páginas
+      • Comentários inline e footer
+
+      Exemplos:
+      • "Quais bugs P1 estão em progresso no projeto IAZ?"
+      • "Resume a página de runbook do incidente 4321 no Confluence"
+      • "Cria um ticket no IAZ com o título 'Refazer dashboard de churn' e atribui pra Fulano"
+      • "Move o IAZ-1023 pra 'In Review' e adiciona o comentário X"
+
+      Requer login pessoal Atlassian via OAuth.
+    iconPath: "/assets/atlassian.svg"
   miro:
     type: streamable-http
     url: https://mcp.miro.com/
@@ -274,6 +393,25 @@ mcpServers:
     startup: false
     requiresOAuth: true
     oauth: {}
+    title: "Miro"
+    description: |
+      Lê e manipula os seus boards do Miro — frames, sticky notes, shapes, conectores, texto e imagens — transformando workshops e brainstorms em texto pronto pra usar.
+
+      O que faz:
+      • Lista boards do workspace, membros e permissões
+      • Leitura completa de itens por board (frames, widgets, conexões, agrupamentos)
+      • Criação e edição de widgets (sticky, shape, text, frame) com cor e posição
+      • Movimentação e organização de itens por coordenadas
+      • Exportação do conteúdo de um board pra resumo estruturado
+
+      Exemplos:
+      • "Resume os post-its do board de discovery do produto X"
+      • "Lista todas as decisões marcadas em verde no board de planning"
+      • "Transforma o customer journey do board Y em um documento estruturado"
+      • "Cria 5 sticky notes amarelos com os blockers desta sprint no board Z"
+
+      Requer login pessoal Miro via OAuth.
+    iconPath: "/assets/miro.svg"
 
   # Microsoft 365 (Outlook Mail/Calendar, Teams, OneDrive, OneNote, Excel) via
   # softeria/ms-365-mcp-server self-hospedado. Pré-requisito: App Registration
@@ -288,6 +426,40 @@ mcpServers:
     startup: false
     requiresOAuth: true
     oauth: {}
+    title: "Microsoft 365"
+    description: |
+      Conecta com sua conta Azzas e dá acesso integrado a Outlook, Teams, OneDrive, OneNote e Excel direto do chat.
+
+      Outlook:
+      • Mail: listar inbox/folders, ler, buscar, rascunhar, enviar, responder, encaminhar, deletar
+      • Calendário: listar eventos, criar/editar/cancelar reuniões, sugerir horários disponíveis
+
+      Teams:
+      • Listar times, canais e mensagens recentes
+      • Postar mensagem em canal
+      • Buscar mensagens por texto
+
+      OneDrive:
+      • Listar drives e arquivos, baixar e enviar conteúdo
+      • Gerar link de compartilhamento
+
+      OneNote:
+      • Listar cadernos, seções e páginas
+      • Ler conteúdo e criar páginas novas
+
+      Excel:
+      • Abrir workbook, listar planilhas e tabelas
+      • Ler ou gravar ranges
+      • Operações em tabelas estruturadas
+
+      Exemplos:
+      • "Resume os e-mails não lidos de hoje do remetente X"
+      • "Agenda reunião de 30 min com Fulano e Beltrana terça ou quarta de manhã"
+      • "Pega a planilha 'Forecast 2026' do OneDrive e dá o total por marca"
+      • "Resume os últimos 7 dias do canal 'IAzzas - Lançamento' no Teams"
+
+      Requer login com sua conta Azzas via OAuth.
+    iconPath: "/assets/microsoft-icon.svg"
 
   # Rollback: descomente o bloco abaixo e remova os 4 acima pra voltar ao stdio.
   # azzas:

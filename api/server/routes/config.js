@@ -6,8 +6,10 @@ const { getLdapConfig } = require('~/server/services/Config/ldap');
 const { getAppConfig } = require('~/server/services/Config/app');
 
 const router = express.Router();
-const emailLoginEnabled =
-  process.env.ALLOW_EMAIL_LOGIN === undefined || isEnabled(process.env.ALLOW_EMAIL_LOGIN);
+// IAzzas: acesso exclusivo via SSO Azzas ID — login por email/senha está
+// hardcoded como `false` por decisão de segurança. Veja `docs/local-dev.md`
+// para o procedimento de testar local sem SSO.
+const emailLoginEnabled = false;
 const passwordResetEnabled = isEnabled(process.env.ALLOW_PASSWORD_RESET);
 
 const sharedLinksEnabled =
@@ -60,7 +62,9 @@ function buildSharedPayload() {
     samlImageUrl: process.env.SAML_IMAGE_URL,
     serverDomain: process.env.DOMAIN_SERVER || 'http://localhost:3080',
     emailLoginEnabled,
-    registrationEnabled: !ldap?.enabled && isEnabled(process.env.ALLOW_REGISTRATION),
+    // IAzzas: cadastro desabilitado — usuários entram apenas via SSO Azzas ID.
+    // Veja `docs/local-dev.md` para testar local sem SSO.
+    registrationEnabled: false,
     socialLoginEnabled: isEnabled(process.env.ALLOW_SOCIAL_LOGIN),
     emailEnabled:
       (!!process.env.EMAIL_SERVICE || !!process.env.EMAIL_HOST) &&

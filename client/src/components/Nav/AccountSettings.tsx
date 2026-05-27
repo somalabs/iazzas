@@ -4,12 +4,81 @@ import * as Menu from '@ariakit/react/menu';
 import { LogOut } from 'lucide-react';
 import { SettingsTabValues } from 'librechat-data-provider';
 import { GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
+import type { TBalanceResponse } from 'librechat-data-provider';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { openSettingsTabAtom } from '~/store/settingsTab';
 import { useAuthContext } from '~/hooks/AuthContext';
-import { formatDisplayCredits } from '~/utils/credits';
+import { formatDisplayCredits, getCycleInfo } from '~/utils/credits';
 import { useLocalize } from '~/hooks';
+import { cn } from '~/utils';
 import Settings from './Settings';
+
+const BAR_COLOR = {
+  safe: 'bg-green-500',
+  warning: 'bg-yellow-500',
+  danger: 'bg-red-500',
+} as const;
+
+const TEXT_COLOR = {
+  safe: 'text-text-tertiary',
+  warning: 'text-yellow-500',
+  danger: 'text-red-500',
+} as const;
+
+function BalanceMenuRow({
+  balance,
+  onClick,
+}: {
+  balance: TBalanceResponse;
+  onClick: () => void;
+}) {
+  const localize = useLocalize();
+  const { pct, colorState, hoursUntilRenewal, hasCycle } = getCycleInfo(balance);
+
+  if (!hasCycle) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="ml-3 mr-2 flex w-[calc(100%-1.25rem)] items-center justify-between rounded-md px-1 py-2 text-left text-sm text-text-secondary hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
+      >
+        <span>{localize('com_nav_balance')}</span>
+        <span className="text-text-primary">{formatDisplayCredits(balance.tokenCredits)}</span>
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="ml-3 mr-2 flex w-[calc(100%-1.25rem)] flex-col gap-1.5 rounded-md px-1 py-2 text-left text-sm hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary"
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-text-secondary">{localize('com_ui_ux_balance_cycle')}</span>
+        <span className="font-medium text-text-primary">{pct}%</span>
+      </div>
+      <div
+        className="h-1 w-full overflow-hidden rounded-full bg-surface-tertiary"
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className={cn('h-full rounded-full transition-all duration-300', BAR_COLOR[colorState])}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      {hoursUntilRenewal != null && (
+        <span className={cn('text-xs', TEXT_COLOR[colorState])}>
+          {localize('com_ui_ux_balance_renova')} ({localize('com_ui_ux_balance_renova_em')}{' '}
+          {hoursUntilRenewal}h)
+        </span>
+      )}
+    </button>
+  );
+}
 
 function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const localize = useLocalize();
@@ -73,9 +142,13 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
         <DropdownMenuSeparator />
         {startupConfig?.balance?.enabled === true && balanceQuery.data != null && (
           <>
-            <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
-              {localize('com_nav_balance')}: {formatDisplayCredits(balanceQuery.data.tokenCredits)}
-            </div>
+            <BalanceMenuRow
+              balance={balanceQuery.data}
+              onClick={() => {
+                setSettingsTab(SettingsTabValues.BALANCE);
+                setShowSettings(true);
+              }}
+            />
             <DropdownMenuSeparator />
           </>
         )}

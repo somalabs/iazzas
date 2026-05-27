@@ -4,6 +4,7 @@ import { PermissionBits, hasPermissions } from 'librechat-data-provider';
 import type { MCPServerStatusIconProps } from '~/components/MCP/MCPServerStatusIcon';
 import type { MCPServerDefinition } from '~/hooks';
 import MCPServerDialog from './MCPServerDialog';
+import MCPServerDetailsDialog from './MCPServerDetailsDialog';
 import { getStatusDotColor } from './MCPStatusBadge';
 import MCPCardActions from './MCPCardActions';
 import { useMCPServerManager, useLocalize } from '~/hooks';
@@ -32,6 +33,7 @@ export default function MCPServerCard({
   const triggerRef = useRef<HTMLDivElement>(null);
   const { initializeServer, revokeOAuthForServer } = useMCPServerManager();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const statusIconProps = getServerStatusIconProps(server.serverName);
   const {
@@ -45,7 +47,6 @@ export default function MCPServerCard({
 
   const canEditThisServer = hasPermissions(server.effectivePermissions, PermissionBits.EDIT);
   const displayName = server.config?.title || server.serverName;
-  const description = server.config?.description;
   const statusDotColor = getStatusDotColor(serverStatus, isInitializing);
   const canEdit = canCreateEditMCPs && canEditThisServer;
 
@@ -95,37 +96,44 @@ export default function MCPServerCard({
         )}
         aria-label={`${displayName} - ${getStatusText()}`}
       >
-        {/* Server Icon with Status Dot */}
-        <div className="relative flex-shrink-0">
-          {server.config?.iconPath ? (
-            <img
-              src={server.config.iconPath}
-              className="size-8 rounded-lg object-cover"
-              alt=""
+        <button
+          type="button"
+          onClick={() => setDetailsOpen(true)}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary rounded-md"
+          aria-label={localize('com_ui_mcp_open_details', { 0: displayName })}
+        >
+          {/* Server Icon with Status Dot */}
+          <div className="relative flex-shrink-0">
+            {server.config?.iconPath ? (
+              <img
+                src={server.config.iconPath}
+                className="size-8 rounded-lg object-cover"
+                alt=""
+                aria-hidden="true"
+              />
+            ) : (
+              <div className="flex size-8 items-center justify-center rounded-lg bg-surface-tertiary">
+                <MCPIcon className="size-5 text-text-secondary" aria-hidden="true" />
+              </div>
+            )}
+            {/* Status dot - color indicates connection state */}
+            <div
+              className={cn(
+                'absolute -bottom-0.5 -right-0.5 size-3 rounded-full',
+                'border-2 border-surface-primary',
+                statusDotColor,
+                (isInitializing || serverStatus?.connectionState === 'connecting') &&
+                  'animate-pulse',
+              )}
               aria-hidden="true"
             />
-          ) : (
-            <div className="flex size-8 items-center justify-center rounded-lg bg-surface-tertiary">
-              <MCPIcon className="size-5 text-text-secondary" aria-hidden="true" />
-            </div>
-          )}
-          {/* Status dot - color indicates connection state */}
-          <div
-            className={cn(
-              'absolute -bottom-0.5 -right-0.5 size-3 rounded-full',
-              'border-2 border-surface-primary',
-              statusDotColor,
-              (isInitializing || serverStatus?.connectionState === 'connecting') && 'animate-pulse',
-            )}
-            aria-hidden="true"
-          />
-        </div>
+          </div>
 
-        {/* Server Info */}
-        <div className="min-w-0 flex-1">
-          <span className="truncate text-sm font-medium text-text-primary">{displayName}</span>
-          {description && <p className="truncate text-xs text-text-secondary">{description}</p>}
-        </div>
+          {/* Server name only — description lives in the details modal */}
+          <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary">
+            {displayName}
+          </span>
+        </button>
 
         {/* Actions */}
         <div className="flex-shrink-0">
@@ -145,6 +153,13 @@ export default function MCPServerCard({
           />
         </div>
       </div>
+
+      <MCPServerDetailsDialog
+        open={detailsOpen}
+        onOpenChange={setDetailsOpen}
+        server={server}
+        statusIconProps={statusIconProps}
+      />
 
       {/* Edit Dialog - separate from card */}
       {canEdit && (

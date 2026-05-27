@@ -1,7 +1,12 @@
 import React from 'react';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext, useLocalize } from '~/hooks';
-import { getCycleInfo } from '~/utils/credits';
+import {
+  formatDisplayCredits,
+  formatTokenEstimate,
+  formatUSD,
+  getCycleInfo,
+} from '~/utils/credits';
 import { cn } from '~/utils';
 
 const RADIUS = 36;
@@ -41,6 +46,24 @@ function Balance() {
       <div className="flex flex-col gap-2 p-4 text-sm text-text-primary">
         <p className="text-text-secondary">{localize('com_ui_ux_balance_sem_ciclo')}</p>
         <p className="text-text-tertiary">{localize('com_ui_ux_balance_autorecarga_inativa')}</p>
+        <div className="mt-2 flex flex-col gap-1 border-t border-border-light pt-3">
+          <div className="flex items-center justify-between text-text-secondary">
+            <span>{localize('com_ui_ux_balance_saldo_disponivel')}</span>
+            <span className="font-medium text-text-primary">
+              {formatDisplayCredits(tokenCredits)}{' '}
+              {localize('com_ui_ux_balance_creditos')}{' '}
+              <span className="text-xs text-text-tertiary">({formatUSD(tokenCredits)})</span>
+            </span>
+          </div>
+          <span className="text-text-tertiary">
+            {localize('com_ui_ux_balance_tokens_estimativa', {
+              tokens: formatTokenEstimate(tokenCredits),
+            })}
+          </span>
+          <span className="text-xs text-text-tertiary">
+            {localize('com_ui_ux_balance_tokens_nota')}
+          </span>
+        </div>
       </div>
     );
   }
@@ -102,6 +125,24 @@ function Balance() {
       <p className="self-start text-text-tertiary">
         {localize('com_ui_ux_balance_autorecarga_ativa')}
       </p>
+      <div className="mt-2 flex w-full flex-col gap-1 border-t border-border-light pt-3">
+        <div className="flex items-center justify-between text-text-secondary">
+          <span>{localize('com_ui_ux_balance_saldo_disponivel')}</span>
+          <span className="font-medium text-text-primary">
+            {formatDisplayCredits(tokenCredits)}{' '}
+            {localize('com_ui_ux_balance_creditos')}{' '}
+            <span className="text-xs text-text-tertiary">({formatUSD(tokenCredits)})</span>
+          </span>
+        </div>
+        <span className="text-text-tertiary">
+          {localize('com_ui_ux_balance_tokens_estimativa', {
+            tokens: formatTokenEstimate(tokenCredits),
+          })}
+        </span>
+        <span className="text-xs text-text-tertiary">
+          {localize('com_ui_ux_balance_tokens_nota')}
+        </span>
+      </div>
     </div>
   );
 }
