@@ -19,7 +19,7 @@ import {
   useDuplicateAgentMutation,
 } from '~/data-provider';
 import { useAgentsAccessRedirect, useSelectAgent } from '~/hooks/Agents';
-import { useAgentDefaultPermissionLevel, useLocalize } from '~/hooks';
+import { useAgentDefaultPermissionLevel, useLocalize, useShowMarketplace } from '~/hooks';
 import { renderAgentAvatar } from '~/utils/agents';
 import { cn } from '~/utils';
 
@@ -27,6 +27,7 @@ export default function AgentesHome() {
   const localize = useLocalize();
   const navigate = useNavigate();
   const hasAccess = useAgentsAccessRedirect();
+  const showMarketplace = useShowMarketplace();
   const permissionLevel = useAgentDefaultPermissionLevel();
   const { data: agents } = useListAgentsQuery(
     { requiredPermission: permissionLevel },
@@ -44,6 +45,7 @@ export default function AgentesHome() {
     >
       <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
         <Header
+          showMarketplace={showMarketplace}
           onCreate={() => navigate('/d/agentes/novo')}
           onMarketplace={() => navigate('/agents')}
         />
@@ -53,7 +55,15 @@ export default function AgentesHome() {
   );
 }
 
-function Header({ onCreate, onMarketplace }: { onCreate: () => void; onMarketplace: () => void }) {
+function Header({
+  showMarketplace,
+  onCreate,
+  onMarketplace,
+}: {
+  showMarketplace: boolean;
+  onCreate: () => void;
+  onMarketplace: () => void;
+}) {
   const localize = useLocalize();
   return (
     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -66,10 +76,12 @@ function Header({ onCreate, onMarketplace }: { onCreate: () => void; onMarketpla
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="outline" onClick={onMarketplace}>
-          <Compass className="size-4" />
-          {localize('com_ui_ux_agentes_home_explore')}
-        </Button>
+        {showMarketplace && (
+          <Button variant="outline" onClick={onMarketplace}>
+            <Compass className="size-4" />
+            {localize('com_ui_ux_agentes_home_explore')}
+          </Button>
+        )}
         <Button onClick={onCreate}>
           <Plus className="size-4" />
           {localize('com_ui_ux_agentes_home_create')}
