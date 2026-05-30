@@ -9,6 +9,9 @@ const router = express.Router();
 // IAzzas: acesso exclusivo via SSO Azzas ID — login por email/senha está
 // hardcoded como `false` por decisão de segurança. Veja `docs/local-dev.md`
 // para o procedimento de testar local sem SSO.
+// IAzzas: acesso exclusivo via SSO Azzas ID — login por email/senha está
+// hardcoded como `false` por decisão de segurança. Veja `docs/local-dev.md`
+// para o procedimento de testar local sem SSO.
 const emailLoginEnabled = false;
 const passwordResetEnabled = isEnabled(process.env.ALLOW_PASSWORD_RESET);
 
