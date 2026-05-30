@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Sidebar collapse/expand (LEM-80) — animate max-width (not width) with ease-out-expo
+   to avoid layout thrashing; mobile drawer slides via transform, overlay fades via opacity.
+   Honor reduced-motion with an instant swap. */
+.sidebar-collapse-anim {
+  transition: max-width 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-drawer-anim {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-overlay-anim {
+  transition: opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-collapse-anim,
+  .sidebar-drawer-anim,
+  .sidebar-overlay-anim {
+    transition: none;
+  }
+}
+
 /* Custom Variables */
 :root {
   --white: #fff;
