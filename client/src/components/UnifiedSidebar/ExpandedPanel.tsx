@@ -99,30 +99,40 @@ function ExpandedPanel({
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
 
-  const toggleButton = (
+  const navyToggle = (
     <Button
       id={expanded ? CLOSE_SIDEBAR_ID : undefined}
       data-testid={expanded ? 'close-sidebar-button' : 'open-sidebar-button'}
       variant="ghost"
       aria-label={localize(toggleLabel)}
       aria-expanded={expanded}
-      className={cn(ROW_BASE, expanded ? ROW_EXPANDED : ROW_COLLAPSED)}
+      className="flex h-8 w-8 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white"
       onClick={onToggle}
     >
-      <span className={cn(ICON_SLOT, expanded && ICON_HIGHLIGHT_EXPANDED)}>
-        <Sidebar aria-hidden="true" className="h-5 w-5 text-text-primary" />
-      </span>
+      <Sidebar aria-hidden="true" className="h-5 w-5" />
     </Button>
   );
 
   return (
-    <div className="flex h-full w-full flex-shrink-0 flex-col gap-2 border-r border-border-light bg-surface-primary-alt px-2 py-2">
-      {expanded ? (
-        toggleButton
-      ) : (
-        <TooltipAnchor side="right" description={localize(toggleLabel)} render={toggleButton} />
-      )}
-      <div className="flex flex-col gap-1 overflow-y-auto">
+    <div className="flex h-full w-full flex-shrink-0 flex-col border-r border-border-light">
+      {/* Navy brand band */}
+      <div className="flex h-[52px] flex-shrink-0 items-center border-b border-azzas-steel/40 bg-azzas-navy px-3">
+        {expanded ? (
+          <>
+            <img
+              src="assets/azzas-logo-dark.svg"
+              alt="Azzas 2154"
+              className="h-[18px] w-auto"
+            />
+            <div className="ml-auto">{navyToggle}</div>
+          </>
+        ) : (
+          <TooltipAnchor side="right" description={localize(toggleLabel)} render={navyToggle} />
+        )}
+      </div>
+
+      {/* Nav body */}
+      <div className="flex flex-1 flex-col gap-1 overflow-y-auto bg-surface-primary-alt px-2 py-2">
         {links.map((link) => {
           if (link.adminOnly && !isAdmin) {
             return null;
@@ -148,7 +158,8 @@ function ExpandedPanel({
         })}
       </div>
 
-      <div className="mt-auto flex flex-col gap-1">
+      {/* Footer */}
+      <div className="flex flex-col gap-1 border-t border-border-light bg-surface-primary-alt px-2 py-2">
         <Suspense fallback={null}>
           <BalanceWidget collapsed={!expanded} />
         </Suspense>

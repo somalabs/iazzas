@@ -86,6 +86,8 @@ module.exports = {
           800: '#06373e',
           900: '#031f29',
         },
+        'azzas-navy': 'var(--azzas-navy)',
+        'azzas-steel': 'var(--azzas-steel)',
         'brand-purple': 'var(--brand-purple)',
         presentation: 'var(--presentation)',
         'text-primary': 'var(--text-primary)',
