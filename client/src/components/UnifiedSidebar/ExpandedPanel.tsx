@@ -12,10 +12,13 @@ const BalanceWidget = lazy(() => import('~/components/Nav/BalanceWidget'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
 const ROW_BASE = 'group flex w-full items-center rounded-lg text-left transition-colors';
-const ROW_EXPANDED = 'h-auto justify-start gap-3 px-2 py-2 hover:!bg-transparent';
+const ROW_EXPANDED = 'h-auto justify-start gap-3 px-2 py-2';
 const ROW_COLLAPSED = 'h-9 w-9 justify-center p-0 hover:bg-surface-hover';
 const ICON_SLOT = 'flex h-6 w-6 flex-shrink-0 items-center justify-center';
 const ICON_HIGHLIGHT_EXPANDED = 'rounded-md transition-colors group-hover:bg-surface-hover h-8 w-8';
+// Terracota left marker (3px) + creme plate for the active nav item
+const ACTIVE_MARKER =
+  "relative bg-canvas text-action before:absolute before:content-[''] before:left-0 before:top-[15%] before:bottom-[15%] before:w-[3px] before:rounded-r-full before:bg-ember";
 
 const NavRouteButton = memo(function NavRouteButton({
   link,
@@ -49,30 +52,16 @@ const NavRouteButton = memo(function NavRouteButton({
       className={cn(
         ROW_BASE,
         expanded ? ROW_EXPANDED : ROW_COLLAPSED,
-        isNavActive && !expanded
-          ? 'bg-surface-active-alt text-text-primary'
-          : 'text-text-secondary',
+        !isNavActive && expanded && 'hover:!bg-transparent',
+        isNavActive ? ACTIVE_MARKER : 'text-text-secondary',
       )}
       onClick={handleClick}
     >
-      <span
-        className={cn(
-          ICON_SLOT,
-          expanded && ICON_HIGHLIGHT_EXPANDED,
-          expanded && isNavActive && 'bg-surface-active-alt text-text-primary',
-        )}
-      >
+      <span className={cn(ICON_SLOT, expanded && ICON_HIGHLIGHT_EXPANDED)}>
         {link.icon && <link.icon className="h-5 w-5" aria-hidden="true" />}
       </span>
       {expanded && (
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-sm font-medium text-text-primary">{label}</span>
-          {link.description && (
-            <span className="truncate text-xs text-text-secondary">
-              {localize(link.description)}
-            </span>
-          )}
-        </span>
+        <span className="min-w-0 truncate text-sm font-medium text-text-primary">{label}</span>
       )}
     </Button>
   );
@@ -119,11 +108,16 @@ function ExpandedPanel({
       <div className="flex h-[52px] flex-shrink-0 items-center border-b border-azzas-steel/40 bg-azzas-navy px-3">
         {expanded ? (
           <>
-            <img
-              src="assets/azzas-logo-dark.svg"
-              alt="Azzas 2154"
-              className="h-[18px] w-auto"
-            />
+            <div className="flex flex-col gap-0.5">
+              <img
+                src="assets/azzas-logo-dark.svg"
+                alt="Azzas 2154"
+                className="h-[18px] w-auto"
+              />
+              <span className="font-editorial text-[10px] italic leading-none text-white/50">
+                Fashion &amp; Lifestyle
+              </span>
+            </div>
             <div className="ml-auto">{navyToggle}</div>
           </>
         ) : (
@@ -132,7 +126,7 @@ function ExpandedPanel({
       </div>
 
       {/* Nav body */}
-      <div className="flex flex-1 flex-col gap-1 overflow-y-auto bg-surface-primary-alt px-2 py-2">
+      <div className="flex flex-1 flex-col gap-1 overflow-y-auto bg-paper px-2 py-2">
         {links.map((link) => {
           if (link.adminOnly && !isAdmin) {
             return null;
@@ -159,7 +153,7 @@ function ExpandedPanel({
       </div>
 
       {/* Footer */}
-      <div className="flex flex-col gap-1 border-t border-border-light bg-surface-primary-alt px-2 py-2">
+      <div className="flex flex-col gap-1 border-t border-border-light bg-paper px-2 py-2">
         <Suspense fallback={null}>
           <BalanceWidget collapsed={!expanded} />
         </Suspense>
