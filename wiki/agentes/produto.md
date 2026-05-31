@@ -1,6 +1,6 @@
 # Agente de Produto — Memória de Longo Prazo
 
-> Atualizado em: 2026-05-30
+> Atualizado em: 2026-05-31
 > Escopo: fork LibreChat para Azzas 2154 (varejo de moda, multimarca: Farm, Animale, Cris Barros, etc.)
 > Produto central desta fase: **Studio** (imagens de moda) + **Flows/Studio de Agentes** (orquestração visual) + **Automações** (agendamento) + **Revisão UX/UI** (LEM-52) + **Copy com voz Azzas** (LEM-79)
 
@@ -220,21 +220,26 @@ Documento autoritativo: `config/ux-revisao/DECISAO.md`
 | **Pessoal** | 3ª pessoa para o sistema ("a Azzas"), 1ª para o usuário |
 | **PT-BR** | Contrações naturais, vocabulário coloquial-profissional |
 
-### Estado da localização (auditoria LEM-79, 2026-05-30)
+### Estado da localização (LEM-102, 2026-05-31)
 
-**Arquitetura**: LibreChat usa `useLocalize()` para 100% do texto visível ao usuário. Não há
-strings hardcoded no UI — tudo passa por `client/src/locales/pt-BR/translation.json`.
+**Arquitetura**: LibreChat usa `useLocalize()` para 100% do texto visível ao usuário.
+Tudo passa por `client/src/locales/pt-BR/translation.json`.
+
+**Entregues no LEM-102**:
+- `client/src/locales/pt-BR/translation.json` — 843 chaves faltantes adicionadas (total: 1903 chaves, cobertura 100% do EN)
+- `client/src/locales/i18n.ts` — pt-BR forçado como default (`lng: 'pt-BR'`, fallback default→pt-BR)
+- Nav verbos-de-intenção: Conversar · Estúdio · Agentes · Fluxos · Automações
+- Dead strings eliminadas: `com_ui_weekend_morning`="Bom fim de semana", `com_auth_welcome_back`="Bem-vindo de volta"
+- `com_endpoint_agent_placeholder`="Selecione um agente" (não "Please select an Agent")
 
 **Componentes-chave**:
 - `client/src/components/Chat/Landing.tsx` — empty state; usa saudações por horário
-- `client/src/components/Chat/Input/ChatForm.tsx:319` — textarea com aria-label mas sem placeholder visível
-- `client/src/utils/getLoginError.ts` — mapeia status HTTP → chave i18n (nunca expõe número HTTP diretamente)
+- `client/src/components/Chat/Input/ChatForm.tsx:319` — textarea com aria-label (placeholder separado — pendente P1-A)
+- `client/src/utils/getLoginError.ts` — mapeia status HTTP → chave i18n
 
-**Lacunas identificadas**:
-- `com_ui_late_night` ausente em PT-BR (saudação 0h–5h59)
-- `com_ui_message_input` ausente em PT-BR (aria-label do textarea)
-- Chave nova necessária: `com_ui_chat_placeholder` (placeholder visível — "Pergunte algo para a Azzas...")
-- `ChatForm.tsx` usa apenas `aria-label`, sem atributo `placeholder` visível no textarea
+**Pendente (fora de escopo LEM-102)**:
+- Chave `com_ui_chat_placeholder` = "Pergunte algo para a Azzas..." + atributo `placeholder` no textarea (é P1-A)
+- Nomes de endpoint/modelo em i18n (data-provider): modelo strings hardcoded no backend (P0-C parcial — fora do escopo de strings)
 
 ### Decisões ratificadas — Copy (LEM-79, 2026-05-30)
 

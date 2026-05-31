@@ -95,11 +95,12 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
+    lng: 'pt-BR',
     fallbackLng: {
       'zh-TW': ['zh-Hant', 'en'],
       'zh-HK': ['zh-Hant', 'en'],
       zh: ['zh-Hans', 'en'],
-      default: ['en'],
+      default: ['pt-BR'],
     },
     fallbackNS: 'translation',
     ns: ['translation'],
