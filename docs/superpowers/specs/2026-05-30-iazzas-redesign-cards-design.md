@@ -185,3 +185,32 @@ Convenção de título: `[redesign] <P#-X> · <verbo>`. Cada filha aponta o épi
 Crio o épico + 14 filhas. **Em `Todo` (dispara já):** P0-B (`agent:tech`), P0-C (`agent:produto`).
 Shape (P0-A/D, P1-A) em Backlog sem label. Demais em Backlog com label (dormentes). Eu monitoro os
 2 runs no Railway (modo babá) e verifico a Onda 0 via Playwright antes de promover a próxima onda.
+
+## 6. P0-A — decomposição pós-shape (2026-05-31)
+
+Shape interativo concluído. **Reframe (de mapeamento real do código):** o iazzas NÃO tem shell
+uniforme de 3 colunas. `Root.tsx` já é rail (`UnifiedSidebar` 56/256px) + `Outlet` (palco full-bleed)
+— metade do modelo novo já existe. A coluna-do-meio é inconsistente: Chat tem `ConversationsColumn`
+permanente (288px, o pior caso); Studio tem `Creations` já toggleável (340px); Automações é
+master-detail genuíno; Agentes/Fluxos já são grid full-width limpo. E o `RunsDrawer` (Automações +
+AgentStudio, 320px, slide-in) já é o primitivo da gaveta — dá pra **extrair e reusar**, não criar do zero.
+
+**Modelo de branch (restrição do dispatcher):** `feature_id` = pai imediato; sub-issues commitam em
+`agentes/<pai>`. Logo os sub-cards do P0-A são **filhos diretos do épico LEM-88** (não aninhados),
+pra cair em `agentes/LEM-88` e construir em cima de P0-B/P0-C.
+
+**AtelierDrawer (a gaveta):** borda direita 320px, `border-l --rule`, fundo `--paper`, slide-in 180ms,
+header (título+fechar), corpo scrollável. **Fechada por padrão.** Trigger consistente (botão-ícone no
+topo-direito do palco das 5 telas). Estado `atelierOpen` por-superfície (não no root).
+
+**Sub-cards (todos `agent:tech`, filhos diretos de LEM-88):**
+- **P0-A.0 (LEM-89)** · Extrair `AtelierDrawer` do RunsDrawer + estado por-superfície + trigger nas 5
+  telas + refatorar os 2 RunsDrawer pra usá-lo. *Fundação — bloqueia os demais. DISPARADO.*
+- **P0-A.1 (LEM-103)** · Chat: matar `ConversationsColumn` permanente → histórico vai pro Atelier.
+- **P0-A.2 (LEM-104)** · Studio: painel `Creations` → Atelier.
+- **P0-A.3 (LEM-105)** · Automações: `RunsDrawer` → Atelier; **manter** `AutomationList`; matar
+  empty-state duplicado.
+- Agentes/Fluxos: já limpos → só o trigger (no .0).
+
+Empty-states editoriais (Playfair headline + CTA) coordenam com **P0-D**. Sequência: .0 → verificar →
+.1/.2/.3 em paralelo → render live pós-P0-A → P0-D/P1.
