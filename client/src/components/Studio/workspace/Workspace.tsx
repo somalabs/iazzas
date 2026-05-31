@@ -26,7 +26,7 @@ export default function Workspace() {
         {/* UC description */}
         {activeSchema && (
           <div className="space-y-0.5">
-            <h2 className="font-editorial text-lg font-semibold text-text-primary">
+            <h2 className="text-lg font-semibold text-text-primary">
               {activeSchema.displayName}
             </h2>
             <p className="text-xs text-text-secondary">{activeSchema.description}</p>

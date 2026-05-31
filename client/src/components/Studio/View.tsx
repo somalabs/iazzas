@@ -20,7 +20,7 @@ export default function StudioView() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Topbar */}
         <div className="flex h-10 flex-shrink-0 items-center gap-2 border-b border-border-medium px-3">
-          <h1 className="font-editorial text-sm font-semibold text-text-primary">
+          <h1 className="text-sm font-semibold text-text-primary">
             {localize('com_studio_title')}
           </h1>
           <AtelierTrigger

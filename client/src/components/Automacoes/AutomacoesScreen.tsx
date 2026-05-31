@@ -37,7 +37,7 @@ function AutomationsEmptyState({ canCreate, onCreate }: AutomationsEmptyStatePro
   const localize = useLocalize();
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
-      <h2 className="font-editorial text-3xl font-medium tracking-tight text-text-primary">
+      <h2 className="font-editorial text-3xl font-medium tracking-[-0.5px] text-text-primary">
         {localize('com_automacoes_empty_state')}
       </h2>
       {canCreate && (

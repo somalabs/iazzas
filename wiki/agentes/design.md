@@ -28,6 +28,31 @@
 - Estado mobile: o workspace é primário; histórico/lista colapsa e abre por drawer
 - Rota `/d/studio`: standalone, bookmarkável, layout próprio (não usa o chat)
 
+### Regras Playfair (P0-D · LEM-88 ratificado)
+
+**Quando usar `font-editorial` (Playfair Display):**
+- Saudação/greeting hero (Landing.tsx) — `text-3xl sm:text-4xl font-medium tracking-[-0.5px]`
+- H1 de destinos principais (AgentesHome, FlowsHome, AutomacoesScreen) — `text-2xl font-medium tracking-[-0.5px]`
+- Heading de auth (AuthLayout) — `text-3xl font-medium tracking-[-0.5px]`
+- Nome de agente/assistente no landing (caso entity) — `getNameSizeClass font-medium tracking-[-0.5px]`
+- Tagline da sidebar "Fashion & Lifestyle" — exceção: `text-[10px] italic` (brand tagline P1-B)
+
+**Quando NÃO usar `font-editorial`:**
+- Topbar labels (`com_studio_title` em Studio/View.tsx) — operacional → Red Hat
+- Section headers de form (UC name em Workspace.tsx) — operacional → Red Hat
+- Qualquer texto < 24px (exceto a tagline que é exceção de marca)
+- Botões, labels, chips, badges
+
+**Regras de tamanho:**
+- Mínimo: `text-2xl` (24px) — nunca Playfair abaixo disso (exceto tagline)
+- Greeting hero: `text-3xl sm:text-4xl` (30→36px)
+- Auth/page H1: `text-3xl` ou `text-2xl`
+- Agent names: `getNameSizeClass` — min `text-2xl`, max `text-4xl`
+
+**Tracking:** sempre `tracking-[-0.5px]` (não `tracking-tight` que é -0.75px a 30px)
+
+**Greeting format:** `"Bom dia, Artur."` — só primeiro nome (`user.name.split(' ')[0]`), vírgula, ponto final. Sem ícone de robô no estado genérico.
+
 ### Referências de mercado para geração de imagem (moda)
 
 - **Freepik**: hero prompt + style presets visuais + galeria inline na mesma tela + painel de parâmetros colapsável

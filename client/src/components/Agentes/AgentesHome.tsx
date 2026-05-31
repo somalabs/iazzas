@@ -74,7 +74,7 @@ function Header({
   return (
     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-2xl font-semibold text-text-primary">
+        <h1 className="font-editorial text-2xl font-medium tracking-[-0.5px] text-text-primary">
           {localize('com_ui_ux_agentes_home_title')}
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
