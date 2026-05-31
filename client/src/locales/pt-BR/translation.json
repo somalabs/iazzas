@@ -696,6 +696,8 @@
   "com_ui_clear_all": "Limpar tudo",
   "com_ui_client_id": "ID do cliente",
   "com_ui_client_secret": "Segredo do cliente",
+  "com_ui_atelier": "Atelier",
+  "com_ui_atelier_empty": "Nada para mostrar aqui ainda.",
   "com_ui_close": "Fechar",
   "com_ui_close_menu": "Fechar Menu",
   "com_ui_close_window": "Fechar Janela",

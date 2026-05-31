@@ -1,6 +1,7 @@
-import { X, CheckCircle, XCircle, Loader, SkipForward, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, Loader, SkipForward, ExternalLink } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
+import AtelierDrawer from '~/components/ui/AtelierDrawer';
 import type { AutomationRun } from './context';
 import type { TranslationKeys } from '~/hooks';
 
@@ -46,37 +47,17 @@ export default function RunsDrawer({ automationName, runs, onClose }: RunsDrawer
   const localize = useLocalize();
 
   return (
-    <aside
-      aria-label={localize('com_automacoes_runs_title')}
-      className="flex h-full w-[320px] flex-shrink-0 animate-slide-in-right flex-col border-l border-border-light bg-surface-secondary"
+    <AtelierDrawer
+      open
+      title={localize('com_automacoes_runs_title')}
+      subtitle={automationName}
+      onClose={onClose}
     >
-      <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold text-text-primary">
-            {localize('com_automacoes_runs_title')}
-          </p>
-          {automationName && (
-            <p className="max-w-[200px] truncate text-[11px] text-text-tertiary">
-              {automationName}
-            </p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Fechar histórico"
-          className="rounded p-1 text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-        >
-          <X className="h-3.5 w-3.5" aria-hidden="true" />
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-3">
-        {runs.length === 0 ? (
-          <p className="text-xs text-text-tertiary">{localize('com_automacoes_runs_empty')}</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {runs.map((run) => {
+      {runs.length === 0 ? (
+        <p className="text-xs text-text-tertiary">{localize('com_automacoes_runs_empty')}</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {runs.map((run) => {
               const cfg = STATUS_CONFIG[run.status];
               const Icon = cfg.Icon;
               const duration = run.completedAt
@@ -144,7 +125,6 @@ export default function RunsDrawer({ automationName, runs, onClose }: RunsDrawer
             })}
           </div>
         )}
-      </div>
-    </aside>
+    </AtelierDrawer>
   );
 }

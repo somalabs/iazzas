@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bot, Plus, Compass, MoreHorizontal, Pencil, Copy, Trash2 } from 'lucide-react';
+import AtelierDrawer from '~/components/ui/AtelierDrawer';
+import AtelierTrigger from '~/components/ui/AtelierTrigger';
 import {
   Button,
   Spinner,
@@ -32,28 +34,51 @@ export default function AgentesHome() {
     { requiredPermission: permissionLevel },
     { select: (res) => res.data },
   );
+  const [atelierOpen, setAtelierOpen] = useState(false);
 
   if (!hasAccess) {
     return null;
   }
 
   return (
-    <main
-      className="h-full w-full overflow-y-auto bg-surface-primary"
-      aria-label={localize('com_ui_ux_nav_agentes')}
-    >
-      <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
-        <Header
-          onCreate={() => navigate('/d/agentes/novo')}
-          onMarketplace={() => navigate('/agents')}
-        />
-        <AgentsGrid agents={agents ?? null} />
-      </div>
-    </main>
+    <div className="flex h-full w-full overflow-hidden">
+      <main
+        className="min-w-0 flex-1 overflow-y-auto bg-surface-primary"
+        aria-label={localize('com_ui_ux_nav_agentes')}
+      >
+        <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
+          <Header
+            onCreate={() => navigate('/d/agentes/novo')}
+            onMarketplace={() => navigate('/agents')}
+            atelierOpen={atelierOpen}
+            onToggleAtelier={() => setAtelierOpen((prev) => !prev)}
+          />
+          <AgentsGrid agents={agents ?? null} />
+        </div>
+      </main>
+
+      <AtelierDrawer
+        open={atelierOpen}
+        title={localize('com_ui_atelier')}
+        onClose={() => setAtelierOpen(false)}
+      >
+        <p className="text-xs text-text-tertiary">{localize('com_ui_atelier_empty')}</p>
+      </AtelierDrawer>
+    </div>
   );
 }
 
-function Header({ onCreate, onMarketplace }: { onCreate: () => void; onMarketplace: () => void }) {
+function Header({
+  onCreate,
+  onMarketplace,
+  atelierOpen,
+  onToggleAtelier,
+}: {
+  onCreate: () => void;
+  onMarketplace: () => void;
+  atelierOpen: boolean;
+  onToggleAtelier: () => void;
+}) {
   const localize = useLocalize();
   return (
     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -74,6 +99,7 @@ function Header({ onCreate, onMarketplace }: { onCreate: () => void; onMarketpla
           <Plus className="size-4" />
           {localize('com_ui_ux_agentes_home_create')}
         </Button>
+        <AtelierTrigger open={atelierOpen} onToggle={onToggleAtelier} />
       </div>
     </header>
   );

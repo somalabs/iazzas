@@ -3,6 +3,8 @@ import { useMediaQuery } from '@librechat/client';
 import { PanelLeftOpen } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
+import AtelierDrawer from '~/components/ui/AtelierDrawer';
+import AtelierTrigger from '~/components/ui/AtelierTrigger';
 import { useStudio } from './context';
 import Creations from './creations/Creations';
 import Workspace from './workspace/Workspace';
@@ -18,6 +20,7 @@ export default function StudioView() {
   // avoiding the useState(!isMobile) pitfall where isMobile=false on first render
   // causes the panel to always open on mobile before the query resolves.
   const [panelOpen, setPanelOpen] = useState(false);
+  const [atelierOpen, setAtelierOpen] = useState(false);
   const panelInitialized = useRef(false);
   const openBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -93,11 +96,24 @@ export default function StudioView() {
           <h1 className="font-editorial text-sm font-semibold text-text-primary">
             {localize('com_studio_title')}
           </h1>
+          <AtelierTrigger
+            open={atelierOpen}
+            onToggle={() => setAtelierOpen((prev) => !prev)}
+            className="ml-auto"
+          />
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-hidden">{isDetail ? <ImageDetail /> : <Workspace />}</div>
       </div>
+
+      <AtelierDrawer
+        open={atelierOpen}
+        title={localize('com_ui_atelier')}
+        onClose={() => setAtelierOpen(false)}
+      >
+        <p className="text-xs text-text-tertiary">{localize('com_ui_atelier_empty')}</p>
+      </AtelierDrawer>
     </div>
   );
 }

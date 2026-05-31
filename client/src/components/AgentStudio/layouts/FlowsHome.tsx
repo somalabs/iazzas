@@ -15,6 +15,8 @@ import {
 import type { Flow } from 'librechat-data-provider';
 import { useFlowsQuery, useDeleteFlowMutation } from '~/data-provider';
 import { useAgentsAccessRedirect } from '~/hooks/Agents';
+import AtelierDrawer from '~/components/ui/AtelierDrawer';
+import AtelierTrigger from '~/components/ui/AtelierTrigger';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -24,25 +26,48 @@ export default function FlowsHome() {
   const hasAccess = useAgentsAccessRedirect();
   const { data: flowsData, isLoading } = useFlowsQuery();
   const flows = flowsData?.flows ?? null;
+  const [atelierOpen, setAtelierOpen] = useState(false);
 
   if (!hasAccess) {
     return null;
   }
 
   return (
-    <main
-      className="h-full w-full overflow-y-auto bg-surface-primary"
-      aria-label={localize('com_ui_ux_nav_flows')}
-    >
-      <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
-        <Header onCreate={() => navigate('/d/flows/novo')} />
-        <FlowsGrid flows={isLoading ? null : flows} />
-      </div>
-    </main>
+    <div className="flex h-full w-full overflow-hidden">
+      <main
+        className="min-w-0 flex-1 overflow-y-auto bg-surface-primary"
+        aria-label={localize('com_ui_ux_nav_flows')}
+      >
+        <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
+          <Header
+            onCreate={() => navigate('/d/flows/novo')}
+            atelierOpen={atelierOpen}
+            onToggleAtelier={() => setAtelierOpen((prev) => !prev)}
+          />
+          <FlowsGrid flows={isLoading ? null : flows} />
+        </div>
+      </main>
+
+      <AtelierDrawer
+        open={atelierOpen}
+        title={localize('com_ui_atelier')}
+        onClose={() => setAtelierOpen(false)}
+      >
+        <p className="text-xs text-text-tertiary">{localize('com_ui_atelier_empty')}</p>
+      </AtelierDrawer>
+    </div>
   );
 }
 
-function Header({ onCreate }: { onCreate: () => void }) {
+function Header({
+  onCreate,
+  atelierOpen,
+  onToggleAtelier,
+}: {
+  onCreate: () => void;
+  atelierOpen: boolean;
+  onToggleAtelier: () => void;
+}) {
   const localize = useLocalize();
   return (
     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -59,6 +84,7 @@ function Header({ onCreate }: { onCreate: () => void }) {
           <Plus className="size-4" />
           {localize('com_ui_ux_flows_home_create')}
         </Button>
+        <AtelierTrigger open={atelierOpen} onToggle={onToggleAtelier} />
       </div>
     </header>
   );

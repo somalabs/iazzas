@@ -1,13 +1,16 @@
 import { memo, useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
 import { useMediaQuery } from '@librechat/client';
 import { getConfigDefaults, PermissionTypes, Permissions } from 'librechat-data-provider';
 import ModelSelector from './Menus/Endpoints/ModelSelector';
 import { useGetStartupConfig } from '~/data-provider';
 import ExportAndShareMenu from './ExportAndShareMenu';
 import { OpenSidebar, PresetsMenu } from './Menus';
+import AtelierTrigger from '~/components/ui/AtelierTrigger';
 import BookmarkMenu from './Menus/BookmarkMenu';
 import { TemporaryChat } from './TemporaryChat';
+import { atelierChatOpenAtom } from '~/store/atelier';
 import AddMultiConvo from './AddMultiConvo';
 import { useHasAccess } from '~/hooks';
 import { cn } from '~/utils';
@@ -40,6 +43,7 @@ function Header() {
   });
 
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
+  const [atelierOpen, setAtelierOpen] = useAtom(atelierChatOpenAtom);
 
   return (
     <div className="absolute top-0 z-10 flex h-[52px] w-full items-center justify-between border-b border-border-light bg-surface-primary/90 p-2 font-semibold text-text-primary backdrop-blur-sm">
@@ -78,8 +82,11 @@ function Header() {
           </div>
         )}
       </div>
-      {/* Empty div for spacing */}
-      <div />
+      <AtelierTrigger
+        open={atelierOpen}
+        onToggle={() => setAtelierOpen((prev) => !prev)}
+        className="mr-1"
+      />
     </div>
   );
 }

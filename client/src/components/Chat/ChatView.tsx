@@ -1,5 +1,6 @@
 import { memo, useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
 import { useForm } from 'react-hook-form';
 import { Spinner } from '@librechat/client';
 import { useParams } from 'react-router-dom';
@@ -7,10 +8,12 @@ import { Constants, buildTree } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
 import type { ChatFormValues } from '~/common';
 import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } from '~/Providers';
-import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers } from '~/hooks';
+import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers, useLocalize } from '~/hooks';
 import ConversationStarters from './Input/ConversationStarters';
 import { useGetMessagesByConvoId } from '~/data-provider';
+import AtelierDrawer from '~/components/ui/AtelierDrawer';
 import MessagesView from './Messages/MessagesView';
+import { atelierChatOpenAtom } from '~/store/atelier';
 import Presentation from './Presentation';
 import ChatForm from './Input/ChatForm';
 import Landing from './Landing';
@@ -30,9 +33,11 @@ function LoadingSpinner() {
 }
 
 function ChatView({ index = 0 }: { index?: number }) {
+  const localize = useLocalize();
   const { conversationId } = useParams();
   const rootSubmission = useRecoilValue(store.submissionByIndex(index));
   const centerFormOnLanding = useRecoilValue(store.centerFormOnLanding);
+  const [atelierOpen, setAtelierOpen] = useAtom(atelierChatOpenAtom);
 
   const methods = useForm<ChatFormValues>({
     defaultValues: { text: '' },
@@ -81,8 +86,9 @@ function ChatView({ index = 0 }: { index?: number }) {
       <ChatContext.Provider value={chatHelpers}>
         <AddedChatContext.Provider value={addedChatHelpers}>
           <Presentation>
-            <div className="relative flex h-full w-full flex-col">
-              <Header />
+            <div className="flex h-full w-full overflow-hidden">
+              <div className="relative flex h-full w-full min-w-0 flex-col">
+                <Header />
               <>
                 <div
                   className={cn(
@@ -105,6 +111,14 @@ function ChatView({ index = 0 }: { index?: number }) {
                 </div>
                 {isLandingPage && <Footer />}
               </>
+              </div>
+              <AtelierDrawer
+                open={atelierOpen}
+                title={localize('com_ui_atelier')}
+                onClose={() => setAtelierOpen(false)}
+              >
+                <p className="text-xs text-text-tertiary">{localize('com_ui_atelier_empty')}</p>
+              </AtelierDrawer>
             </div>
           </Presentation>
         </AddedChatContext.Provider>
