@@ -136,7 +136,7 @@ AgentStudio/
 | Nó | Ícone | Accent | Handles saída |
 |----|-------|--------|---------------|
 | Trigger | `Zap` | violet | 1: default (bottom) |
-| Agente | `Bot` | blue | 1: default (bottom) |
+| Agente | `ManequimIcon` (fashion) | blue | 1: default (bottom) |
 | Condição | `GitBranch` | amber | 2: true (75%) / false (25%) bottom |
 | HTTP | `Globe` | sky | 1: default (bottom) |
 | Aprovação | `UserCheck` | orange | 2: approved (75%) / rejected (25%) bottom |
@@ -145,6 +145,7 @@ AgentStudio/
 - Handles coloridos: true/approved = `border-emerald-400`, false/rejected = `border-red-400`, default = cor do tipo
 - `BaseNode` (shared.tsx): 200-260px, header com accent stripe, botão delete visível no hover
 - **Estado de erro**: nó com `nodeId` em `validationErrors` (severity=error) → `border-red-500/60` + `ring-red-500/50` + badge `AlertTriangle` no header
+- **GitBranch (ConditionNode) mantido intencionalmente** — é conceito semântico de fluxo (bifurcação lógica), não vocabulário de identidade de destino. Sem substituto fashion definido.
 
 ### Tipos — data-provider
 
@@ -205,40 +206,6 @@ Automacoes/
   RunsDrawer.tsx           # histórico de execuções (drawer direito)
 ```
 
-### Layout responsivo (LEM-50)
-
-```
-DESKTOP (≥768px):
-┌──── header 12px ────────────────────────────────────────┐
-│ [←→/c/new] Automações                                  │
-├────────────────────┬───────────────────────┬────────────┤
-│ AutomationList     │ AutomationEditor       │ RunsDrawer │
-│ w-[300px]         │ flex-1                 │ w-[320px]  │
-│ border-r           │ bg-surface-secondary   │ border-l   │
-│                    │                        │ slide-right│
-└────────────────────┴───────────────────────┴────────────┘
-
-MOBILE (<768px) — drill-in:
-Estado 1 — lista:
-┌──── header ─────────────────┐
-│ [←→/c/new] Automações      │
-├─────────────────────────────┤
-│ AutomationList (w-full)     │
-│ Selecionar/criar → Estado 2 │
-└─────────────────────────────┘
-
-Estado 2 — editor/criação (full-screen):
-┌──── header ─────────────────┐
-│ [←→lista] Automações        │
-├─────────────────────────────┤
-│ AutomationEditor (flex-1)   │
-└─────────────────────────────┘
-```
-
-`useMediaQuery('(max-width: 768px)')` de `@librechat/client` (mesmo hook do Studio de imagens).
-
-Header back button: mobile+showEditor → `dispatch({type:'CANCEL'})` + `aria-label` = `com_automacoes_back_to_list`; caso contrário → `navigate('/c/new')`.
-
 ---
 
 ## Arquitetura NavLink (LEM-52)
@@ -247,17 +214,22 @@ Header back button: mobile+showEditor → `dispatch({type:'CANCEL'})` + `aria-la
 - `href?: string` — presente → nav link (navigate + route-based active); ausente → panel link
 - `separator?: true` — render como `<div role="separator">`, ignorado por SidePanelNav
 - `adminOnly?: boolean` — filtrado por `isAdmin` no ExpandedPanel
+- `iconFilled?: LucideIcon | React.FC` — variante preenchida, renderizada quando `isNavActive=true` no `NavRouteButton` (P1-C)
 
 `SidePanelNav` filtra: `links.filter(l => !l.href && !l.separator)` antes de renderizar painéis.
 
-## Ícones dos destinos primários (iazzas sidebar)
+## Ícones dos destinos primários (iazzas sidebar) — P1-C
 
-| Destino | Ícone Lucide | Rota |
-|---|---|---|
-| Studio de Imagens | `Image` | `/d/studio` |
-| Flows (AgentStudio) | `GitFork` | `/d/agent-studio` |
-| Automações | `CalendarClock` | `/d/automacoes` |
-| Admin | `ShieldCheck` | `/d/admin` |
+| Destino | Ícone (inativo) | Ícone (ativo) | Rota |
+|---|---|---|---|
+| Conversar | `MessageSquare` (Lucide) | — | `/c/new` |
+| Studio de Imagens | `CabideIcon` (fashion) | `CabideIconFilled` | `/d/studio` |
+| Agentes | `ManequimIcon` (fashion) | `ManequimIconFilled` | `/d/agentes` |
+| Fluxos | `CarretelIcon` (fashion) | `CarretelIconFilled` | `/d/flows` |
+| Automações | `CalendarClock` (Lucide) | — | `/d/automacoes` |
+| Admin | `ShieldCheck` (Lucide) | — | `/d/admin` |
+
+Fashion icons em `client/src/components/icons/fashion.tsx`.
 
 ## Padrão de cor semântica — BalanceWidget
 
@@ -279,55 +251,116 @@ Ring SVG colapsado: dois círculos sobrepostos — track (opacity-20) + progress
 
 ## P1-B · Active-nav + régua redesenhada — entregue (LEM-92)
 
-### ExpandedPanel.tsx — 5 mudanças
+### ExpandedPanel.tsx — 6 mudanças em 1 arquivo
 
-**1. Marcador terracota + plate creme (estado ativo)**
+**1. Marcador terracota 3px + plate creme (estado ativo)**
 
 Constante `ACTIVE_MARKER` aplicada no `Button` do item ativo:
 ```
 "relative bg-canvas text-action before:absolute before:content-[''] before:left-0 before:top-[15%] before:bottom-[15%] before:w-[3px] before:rounded-r-full before:bg-ember"
 ```
-- `bg-canvas` (#F9F6EA) = plate creme sobre fundo paper branco (contraste visível)
-- `text-action` (#274566 navy) = ícone navy no ativo (o ícone herda a cor do button)
-- `before:*` = barra terracota (#C25A3C) 3px, 70% da altura, arredondada à direita
+- `bg-canvas` (#F9F6EA) = plate creme sobre sidebar paper branco
+- `text-action` (#274566 navy) = ícone navy no ativo (herança CSS)
+- `before:*` = barra terracota (#C25A3C) 3px, 70% altura, arredondada à direita
 
 **2. Hover isolado para itens inativos**
 
-`hover:!bg-transparent` removido de `ROW_EXPANDED` (era global). Agora é condicional:
-```tsx
-!isNavActive && expanded && 'hover:!bg-transparent'
-```
-Itens ativos mantêm `bg-canvas` no hover (plate persiste); inativos ganham hover só no icon slot.
+`hover:!bg-transparent` removido de `ROW_EXPANDED` (era global). Agora é condicional: `!isNavActive && expanded && 'hover:!bg-transparent'`. Itens ativos mantêm `bg-canvas` no hover.
 
 **3. Remoção do highlight do icon slot no ativo**
 
-Removido: `expanded && isNavActive && 'bg-surface-active-alt text-text-primary'` do icon slot. A cor do ícone agora vem de `text-action` no button (herança CSS limpa).
+Removido `expanded && isNavActive && 'bg-surface-active-alt text-text-primary'` do icon span. Cor do ícone ativo vem de `text-action` no button por herança.
 
 **4. Remoção dos subtítulos de 2 linhas**
 
-`link.description` não é mais renderizado. Label simplificado de `flex min-w-0 flex-col > span + span` para `span` único. Os dados `description` nos hooks ficam inertes (não quebra a tipagem `NavLink`).
+`link.description` não renderizado. Label de `flex min-w-0 flex-col > span + span` → `span` único.
 
 **5. Tagline Playfair-itálica sob o logo**
 
 ```tsx
 <div className="flex flex-col gap-0.5">
-  <img src="assets/azzas-logo-dark.svg" alt="Azzas 2154" className="h-[18px] w-auto" />
+  <img ... className="h-[18px] w-auto" />
   <span className="font-editorial text-[10px] italic leading-none text-white/50">
     Fashion &amp; Lifestyle
   </span>
 </div>
 ```
-Só no estado expanded. Header (52px) acomoda confortavelmente (logo 18px + gap 2px + tagline ~12px = 32px, centralizado).
 
 **6. Nav body + footer: `bg-surface-primary-alt` → `bg-paper`**
 
-`surface-primary-alt` = `--canvas` creme (após P0-B). Sidebar branca permite que o plate creme dos itens ativos seja visível. Sem o contraste `paper > canvas`, a plate seria invisível.
+Após P0-B, `surface-primary-alt` = creme. Sidebar precisa ser branca para o plate creme do ativo ser visível.
 
 ### Constraint de logo (documentada)
 
-`azzas-logo-dark.svg` tem `fill="white"` (logo branco para fundo escuro). A régua permanece com `bg-azzas-navy` no header band. A conversão para paper-white requer um variant dark (navy sobre transparente) — fora do escopo de P1-B.
+`azzas-logo-dark.svg` usa `fill="white"`. Header band permanece `bg-azzas-navy`. Conversão régua → paper-white requer SVG dark variant — fora do escopo de P1-B.
 
-### Gate
+---
 
-- `tsc --noEmit`: exit 0 (sem erros)
-- `npm run frontend`: ✓ 54.14s + `✅ PWA icons … copied successfully` (heap 4096, `BUILD_EXIT=0`)
+## P0-D · Playfair como voz — entregue (LEM-88)
+
+### Arquivos tocados (7)
+
+**`client/src/components/Chat/Landing.tsx`** — alvo principal
+- `ConvoIcon` removido do estado de saudação genérica (só aparece quando `hasEntity = !!name`)
+- Greeting em `font-editorial text-3xl font-medium tracking-[-0.5px] sm:text-4xl` (30→36px)
+- `firstName = user.name.split(' ')[0]` — só primeiro nome
+- Formato: `"${getGreeting()}, ${firstName}."` (com ponto final)
+- Nome de agente: `font-editorial {getNameSizeClass} font-medium tracking-[-0.5px]`
+- `getNameSizeClass` nunca retorna abaixo de `text-2xl` (24px — mínimo Playfair)
+
+**`Agentes/AgentesHome.tsx`** — H1 `font-editorial text-2xl font-medium tracking-[-0.5px]`
+
+**`AgentStudio/layouts/FlowsHome.tsx`** — H1 `font-editorial text-2xl font-medium tracking-[-0.5px]`
+
+**`Automacoes/AutomacoesScreen.tsx`** — `tracking-tight` → `tracking-[-0.5px]` (spec é -0.5px)
+
+**`Auth/AuthLayout.tsx`** — `font-editorial text-3xl font-medium tracking-[-0.5px] text-text-primary`
+
+**`Studio/View.tsx`** — removido `font-editorial` do topbar label `text-sm` (12px → operacional)
+
+**`Studio/workspace/Workspace.tsx`** — removido `font-editorial` do section header `text-lg` (18px → operacional)
+
+### Gate ✓
+- `npm run frontend`: ✓ **55.91s** + `✅ PWA icons copied` (BUILD_EXIT=0, heap 4096)
+- `npx tsc --noEmit`: **exit 0** (árvore inteira)
+
+---
+
+## P1-C · Set de ícones custom — entregue (LEM-93)
+
+### Vocabulário de moda implementado
+
+| Destino | Metáfora | Ícone | Path SVG (outline) |
+|---|---|---|---|
+| Estúdio | Cabide | `CabideIcon` | Hook: `M10 7Q10 4 12 4Q14 4 14 7` + Arch: `M12 7L3 20H21L12 7` |
+| Agentes | Manequim | `ManequimIcon` | Body: `M6 8Q9 5 12 5Q15 5 18 8Q19 13 16 15Q17 18 17 20Q12 22 7 20Q7 18 8 15Q5 13 6 8Z` + Stand: `M12 20V22M9 22H15` |
+| Fluxos | Carretel | `CarretelIcon` | Flanges: `rect x=3/y=3/w=18/h=3.5/rx=1.5` (top e bottom) + Barrel: `M7 6.5V17.5M17 6.5V17.5` |
+
+### Especificações técnicas
+
+- **Grid**: 24×24px viewBox
+- **Stroke**: 1.5px (`strokeWidth="1.5"`)
+- **Joins**: arredondados (`strokeLinecap/Join="round"`)
+- **Cor**: `currentColor` (herda `text-text-secondary` em repouso, `text-action` navy no ativo)
+- **Variante preenchida**: mesma path com `fill="currentColor"` no body — renderizada quando `isNavActive=true` via `NavLink.iconFilled`
+
+### Arquivos tocados (8)
+
+| Arquivo | Mudança |
+|---|---|
+| `client/src/components/icons/fashion.tsx` | **novo** — 6 componentes: Cabide/Manequim/Carretel × outline+filled |
+| `client/src/common/types.ts` | `iconFilled?: LucideIcon \| React.FC` adicionado ao `NavLink` |
+| `client/src/components/UnifiedSidebar/ExpandedPanel.tsx` | `NavRouteButton` seleciona `iconFilled` quando `isNavActive` |
+| `client/src/hooks/Nav/useUnifiedSidebarLinks.ts` | Image/Bot/GitFork → CabideIcon/ManequimIcon/CarretelIcon (+ filled variants) |
+| `client/src/components/Agentes/AgentesHome.tsx` | Empty state `Bot` → `ManequimIcon` |
+| `client/src/components/AgentStudio/canvas/nodes/AgentNode.tsx` | `Bot` → `ManequimIcon` |
+| `client/src/components/AgentStudio/inspector/AgentInspector.tsx` | `Bot` → `ManequimIcon` |
+| `client/src/components/AgentStudio/palette/Palette.tsx` | `Bot` → `ManequimIcon` (GitBranch no nó Condição mantido — semântica de fluxo) |
+
+### Decisão de escopo documentada
+
+`Endpoints/MinimalIcon.tsx` e `Endpoints/MessageEndpointIcon.tsx` usam `Bot` como fallback genérico de endpoint de chat — não são vocabulário de identidade de destino. Mantidos como Lucide Bot; não são robô-de-identidade, são fallback técnico.
+
+### Gate ✓
+- `npx tsc --noEmit`: exit 0 (árvore inteira, zero erros)
+- `npm run frontend`: ✓ **52.86s** + `✅ PWA icons copied` (BUILD_EXIT=0, heap 4096)

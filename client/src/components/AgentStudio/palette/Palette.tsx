@@ -1,6 +1,7 @@
-import { Zap, Bot, GitBranch, Globe, UserCheck, Flag } from 'lucide-react';
+import { Zap, GitBranch, Globe, UserCheck, Flag } from 'lucide-react';
 import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
+import { ManequimIcon } from '~/components/icons/fashion';
 import PaletteCard from './PaletteCard';
 import type { FlowNodeType } from 'librechat-data-provider';
 
@@ -24,7 +25,7 @@ const PALETTE_ITEMS: PaletteItem[] = [
     nodeType: 'agent',
     labelKey: 'com_studio_flow_node_agent',
     descKey: 'com_studio_flow_node_agent_desc',
-    icon: <Bot className="h-3.5 w-3.5 text-blue-400" />,
+    icon: <ManequimIcon className="h-3.5 w-3.5 text-blue-400" />,
     accentClass: 'bg-blue-500/10',
   },
   {

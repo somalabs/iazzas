@@ -1,5 +1,5 @@
-import { Bot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ManequimIcon } from '~/components/icons/fashion';
 import { PermissionBits } from 'librechat-data-provider';
 import { useLocalize } from '~/hooks';
 import { useListAgentsQuery } from '~/data-provider';
@@ -23,7 +23,7 @@ export default function AgentInspector({ nodeId, data }: { nodeId: string; data:
   if (agents.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-lg border border-border-light bg-surface-secondary p-6 text-center">
-        <Bot className="h-6 w-6 text-text-tertiary" aria-hidden="true" />
+        <ManequimIcon className="h-6 w-6 text-text-tertiary" aria-hidden="true" />
         <p className="text-sm text-text-secondary">{localize('com_ui_ux_flows_empty_agent')}</p>
         <button
           type="button"

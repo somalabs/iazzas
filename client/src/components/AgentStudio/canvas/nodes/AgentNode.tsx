@@ -1,6 +1,6 @@
-import { Bot } from 'lucide-react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useLocalize } from '~/hooks';
+import { ManequimIcon } from '~/components/icons/fashion';
 import { BaseNode } from './shared';
 import type { AgentNodeData } from 'librechat-data-provider';
 
@@ -21,7 +21,7 @@ export default function AgentNode({ id, selected, data }: NodeProps) {
         id={id}
         selected={selected}
         accent="blue"
-        icon={<Bot className="h-3.5 w-3.5" />}
+        icon={<ManequimIcon className="h-3.5 w-3.5" />}
         label={localize('com_studio_flow_node_agent')}
       >
         {d.agentId ? (

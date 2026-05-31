@@ -43,6 +43,8 @@ const NavRouteButton = memo(function NavRouteButton({
     navigate(link.href!);
   }, [onClickOverride, navigate, link.href]);
 
+  const IconComponent = isNavActive && link.iconFilled ? link.iconFilled : link.icon;
+
   const element = (
     <Button
       variant="ghost"
@@ -58,7 +60,7 @@ const NavRouteButton = memo(function NavRouteButton({
       onClick={handleClick}
     >
       <span className={cn(ICON_SLOT, expanded && ICON_HIGHLIGHT_EXPANDED)}>
-        {link.icon && <link.icon className="h-5 w-5" aria-hidden="true" />}
+        {IconComponent && <IconComponent className="h-5 w-5" aria-hidden="true" />}
       </span>
       {expanded && (
         <span className="min-w-0 truncate text-sm font-medium text-text-primary">{label}</span>
