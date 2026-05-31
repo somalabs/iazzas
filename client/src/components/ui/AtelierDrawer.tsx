@@ -11,6 +11,7 @@ type AtelierDrawerProps = {
   subtitle?: string;
   className?: string;
   bodyClassName?: string;
+  overlay?: boolean;
 };
 
 export default function AtelierDrawer({
@@ -21,6 +22,7 @@ export default function AtelierDrawer({
   subtitle,
   className,
   bodyClassName = 'p-3',
+  overlay = false,
 }: AtelierDrawerProps) {
   const localize = useLocalize();
 
@@ -28,12 +30,13 @@ export default function AtelierDrawer({
     return null;
   }
 
-  return (
+  const panel = (
     <aside
       role="complementary"
       aria-label={title}
       className={cn(
         'flex h-full w-[320px] flex-shrink-0 animate-atelier-in flex-col border-l border-rule bg-paper motion-reduce:animate-none',
+        overlay && 'fixed inset-y-0 right-0 z-50 max-w-[85vw] shadow-xl',
         className,
       )}
     >
@@ -56,5 +59,21 @@ export default function AtelierDrawer({
 
       <div className={cn('flex-1 overflow-y-auto', bodyClassName)}>{children}</div>
     </aside>
+  );
+
+  if (!overlay) {
+    return panel;
+  }
+
+  return (
+    <>
+      <div
+        role="presentation"
+        aria-hidden="true"
+        onClick={onClose}
+        className="fixed inset-0 z-40 bg-ink-900/30 motion-safe:animate-fade-in"
+      />
+      {panel}
+    </>
   );
 }

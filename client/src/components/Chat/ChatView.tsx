@@ -2,7 +2,7 @@ import { memo, useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useAtom } from 'jotai';
 import { useForm } from 'react-hook-form';
-import { Spinner } from '@librechat/client';
+import { Spinner, useMediaQuery } from '@librechat/client';
 import { useParams } from 'react-router-dom';
 import { Constants, buildTree } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
@@ -11,6 +11,7 @@ import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } fr
 import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers, useLocalize } from '~/hooks';
 import ConversationStarters from './Input/ConversationStarters';
 import { useGetMessagesByConvoId } from '~/data-provider';
+import ConversationsSection from '~/components/UnifiedSidebar/ConversationsSection';
 import AtelierDrawer from '~/components/ui/AtelierDrawer';
 import MessagesView from './Messages/MessagesView';
 import { atelierChatOpenAtom } from '~/store/atelier';
@@ -38,6 +39,7 @@ function ChatView({ index = 0 }: { index?: number }) {
   const rootSubmission = useRecoilValue(store.submissionByIndex(index));
   const centerFormOnLanding = useRecoilValue(store.centerFormOnLanding);
   const [atelierOpen, setAtelierOpen] = useAtom(atelierChatOpenAtom);
+  const isSmallScreen = useMediaQuery('(max-width: 768px)');
 
   const methods = useForm<ChatFormValues>({
     defaultValues: { text: '' },
@@ -116,8 +118,10 @@ function ChatView({ index = 0 }: { index?: number }) {
                 open={atelierOpen}
                 title={localize('com_ui_atelier')}
                 onClose={() => setAtelierOpen(false)}
+                overlay={isSmallScreen}
+                bodyClassName="p-0"
               >
-                <p className="text-xs text-text-tertiary">{localize('com_ui_atelier_empty')}</p>
+                <ConversationsSection />
               </AtelierDrawer>
             </div>
           </Presentation>

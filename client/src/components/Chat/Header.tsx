@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useAtom } from 'jotai';
-import { useMediaQuery } from '@librechat/client';
+import { useMediaQuery, NewChatIcon } from '@librechat/client';
 import { getConfigDefaults, PermissionTypes, Permissions } from 'librechat-data-provider';
 import ModelSelector from './Menus/Endpoints/ModelSelector';
 import { useGetStartupConfig } from '~/data-provider';
@@ -12,7 +12,7 @@ import BookmarkMenu from './Menus/BookmarkMenu';
 import { TemporaryChat } from './TemporaryChat';
 import { atelierChatOpenAtom } from '~/store/atelier';
 import AddMultiConvo from './AddMultiConvo';
-import { useHasAccess } from '~/hooks';
+import { useHasAccess, useGoToNewChat, useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import store from '~/store';
 
@@ -44,12 +44,22 @@ function Header() {
 
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const [atelierOpen, setAtelierOpen] = useAtom(atelierChatOpenAtom);
+  const goToNewChat = useGoToNewChat();
+  const localize = useLocalize();
 
   return (
     <div className="absolute top-0 z-10 flex h-[52px] w-full items-center justify-between border-b border-border-light bg-surface-primary/90 p-2 font-semibold text-text-primary backdrop-blur-sm">
       <div className="hide-scrollbar flex w-full items-center justify-between gap-2 overflow-x-auto">
         <div className="mx-1 flex items-center">
           <OpenSidebar className="md:hidden" />
+          <button
+            type="button"
+            onClick={goToNewChat}
+            aria-label={localize('com_ui_new_chat')}
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-ink-700 transition-colors hover:bg-surface-hover hover:text-text-primary"
+          >
+            <NewChatIcon className="h-5 w-5" aria-hidden="true" />
+          </button>
           {!(navVisible && isSmallScreen) && (
             <div
               className={cn(
