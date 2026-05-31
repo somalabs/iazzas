@@ -16,28 +16,27 @@ import {
 import { useLocalize, useNavigateToConvo, useNewConvo } from '~/hooks';
 import { NotificationSeverity } from '~/common';
 import { ChatContext } from '~/Providers';
-import DeleteButton from './DeleteButton';
 import ShareButton from './ShareButton';
 import { cn } from '~/utils';
 
 function ConvoOptions({
   conversationId,
-  title,
   retainView,
   renameHandler,
   isPopoverActive,
   setIsPopoverActive,
   isActiveConvo,
   isShiftHeld = false,
+  onRequestDelete,
 }: {
   conversationId: string | null;
-  title: string | null;
   retainView: () => void;
   renameHandler: (e: MouseEvent) => void;
   isPopoverActive: boolean;
   setIsPopoverActive: (open: boolean) => void;
   isActiveConvo: boolean;
   isShiftHeld?: boolean;
+  onRequestDelete: () => void;
 }) {
   const localize = useLocalize();
   const queryClient = useQueryClient();
@@ -53,9 +52,7 @@ function ConvoOptions({
 
   const menuId = useId();
   const shareButtonRef = useRef<HTMLButtonElement>(null);
-  const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [announcement, setAnnouncement] = useState('');
 
   const archiveConvoMutation = useArchiveConvoMutation();
@@ -114,8 +111,9 @@ function ConvoOptions({
   }, []);
 
   const deleteHandler = useCallback(() => {
-    setShowDeleteDialog(true);
-  }, []);
+    setIsPopoverActive(false);
+    onRequestDelete();
+  }, [onRequestDelete, setIsPopoverActive]);
 
   const handleInstantDelete = useCallback(
     (e: MouseEvent) => {
@@ -227,12 +225,6 @@ function ConvoOptions({
         label: localize('com_ui_delete'),
         onClick: deleteHandler,
         icon: <Trash className="icon-sm mr-2 text-text-primary" aria-hidden="true" />,
-        ariaHasPopup: 'dialog' as const,
-        ariaControls: 'delete-conversation-dialog',
-        /** NOTE: THE FOLLOWING PROPS ARE REQUIRED FOR MENU ITEMS THAT OPEN DIALOGS */
-        hideOnClick: false,
-        ref: deleteButtonRef,
-        render: (props) => <button {...props} />,
       },
     ],
     [
@@ -248,14 +240,10 @@ function ConvoOptions({
     ],
   );
 
-  const buttonClassName = cn(
-    'inline-flex h-7 w-7 items-center justify-center rounded-md border-none p-0 text-sm font-medium ring-ring-primary transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50',
-    isActiveConvo === true || isPopoverActive
-      ? 'opacity-100'
-      : 'opacity-0 focus:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100 data-[open]:opacity-100',
-  );
+  const buttonClassName =
+    'inline-flex h-7 w-7 items-center justify-center rounded-md border-none p-0 text-sm font-medium ring-ring-primary transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50';
 
-  if (isShiftHeld && isActiveConvo && !isPopoverActive && !showShareDialog && !showDeleteDialog) {
+  if (isShiftHeld && isActiveConvo && !isPopoverActive && !showShareDialog) {
     return (
       <div className="flex items-center gap-0.5">
         <button
@@ -267,7 +255,7 @@ function ConvoOptions({
           {isArchiveLoading ? (
             <Spinner className="size-4" />
           ) : (
-            <Archive className="icon-md text-text-secondary" aria-hidden={true} />
+            <Archive className="icon-md text-ink-700" aria-hidden={true} />
           )}
         </button>
         <button
@@ -279,7 +267,7 @@ function ConvoOptions({
           {isDeleteLoading ? (
             <Spinner className="size-4" />
           ) : (
-            <Trash className="icon-md text-text-secondary" aria-hidden={true} />
+            <Trash className="icon-md text-ink-700" aria-hidden={true} />
           )}
         </button>
       </div>
@@ -304,12 +292,7 @@ function ConvoOptions({
             id={`conversation-menu-${conversationId}`}
             aria-label={localize('com_nav_convo_menu_options')}
             aria-expanded={isPopoverActive}
-            className={cn(
-              'inline-flex h-7 w-7 items-center justify-center gap-2 rounded-md border-none p-0 text-sm font-medium ring-ring-primary transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50',
-              isActiveConvo === true || isPopoverActive
-                ? 'opacity-100'
-                : 'opacity-0 focus:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100 data-[open]:opacity-100',
-            )}
+            className="inline-flex h-7 w-7 items-center justify-center gap-2 rounded-md border-none p-0 text-sm font-medium opacity-100 ring-ring-primary transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50"
             onClick={(e: MouseEvent<HTMLButtonElement>) => {
               e.stopPropagation();
             }}
@@ -319,7 +302,7 @@ function ConvoOptions({
               }
             }}
           >
-            <Ellipsis className="icon-md text-text-secondary" aria-hidden={true} />
+            <Ellipsis className="icon-md text-ink-700" aria-hidden={true} />
           </Ariakit.MenuButton>
         }
         items={dropdownItems}
@@ -332,17 +315,6 @@ function ConvoOptions({
           triggerRef={shareButtonRef}
         />
       )}
-      {showDeleteDialog && (
-        <DeleteButton
-          title={title ?? ''}
-          retainView={retainView}
-          triggerRef={deleteButtonRef}
-          setMenuOpen={setIsPopoverActive}
-          showDeleteDialog={showDeleteDialog}
-          conversationId={conversationId ?? ''}
-          setShowDeleteDialog={setShowDeleteDialog}
-        />
-      )}
     </>
   );
 }
@@ -350,9 +322,9 @@ function ConvoOptions({
 export default memo(ConvoOptions, (prevProps, nextProps) => {
   return (
     prevProps.conversationId === nextProps.conversationId &&
-    prevProps.title === nextProps.title &&
     prevProps.isPopoverActive === nextProps.isPopoverActive &&
     prevProps.isActiveConvo === nextProps.isActiveConvo &&
-    prevProps.isShiftHeld === nextProps.isShiftHeld
+    prevProps.isShiftHeld === nextProps.isShiftHeld &&
+    prevProps.onRequestDelete === nextProps.onRequestDelete
   );
 });

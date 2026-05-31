@@ -1,19 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bot, Plus, Compass, MoreHorizontal, Pencil, Copy, Trash2 } from 'lucide-react';
+import { Bot, Plus, Compass, Pencil, Copy, Trash2 } from 'lucide-react';
 import AtelierDrawer from '~/components/ui/AtelierDrawer';
 import AtelierTrigger from '~/components/ui/AtelierTrigger';
-import {
-  Button,
-  Spinner,
-  useToastContext,
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  OGDialog,
-  OGDialogTemplate,
-} from '@librechat/client';
+import InlineConfirm from '~/components/ui/InlineConfirm';
+import { Button, Spinner, useToastContext } from '@librechat/client';
 import type { Agent } from 'librechat-data-provider';
 import {
   useListAgentsQuery,
@@ -149,12 +140,12 @@ function AgentCard({ agent }: { agent: Agent }) {
   const navigate = useNavigate();
   const { showToast } = useToastContext();
   const { onSelect } = useSelectAgent();
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const deleteAgent = useDeleteAgentMutation({
     onSuccess: () => {
       showToast({ message: localize('com_ui_agent_deleted'), status: 'success' });
-      setDeleteOpen(false);
+      setConfirmDelete(false);
     },
     onError: () => {
       showToast({ message: localize('com_ui_agent_delete_error'), status: 'error' });
@@ -210,83 +201,62 @@ function AgentCard({ agent }: { agent: Agent }) {
             <p className="mt-1 line-clamp-2 text-xs text-text-secondary">{agent.description}</p>
           ) : null}
         </div>
-        <CardMenu
-          onEdit={goEdit}
-          onDuplicate={() => duplicateAgent.mutate({ agent_id: agent.id ?? '' })}
-          onDelete={() => setDeleteOpen(true)}
-        />
       </div>
 
-      <OGDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <OGDialogTemplate
-          showCloseButton={false}
-          title={localize('com_ui_delete_agent')}
-          className="max-w-[450px]"
-          main={
-            <div className="text-sm text-text-secondary">
-              {localize('com_ui_delete_agent_confirm')}
-            </div>
-          }
-          selection={{
-            selectHandler: () => deleteAgent.mutate({ agent_id: agent.id ?? '' }),
-            selectClasses: 'bg-red-500 hover:bg-red-600 text-white',
-            selectText: localize('com_ui_delete'),
-          }}
-        />
-      </OGDialog>
+      <div className="mt-auto border-t border-rule pt-2">
+        {confirmDelete ? (
+          <InlineConfirm
+            message={localize('com_ui_delete_agent_confirm')}
+            cancelLabel={localize('com_ui_cancel')}
+            confirmLabel={localize('com_ui_delete')}
+            loading={deleteAgent.isLoading}
+            onCancel={() => setConfirmDelete(false)}
+            onConfirm={() => deleteAgent.mutate({ agent_id: agent.id ?? '' })}
+          />
+        ) : (
+          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+            <RowAction
+              icon={Pencil}
+              label={localize('com_ui_edit')}
+              onClick={goEdit}
+            />
+            <RowAction
+              icon={Copy}
+              label={localize('com_ui_duplicate')}
+              onClick={() => duplicateAgent.mutate({ agent_id: agent.id ?? '' })}
+            />
+            <RowAction
+              icon={Trash2}
+              label={localize('com_ui_delete')}
+              onClick={() => setConfirmDelete(true)}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-function CardMenu({
-  onEdit,
-  onDuplicate,
-  onDelete,
+function RowAction({
+  icon: Icon,
+  label,
+  onClick,
 }: {
-  onEdit: () => void;
-  onDuplicate: () => void;
-  onDelete: () => void;
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
 }) {
-  const localize = useLocalize();
-  const stop = (e: React.MouseEvent) => e.stopPropagation();
-  const items = useMemo(
-    () => [
-      { label: localize('com_ui_edit'), icon: Pencil, onClick: onEdit },
-      { label: localize('com_ui_duplicate'), icon: Copy, onClick: onDuplicate },
-      { label: localize('com_ui_delete'), icon: Trash2, onClick: onDelete, destructive: true },
-    ],
-    [localize, onEdit, onDuplicate, onDelete],
-  );
-
   return (
-    <div onClick={stop}>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            size="sm"
-            variant="ghost"
-            aria-label={localize('com_ui_more_options')}
-            className="size-8 p-0 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
-          >
-            <MoreHorizontal className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[160px]">
-          {items.map((item) => (
-            <DropdownMenuItem
-              key={item.label}
-              onClick={(e) => {
-                e.stopPropagation();
-                item.onClick();
-              }}
-              className={cn(item.destructive && 'text-red-500 focus:text-red-500')}
-            >
-              <item.icon className="mr-2 size-4" />
-              {item.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-ink-700 transition-colors hover:bg-surface-hover hover:text-ink-900"
+    >
+      <Icon className="h-3 w-3" aria-hidden="true" />
+      {label}
+    </button>
   );
 }

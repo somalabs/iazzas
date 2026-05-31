@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
-import { useParams } from 'react-router-dom';
-import { Constants } from 'librechat-data-provider';
+import { useQueryClient } from '@tanstack/react-query';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Constants, QueryKeys } from 'librechat-data-provider';
 import { useToastContext, useMediaQuery } from '@librechat/client';
-import type { TConversation } from 'librechat-data-provider';
-import { useUpdateConversationMutation } from '~/data-provider';
+import type { TConversation, TMessage } from 'librechat-data-provider';
+import { useUpdateConversationMutation, useDeleteConversationMutation } from '~/data-provider';
 import EndpointIcon from '~/components/Endpoints/EndpointIcon';
-import { useNavigateToConvo, useLocalize, useShiftKey } from '~/hooks';
+import { useNavigateToConvo, useLocalize, useShiftKey, useNewConvo } from '~/hooks';
+import InlineConfirm from '~/components/ui/InlineConfirm';
 import { useGetEndpointsQuery } from '~/data-provider';
 import { NotificationSeverity } from '~/common';
 import { ConvoOptions } from './ConvoOptions';
@@ -29,8 +31,11 @@ export default function Conversation({
   isGenerating = false,
 }: ConversationProps) {
   const params = useParams();
+  const navigate = useNavigate();
   const localize = useLocalize();
+  const queryClient = useQueryClient();
   const { showToast } = useToastContext();
+  const { newConversation } = useNewConvo();
   const { navigateToConvo } = useNavigateToConvo();
   const { data: endpointsConfig } = useGetEndpointsQuery();
   const currentConvoId = useMemo(() => params.conversationId, [params.conversationId]);
@@ -43,8 +48,45 @@ export default function Conversation({
   const [titleInput, setTitleInput] = useState(title || '');
   const [renaming, setRenaming] = useState(false);
   const [isPopoverActive, setIsPopoverActive] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   // Lazy-load ConvoOptions to avoid running heavy hooks for all conversations
   const [hasInteracted, setHasInteracted] = useState(false);
+
+  const deleteMutation = useDeleteConversationMutation({
+    onSuccess: () => {
+      setConfirmDelete(false);
+      if (currentConvoId === conversationId || currentConvoId === Constants.NEW_CONVO) {
+        newConversation();
+        navigate('/c/new', { replace: true });
+      }
+      retainView();
+      showToast({
+        message: localize('com_ui_convo_delete_success'),
+        severity: NotificationSeverity.SUCCESS,
+        showIcon: true,
+      });
+    },
+    onError: () => {
+      showToast({
+        message: localize('com_ui_convo_delete_error'),
+        severity: NotificationSeverity.ERROR,
+        showIcon: true,
+      });
+    },
+  });
+
+  const handleConfirmDelete = useCallback(() => {
+    const convoId = conversationId ?? '';
+    if (!convoId) {
+      return;
+    }
+    const messages = queryClient.getQueryData<TMessage[]>([QueryKeys.messages, convoId]);
+    const thread_id = messages?.[messages.length - 1]?.thread_id;
+    const endpoint = messages?.[messages.length - 1]?.endpoint;
+    deleteMutation.mutate({ conversationId: convoId, thread_id, endpoint, source: 'button' });
+  }, [conversationId, deleteMutation, queryClient]);
+
+  const handleRequestDelete = useCallback(() => setConfirmDelete(true), []);
 
   const previousTitle = useRef(title);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -175,6 +217,7 @@ export default function Conversation({
     isPopoverActive,
     setIsPopoverActive: handlePopoverOpenChange,
     isShiftHeld: isActiveConvo ? isShiftHeld : false,
+    onRequestDelete: handleRequestDelete,
   };
 
   return (
@@ -218,8 +261,20 @@ export default function Conversation({
       style={{ cursor: renaming ? 'default' : 'pointer' }}
       data-testid="convo-item"
     >
-      {renaming ? (
-        <RenameForm
+      {confirmDelete ? (
+        <InlineConfirm
+          message={localize('com_ui_delete_conversation')}
+          cancelLabel={localize('com_ui_cancel')}
+          confirmLabel={localize('com_ui_delete')}
+          loading={deleteMutation.isLoading}
+          onCancel={() => setConfirmDelete(false)}
+          onConfirm={handleConfirmDelete}
+          className="w-full px-2"
+        />
+      ) : (
+        <>
+          {renaming ? (
+            <RenameForm
           titleInput={titleInput}
           setTitleInput={setTitleInput}
           onSubmit={handleRenameSubmit}
@@ -281,6 +336,8 @@ export default function Conversation({
         {/* Only render ConvoOptions when user interacts (hover/focus) or for active conversation */}
         {!renaming && (hasInteracted || isActiveConvo) && <ConvoOptions {...convoOptionsProps} />}
       </div>
+        </>
+      )}
     </div>
   );
 }
