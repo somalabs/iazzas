@@ -10,6 +10,7 @@ type AtelierDrawerProps = {
   children: ReactNode;
   subtitle?: string;
   className?: string;
+  bodyClassName?: string;
 };
 
 export default function AtelierDrawer({
@@ -19,6 +20,7 @@ export default function AtelierDrawer({
   children,
   subtitle,
   className,
+  bodyClassName = 'p-3',
 }: AtelierDrawerProps) {
   const localize = useLocalize();
 
@@ -52,7 +54,7 @@ export default function AtelierDrawer({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3">{children}</div>
+      <div className={cn('flex-1 overflow-y-auto', bodyClassName)}>{children}</div>
     </aside>
   );
 }

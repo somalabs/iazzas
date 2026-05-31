@@ -150,7 +150,7 @@ export default function Creations() {
   }
 
   return (
-    <div className="flex h-full flex-col border-r border-border-medium bg-surface-primary">
+    <div className="flex h-full flex-col">
       {/* Header tabs */}
       <div className="border-b border-border-medium px-3 py-2">
         <div className="flex items-center gap-1">
