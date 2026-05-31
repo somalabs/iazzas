@@ -7,17 +7,16 @@ import {
   AppleIcon,
   SamlIcon,
 } from '@librechat/client';
-
-import SocialButton from './SocialButton';
-
-import { useLocalize } from '~/hooks';
-
 import { TStartupConfig } from 'librechat-data-provider';
+import SocialButton from './SocialButton';
+import { useLocalize } from '~/hooks';
 
 function SocialLoginRender({
   startupConfig,
+  emailDivider = true,
 }: {
   startupConfig: TStartupConfig | null | undefined;
+  emailDivider?: boolean;
 }) {
   const localize = useLocalize();
 
@@ -87,6 +86,7 @@ function SocialLoginRender({
         enabled={startupConfig.openidLoginEnabled}
         serverDomain={startupConfig.serverDomain}
         oauthPath="openid"
+        variant="primary"
         Icon={() =>
           startupConfig.openidImageUrl ? (
             <img src={startupConfig.openidImageUrl} alt="OpenID Logo" className="h-5 w-5" />
@@ -94,7 +94,7 @@ function SocialLoginRender({
             <OpenIDIcon />
           )
         }
-        label={startupConfig.openidLabel}
+        label={startupConfig.openidLabel || localize('com_auth_microsoft_login')}
         id="openid"
       />
     ),
@@ -117,24 +117,32 @@ function SocialLoginRender({
     ),
   };
 
+  if (!startupConfig.socialLoginEnabled) {
+    return null;
+  }
+
+  const providers = startupConfig.socialLogins ?? [];
+  const primaryProvider = providers.includes('openid') ? providerComponents.openid : null;
+  const secondaryProviders = providers
+    .filter((provider) => provider !== 'openid')
+    .map((provider) => providerComponents[provider] || null);
+
   return (
-    startupConfig.socialLoginEnabled && (
-      <>
-        {startupConfig.emailLoginEnabled && (
-          <>
-            <div className="relative mt-6 flex w-full items-center justify-center border border-t border-gray-300 uppercase dark:border-gray-600">
-              <div className="absolute bg-white px-3 text-xs text-black dark:bg-gray-900 dark:text-white">
-                Or
-              </div>
-            </div>
-            <div className="mt-8" />
-          </>
-        )}
-        <div className="mt-2">
-          {startupConfig.socialLogins?.map((provider) => providerComponents[provider] || null)}
+    <>
+      {emailDivider && startupConfig.emailLoginEnabled && (
+        <div className="my-4 flex items-center gap-3">
+          <span className="h-px flex-1 bg-border-medium" />
+          <span className="text-xs uppercase tracking-wide text-text-secondary">
+            {localize('com_auth_or_continue_with')}
+          </span>
+          <span className="h-px flex-1 bg-border-medium" />
         </div>
-      </>
-    )
+      )}
+      <div className="mt-2">
+        {primaryProvider}
+        {secondaryProviders}
+      </div>
+    </>
   );
 }
 

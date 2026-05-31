@@ -1,6 +1,6 @@
 import reactRouter from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
-import { getByTestId, render, waitFor } from 'test/layout-test-utils';
+import { getByTestId, queryByTestId, render, waitFor } from 'test/layout-test-utils';
 import type { TStartupConfig } from 'librechat-data-provider';
 import * as endpointQueries from '~/data-provider/Endpoints/queries';
 import * as miscDataProvider from '~/data-provider/Misc/queries';
@@ -119,88 +119,76 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-test('renders login form', () => {
-  const { getByLabelText, getByRole } = setup();
-  expect(getByLabelText(/email/i)).toBeInTheDocument();
-  expect(getByLabelText(/password/i)).toBeInTheDocument();
-  expect(getByTestId(document.body, 'login-button')).toBeInTheDocument();
-  expect(getByRole('link', { name: /Sign up/i })).toBeInTheDocument();
-  expect(getByRole('link', { name: /Sign up/i })).toHaveAttribute('href', '/register');
-  expect(getByRole('link', { name: /Continue with Google/i })).toBeInTheDocument();
-  expect(getByRole('link', { name: /Continue with Google/i })).toHaveAttribute(
+// SSO-first login (redesign P2-C): single set of provider buttons with the
+// OpenID/Microsoft provider as the primary action; email/password collapse
+// behind the "or use email" disclosure. Asserted via stable data-testids so
+// the test is locale-independent (the app renders in pt-BR).
+test('renders SSO-first with a single set of providers and collapsed email form', () => {
+  setup();
+
+  expect(getByTestId(document.body, 'openid')).toHaveAttribute(
+    'href',
+    'mock-server/oauth/openid',
+  );
+  expect(getByTestId(document.body, 'google')).toHaveAttribute(
     'href',
     'mock-server/oauth/google',
   );
-  expect(getByRole('link', { name: /Continue with Facebook/i })).toBeInTheDocument();
-  expect(getByRole('link', { name: /Continue with Facebook/i })).toHaveAttribute(
+  expect(getByTestId(document.body, 'facebook')).toHaveAttribute(
     'href',
     'mock-server/oauth/facebook',
   );
-  expect(getByRole('link', { name: /Continue with Github/i })).toBeInTheDocument();
-  expect(getByRole('link', { name: /Continue with Github/i })).toHaveAttribute(
+  expect(getByTestId(document.body, 'github')).toHaveAttribute(
     'href',
     'mock-server/oauth/github',
   );
-  expect(getByRole('link', { name: /Continue with Discord/i })).toBeInTheDocument();
-  expect(getByRole('link', { name: /Continue with Discord/i })).toHaveAttribute(
+  expect(getByTestId(document.body, 'discord')).toHaveAttribute(
     'href',
     'mock-server/oauth/discord',
   );
-  expect(getByRole('link', { name: /Test SAML/i })).toBeInTheDocument();
-  expect(getByRole('link', { name: /Test SAML/i })).toHaveAttribute(
-    'href',
-    'mock-server/oauth/saml',
-  );
+  expect(getByTestId(document.body, 'saml')).toHaveAttribute('href', 'mock-server/oauth/saml');
+
+  // Email/password are not rendered until the disclosure is opened.
+  expect(getByTestId(document.body, 'show-email-form')).toHaveAttribute('aria-expanded', 'false');
+  expect(queryByTestId(document.body, 'login-button')).not.toBeInTheDocument();
+  expect(document.querySelector('#email')).toBeNull();
+  expect(document.querySelector('#password')).toBeNull();
 });
 
-test('calls loginUser.mutate on login', async () => {
+test('disclosure reveals the email/password form', async () => {
+  setup();
+
+  const toggle = getByTestId(document.body, 'show-email-form');
+  expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+  await userEvent.click(toggle);
+
+  expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  expect(document.querySelector('#email')).toBeInTheDocument();
+  expect(document.querySelector('#password')).toBeInTheDocument();
+  expect(getByTestId(document.body, 'login-button')).toBeInTheDocument();
+});
+
+test('calls loginUser.mutate after revealing and submitting the form', async () => {
   const mutate = jest.fn();
-  const { getByLabelText } = setup({
+  setup({
     // @ts-ignore - we don't need all parameters of the QueryObserverResult
     useLoginUserReturnValue: {
       isLoading: false,
-      mutate: mutate,
+      mutate,
       isError: false,
     },
   });
 
-  const emailInput = getByLabelText(/email/i);
-  const passwordInput = getByLabelText(/password/i);
+  await userEvent.click(getByTestId(document.body, 'show-email-form'));
+
+  const emailInput = document.querySelector('#email') as HTMLInputElement;
+  const passwordInput = document.querySelector('#password') as HTMLInputElement;
   const submitButton = getByTestId(document.body, 'login-button');
 
   await userEvent.type(emailInput, 'test@test.com');
   await userEvent.type(passwordInput, 'password');
   await userEvent.click(submitButton);
 
-  waitFor(() => expect(mutate).toHaveBeenCalled());
-});
-
-test('Navigates to / on successful login', async () => {
-  const { getByLabelText } = setup({
-    // @ts-ignore - we don't need all parameters of the QueryObserverResult
-    useLoginUserReturnValue: {
-      isLoading: false,
-      mutate: jest.fn(),
-      isError: false,
-      isSuccess: true,
-    },
-    useGetStartupConfigReturnValue: {
-      ...mockStartupConfig,
-      data: {
-        ...mockStartupConfig.data,
-        emailLoginEnabled: true,
-        registrationEnabled: true,
-      },
-    },
-  });
-
-  const emailInput = getByLabelText(/email/i);
-  const passwordInput = getByLabelText(/password/i);
-  const submitButton = getByTestId(document.body, 'login-button');
-
-  await userEvent.type(emailInput, 'test@test.com');
-  await userEvent.type(passwordInput, 'password');
-  await userEvent.click(submitButton);
-
-  waitFor(() => expect(window.location.pathname).toBe('/'));
+  await waitFor(() => expect(mutate).toHaveBeenCalled());
 });
