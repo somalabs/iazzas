@@ -352,36 +352,21 @@ export default function AutomationList({
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">
-        {automations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-            <p className="text-sm text-text-tertiary">{localize('com_automacoes_empty_state')}</p>
-            {canCreate && (
-              <button
-                type="button"
-                onClick={onCreate}
-                className="rounded-lg bg-surface-submit px-4 py-2 text-xs font-medium text-white hover:bg-surface-submit-hover"
-              >
-                {localize('com_automacoes_create_btn')}
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-1">
-            {automations.map((a) => (
-              <AutomationRow
-                key={a._id}
-                automation={a}
-                selected={selectedId === a._id}
-                onSelect={() => onSelect(a._id)}
-                onEdit={() => onSelect(a._id)}
-                onToggleEnabled={(enabled) => onToggleEnabled(a._id, enabled)}
-                onRunNow={() => onRunNow(a._id)}
-                onDelete={() => onDelete(a._id)}
-                onOpenRuns={() => onOpenRuns(a._id)}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex flex-col gap-1">
+          {automations.map((a) => (
+            <AutomationRow
+              key={a._id}
+              automation={a}
+              selected={selectedId === a._id}
+              onSelect={() => onSelect(a._id)}
+              onEdit={() => onSelect(a._id)}
+              onToggleEnabled={(enabled) => onToggleEnabled(a._id, enabled)}
+              onRunNow={() => onRunNow(a._id)}
+              onDelete={() => onDelete(a._id)}
+              onOpenRuns={() => onOpenRuns(a._id)}
+            />
+          ))}
+        </div>
       </div>
     </aside>
   );
