@@ -95,6 +95,11 @@ docker compose -f deploy-compose.yml up -d --no-deps --force-recreate api
 - `ALLOW_REGISTRATION=false` (sem registro local) + `ALLOW_SOCIAL_REGISTRATION=true` (Authentik decide quem é provisionado).
 - Defaults perigosos no boot: `CREDS_KEY`, `CREDS_IV`, `JWT_SECRET`, `JWT_REFRESH_SECRET` estão em valores default (logs avisam). Rotacionar em janela de manutenção.
 
+### RAG / Embeddings (file_search)
+- O `rag_api` faz embeddings via **OpenAI por padrão**, mas não há chave OpenAI de sistema (`OPENAI_API_KEY=user_provided`). Prod **exige** no `.env`: `EMBEDDINGS_PROVIDER=google_genai` + `EMBEDDINGS_MODEL=gemini-embedding-001` (reusa `GOOGLE_KEY` via ordem `RAG_GOOGLE_API_KEY` > `GOOGLE_KEY` > `GOOGLE_API_KEY`). Ver `docs/env-production.md`.
+- **Sintoma se faltar:** anexar arquivo em "Knowledge" (agents) dá `Error processing file` e o arquivo não persiste — a falha de embedding aborta antes de vincular o arquivo ao agent. O container `rag_api` sobe normal; só quebra no `/embed`. Confirmar com `docker compose -f deploy-compose.yml logs rag_api`.
+- A imagem `-lite` só suporta embeddings via API (sem HuggingFace local). Trocar de modelo/dimensão depois exige re-embeddar os arquivos.
+
 ### Diagnóstico de SSO
 | Sintoma | Causa provável | Fix |
 |---|---|---|

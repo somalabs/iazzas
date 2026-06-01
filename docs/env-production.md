@@ -69,6 +69,21 @@ Gerar valores únicos para cada ambiente (`openssl rand -hex 32`).
 | `GOOGLE_KEY` * | chave API | Gemini API (AI Studio) |
 | `GEMINI_API_KEY` | chave API | Gemini para geração de imagem |
 
+## RAG / Embeddings (Knowledge / file_search)
+
+A funcionalidade **Knowledge** dos agents (`file_search`) depende do serviço `rag_api`, que transforma os arquivos em embeddings e os guarda no `vectordb` (pgvector). O `rag_api` recebe o `.env` inteiro via `env_file` no `deploy-compose.yml`.
+
+Por padrão o `rag_api` usa **OpenAI** para embeddings — e como não há chave OpenAI de sistema (`OPENAI_API_KEY=user_provided`), é **obrigatório** apontá-lo para o Google, reaproveitando a `GOOGLE_KEY`:
+
+| Variável | Valor | Descrição |
+|---|---|---|
+| `EMBEDDINGS_PROVIDER` * | `google_genai` | Provider de embeddings do `rag_api` |
+| `EMBEDDINGS_MODEL` | `gemini-embedding-001` | Modelo de embedding (fallback: `text-embedding-004`) |
+
+A chave é resolvida na ordem `RAG_GOOGLE_API_KEY` > `GOOGLE_KEY` > `GOOGLE_API_KEY`, então a `GOOGLE_KEY` já existente é usada — **não precisa de chave OpenAI**.
+
+> ⚠️ **Sem essas variáveis, anexar arquivos em Knowledge falha com "Error processing file"** e o arquivo não persiste no agent. O `rag_api` sobe normalmente; só quebra no `/embed`. A imagem `librechat-rag-api-dev-lite` só suporta embeddings via API (sem HuggingFace local). Após mudar, recriar: `docker compose -f deploy-compose.yml up -d --no-deps --force-recreate rag_api`.
+
 ## Balance / Créditos
 
 | Variável | Valor | Descrição |
