@@ -6,6 +6,7 @@ import { useStudioDeleteMutation } from '~/data-provider';
 import { useStudio, useStudioDispatch, useStudioHistory, useRetryGeneration } from '../context';
 import { MODEL_DISPLAY_NAMES, useCaseHasRequiredInputs } from '../schemas';
 import { formatStudioDate } from '../date';
+import GeneratingDot from '~/components/ui/GeneratingDot';
 import type { StudioCreation } from 'librechat-data-provider';
 
 function CreationItem({
@@ -42,9 +43,9 @@ function CreationItem({
           }`}
         >
           {thumbnail ? (
-            <img src={thumbnail} alt="" className="h-full w-full object-cover" />
+            <img src={thumbnail} alt="" className="h-full w-full animate-photo-reveal object-cover" />
           ) : creation.status === 'generating' ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-medium border-t-text-secondary" />
+            <GeneratingDot size={10} />
           ) : isError ? (
             <AlertCircle className="h-5 w-5 text-red-400" strokeWidth={1.5} />
           ) : (

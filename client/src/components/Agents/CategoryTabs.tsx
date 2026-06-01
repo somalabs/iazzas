@@ -3,6 +3,7 @@ import { useMediaQuery } from '@librechat/client';
 import type t from 'librechat-data-provider';
 import { useLocalize, TranslationKeys } from '~/hooks';
 import { SmartLoader } from './SmartLoader';
+import Skeleton from '~/components/ui/Skeleton';
 import { cn } from '~/utils';
 
 /**
@@ -56,10 +57,7 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
     <div className="w-full pb-2">
       <div className="flex flex-wrap justify-center gap-1.5 px-4">
         {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="h-[36px] min-w-[80px] animate-pulse rounded-lg bg-surface-tertiary"
-          />
+          <Skeleton key={i} className="h-[36px] min-w-[80px]" />
         ))}
       </div>
     </div>
