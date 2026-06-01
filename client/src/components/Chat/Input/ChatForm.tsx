@@ -26,6 +26,7 @@ import AttachFileChat from './Files/AttachFileChat';
 import FileFormChat from './Files/FileFormChat';
 import { cn, removeFocusRings } from '~/utils';
 import TextareaHeader from './TextareaHeader';
+import AgentChip from './AgentChip';
 import PromptsCommand from './PromptsCommand';
 import AudioRecorder from './AudioRecorder';
 import CollapseChat from './CollapseChat';
@@ -273,6 +274,8 @@ const ChatForm = memo(function ChatForm({
                 : 'border-rule bg-paper',
             )}
           >
+            {/* F4: chip "para [Agente]" + popover foto-card (só no endpoint de agentes) */}
+            <AgentChip />
             <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
             {/* WIP */}
             <EditBadges
