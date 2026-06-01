@@ -1,13 +1,5 @@
 import { useMemo } from 'react';
-import { CalendarClock, ShieldCheck, MessageSquare } from 'lucide-react';
-import {
-  CabideIcon,
-  CabideIconFilled,
-  ManequimIcon,
-  ManequimIconFilled,
-  CarretelIcon,
-  CarretelIconFilled,
-} from '~/components/icons/fashion';
+import { CalendarClock, ShieldCheck, MessageSquare, Sparkles, Bot, GitBranch, Zap } from 'lucide-react';
 import type { NavLink } from '~/common';
 
 /**
@@ -28,31 +20,28 @@ export default function useUnifiedSidebarLinks() {
       {
         title: 'com_ui_ux_nav_studio_imagens',
         description: 'com_ui_ux_rail_studio_desc',
-        icon: CabideIcon,
-        iconFilled: CabideIconFilled,
+        icon: Sparkles,
         id: 'nav-studio',
         href: '/d/studio',
       },
       {
         title: 'com_ui_ux_nav_agentes',
         description: 'com_ui_ux_rail_agentes_desc',
-        icon: ManequimIcon,
-        iconFilled: ManequimIconFilled,
+        icon: Bot,
         id: 'nav-agentes',
         href: '/d/agentes',
       },
       {
         title: 'com_ui_ux_nav_flows',
         description: 'com_ui_ux_rail_flows_desc',
-        icon: CarretelIcon,
-        iconFilled: CarretelIconFilled,
+        icon: GitBranch,
         id: 'nav-flows',
         href: '/d/flows',
       },
       {
         title: 'com_ui_ux_nav_automacoes',
         description: 'com_ui_ux_rail_automacoes_desc',
-        icon: CalendarClock,
+        icon: Zap,
         id: 'nav-automacoes',
         href: '/d/automacoes',
       },

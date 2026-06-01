@@ -9,7 +9,6 @@ interface:
   peoplePicker: { users: false, groups: false, roles: false }
   marketplace: { use: false }
   remoteAgents: { use: false }
-  customWelcome: "Olá! Sou o IAzzas, o assistente de IA da Azzas 2154. Posso te ajudar com pesquisa, análise de dados, criação de textos, geração de imagens e muito mais. Como posso ajudar?"
 
 registration:
   socialLogins: ['openid']
@@ -21,6 +20,11 @@ endpoints:
 modelSpecs:
   enforce: false
   prioritize: false
+  # Mantém o endpoint de agentes no seletor ao lado dos specs Flash/Pro,
+  # então o seletor lista IAzzas Flash/Pro + agentes criados pelo usuário
+  # (sem expor os modelos crus do Google).
+  addedEndpoints:
+    - "agents"
   list:
     - name: "iazzas-flash"
       label: "IAzzas (Flash)"

@@ -81,7 +81,6 @@ Gerar valores únicos para cada ambiente (`openssl rand -hex 32`).
 | Variável | Valor |
 |---|---|
 | `APP_TITLE` | `IAzzas` |
-| `CUSTOM_FOOTER` | `"Azzas 2154 — Fashion & Lifestyle"` |
 | `HELP_AND_FAQ_URL` | `https://www.azzas2154.com.br` |
 
 ## Busca (Meilisearch)

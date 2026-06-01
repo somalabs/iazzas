@@ -11,6 +11,8 @@ type AtelierDrawerProps = {
   subtitle?: string;
   className?: string;
   bodyClassName?: string;
+  headerClassName?: string;
+  hideTitle?: boolean;
   overlay?: boolean;
 };
 
@@ -22,6 +24,8 @@ export default function AtelierDrawer({
   subtitle,
   className,
   bodyClassName = 'p-3',
+  headerClassName = 'px-4 py-3',
+  hideTitle = false,
   overlay = false,
 }: AtelierDrawerProps) {
   const localize = useLocalize();
@@ -40,9 +44,11 @@ export default function AtelierDrawer({
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-rule px-4 py-3">
+      <div className={cn('flex items-center justify-between border-b border-rule', headerClassName)}>
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold text-text-primary">{title}</p>
+          {!hideTitle && (
+            <p className="truncate text-xs font-semibold text-text-primary">{title}</p>
+          )}
           {subtitle != null && subtitle !== '' && (
             <p className="max-w-[220px] truncate text-[11px] text-text-tertiary">{subtitle}</p>
           )}

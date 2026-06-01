@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Compass, Pencil, Copy, Trash2 } from 'lucide-react';
-import { ManequimIcon } from '~/components/icons/fashion';
+import { Plus, Compass, Pencil, Copy, Trash2, Bot } from 'lucide-react';
+
 import AtelierDrawer from '~/components/ui/AtelierDrawer';
 import AtelierTrigger from '~/components/ui/AtelierTrigger';
 import InlineConfirm from '~/components/ui/InlineConfirm';
@@ -115,7 +115,7 @@ function AgentsGrid({ agents }: { agents: Agent[] | null }) {
   if (agents.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-medium px-6 py-16 text-center">
-        <ManequimIcon className="mb-3 size-10 text-text-secondary" />
+        <Bot className="mb-3 size-10 text-text-secondary" />
         <h2 className="text-lg font-medium text-text-primary">
           {localize('com_ui_ux_agentes_home_empty_title')}
         </h2>

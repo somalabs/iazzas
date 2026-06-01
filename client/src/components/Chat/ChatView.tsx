@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useAtom } from 'jotai';
 import { useForm } from 'react-hook-form';
@@ -40,9 +40,12 @@ function ChatView({ index = 0 }: { index?: number }) {
   const localize = useLocalize();
   const { conversationId } = useParams();
   const rootSubmission = useRecoilValue(store.submissionByIndex(index));
-  const centerFormOnLanding = useRecoilValue(store.centerFormOnLanding);
   const [atelierOpen, setAtelierOpen] = useAtom(atelierChatOpenAtom);
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
+
+  useEffect(() => {
+    setAtelierOpen(false);
+  }, [conversationId, setAtelierOpen]);
 
   const methods = useForm<ChatFormValues>({
     defaultValues: { text: '' },
@@ -83,7 +86,7 @@ function ChatView({ index = 0 }: { index?: number }) {
   } else if (!isLandingPage) {
     content = <MessagesView messagesTree={messagesTree} />;
   } else {
-    content = <Landing centerFormOnLanding={centerFormOnLanding} />;
+    content = <Landing />;
   }
 
   return (
@@ -99,7 +102,7 @@ function ChatView({ index = 0 }: { index?: number }) {
                   className={cn(
                     'flex flex-col',
                     isLandingPage
-                      ? 'relative isolate flex-1 items-center justify-end sm:justify-center'
+                      ? 'relative isolate h-full items-center overflow-y-auto pt-20'
                       : 'h-full overflow-y-auto',
                   )}
                 >
@@ -114,7 +117,7 @@ function ChatView({ index = 0 }: { index?: number }) {
                   {content}
                   <div
                     className={cn(
-                      'w-full',
+                      'mx-auto w-full',
                       isLandingPage && 'max-w-[760px] transition-all duration-200',
                     )}
                   >
@@ -130,6 +133,8 @@ function ChatView({ index = 0 }: { index?: number }) {
               <AtelierDrawer
                 open={atelierOpen}
                 title={localize('com_ui_atelier')}
+                hideTitle
+                headerClassName="h-[52px] px-4"
                 onClose={() => setAtelierOpen(false)}
                 overlay={isSmallScreen}
                 bodyClassName="p-0"

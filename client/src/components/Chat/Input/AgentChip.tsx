@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { isAgentsEndpoint } from 'librechat-data-provider';
 import type { MentionOption } from '~/common';
@@ -25,7 +25,7 @@ export default function AgentChip() {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
 
-  const { agentsList, presets, modelSpecs, endpointsConfig } = useMentions({
+  const { agentsList, presets, modelSpecs, endpointsConfig, options } = useMentions({
     assistantMap: assistantsMap || {},
     includeAssistants: false,
   });
@@ -40,13 +40,30 @@ export default function AgentChip() {
 
   const endpoint = conversation?.endpointType ?? conversation?.endpoint;
   const agentId = conversation?.agent_id;
+  const activeSpec = conversation?.spec;
+
+  const specOptions = useMemo(
+    () => (options ?? []).filter((o) => o.type === 'modelSpec'),
+    [options],
+  );
+
+  const items = useMemo(
+    () => [...specOptions, ...(agentsList ?? [])],
+    [specOptions, agentsList],
+  );
+
+  const isItemActive = useCallback(
+    (item: MentionOption) =>
+      item.type === 'modelSpec' ? item.value === activeSpec : item.value === agentId,
+    [activeSpec, agentId],
+  );
 
   const currentName = useMemo(() => {
-    const found = (agentsList ?? []).find((a) => a.value === agentId);
-    return found?.label ?? localize('com_ui_select_agent');
-  }, [agentsList, agentId, localize]);
+    const active = items.find((item) => isItemActive(item));
+    return active?.label ?? localize('com_ui_select_agent');
+  }, [items, isItemActive, localize]);
 
-  if (!isAgentsEndpoint(endpoint) || !agentsList || agentsList.length === 0) {
+  if (!isAgentsEndpoint(endpoint) || items.length === 0) {
     return null;
   }
 
@@ -88,27 +105,102 @@ export default function AgentChip() {
             className="fixed z-50 max-h-[60vh] w-[320px] overflow-y-auto rounded-[14px] border border-rule bg-paper p-2 shadow-atelier"
             style={{ top: coords.top, left: coords.left }}
           >
-            <div className="grid grid-cols-2 gap-2">
-              {agentsList.map((agent) => (
-                <button
-                  key={String(agent.value)}
-                  type="button"
-                  role="option"
-                  aria-selected={agent.value === agentId}
-                  onClick={() => pick(agent as MentionOption)}
-                  className={cn(
-                    'flex items-center gap-2 rounded-lg border bg-canvas p-2 text-left transition-colors hover:border-action/40',
-                    agent.value === agentId ? 'border-action' : 'border-rule',
-                  )}
-                >
-                  <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full">
-                    {agent.icon}
-                  </span>
-                  <span className="line-clamp-2 text-xs font-medium text-text-primary">
-                    {agent.label}
-                  </span>
-                </button>
-              ))}
+            <div className="flex flex-col gap-2">
+              <div>
+                <div className="px-1 pb-0.5 text-[11px] font-semibold text-text-tertiary">
+                  Modelos IAzzas
+                </div>
+                <div className="flex flex-col gap-1">
+                  {specOptions.map((item) => {
+                    const isPro = String(item.label).toLowerCase().includes('pro');
+                    return (
+                      <button
+                        key={`model-${String(item.value)}`}
+                        type="button"
+                        onClick={() => pick(item as MentionOption)}
+                        className={cn(
+                          'flex w-full items-center gap-2.5 rounded-[10px] border px-2 py-1.5 text-left transition-colors',
+                          isItemActive(item)
+                            ? 'border-action bg-paper'
+                            : 'border-transparent hover:bg-surface-hover',
+                        )}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            'flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-[9px] transition-colors',
+                            isItemActive(item)
+                              ? 'bg-action text-on-action'
+                              : 'bg-[var(--azzas-blue-light)] text-action',
+                          )}
+                        >
+                          {isPro ? (
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M4 19V11" />
+                              <path d="M10 19V5" />
+                              <path d="M16 19v-9" />
+                              <path d="M22 19V8" />
+                            </svg>
+                          ) : (
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z" />
+                            </svg>
+                          )}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-text-primary">
+                          {item.label}
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            'h-[7px] w-[7px] flex-shrink-0 rounded-full bg-action transition-opacity',
+                            isItemActive(item) ? 'opacity-100' : 'opacity-0',
+                          )}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              {agentsList && agentsList.length > 0 && (
+                <div>
+                  <div className="px-1 pb-0.5 text-[11px] font-semibold text-text-tertiary">
+                    Seus agentes
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {agentsList.map((item) => (
+                      <button
+                        key={`agent-${String(item.value)}`}
+                        type="button"
+                        onClick={() => pick(item as MentionOption)}
+                        className={cn(
+                          'flex w-full items-center gap-2.5 rounded-[10px] border px-2 py-1.5 text-left transition-colors',
+                          isItemActive(item)
+                            ? 'border-action bg-paper'
+                            : 'border-transparent hover:bg-surface-hover',
+                        )}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-surface-hover text-[12px] font-bold text-text-secondary"
+                        >
+                          {String(item.label).trim().charAt(0).toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-text-primary">
+                          {item.label}
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            'h-[7px] w-[7px] flex-shrink-0 rounded-full bg-action transition-opacity',
+                            isItemActive(item) ? 'opacity-100' : 'opacity-0',
+                          )}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </>

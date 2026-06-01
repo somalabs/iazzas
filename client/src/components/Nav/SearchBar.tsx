@@ -13,12 +13,11 @@ type SearchBarProps = {
   isSmallScreen?: boolean;
 };
 
-const SearchBar = forwardRef((props: SearchBarProps, ref: React.Ref<HTMLDivElement>) => {
+const SearchBar = forwardRef((_props: SearchBarProps, ref: React.Ref<HTMLDivElement>) => {
   const localize = useLocalize();
   const location = useLocation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { isSmallScreen } = props;
 
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -109,16 +108,16 @@ const SearchBar = forwardRef((props: SearchBarProps, ref: React.Ref<HTMLDivEleme
   return (
     <div
       ref={ref}
-      className="group relative flex h-9 min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg border-2 border-transparent px-3 py-1.5 text-text-primary focus-within:border-ring-primary focus-within:bg-surface-active-alt hover:bg-surface-active-alt"
+      className="group relative my-4 flex h-10 min-w-0 flex-1 items-center gap-2.5 rounded-[10px] border border-rule bg-canvas px-3.5 transition duration-200 ease-out hover:border-ink-700 focus-within:border-action focus-within:bg-paper focus-within:shadow-[0_0_0_3px_rgba(39,69,102,0.10)]"
     >
       <Search
         aria-hidden="true"
-        className="absolute left-3 h-4 w-4 text-text-secondary group-focus-within:text-text-primary group-hover:text-text-primary"
+        className="h-4 w-4 shrink-0 text-text-secondary transition-colors group-focus-within:text-action"
       />
       <input
         type="text"
         ref={inputRef}
-        className="m-0 mr-0 w-full border-none bg-transparent p-0 pl-7 text-sm leading-tight placeholder-text-secondary placeholder-opacity-100 focus-visible:outline-none group-focus-within:placeholder-text-primary group-hover:placeholder-text-primary"
+        className="m-0 w-full min-w-0 border-none bg-transparent p-0 text-sm leading-tight text-text-primary placeholder-text-secondary placeholder-opacity-100 focus-visible:outline-none"
         value={text}
         onChange={onChange}
         onKeyDown={(e) => {
@@ -136,15 +135,14 @@ const SearchBar = forwardRef((props: SearchBarProps, ref: React.Ref<HTMLDivEleme
         type="button"
         aria-label={localize('com_ui_clear_search')}
         className={cn(
-          'absolute right-[7px] flex h-5 w-5 items-center justify-center rounded-full border-none bg-transparent p-0 transition-opacity duration-200',
+          'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-none bg-transparent p-0 text-text-secondary transition-opacity duration-200',
           showClearIcon ? 'opacity-100' : 'opacity-0',
-          isSmallScreen === true ? 'right-[16px]' : '',
         )}
         onClick={() => clearText(location.pathname)}
         tabIndex={showClearIcon ? 0 : -1}
         disabled={!showClearIcon}
       >
-        <X className="h-5 w-5 cursor-pointer" aria-hidden="true" />
+        <X className="h-4 w-4 cursor-pointer" aria-hidden="true" />
       </button>
     </div>
   );

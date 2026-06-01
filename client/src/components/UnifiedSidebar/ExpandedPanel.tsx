@@ -1,7 +1,8 @@
 import { memo, lazy, Suspense, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SystemRoles } from 'librechat-data-provider';
-import { Skeleton, Sidebar, Button, TooltipAnchor } from '@librechat/client';
+import { PanelLeft } from 'lucide-react';
+import { Skeleton, Button, TooltipAnchor } from '@librechat/client';
 import type { NavLink } from '~/common';
 import { CLOSE_SIDEBAR_ID } from '~/components/Chat/Menus/OpenSidebar';
 import { useGoToNewChat, useLocalize } from '~/hooks';
@@ -92,17 +93,17 @@ function ExpandedPanel({
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
 
   const steelToggle = (
-    <Button
+    <button
+      type="button"
       id={expanded ? CLOSE_SIDEBAR_ID : undefined}
       data-testid={expanded ? 'close-sidebar-button' : 'open-sidebar-button'}
-      variant="ghost"
       aria-label={localize(toggleLabel)}
       aria-expanded={expanded}
-      className="flex h-8 w-8 items-center justify-center rounded-md text-ink-700 hover:bg-canvas hover:text-ink-900"
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
       onClick={onToggle}
     >
-      <Sidebar aria-hidden="true" className="h-5 w-5" />
-    </Button>
+      <PanelLeft aria-hidden="true" className="h-5 w-5" />
+    </button>
   );
 
   return (

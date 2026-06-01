@@ -1,6 +1,7 @@
 import { startTransition } from 'react';
 import { useSetRecoilState } from 'recoil';
-import { TooltipAnchor, Button, Sidebar } from '@librechat/client';
+import { PanelLeft } from 'lucide-react';
+import { TooltipAnchor } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import store from '~/store';
@@ -25,22 +26,21 @@ export default function OpenSidebar({ className }: { className?: string }) {
     <TooltipAnchor
       description={localize('com_nav_open_sidebar')}
       render={
-        <Button
+        <button
+          type="button"
           id={OPEN_SIDEBAR_ID}
-          size="icon"
-          variant="outline"
           data-testid="open-sidebar-button"
           aria-label={localize('com_nav_open_sidebar')}
           aria-expanded={false}
           aria-controls="chat-history-nav"
           className={cn(
-            'rounded-xl bg-presentation duration-0 hover:bg-surface-active-alt',
+            'flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary',
             className,
           )}
           onClick={handleClick}
         >
-          <Sidebar className="icon-md" aria-hidden="true" />
-        </Button>
+          <PanelLeft className="h-5 w-5" aria-hidden="true" />
+        </button>
       }
     />
   );

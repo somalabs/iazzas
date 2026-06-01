@@ -1,5 +1,5 @@
 import React from 'react';
-import { ManequimIcon } from '~/components/icons/fashion';
+import { Bot } from 'lucide-react';
 import { isAgentsEndpoint, isAssistantsEndpoint } from 'librechat-data-provider';
 import type {
   TModelSpec,
@@ -147,7 +147,7 @@ export function getSelectedIcon({
 
     return (
       selectedEndpoint.icon ||
-      React.createElement(ManequimIcon, {
+      React.createElement(Bot, {
         className: 'icon-md shrink-0 text-text-primary',
       })
     );

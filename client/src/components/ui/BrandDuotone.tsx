@@ -41,8 +41,11 @@ export default function BrandDuotone({
       />
       {/* Sombras viram navy → leitura de duotone */}
       <div className="absolute inset-0 bg-action mix-blend-multiply" style={{ opacity: imageOpacity }} />
-      {/* Dissolve no creme, ancorando o material no terço inferior */}
-      {fade && <div className="absolute inset-0 bg-gradient-to-t from-transparent via-canvas/60 to-canvas" />}
+      {/* Dissolve no creme em ambas as bordas: o material vive no terço inferior
+          mas nunca encosta numa borda dura — sem emenda visível ao rolar */}
+      {fade && (
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,var(--canvas),transparent_18%,transparent_52%,var(--canvas))]" />
+      )}
     </div>
   );
 }

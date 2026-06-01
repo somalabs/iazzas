@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useGetModelsQuery } from 'librechat-data-provider/react-query';
 import {
+  Constants,
   Permissions,
   alternateName,
   PermissionBits,
@@ -143,6 +144,9 @@ export default function useMentions({
      */
     return specs.filter((spec) => {
       if (spec.preset?.endpoint === EModelEndpoint.agents && spec.preset?.agent_id) {
+        if (spec.preset.agent_id === Constants.EPHEMERAL_AGENT_ID) {
+          return true;
+        }
         return spec.preset.agent_id in agentsMap;
       }
       /** Keep non-agent modelSpecs */
