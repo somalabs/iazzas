@@ -80,7 +80,10 @@ function Header({
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <Button onClick={onCreate}>
+        <Button
+          onClick={onCreate}
+          className="bg-action text-on-action hover:bg-action-hover"
+        >
           <Plus className="size-4" />
           {localize('com_ui_ux_flows_home_create')}
         </Button>

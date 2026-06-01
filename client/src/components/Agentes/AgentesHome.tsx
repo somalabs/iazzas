@@ -87,7 +87,10 @@ function Header({
           <Compass className="size-4" />
           {localize('com_ui_ux_agentes_home_explore')}
         </Button>
-        <Button onClick={onCreate}>
+        <Button
+          onClick={onCreate}
+          className="bg-action text-on-action hover:bg-action-hover"
+        >
           <Plus className="size-4" />
           {localize('com_ui_ux_agentes_home_create')}
         </Button>
