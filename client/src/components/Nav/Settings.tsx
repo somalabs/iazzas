@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { SettingsTabValues, PermissionTypes, Permissions } from 'librechat-data-provider';
-import { MessageSquare, DollarSign } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
-import { GearIcon, DataIcon, UserIcon, MCPIcon, useMediaQuery } from '@librechat/client';
+import { GearIcon, UserIcon, MCPIcon, useMediaQuery } from '@librechat/client';
 import type { TDialogProps } from '~/common';
 import MCPBuilderPanel from '~/components/SidePanel/MCPBuilder/MCPBuilderPanel';
 import { General, Chat, Data, Balance, Account } from './SettingsTabs';
@@ -34,8 +34,6 @@ export default function Settings({
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const tabs: SettingsTabValues[] = [
       SettingsTabValues.GENERAL,
-      SettingsTabValues.CHAT,
-      SettingsTabValues.DATA,
       ...(startupConfig?.balance?.enabled ? [SettingsTabValues.BALANCE] : []),
       ...(showMCP ? [SettingsTabValues.MCP] : []),
       SettingsTabValues.ACCOUNT,
@@ -71,16 +69,6 @@ export default function Settings({
       value: SettingsTabValues.GENERAL,
       icon: <GearIcon />,
       label: 'com_nav_setting_general',
-    },
-    {
-      value: SettingsTabValues.CHAT,
-      icon: <MessageSquare className="icon-sm" aria-hidden="true" />,
-      label: 'com_nav_setting_chat',
-    },
-    {
-      value: SettingsTabValues.DATA,
-      icon: <DataIcon />,
-      label: 'com_nav_setting_data',
     },
     ...(startupConfig?.balance?.enabled
       ? [
@@ -206,12 +194,7 @@ export default function Settings({
                   <div className="flex-1 overflow-y-auto sm:w-full sm:max-w-none md:pr-0.5 md:pt-0.5">
                     <Tabs.Content value={SettingsTabValues.GENERAL} tabIndex={-1}>
                       <General />
-                    </Tabs.Content>
-                    <Tabs.Content value={SettingsTabValues.CHAT} tabIndex={-1}>
                       <Chat />
-                    </Tabs.Content>
-                    <Tabs.Content value={SettingsTabValues.DATA} tabIndex={-1}>
-                      <Data />
                     </Tabs.Content>
                     {startupConfig?.balance?.enabled && (
                       <Tabs.Content value={SettingsTabValues.BALANCE} tabIndex={-1}>
@@ -225,6 +208,7 @@ export default function Settings({
                     )}
                     <Tabs.Content value={SettingsTabValues.ACCOUNT} tabIndex={-1}>
                       <Account />
+                      <Data />
                     </Tabs.Content>
                   </div>
                 </Tabs.Root>
