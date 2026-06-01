@@ -169,6 +169,11 @@ export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: 
             onLineCountChange={handleLineCountChange}
           />
         )}
+        {!hasEntity && (
+          <div className="animate-fadeIn mt-3 text-center text-[15px] font-normal text-text-secondary">
+            {localize('com_ui_landing_subline')}
+          </div>
+        )}
         {description && (
           <div className="animate-fadeIn mt-4 max-w-md text-center text-sm font-normal text-text-primary">
             {description}

@@ -231,7 +231,7 @@ const ChatForm = memo(function ChatForm({
       onSubmit={methods.handleSubmit(submitMessage)}
       className={cn(
         'mx-auto flex w-full flex-row gap-3 transition-[max-width] duration-300 sm:px-2',
-        maximizeChatSpace ? 'max-w-full' : 'md:max-w-3xl xl:max-w-4xl',
+        maximizeChatSpace ? 'max-w-full' : 'md:max-w-[760px]',
         centerFormOnLanding &&
           (conversationId == null || conversationId === Constants.NEW_CONVO) &&
           !isSubmitting &&
@@ -263,11 +263,14 @@ const ChatForm = memo(function ChatForm({
           <div
             onClick={handleContainerClick}
             className={cn(
-              'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-3xl border pb-4 text-text-primary transition-all duration-200 sm:rounded-3xl sm:pb-0',
-              isTextAreaFocused ? 'shadow-lg' : 'shadow-md',
+              // Composer-herói: superfície paper (branca) flutuando sobre o creme,
+              // 14px raio, hairline quente, e a única elevação da tela (shadow atelier).
+              'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-[14px] border pb-4 text-text-primary shadow-atelier transition-all duration-200 sm:rounded-[14px] sm:pb-0',
+              // Anel terracota acende ao focar/digitar (status, nunca fill).
+              isTextAreaFocused && 'ring-1 ring-ember/70',
               isTemporary
-                ? 'border-violet-800/60 bg-violet-950/10'
-                : 'border-border-light bg-surface-chat',
+                ? 'border-dashed border-ink-500/40 bg-paper'
+                : 'border-rule bg-paper',
             )}
           >
             <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />

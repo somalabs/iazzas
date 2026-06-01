@@ -171,6 +171,10 @@ module.exports = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      boxShadow: {
+        // Atelier: única elevação flutuante (composer + gaveta) sobre o creme.
+        atelier: '0 1px 2px rgba(28,43,56,.04), 0 8px 24px rgba(28,43,56,.06)',
+      },
     },
   },
   plugins: [

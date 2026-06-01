@@ -104,7 +104,7 @@ function ChatView({ index = 0 }: { index?: number }) {
                   <div
                     className={cn(
                       'w-full',
-                      isLandingPage && 'max-w-3xl transition-all duration-200 xl:max-w-4xl',
+                      isLandingPage && 'max-w-[760px] transition-all duration-200',
                     )}
                   >
                     <ChatForm index={index} />
