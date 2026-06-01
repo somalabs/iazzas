@@ -16,9 +16,10 @@ const ROW_EXPANDED = 'h-auto justify-start gap-3 px-2 py-2';
 const ROW_COLLAPSED = 'h-9 w-9 justify-center p-0 hover:bg-surface-hover';
 const ICON_SLOT = 'flex h-6 w-6 flex-shrink-0 items-center justify-center';
 const ICON_HIGHLIGHT_EXPANDED = 'rounded-md transition-colors group-hover:bg-surface-hover h-8 w-8';
-// Terracota left marker (3px) + creme plate for the active nav item
+// Terracota left marker (3px) + creme plate for the active nav item.
+// F2: o marcador entra deslizando da esquerda (before:animate-marker-in).
 const ACTIVE_MARKER =
-  "relative bg-canvas text-action before:absolute before:content-[''] before:left-0 before:top-[15%] before:bottom-[15%] before:w-[3px] before:rounded-r-full before:bg-ember";
+  "relative bg-canvas text-action before:absolute before:content-[''] before:left-0 before:top-[15%] before:bottom-[15%] before:w-[3px] before:rounded-r-full before:bg-ember before:animate-marker-in";
 
 const NavRouteButton = memo(function NavRouteButton({
   link,

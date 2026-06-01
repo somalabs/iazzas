@@ -63,6 +63,11 @@ module.exports = {
           '0%': { opacity: '0', transform: 'scale(1.02)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        // F2: marcador ember da nav entra deslizando da esquerda (180ms).
+        markerIn: {
+          '0%': { opacity: '0', transform: 'translateX(-3px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out forwards',
@@ -76,6 +81,7 @@ module.exports = {
         shimmer: 'shimmer 1.6s ease-in-out infinite',
         'ember-pulse': 'emberPulse 1.4s ease-in-out infinite',
         'photo-reveal': 'photoReveal 240ms ease-out forwards',
+        'marker-in': 'markerIn 180ms ease-out',
       },
       colors: {
         gray: {
