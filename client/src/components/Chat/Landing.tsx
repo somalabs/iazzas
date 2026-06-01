@@ -1,28 +1,11 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { easings } from '@react-spring/web';
-import { EModelEndpoint } from 'librechat-data-provider';
-import { BirthdayIcon, TooltipAnchor, SplitText } from '@librechat/client';
-import { useChatContext, useAgentsMapContext, useAssistantsMapContext } from '~/Providers';
-import { useGetEndpointsQuery, useGetStartupConfig } from '~/data-provider';
-import ConvoIcon from '~/components/Endpoints/ConvoIcon';
+import { SplitText } from '@librechat/client';
+import { useGetStartupConfig } from '~/data-provider';
 import { useLocalize, useAuthContext } from '~/hooks';
-import { getIconEndpoint, getEntity } from '~/utils';
-
-const containerClassName =
-  'shadow-stroke relative flex h-full items-center justify-center rounded-full bg-white dark:bg-presentation dark:text-white text-black dark:after:shadow-none ';
-
-function getNameSizeClass(text: string | undefined | null) {
-  if (!text || text.length < 40) return 'text-2xl sm:text-4xl';
-  if (text.length < 70) return 'text-2xl sm:text-3xl';
-  return 'text-2xl';
-}
 
 export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: boolean }) {
-  const { conversation } = useChatContext();
-  const agentsMap = useAgentsMapContext();
-  const assistantMap = useAssistantsMapContext();
   const { data: startupConfig } = useGetStartupConfig();
-  const { data: endpointsConfig } = useGetEndpointsQuery();
   const { user } = useAuthContext();
   const localize = useLocalize();
 
@@ -31,28 +14,6 @@ export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: 
   const [contentHeight, setContentHeight] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const endpointType = useMemo(() => {
-    let ep = conversation?.endpoint ?? '';
-    if (ep === EModelEndpoint.azureOpenAI) {
-      ep = EModelEndpoint.openAI;
-    }
-    return getIconEndpoint({
-      endpointsConfig,
-      iconURL: conversation?.iconURL,
-      endpoint: ep,
-    });
-  }, [conversation?.endpoint, conversation?.iconURL, endpointsConfig]);
-
-  const { entity, isAgent, isAssistant } = getEntity({
-    endpoint: endpointType,
-    agentsMap,
-    assistantMap,
-    agent_id: conversation?.agent_id,
-    assistant_id: conversation?.assistant_id,
-  });
-
-  const name = entity?.name ?? '';
-  const description = (entity?.description || conversation?.greeting) ?? '';
   const firstName = user?.name?.split(' ')[0] ?? '';
 
   const getGreeting = useCallback(() => {
@@ -87,13 +48,13 @@ export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: 
     if (contentRef.current) {
       setContentHeight(contentRef.current.offsetHeight);
     }
-  }, [lineCount, description]);
+  }, [lineCount]);
 
   const getDynamicMargin = useMemo(() => {
     let margin = 'mb-0';
-    if (lineCount > 2 || (description && description.length > 100)) {
+    if (lineCount > 2) {
       margin = 'mb-10';
-    } else if (lineCount > 1 || (description && description.length > 0)) {
+    } else if (lineCount > 1) {
       margin = 'mb-6';
     } else if (textHasMultipleLines) {
       margin = 'mb-4';
@@ -101,84 +62,34 @@ export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: 
     if (contentHeight > 200) margin = 'mb-16';
     else if (contentHeight > 150) margin = 'mb-12';
     return margin;
-  }, [lineCount, description, textHasMultipleLines, contentHeight]);
+  }, [lineCount, textHasMultipleLines, contentHeight]);
 
   const greetingText =
     typeof startupConfig?.interface?.customWelcome === 'string'
       ? getGreeting()
       : getGreeting() + (firstName ? `, ${firstName}.` : '.');
 
-  const hasEntity = ((isAgent || isAssistant) && !!name) || !!name;
-
   return (
     <div
       className={`flex h-full transform-gpu flex-col items-center justify-center pb-16 transition-all duration-200 ${centerFormOnLanding ? 'max-h-full sm:max-h-0' : 'max-h-full'} ${getDynamicMargin}`}
     >
       <div ref={contentRef} className="flex flex-col items-center gap-0 p-2">
-        {hasEntity ? (
-          <div
-            className={`flex ${textHasMultipleLines ? 'flex-col' : 'flex-col md:flex-row'} items-center justify-center gap-2`}
-          >
-            <div className={`relative size-10 justify-center ${textHasMultipleLines ? 'mb-2' : ''}`}>
-              <ConvoIcon
-                agentsMap={agentsMap}
-                assistantMap={assistantMap}
-                conversation={conversation}
-                endpointsConfig={endpointsConfig}
-                containerClassName={containerClassName}
-                context="landing"
-                className="h-2/3 w-2/3 text-black dark:text-white"
-                size={41}
-              />
-              {startupConfig?.showBirthdayIcon && (
-                <TooltipAnchor
-                  className="absolute bottom-[27px] right-2"
-                  description={localize('com_ui_happy_birthday')}
-                  aria-label={localize('com_ui_happy_birthday')}
-                >
-                  <BirthdayIcon />
-                </TooltipAnchor>
-              )}
-            </div>
-            <SplitText
-              key={`split-text-${name}`}
-              text={name}
-              className={`${getNameSizeClass(name)} font-editorial font-medium tracking-[-0.5px] text-text-primary`}
-              delay={50}
-              textAlign="center"
-              animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
-              animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
-              easing={easings.easeOutCubic}
-              threshold={0}
-              rootMargin="0px"
-              onLineCountChange={handleLineCountChange}
-            />
-          </div>
-        ) : (
-          <SplitText
-            key={`split-text-${greetingText}`}
-            text={greetingText}
-            className="font-editorial text-3xl font-medium tracking-[-0.5px] text-text-primary sm:text-4xl"
-            delay={50}
-            textAlign="center"
-            animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
-            animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
-            easing={easings.easeOutCubic}
-            threshold={0}
-            rootMargin="0px"
-            onLineCountChange={handleLineCountChange}
-          />
-        )}
-        {!hasEntity && (
-          <div className="animate-fadeIn mt-3 text-center text-[15px] font-normal text-text-secondary">
-            {localize('com_ui_landing_subline')}
-          </div>
-        )}
-        {description && (
-          <div className="animate-fadeIn mt-4 max-w-md text-center text-sm font-normal text-text-primary">
-            {description}
-          </div>
-        )}
+        <SplitText
+          key={`split-text-${greetingText}`}
+          text={greetingText}
+          className="font-editorial text-3xl font-medium tracking-[-0.5px] text-text-primary sm:text-4xl"
+          delay={50}
+          textAlign="center"
+          animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+          animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
+          easing={easings.easeOutCubic}
+          threshold={0}
+          rootMargin="0px"
+          onLineCountChange={handleLineCountChange}
+        />
+        <div className="animate-fadeIn mt-3 text-center text-[15px] font-normal text-text-secondary">
+          {localize('com_ui_landing_subline')}
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { Bot } from 'lucide-react';
+import { ManequimIcon } from '~/components/icons/fashion';
 import { EModelEndpoint } from 'librechat-data-provider';
 import {
   GPTIcon,
@@ -51,7 +51,7 @@ const AgentAvatar = ({ className = '', avatar = '', agentName, size }: AgentIcon
     );
   }
 
-  return <Bot className={cn(agentName === '' ? 'icon-2xl' : '', className)} size={size} />;
+  return <ManequimIcon className={cn(agentName === '' ? 'icon-2xl' : '', className)} />;
 };
 
 const Bedrock = ({ className = '' }: IconMapProps) => {

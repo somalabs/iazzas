@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Bot } from 'lucide-react';
 import { Skeleton } from '@librechat/client';
+import { ManequimIcon } from '~/components/icons/fashion';
 import type t from 'librechat-data-provider';
 
 /**
@@ -116,7 +116,7 @@ export const renderAgentAvatar = (
 
   return (
     <div className={`relative flex items-center justify-center ${sizeClasses[size]} ${className}`}>
-      <Bot className={`text-text-primary ${iconSizeClasses[size]}`} strokeWidth={1.5} />
+      <ManequimIcon className={`text-text-primary ${iconSizeClasses[size]}`} />
     </div>
   );
 };

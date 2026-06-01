@@ -91,14 +91,14 @@ function ExpandedPanel({
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
 
-  const navyToggle = (
+  const steelToggle = (
     <Button
       id={expanded ? CLOSE_SIDEBAR_ID : undefined}
       data-testid={expanded ? 'close-sidebar-button' : 'open-sidebar-button'}
       variant="ghost"
       aria-label={localize(toggleLabel)}
       aria-expanded={expanded}
-      className="flex h-8 w-8 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white"
+      className="flex h-8 w-8 items-center justify-center rounded-md text-ink-700 hover:bg-canvas hover:text-ink-900"
       onClick={onToggle}
     >
       <Sidebar aria-hidden="true" className="h-5 w-5" />
@@ -107,24 +107,24 @@ function ExpandedPanel({
 
   return (
     <div className="flex h-full w-full flex-shrink-0 flex-col border-r border-border-light">
-      {/* Navy brand band */}
-      <div className="flex h-[52px] flex-shrink-0 items-center border-b border-azzas-steel/40 bg-azzas-navy px-3">
+      {/* Paper-white brand band with navy wordmark + steel tagline */}
+      <div className="flex h-[52px] flex-shrink-0 items-center border-b border-rule bg-paper px-3">
         {expanded ? (
           <>
             <div className="flex flex-col gap-0.5">
               <img
-                src="assets/azzas-logo-dark.svg"
+                src="assets/azzas-logo-navy.svg"
                 alt="Azzas 2154"
                 className="h-[18px] w-auto"
               />
-              <span className="font-editorial text-[10px] italic leading-none text-white/50">
+              <span className="font-editorial text-[10px] italic leading-none text-ink-700">
                 Fashion &amp; Lifestyle
               </span>
             </div>
-            <div className="ml-auto">{navyToggle}</div>
+            <div className="ml-auto">{steelToggle}</div>
           </>
         ) : (
-          <TooltipAnchor side="right" description={localize(toggleLabel)} render={navyToggle} />
+          <TooltipAnchor side="right" description={localize(toggleLabel)} render={steelToggle} />
         )}
       </div>
 
