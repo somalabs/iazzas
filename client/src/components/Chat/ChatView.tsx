@@ -11,6 +11,7 @@ import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } fr
 import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers, useLocalize } from '~/hooks';
 import ConversationStarters from './Input/ConversationStarters';
 import StarterChips from './Input/StarterChips';
+import BrandDuotone from '~/components/ui/BrandDuotone';
 import { useGetMessagesByConvoId } from '~/data-provider';
 import ConversationsSection from '~/components/UnifiedSidebar/ConversationsSection';
 import AtelierDrawer from '~/components/ui/AtelierDrawer';
@@ -97,10 +98,18 @@ function ChatView({ index = 0 }: { index?: number }) {
                   className={cn(
                     'flex flex-col',
                     isLandingPage
-                      ? 'flex-1 items-center justify-end sm:justify-center'
+                      ? 'relative isolate flex-1 items-center justify-end sm:justify-center'
                       : 'h-full overflow-y-auto',
                   )}
                 >
+                  {isLandingPage && (
+                    <BrandDuotone
+                      src="/assets/brand/azzas-campaign-1.jpg"
+                      anchor="bottom"
+                      imageOpacity={0.08}
+                      className="-z-10"
+                    />
+                  )}
                   {content}
                   <div
                     className={cn(
