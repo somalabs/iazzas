@@ -10,6 +10,7 @@ import type { ChatFormValues } from '~/common';
 import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } from '~/Providers';
 import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers, useLocalize } from '~/hooks';
 import ConversationStarters from './Input/ConversationStarters';
+import StarterChips from './Input/StarterChips';
 import { useGetMessagesByConvoId } from '~/data-provider';
 import ConversationsSection from '~/components/UnifiedSidebar/ConversationsSection';
 import AtelierDrawer from '~/components/ui/AtelierDrawer';
@@ -108,6 +109,7 @@ function ChatView({ index = 0 }: { index?: number }) {
                     )}
                   >
                     <ChatForm index={index} />
+                    {isLandingPage && <StarterChips />}
                     {isLandingPage ? <ConversationStarters /> : <Footer />}
                   </div>
                 </div>
