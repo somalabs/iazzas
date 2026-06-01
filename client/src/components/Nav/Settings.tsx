@@ -136,14 +136,14 @@ export default function Settings({
           <div className={cn('fixed inset-0 flex w-screen items-center justify-center p-4')}>
             <DialogPanel
               className={cn(
-                'max-h-[90vh] overflow-hidden rounded-xl rounded-b-lg bg-background pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:w-[680px]',
+                'flex flex-col h-[80vh] max-h-[640px] overflow-hidden rounded-xl rounded-b-lg bg-paper pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:w-[680px]',
               )}
             >
               <DialogTitle
-                className="mb-1 flex items-center justify-between p-6 pb-5 text-left"
+                className="mb-1 flex items-center justify-between border-b border-rule p-6 pb-5 text-left"
                 as="div"
               >
-                <h2 className="text-lg font-medium leading-6 text-text-primary">
+                <h2 className="font-editorial text-lg font-medium leading-6 text-ink-900">
                   {localize('com_nav_settings')}
                 </h2>
                 <button
@@ -169,11 +169,11 @@ export default function Settings({
                   <span className="sr-only">{localize('com_ui_close_settings')}</span>
                 </button>
               </DialogTitle>
-              <div className="max-h-[calc(90vh-120px)] overflow-auto px-6 md:w-[680px]">
+              <div className="flex flex-1 flex-col overflow-hidden px-6 md:w-[680px]">
                 <Tabs.Root
                   value={activeTab}
                   onValueChange={handleTabChange}
-                  className="flex flex-col gap-10 md:flex-row"
+                  className="flex flex-1 flex-col gap-4 md:flex-row"
                   orientation="vertical"
                 >
                   <Tabs.List
@@ -181,7 +181,7 @@ export default function Settings({
                     className={cn(
                       'min-w-auto max-w-auto relative -ml-[8px] flex flex-shrink-0 flex-col flex-nowrap overflow-auto sm:max-w-none',
                       isSmallScreen
-                        ? 'flex-row rounded-xl bg-surface-secondary'
+                        ? 'flex-row rounded-lg bg-canvas'
                         : 'sticky top-0 h-full',
                     )}
                     onKeyDown={handleKeyDown}
@@ -190,10 +190,10 @@ export default function Settings({
                       <Tabs.Trigger
                         key={value}
                         className={cn(
-                          'group relative z-10 m-1 flex items-center justify-start gap-2 rounded-xl px-2 py-1.5 transition-all duration-200 ease-in-out',
+                          'group relative z-10 m-1 flex items-center justify-start gap-2 rounded-lg px-2 py-1.5 transition-all duration-200 ease-in-out',
                           isSmallScreen
-                            ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-text-secondary radix-state-active:bg-surface-hover radix-state-active:text-text-primary'
-                            : 'bg-transparent text-text-secondary radix-state-active:bg-surface-tertiary radix-state-active:text-text-primary',
+                            ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-ink-700 radix-state-active:bg-canvas radix-state-active:text-action'
+                            : 'relative bg-transparent text-ink-700 radix-state-active:bg-canvas radix-state-active:text-action radix-state-active:before:absolute radix-state-active:before:left-0 radix-state-active:before:top-[20%] radix-state-active:before:bottom-[20%] radix-state-active:before:w-1 radix-state-active:before:rounded-r-full radix-state-active:before:bg-ember',
                         )}
                         value={value}
                         ref={(el) => (tabRefs.current[value] = el)}
@@ -203,7 +203,7 @@ export default function Settings({
                       </Tabs.Trigger>
                     ))}
                   </Tabs.List>
-                  <div className="overflow-auto sm:w-full sm:max-w-none md:pr-0.5 md:pt-0.5">
+                  <div className="flex-1 overflow-y-auto sm:w-full sm:max-w-none md:pr-0.5 md:pt-0.5">
                     <Tabs.Content value={SettingsTabValues.GENERAL} tabIndex={-1}>
                       <General />
                     </Tabs.Content>

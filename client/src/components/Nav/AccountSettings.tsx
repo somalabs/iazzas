@@ -106,7 +106,7 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   }, [requestedTab, setRequestedTab]);
 
   return (
-    <Menu.MenuProvider placement={collapsed ? 'right-end' : undefined}>
+    <Menu.MenuProvider placement="top-end">
       <Menu.MenuButton
         ref={accountSettingsButtonRef}
         aria-label={localize('com_nav_account_settings')}
@@ -135,13 +135,14 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
       </Menu.MenuButton>
       <Menu.Menu
         portal
-        className="account-settings-popover popover-ui z-[125] w-[305px] rounded-lg md:w-[244px]"
+        className="z-[125] w-[305px] rounded-lg border border-rule bg-paper shadow-atelier md:w-[244px]"
         style={{
-          transformOrigin: collapsed ? 'left bottom' : 'bottom',
-          translate: collapsed ? '4px 0' : '0 -4px',
+          transformOrigin: 'bottom',
+          translate: '0 -4px',
         }}
       >
-        <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
+
+        <div className="ml-3 mr-2 py-2 text-sm text-ink-700" role="note">
           {user?.email ?? localize('com_nav_user')}
         </div>
         <DropdownMenuSeparator />
@@ -163,13 +164,13 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             setSettingsTab(undefined);
             setShowSettings(true);
           }}
-          className="select-item text-sm"
+          className="flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-md px-1 py-2 text-sm text-ink-700 hover:bg-canvas"
         >
           <GearIcon className="icon-md" aria-hidden="true" />
           {localize('com_nav_settings')}
         </Menu.MenuItem>
         <DropdownMenuSeparator />
-        <Menu.MenuItem onClick={() => logout()} className="select-item text-sm">
+        <Menu.MenuItem onClick={() => logout()} className="flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-md px-1 py-2 text-sm text-ink-700 hover:bg-canvas">
           <LogOut className="icon-md" aria-hidden="true" />
           {localize('com_nav_log_out')}
         </Menu.MenuItem>
