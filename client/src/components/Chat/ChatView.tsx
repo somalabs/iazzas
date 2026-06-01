@@ -11,6 +11,7 @@ import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } fr
 import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers, useLocalize } from '~/hooks';
 import ConversationStarters from './Input/ConversationStarters';
 import StarterChips from './Input/StarterChips';
+import RecentWork from './RecentWork';
 import BrandDuotone from '~/components/ui/BrandDuotone';
 import { useGetMessagesByConvoId } from '~/data-provider';
 import ConversationsSection from '~/components/UnifiedSidebar/ConversationsSection';
@@ -120,6 +121,7 @@ function ChatView({ index = 0 }: { index?: number }) {
                     <ChatForm index={index} />
                     {isLandingPage && <StarterChips />}
                     {isLandingPage ? <ConversationStarters /> : <Footer />}
+                    {isLandingPage && <RecentWork />}
                   </div>
                 </div>
                 {isLandingPage && <Footer />}
