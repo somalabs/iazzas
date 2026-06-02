@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { isAgentsEndpoint } from 'librechat-data-provider';
+import { Constants, isAgentsEndpoint } from 'librechat-data-provider';
 import type { MentionOption } from '~/common';
 import { useChatContext, useAssistantsMapContext } from '~/Providers';
 import useMentions from '~/hooks/Input/useMentions';
@@ -62,6 +62,12 @@ export default function AgentChip() {
     const active = items.find((item) => isItemActive(item));
     return active?.label ?? localize('com_ui_select_agent');
   }, [items, isItemActive, localize]);
+
+  // No fluxo de criação (chat com o agente construtor) trocar de agente não faz
+  // sentido — o composer é só para descrever o agente que está sendo criado.
+  if (agentId === Constants.CONSTRUTOR_AGENT_ID) {
+    return null;
+  }
 
   if (!isAgentsEndpoint(endpoint) || items.length === 0) {
     return null;
