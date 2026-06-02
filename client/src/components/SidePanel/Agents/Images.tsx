@@ -26,11 +26,31 @@ export function NoImage() {
   );
 }
 
-export const AgentAvatarRender = ({ url }: { url?: string }) => {
+export const AgentAvatarRender = ({
+  url,
+  icon,
+  iconColor,
+}: {
+  url?: string;
+  icon?: string;
+  iconColor?: string;
+}) => {
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => {
     setIsLoaded(false);
   }, [url]);
+
+  if (icon) {
+    return (
+      <div
+        className="flex h-20 w-20 items-center justify-center rounded-full text-3xl"
+        style={{ backgroundColor: iconColor ?? 'var(--azzas-navy)' }}
+        aria-hidden="true"
+      >
+        <span>{icon}</span>
+      </div>
+    );
+  }
 
   return (
     <div>
