@@ -14,7 +14,7 @@ import {
   isAssistantsEndpoint,
 } from 'librechat-data-provider';
 import type { FieldNamesMarkedBoolean, Path } from 'react-hook-form';
-import type { Agent } from 'librechat-data-provider';
+import type { Agent, AgentAvatar } from 'librechat-data-provider';
 import type { TranslationKeys } from '~/hooks/useLocalize';
 import type { AgentForm, StringOption } from '~/common';
 import {
@@ -35,7 +35,7 @@ import { useSelectAgent, useLocalize, useAuthContext } from '~/hooks';
 import { useAgentDraftContext } from '~/Providers';
 import { useAgentPanelContext } from '~/Providers/AgentPanelContext';
 import AgentPanelSkeleton from './AgentPanelSkeleton';
-import { Panel, isEphemeralAgent } from '~/common';
+import { Panel, isEphemeralAgent, AVATAR_SOURCE_ICON, DEFAULT_ICON_COLOR } from '~/common';
 import AgentConfig from './AgentConfig';
 import AgentSelect from './AgentSelect';
 import AgentFooter from './AgentFooter';
@@ -83,10 +83,23 @@ export function composeAgentUpdatePayload(data: AgentForm, agent_id?: string | n
     support_contact,
     tool_options,
     avatar_action: avatarActionState,
+    avatar_icon: avatarIcon,
+    avatar_icon_color: avatarIconColor,
   } = data;
 
   const shouldResetAvatar =
     avatarActionState === 'reset' && Boolean(agent_id) && !isEphemeralAgent(agent_id);
+  const avatarPatch: { avatar?: AgentAvatar | null } = avatarIcon
+    ? {
+        avatar: {
+          source: AVATAR_SOURCE_ICON,
+          icon: avatarIcon,
+          iconColor: avatarIconColor ?? DEFAULT_ICON_COLOR,
+        },
+      }
+    : shouldResetAvatar
+      ? { avatar: null }
+      : {};
   const model = _model ?? '';
   const provider =
     (typeof _provider === 'string' ? _provider : (_provider as StringOption).value) ?? '';
@@ -108,7 +121,7 @@ export function composeAgentUpdatePayload(data: AgentForm, agent_id?: string | n
       category,
       support_contact,
       tool_options,
-      ...(shouldResetAvatar ? { avatar: null } : {}),
+      ...avatarPatch,
     },
     provider,
     model,

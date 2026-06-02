@@ -9,6 +9,9 @@ import type {
 } from 'librechat-data-provider';
 import type { OptionWithIcon, ExtendedFile } from './types';
 
+export const AVATAR_SOURCE_ICON = 'icon';
+export const DEFAULT_ICON_COLOR = 'var(--azzas-navy)';
+
 export type AgentQueryResult = { found: true; agent: Agent } | { found: false };
 
 export type TAgentOption = OptionWithIcon &
