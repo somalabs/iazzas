@@ -100,6 +100,7 @@ const createMockResponse = (
         tools: [],
         instructions: '',
         avatar: null,
+        isPublic: true,
         provider: 'openai',
         model_parameters: {
           temperature: 0.7,
@@ -201,6 +202,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
       description: 'First test agent',
       avatar: { filepath: '/avatar1.png', source: 'local' },
       category: 'finance',
+      isPublic: true,
       authorName: 'Author 1',
       created_at: 1672531200000,
       instructions: null,
@@ -222,6 +224,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
       description: 'Second test agent',
       avatar: { filepath: '/avatar2.png', source: 'local' },
       category: 'finance',
+      isPublic: true,
       authorName: 'Author 2',
       created_at: 1672531200000,
       instructions: null,

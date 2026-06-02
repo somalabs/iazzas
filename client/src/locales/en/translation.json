@@ -857,6 +857,7 @@
   "com_ui_branch_message": "Create branch from this response",
   "com_ui_by_author": "by {{0}}",
   "com_ui_callback_url": "Callback URL",
+  "com_ui_public": "Public",
   "com_ui_cancel": "Cancel",
   "com_ui_cancelled": "Cancelled",
   "com_ui_category": "Category",

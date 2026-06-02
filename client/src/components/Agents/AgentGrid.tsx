@@ -75,10 +75,15 @@ const AgentGrid: React.FC<AgentGridProps> = ({
     isFetchingNextPage,
   } = useMarketplaceAgentsInfiniteQuery(queryParams);
 
-  // Flatten all pages into a single array of agents
+  // Flatten all pages into a single array of agents.
+  // The marketplace shows publicly-shared agents only. There is no server flag to
+  // return solely publicly-accessible agents (the list handler returns every agent
+  // the user can VIEW, tagging public ones with `isPublic`), so we filter client-side.
+  // Note: this can interact with cursor pagination — a page may render fewer than
+  // `limit` cards when it contains non-public agents the current user can also view.
   const currentAgents = useMemo(() => {
     if (!data?.pages) return [];
-    return data.pages.flatMap((page) => page.data || []);
+    return data.pages.flatMap((page) => (page.data || []).filter((agent) => agent.isPublic));
   }, [data?.pages]);
 
   // Check if we have meaningful data to prevent unnecessary loading states

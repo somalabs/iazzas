@@ -1251,6 +1251,7 @@
   "com_ui_branch_message": "Criar branch a partir desta resposta",
   "com_ui_by_author": "por {{0}}",
   "com_ui_change_version": "Mudar Versão",
+  "com_ui_public": "Público",
   "com_ui_chats": "Conversas",
   "com_ui_check_internet": "Verifique sua conexão com a internet",
   "com_ui_clear_browser_cache": "Limpe o cache do navegador",

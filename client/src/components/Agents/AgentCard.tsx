@@ -85,15 +85,22 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
           {/* Content */}
           <div className="flex min-w-0 flex-1 flex-col justify-center overflow-hidden">
             {/* Agent name */}
-            <Label className="line-clamp-2 text-base font-semibold text-text-primary md:text-lg">
-              {agent.name}
-            </Label>
+            <div className="flex items-center gap-2">
+              <Label className="line-clamp-2 text-base font-semibold text-[var(--azzas-navy)] md:text-lg">
+                {agent.name}
+              </Label>
+              {agent.isPublic && (
+                <span className="flex-shrink-0 rounded-md border border-border-light px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-token-text-secondary">
+                  {localize('com_ui_public')}
+                </span>
+              )}
+            </div>
 
             {/* Agent description */}
             {agent.description && (
               <p
                 id={`agent-${agent.id}-description`}
-                className="mt-0.5 line-clamp-2 text-sm leading-snug text-text-secondary md:line-clamp-5"
+                className="mt-0.5 line-clamp-2 text-sm leading-snug text-token-text-secondary md:line-clamp-5"
                 aria-label={localize('com_agents_description_card', {
                   description: agent.description,
                 })}
