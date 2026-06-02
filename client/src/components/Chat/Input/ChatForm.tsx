@@ -177,14 +177,7 @@ const ChatForm = memo(function ChatForm({
 
   useQueryParams({ textAreaRef });
 
-  const { ref, ...registerProps } = methods.register('text', {
-    required: true,
-    onChange: useCallback(
-      (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-        methods.setValue('text', e.target.value, { shouldValidate: true }),
-      [methods],
-    ),
-  });
+  const { ref, ...registerProps } = methods.register('text', { required: true });
 
   const textValue = useWatch({ control: methods.control, name: 'text' });
 
