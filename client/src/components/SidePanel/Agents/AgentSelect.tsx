@@ -84,6 +84,7 @@ function AgentSelect({
         avatar_file: null,
         avatar_preview: fullAgent.avatar?.filepath ?? '',
         avatar_action: null,
+        is_public: isGlobal,
       };
 
       Object.entries(fullAgent).forEach(([name, value]) => {

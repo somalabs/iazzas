@@ -23,6 +23,7 @@ import useAgentCapabilities from '~/hooks/Agents/useAgentCapabilities';
 import { useFileMapContext, useAgentPanelContext } from '~/Providers';
 import AgentCategorySelector from './AgentCategorySelector';
 import MemoizedAvatar from './AgentAvatar';
+import VisibilityToggle from './VisibilityToggle';
 import { useLocalize, useVisibleTools } from '~/hooks';
 import { useGetAgentFiles } from '~/data-provider';
 import MaxAgentSteps from './Advanced/MaxAgentSteps';
@@ -196,6 +197,7 @@ export default function AgentConfig() {
                 </>
               )}
             />
+            <VisibilityToggle />
           </div>
         </div>
         {/* Instructions */}

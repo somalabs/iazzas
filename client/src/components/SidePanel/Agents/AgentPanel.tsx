@@ -8,11 +8,13 @@ import {
   Tools,
   SystemRoles,
   ResourceType,
+  AccessRoleIds,
   EModelEndpoint,
   PermissionBits,
   AgentCapabilities,
   isAssistantsEndpoint,
 } from 'librechat-data-provider';
+import { useUpdateResourcePermissionsMutation } from 'librechat-data-provider/react-query';
 import type { FieldNamesMarkedBoolean, Path } from 'react-hook-form';
 import type { Agent, AgentAvatar } from 'librechat-data-provider';
 import type { TranslationKeys } from '~/hooks/useLocalize';
@@ -492,6 +494,8 @@ export default function AgentPanel() {
     },
   });
 
+  const updatePermissionsMutation = useUpdateResourcePermissionsMutation();
+
   const create = useCreateAgentMutation({
     onSuccess: async (data) => {
       setCurrentAgentId(data.id);
@@ -500,6 +504,29 @@ export default function AgentPanel() {
           data.name ?? localize('com_ui_agent')
         }`,
       });
+
+      if (getValues('is_public') === true && data._id) {
+        updatePermissionsMutation.mutate(
+          {
+            resourceType: ResourceType.AGENT,
+            resourceId: data._id,
+            data: {
+              updated: [],
+              removed: [],
+              public: true,
+              publicAccessRoleId: AccessRoleIds.AGENT_VIEWER,
+            },
+          },
+          {
+            onError: () => {
+              showToast({
+                message: localize('com_ui_permissions_failed_update'),
+                status: 'error',
+              });
+            },
+          },
+        );
+      }
 
       try {
         await handleAvatarUpload(data.id);

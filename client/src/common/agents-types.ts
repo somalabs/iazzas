@@ -49,6 +49,8 @@ export type AgentForm = {
   recursion_limit?: number;
   support_contact?: SupportContact;
   category: string;
+  /** User-controlled marketplace visibility, mapped to the public SHARE_PUBLIC ACL. */
+  is_public?: boolean;
   // Avatar management fields
   avatar_file?: File | null;
   avatar_preview?: string | null;

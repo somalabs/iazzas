@@ -75,6 +75,7 @@ export const getDefaultAgentFormValues = () => ({
   avatar_action: null,
   avatar_icon: null,
   avatar_icon_color: null,
+  is_public: false,
 });
 
 export const processAgentOption = ({

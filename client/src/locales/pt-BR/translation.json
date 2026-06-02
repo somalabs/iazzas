@@ -625,6 +625,8 @@
   "com_ui_agent_version_history": "Histórico de Versões",
   "com_ui_agent_version_no_date": "Data não disponível",
   "com_ui_agent_version_unknown_date": "Data desconhecida",
+  "com_ui_agent_visible_marketplace": "Visível no marketplace",
+  "com_ui_agent_visible_marketplace_desc": "Qualquer pessoa pode encontrar e usar este agente",
   "com_ui_agents": "Agentes",
   "com_ui_agents_allow_create": "Permitir a criação de agentes",
   "com_ui_agents_allow_use": "Permitir o uso de agentes",
