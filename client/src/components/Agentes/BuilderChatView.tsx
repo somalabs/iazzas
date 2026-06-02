@@ -14,6 +14,7 @@ import { useGetMessagesByConvoId } from '~/data-provider';
 import { useAgentDraftContext } from '~/Providers/AgentDraftContext';
 import MessagesView from '~/components/Chat/Messages/MessagesView';
 import ChatForm from '~/components/Chat/Input/ChatForm';
+import BuilderEmptyState from './BuilderEmptyState';
 import store from '~/store';
 
 const BUILDER_CHAT_INDEX = 3;
@@ -94,7 +95,7 @@ export default function BuilderChatView({
               {messagesTree != null ? (
                 <MessagesView messagesTree={messagesTree} />
               ) : (
-                <div className="flex h-full items-center justify-center" />
+                <BuilderEmptyState />
               )}
             </div>
             <ChatForm index={BUILDER_CHAT_INDEX} />

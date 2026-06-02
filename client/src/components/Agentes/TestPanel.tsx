@@ -12,7 +12,7 @@ export default function TestPanel() {
     <div className="flex h-full flex-col border-l border-border-medium">
       {/* Ephemeral badge */}
       <div className="flex justify-center py-1.5">
-        <span className="rounded-full border border-yellow-400 bg-yellow-50 px-3 py-0.5 text-xs text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300">
+        <span className="rounded-full border border-border-light bg-surface-secondary px-3 py-0.5 text-xs text-text-secondary">
           {localize('com_ui_ux_rascunho_efemero')}
         </span>
       </div>

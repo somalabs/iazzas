@@ -48,6 +48,10 @@ jest.mock('~/components/Chat/Input/ChatForm', () => ({
   __esModule: true,
   default: () => <div data-testid="chat-form" />,
 }));
+jest.mock('../BuilderEmptyState', () => ({
+  __esModule: true,
+  default: () => <div data-testid="builder-empty-state" />,
+}));
 jest.mock('~/Providers/AgentDraftContext', () => ({
   useAgentDraftContext: () => ({
     setDraftParams: jest.fn(),

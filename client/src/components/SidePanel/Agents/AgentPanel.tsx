@@ -695,7 +695,7 @@ export default function AgentPanel() {
                 onClick={() => setCreationMode('manual')}
                 className={`px-3 py-2 text-sm transition-colors ${
                   creationMode === 'manual'
-                    ? 'border-b-2 border-green-500 font-semibold text-green-600'
+                    ? 'border-b-2 border-[var(--azzas-navy)] font-semibold text-[var(--azzas-navy)]'
                     : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
@@ -706,7 +706,7 @@ export default function AgentPanel() {
                 onClick={() => setCreationMode('prompt')}
                 className={`px-3 py-2 text-sm transition-colors ${
                   creationMode === 'prompt'
-                    ? 'border-b-2 border-green-500 font-semibold text-green-600'
+                    ? 'border-b-2 border-[var(--azzas-navy)] font-semibold text-[var(--azzas-navy)]'
                     : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
