@@ -364,8 +364,8 @@ describe('Accessibility Improvements', () => {
           pages: [
             {
               data: [
-                { id: '1', name: 'Agent 1', description: 'First agent' },
-                { id: '2', name: 'Agent 2', description: 'Second agent' },
+                { id: '1', name: 'Agent 1', description: 'First agent', isPublic: true },
+                { id: '2', name: 'Agent 2', description: 'Second agent', isPublic: true },
               ],
             },
           ],
