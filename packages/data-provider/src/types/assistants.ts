@@ -636,8 +636,10 @@ export type AssistantDocument = {
 /* Agent types */
 
 export type AgentAvatar = {
-  filepath: string;
+  filepath?: string;
   source: string;
+  icon?: string;
+  iconColor?: string;
 };
 
 export enum FilePurpose {

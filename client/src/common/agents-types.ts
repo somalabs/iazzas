@@ -50,4 +50,6 @@ export type AgentForm = {
   avatar_file?: File | null;
   avatar_preview?: string | null;
   avatar_action?: 'upload' | 'reset' | null;
+  avatar_icon?: string | null;
+  avatar_icon_color?: string | null;
 } & TAgentCapabilities;
