@@ -346,7 +346,7 @@ const updateAgentHandler = async (req, res) => {
   try {
     const id = req.params.id;
     const validatedData = agentUpdateSchema.parse(req.body);
-    // Preserve explicit null for avatar to allow resetting the avatar
+    // Include avatar when explicitly provided (null resets it, object sets it)
     const { avatar: avatarField, _id, ...rest } = validatedData;
     const updateData = removeNullishValues(rest);
 
@@ -354,7 +354,7 @@ const updateAgentHandler = async (req, res) => {
       updateData.model_parameters = removeNullishValues(updateData.model_parameters, true);
     }
 
-    if (avatarField === null) {
+    if (avatarField !== undefined) {
       updateData.avatar = avatarField;
     }
 
