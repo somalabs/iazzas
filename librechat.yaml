@@ -40,6 +40,8 @@ modelSpecs:
         - "azzas_devolucoes"
         - "azzas_ciclo"
         - "azzas_clientes"
+        - "azzas_midia_crm"
+        - "azzas_people_rh"
       tools:
         - "web_search"
         - "gemini_image_gen"
@@ -90,6 +92,8 @@ modelSpecs:
         - "azzas_devolucoes"
         - "azzas_ciclo"
         - "azzas_clientes"
+        - "azzas_midia_crm"
+        - "azzas_people_rh"
       tools:
         - "web_search"
         - "gemini_image_gen"
@@ -327,6 +331,55 @@ mcpServers:
       • "Cluster de frequência por marca no ano de competência"
 
       ⚠ A receita aqui não bate com Vendas Linx por desenho: marketplaces (ex.: Mercado Livre) geram receita para a Azzas mas o cliente final pertence ao marketplace e fica fora deste universo.
+    iconPath: "/assets/a2154.png"
+  azzas_midia_crm:
+    type: streamable-http
+    url: https://agent-midia-e-crm-production.up.railway.app/mcp
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
+    timeout: 60000
+    title: "Mídia & CRM"
+    description: |
+      Cruza mídia paga e CRM multicanal das marcas do grupo direto do chat, sobre os projetos de BI de marketing (soma-crm-bi, soma-bi-ga4, soma-dl-refined-online).
+
+      O que entrega:
+      • Mídia paga (Google Ads via GA4 e histórico GA3): investimento, impressões, cliques, sessões, transações e receita por marca, campanha, veículo e canal — com custo já convertido de USD para BRL e ROAS/ROI calculados
+      • CRM multicanal: e-mail (Dito), push, SMS e WhatsApp — funil de mensageria, conversão e ROI por canal
+      • Segmentação de base (McKinsey) e clientes ativos sob a ótica de performance de marketing
+      • Receita e segmentação de vendas online
+
+      Dimensões: marca, campanha, grupo de anúncio, veículo/canal de mídia, plataforma (web/app), período.
+
+      Exemplos:
+      • "ROAS da Farm em Google Ads no último trimestre, por campanha"
+      • "Investimento total de mídia paga por marca em outubro, em reais"
+      • "ROI dos disparos de e-mail Dito da Animale no mês"
+      • "Funil de mensageria push vs. e-mail nas últimas 4 semanas"
+    iconPath: "/assets/a2154.png"
+  azzas_people_rh:
+    type: streamable-http
+    url: https://agent-people-rh-production.up.railway.app/mcp
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
+    timeout: 60000
+    title: "People / RH"
+    description: |
+      Consulta self-service do seu cadastro de colaborador a partir da sua matrícula — sem abrir chamado com o RH.
+
+      O que responde (sobre os seus próprios dados):
+      • Quem é a sua BP (Business Partner de RH) e o seu gestor
+      • Sua diretoria, área e lotação / centro de custo
+      • Data de admissão e tempo de casa
+      • Elegibilidade de férias (se já adquiriu o direito — 12 meses desde a admissão)
+
+      Como usar: informe a sua matrícula no chat e pergunte. Respostas são pontuais e individuais (sem listas, rankings ou relatórios).
+
+      Exemplos:
+      • "Minha matrícula é 12345, quem é minha BP?"
+      • "Qual a minha data de admissão e tempo de casa?"
+      • "Já tenho direito a férias?"
+
+      ⚠ Saldo de dias e férias já gozadas não estão nesta base — para isso, procure a sua BP.
     iconPath: "/assets/a2154.png"
 
   # MCPs externos SaaS — OAuth per-user com Dynamic Client Registration (RFC 7591).
