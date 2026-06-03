@@ -40,6 +40,7 @@ export default function StudioView() {
       <AtelierDrawer
         open={atelierOpen}
         title={localize('com_ui_atelier')}
+        hideTitle
         headerClassName="h-[52px] px-4"
         onClose={() => setAtelierOpen(false)}
         bodyClassName="p-0"

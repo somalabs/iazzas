@@ -1830,7 +1830,6 @@
   "com_automacoes_page_subtitle": "Agende seus flows para rodar automaticamente",
   "com_automacoes_empty_state": "Nada agendado ainda",
   "com_automacoes_select_or_create": "Selecione uma automação ou crie uma nova.",
-  "com_automacoes_back_to_list": "Voltar à lista",
   "com_automacoes_create_btn": "Nova automação",
   "com_automacoes_form_name_label": "Nome",
   "com_automacoes_form_name_placeholder": "Ex: Relatório semanal de coleção",

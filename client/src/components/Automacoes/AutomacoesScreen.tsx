@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react';
 import { useToastContext, useMediaQuery } from '@librechat/client';
 import {
   useAutomationsQuery,
@@ -7,7 +6,7 @@ import {
   useRunAutomationMutation,
   useDeleteAutomationMutation,
 } from '~/data-provider';
-import { useGoToNewChat, useLocalize } from '~/hooks';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { AutomacoesProvider, useAutomacoesContext } from './context';
 import ScreenHeader from '~/components/ui/ScreenHeader';
@@ -53,7 +52,6 @@ function AutomationsEmptyState({ canCreate, onCreate }: AutomationsEmptyStatePro
 
 function AutomacoesView() {
   const localize = useLocalize();
-  const goToNewChat = useGoToNewChat();
   const { showToast } = useToastContext();
   const { state, dispatch } = useAutomacoesContext();
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -116,19 +114,9 @@ function AutomacoesView() {
   const showEditor = state.isCreating || !!state.selectedId;
   const showEmptyState = automations.length === 0 && !showEditor;
 
-  const backToList = isMobile && showEditor;
-
   return (
     <div className="relative flex h-full flex-col">
       <ScreenHeader>
-        <button
-          type="button"
-          onClick={() => (backToList ? dispatch({ type: 'CANCEL' }) : goToNewChat())}
-          className="rounded-lg p-1.5 text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-          aria-label={backToList ? localize('com_automacoes_back_to_list') : 'Voltar ao chat'}
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        </button>
         <h1 className="text-sm font-semibold text-text-primary">
           {localize('com_automacoes_page_title')}
         </h1>
