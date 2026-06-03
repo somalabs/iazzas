@@ -207,59 +207,81 @@ html {
   --switch-unchecked: 0 0% 58%;
 }
 .dark {
-  --brand-purple: var(--azzas-blue-soft);
-  --presentation: var(--gray-800);
-  --text-primary: var(--white);
-  --text-secondary: var(--azzas-blue-light);
-  --text-secondary-alt: var(--azzas-ink-faint);
-  --text-tertiary: var(--azzas-ink-faint);
-  --text-warning: var(--amber-500);
-  --text-destructive: var(--red-600);
-  --header-primary: var(--azzas-navy);
-  --header-hover: var(--azzas-steel);
-  --header-button-hover: var(--azzas-navy);
-  --surface-active: var(--azzas-navy);
-  --surface-active-alt: var(--azzas-steel);
-  --surface-hover: var(--azzas-steel);
-  --surface-hover-alt: var(--azzas-steel);
-  --surface-primary: var(--gray-900);
-  --surface-primary-alt: var(--gray-850);
-  --surface-primary-contrast: var(--gray-850);
-  --surface-secondary: var(--gray-800);
-  --surface-secondary-alt: var(--gray-800);
-  --surface-tertiary: var(--azzas-navy);
-  --surface-tertiary-alt: var(--azzas-steel);
-  --surface-dialog: var(--gray-850);
-  --surface-submit: var(--azzas-blue-soft);
-  --surface-submit-hover: var(--azzas-blue-light);
-  --surface-destructive: var(--red-800);
-  --surface-destructive-hover: var(--red-900);
-  --surface-chat: var(--gray-700);
-  --border-light: var(--azzas-navy);
-  --border-medium-alt: var(--azzas-steel);
-  --border-medium: var(--azzas-steel);
-  --border-heavy: var(--azzas-ink-faint);
-  --border-xheavy: var(--azzas-blue-light);
-  --border-destructive: var(--red-500);
-  /* These are test styles */
+  /* Redesign — dark mode é o mesmo sistema do light, só que o navy vira clima.
+     Base navy-charcoal quente (NUNCA cinza puro de dev-tool, NUNCA navy saturado
+     como superfície). As bases abaixo viram a fonte de verdade; os tokens
+     derivados apontam pra elas, espelhando o bloco html{} do light. */
+  --canvas: #15191f; /* fundo do app / sidebar / chat — navy bem escuro, levemente quente */
+  --paper: #1c222b; /* cards/composer/header — um degrau acima do canvas */
+  --rule: #2d3640; /* hairline; navy dessaturado, nunca azzas-navy cheio */
+  --ink-900: #eef2f6; /* títulos / texto primário */
+  --ink-700: #aeb9c5; /* texto secundário, ícones em repouso */
+  --ink-500: #8a97a4; /* helper/caption/placeholder — passa 4.5:1 em canvas e paper */
+  --action: #3f72a8; /* navy mais claro p/ ler como ação sobre fundo escuro */
+  --action-hover: #4a80b8;
+  --on-action: #f5f9fd;
+  --ember: #d4694a; /* terracota um tom mais vivo p/ status ativo no escuro */
+  --focus-rgb: 122 162 207; /* navy claro em rgba(... / .x) — foco/seleção */
 
-  --background: 0 0% 7%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 14.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 14.9%;
-  --muted-foreground: 0 0% 63.9%;
-  --accent: 0 0% 14.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 40.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 14.9%;
-  --input: 0 0% 14.9%;
-  --ring: 0 0% 83.1%;
+  /* helpers de elevação só do escuro */
+  --raise-1: #242c36; /* hover/superfície de 2º nível (equivale ao surface-warm do light) */
+  --selection: #293a4d; /* item selecionado (equivale ao blue-light do light) */
+  --border-strong: #3a4654;
+
+  --brand-purple: var(--action);
+  --presentation: var(--canvas);
+  --text-primary: var(--ink-900);
+  --text-secondary: var(--ink-700);
+  --text-secondary-alt: var(--ink-700);
+  --text-tertiary: var(--ink-500);
+  --text-warning: var(--amber-400);
+  --text-destructive: var(--red-400);
+  --ring-primary: var(--action);
+  --header-primary: var(--paper);
+  --header-hover: var(--raise-1);
+  --header-button-hover: var(--raise-1);
+  --surface-active: var(--selection);
+  --surface-active-alt: var(--raise-1);
+  --surface-hover: var(--raise-1);
+  --surface-hover-alt: var(--selection);
+  --surface-primary: var(--canvas);
+  --surface-primary-alt: var(--canvas);
+  --surface-primary-contrast: var(--raise-1);
+  --surface-secondary: var(--canvas);
+  --surface-secondary-alt: var(--raise-1);
+  --surface-tertiary: var(--raise-1);
+  --surface-tertiary-alt: var(--paper);
+  --surface-dialog: var(--paper);
+  --surface-submit: var(--action);
+  --surface-submit-hover: var(--action-hover);
+  --surface-destructive: var(--red-700);
+  --surface-destructive-hover: var(--red-800);
+  --surface-chat: var(--canvas);
+  --border-light: var(--rule);
+  --border-medium-alt: var(--border-strong);
+  --border-medium: var(--border-strong);
+  --border-heavy: var(--ink-700);
+  --border-xheavy: var(--ink-900);
+  --border-destructive: var(--red-500);
+  /* These are test styles — alinhadas ao navy-charcoal acima */
+
+  --background: 214 19% 10%;
+  --foreground: 210 27% 95%;
+  --card: 215 21% 14%;
+  --card-foreground: 210 27% 95%;
+  --primary: 210 46% 46%;
+  --primary-foreground: 210 50% 98%;
+  --secondary: 214 16% 20%;
+  --secondary-foreground: 210 27% 95%;
+  --muted: 214 16% 18%;
+  --muted-foreground: 210 13% 60%;
+  --accent: 214 16% 20%;
+  --accent-foreground: 210 27% 95%;
+  --destructive: 0 62.8% 45%;
+  --destructive-foreground: 210 50% 98%;
+  --border: 214 16% 24%;
+  --input: 214 16% 24%;
+  --ring: 210 46% 55%;
   --chart-1: 220 70% 50%;
   --chart-2: 160 60% 45%;
   --chart-3: 30 80% 55%;
@@ -1591,8 +1613,7 @@ html {
 
 .dark body,
 .dark html {
-  --tw-bg-opacity: 1;
-  background-color: rgba(23, 23, 23, var(--tw-bg-opacity));
+  background-color: var(--canvas);
 }
 
 #__next,
@@ -1862,8 +1883,7 @@ html {
 }
 .dark body,
 .dark html {
-  --tw-bg-opacity: 1;
-  background-color: rgba(33, 33, 33, var(--tw-bg-opacity));
+  background-color: var(--canvas);
 }
 #__next,
 #root {
@@ -2256,7 +2276,7 @@ html {
 .dark .webkit-dark-styles:focus {
   -webkit-text-fill-color: #fff;
   background-clip: content-box;
-  -webkit-box-shadow: 0 0 0 50vh #0d0d0d inset;
+  -webkit-box-shadow: 0 0 0 50vh var(--canvas) inset;
 }
 
 /* Ordered Listing */

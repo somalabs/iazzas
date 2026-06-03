@@ -114,7 +114,16 @@ function ExpandedPanel({
         {expanded ? (
           <>
             <div className="flex flex-col gap-0.5">
-              <img src="assets/azzas-logo-navy.svg" alt="Azzas 2154" className="h-[18px] w-auto" />
+              <img
+                src="assets/azzas-logo-navy.svg"
+                alt="Azzas 2154"
+                className="h-[18px] w-auto dark:hidden"
+              />
+              <img
+                src="assets/azzas-logo-dark.svg"
+                alt="Azzas 2154"
+                className="hidden h-[18px] w-auto dark:block"
+              />
               <span className="font-editorial text-[10px] italic leading-none text-ink-700">
                 Fashion &amp; Lifestyle
               </span>
