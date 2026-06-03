@@ -533,6 +533,8 @@ mcpSettings:
     - analista-devolucoes-production.up.railway.app
     - agent-atacado-production.up.railway.app
     - agent-clientes-production.up.railway.app
+    - agent-midia-e-crm-production.up.railway.app
+    - agent-people-rh-production.up.railway.app
     - mcp.notion.com
     - mcp.atlassian.com
     - mcp.miro.com
