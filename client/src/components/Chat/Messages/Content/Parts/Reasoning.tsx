@@ -29,7 +29,7 @@ const Reasoning = memo(({ reasoning, isLast }: ReasoningProps) => {
   const { isSubmitting, isLatestMessage, nextType } = useMessageContext();
   const effectiveIsSubmitting = isLatestMessage ? isSubmitting : false;
   const isStreaming = Boolean(effectiveIsSubmitting && isLast);
-  const [isExpanded, setIsExpanded] = useState(() => isStreaming);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { style: expandStyle, ref: expandRef } = useExpandCollapse(isExpanded);
 
   useEffect(() => {
