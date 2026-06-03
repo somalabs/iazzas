@@ -9,6 +9,9 @@ import type {
 } from 'librechat-data-provider';
 import type { OptionWithIcon, ExtendedFile } from './types';
 
+export const AVATAR_SOURCE_ICON = 'icon';
+export const DEFAULT_ICON_COLOR = 'var(--azzas-navy)';
+
 export type AgentQueryResult = { found: true; agent: Agent } | { found: false };
 
 export type TAgentOption = OptionWithIcon &
@@ -46,8 +49,12 @@ export type AgentForm = {
   recursion_limit?: number;
   support_contact?: SupportContact;
   category: string;
+  /** User-controlled marketplace visibility, mapped to the public SHARE_PUBLIC ACL. */
+  is_public?: boolean;
   // Avatar management fields
   avatar_file?: File | null;
   avatar_preview?: string | null;
   avatar_action?: 'upload' | 'reset' | null;
+  avatar_icon?: string | null;
+  avatar_icon_color?: string | null;
 } & TAgentCapabilities;

@@ -2,9 +2,8 @@ import { useRef, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
 import { TextareaAutosize, TooltipAnchor } from '@librechat/client';
-import { useUpdateMessageMutation } from 'librechat-data-provider/react-query';
 import type { TEditProps } from '~/common';
-import { useMessagesOperations, useMessagesConversation } from '~/Providers';
+import { useMessagesOperations } from '~/Providers';
 import { useGetAddedConvo } from '~/hooks/Chat';
 import { cn, removeFocusRings } from '~/utils';
 import { useLocalize } from '~/hooks';
@@ -20,15 +19,12 @@ const EditMessage = ({
   siblingIdx,
   setSiblingIdx,
 }: TEditProps) => {
-  const saveButtonRef = useRef<HTMLButtonElement | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
-  const { conversation } = useMessagesConversation();
-  const { getMessages, setMessages } = useMessagesOperations();
+  const { getMessages } = useMessagesOperations();
 
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const { conversationId, parentMessageId, messageId } = message;
-  const updateMessageMutation = useUpdateMessageMutation(conversationId ?? '');
   const localize = useLocalize();
 
   const chatDirection = useRecoilValue(store.chatDirection).toLowerCase();
@@ -90,46 +86,11 @@ const EditMessage = ({
     enterEdit(true);
   };
 
-  const updateMessage = (data: { text: string }) => {
-    const messages = getMessages();
-    if (!messages) {
-      return;
-    }
-    updateMessageMutation.mutate({
-      conversationId: conversationId ?? '',
-      model: conversation?.model ?? 'gpt-3.5-turbo',
-      text: data.text,
-      messageId,
-    });
-
-    const isInMessages = messages.some((message) => message.messageId === messageId);
-    if (!isInMessages) {
-      message.text = data.text;
-    } else {
-      setMessages(
-        messages.map((msg) =>
-          msg.messageId === messageId
-            ? {
-                ...msg,
-                text: data.text,
-              }
-            : msg,
-        ),
-      );
-    }
-
-    enterEdit(true);
-  };
-
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         submitButtonRef.current?.click();
-      }
-      if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        saveButtonRef.current?.click();
       }
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -148,7 +109,7 @@ const EditMessage = ({
 
   return (
     <Container message={message}>
-      <div className="bg-token-main-surface-primary relative mt-2 flex w-full flex-grow flex-col overflow-hidden rounded-2xl border border-border-medium text-text-primary [&:has(textarea:focus)]:border-border-heavy [&:has(textarea:focus)]:shadow-[0_2px_6px_rgba(0,0,0,.05)]">
+      <div className="bg-token-main-surface-primary relative mt-2 flex w-full flex-grow flex-col overflow-hidden rounded-2xl border border-border-medium text-text-primary transition-shadow duration-150 [&:has(textarea:focus)]:border-action [&:has(textarea:focus)]:shadow-[0_0_0_3px_rgba(39,69,102,0.14)]">
         <TextareaAutosize
           {...registerProps}
           ref={(e) => {
@@ -169,38 +130,26 @@ const EditMessage = ({
           dir={isRTL ? 'rtl' : 'ltr'}
         />
       </div>
-      <div className="mt-2 flex w-full justify-center text-center">
+      <div className="mt-2 flex w-full flex-wrap items-center justify-end gap-2">
+        <span className="mr-auto hidden select-none text-xs text-text-tertiary sm:inline">
+          {localize('com_ui_edit_shortcut_hint')}
+        </span>
+        <button
+          className="btn relative bg-transparent text-text-secondary transition-colors hover:bg-surface-hover"
+          onClick={() => enterEdit(true)}
+        >
+          {localize('com_ui_cancel')}
+        </button>
         <TooltipAnchor
           description="Ctrl + Enter / ⌘ + Enter"
           render={
             <button
               ref={submitButtonRef}
-              className="btn btn-primary relative mr-2"
+              className="btn relative bg-action text-on-action transition-colors hover:bg-action-hover disabled:opacity-50"
               disabled={isSubmitting}
               onClick={handleSubmit(resubmitMessage)}
             >
-              {localize('com_ui_save_submit')}
-            </button>
-          }
-        />
-        <TooltipAnchor
-          description="Shift + Enter"
-          render={
-            <button
-              ref={saveButtonRef}
-              className="btn btn-secondary relative mr-2"
-              disabled={isSubmitting}
-              onClick={handleSubmit(updateMessage)}
-            >
-              {localize('com_ui_save')}
-            </button>
-          }
-        />
-        <TooltipAnchor
-          description="Esc"
-          render={
-            <button className="btn btn-neutral relative" onClick={() => enterEdit(true)}>
-              {localize('com_ui_cancel')}
+              {localize('com_ui_submit')}
             </button>
           }
         />

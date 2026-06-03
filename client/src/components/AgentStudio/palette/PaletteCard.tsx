@@ -6,16 +6,9 @@ type PaletteCardProps = {
   label: string;
   description: string;
   icon: React.ReactNode;
-  accentClass: string;
 };
 
-export default function PaletteCard({
-  nodeType,
-  label,
-  description,
-  icon,
-  accentClass,
-}: PaletteCardProps) {
+export default function PaletteCard({ nodeType, label, description, icon }: PaletteCardProps) {
   const onDragStart = (event: React.DragEvent) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
@@ -29,7 +22,8 @@ export default function PaletteCard({
       tabIndex={0}
       aria-label={`Arrastar nó ${label} para o canvas`}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') e.currentTarget.dispatchEvent(new DragEvent('dragstart'));
+        if (e.key === 'Enter' || e.key === ' ')
+          e.currentTarget.dispatchEvent(new DragEvent('dragstart'));
       }}
       className={cn(
         'flex cursor-grab items-center gap-2.5 rounded-lg border px-3 py-2',
@@ -37,7 +31,10 @@ export default function PaletteCard({
         'border-border-light hover:border-border-medium',
       )}
     >
-      <span className={cn('flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md', accentClass)} aria-hidden="true">
+      <span
+        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-surface-tertiary"
+        aria-hidden="true"
+      >
         {icon}
       </span>
       <div className="min-w-0">

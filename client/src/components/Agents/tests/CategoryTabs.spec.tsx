@@ -84,11 +84,9 @@ describe('CategoryTabs', () => {
     );
 
     const generalTab = screen.getByText('General').closest('button');
-    expect(generalTab).toHaveClass('bg-surface-hover');
-
-    // Should have active underline
-    const underline = generalTab?.querySelector('.absolute.bottom-0');
-    expect(underline).toBeInTheDocument();
+    // Active tab is filled navy with white text (Azzas restyle)
+    expect(generalTab).toHaveClass('bg-[var(--azzas-navy)]');
+    expect(generalTab).toHaveClass('text-white');
   });
 
   it('calls onChange when a tab is clicked', async () => {
@@ -150,12 +148,10 @@ describe('CategoryTabs', () => {
     );
 
     const generalTab = screen.getByText('General').closest('button');
-    expect(generalTab).toHaveClass('bg-surface-secondary');
-    expect(generalTab).toHaveClass('text-text-secondary');
-
-    // Should not have active underline
-    const underline = generalTab?.querySelector('.absolute.bottom-0');
-    expect(underline).not.toBeInTheDocument();
+    // Inactive tab uses warm surface with ink text (Azzas restyle)
+    expect(generalTab).toHaveClass('bg-[var(--azzas-surface-warm)]');
+    expect(generalTab).toHaveClass('text-text-primary');
+    expect(generalTab).not.toHaveClass('bg-[var(--azzas-navy)]');
   });
 
   it('renders with proper accessibility', () => {

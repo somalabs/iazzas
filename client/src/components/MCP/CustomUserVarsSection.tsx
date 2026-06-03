@@ -67,7 +67,7 @@ function AuthField({ name, config, hasValue, control, errors, autoFocus }: AuthF
         <div aria-hidden="true">
           {hasValue ? (
             <div className="flex min-w-fit items-center gap-2 whitespace-nowrap rounded-full border border-border-light px-2 py-0.5 text-xs font-medium text-text-secondary">
-              <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
+              <div className="h-1.5 w-1.5 rounded-full bg-[var(--azzas-navy)]" />
               <span>{localize('com_ui_set')}</span>
             </div>
           ) : (
@@ -97,13 +97,13 @@ function AuthField({ name, config, hasValue, control, errors, autoFocus }: AuthF
                 ? localize('com_ui_mcp_update_var', { 0: config.title })
                 : localize('com_ui_mcp_enter_var', { 0: config.title })
             }
-            className="w-full rounded border border-border-medium bg-transparent px-2 py-1 text-text-primary placeholder:text-text-secondary focus:outline-none sm:text-sm"
+            className="w-full rounded-md border border-border-light bg-surface-primary px-3 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--azzas-navy)] sm:text-sm"
           />
         )}
       />
       {sanitizedDescription && (
         <p
-          className="text-xs text-text-secondary [&_a]:text-blue-500 [&_a]:hover:underline"
+          className="text-xs text-text-secondary [&_a]:text-[var(--azzas-navy)] [&_a]:hover:underline"
           dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
         />
       )}

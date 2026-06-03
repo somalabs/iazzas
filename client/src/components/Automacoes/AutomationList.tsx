@@ -11,6 +11,7 @@ import {
   History,
 } from 'lucide-react';
 import { useLocalize } from '~/hooks';
+import InlineConfirm from '~/components/ui/InlineConfirm';
 import { cn } from '~/utils';
 import type { Automation } from './context';
 
@@ -204,47 +205,26 @@ function AutomationRow({
       </div>
 
       {confirmDelete ? (
-        <div
-          className="flex flex-col gap-2 border-t border-border-light px-3 py-2"
-          onClick={(e) => e.stopPropagation()}
-          role="none"
-        >
-          <p className="text-[11px] leading-snug text-text-secondary">
-            {localize('com_automacoes_delete_confirm')}
-          </p>
-          <div className="flex items-center justify-end gap-1">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setConfirmDelete(false);
-              }}
-              className="rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover"
-            >
-              {localize('com_automacoes_form_cancel_btn')}
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-                setConfirmDelete(false);
-              }}
-              className="rounded px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-500/10"
-            >
-              {localize('com_automacoes_delete_btn')}
-            </button>
-          </div>
-        </div>
+        <InlineConfirm
+          message={localize('com_automacoes_delete_confirm')}
+          cancelLabel={localize('com_automacoes_form_cancel_btn')}
+          confirmLabel={localize('com_automacoes_delete_btn')}
+          onCancel={() => setConfirmDelete(false)}
+          onConfirm={() => {
+            onDelete();
+            setConfirmDelete(false);
+          }}
+          className="border-t border-border-light px-3 py-2"
+        />
       ) : (
-        <div className="flex items-center gap-1 border-t border-border-light px-3 py-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="flex items-center justify-end gap-1 border-t border-border-light px-3 py-1.5">
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onRunNow();
             }}
-            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-ink-700 transition-colors hover:bg-surface-hover hover:text-ink-900"
             aria-label={localize('com_automacoes_run_now_btn')}
           >
             <Play className="h-3 w-3" aria-hidden="true" />
@@ -256,7 +236,7 @@ function AutomationRow({
               e.stopPropagation();
               onEdit();
             }}
-            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-ink-700 transition-colors hover:bg-surface-hover hover:text-ink-900"
             aria-label={localize('com_automacoes_edit_btn')}
           >
             <Pencil className="h-3 w-3" aria-hidden="true" />
@@ -268,7 +248,7 @@ function AutomationRow({
               e.stopPropagation();
               onOpenRuns();
             }}
-            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text-primary"
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-ink-700 transition-colors hover:bg-surface-hover hover:text-ink-900"
             aria-label={localize('com_automacoes_runs_title')}
           >
             <History className="h-3 w-3" aria-hidden="true" />
@@ -280,7 +260,7 @@ function AutomationRow({
               e.stopPropagation();
               setConfirmDelete(true);
             }}
-            className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-[11px] text-text-tertiary hover:bg-red-500/10 hover:text-red-400"
+            className="flex items-center gap-1 rounded px-2 py-1 text-[11px] text-ink-700 transition-colors hover:bg-red-500/10 hover:text-red-500"
             aria-label={localize('com_automacoes_delete_btn')}
           >
             <Trash2 className="h-3 w-3" aria-hidden="true" />
@@ -352,36 +332,21 @@ export default function AutomationList({
       </div>
 
       <div className="flex-1 overflow-y-auto p-3">
-        {automations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-            <p className="text-sm text-text-tertiary">{localize('com_automacoes_empty_state')}</p>
-            {canCreate && (
-              <button
-                type="button"
-                onClick={onCreate}
-                className="rounded-lg bg-surface-submit px-4 py-2 text-xs font-medium text-white hover:bg-surface-submit-hover"
-              >
-                {localize('com_automacoes_create_btn')}
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col gap-1">
-            {automations.map((a) => (
-              <AutomationRow
-                key={a._id}
-                automation={a}
-                selected={selectedId === a._id}
-                onSelect={() => onSelect(a._id)}
-                onEdit={() => onSelect(a._id)}
-                onToggleEnabled={(enabled) => onToggleEnabled(a._id, enabled)}
-                onRunNow={() => onRunNow(a._id)}
-                onDelete={() => onDelete(a._id)}
-                onOpenRuns={() => onOpenRuns(a._id)}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex flex-col gap-1">
+          {automations.map((a) => (
+            <AutomationRow
+              key={a._id}
+              automation={a}
+              selected={selectedId === a._id}
+              onSelect={() => onSelect(a._id)}
+              onEdit={() => onSelect(a._id)}
+              onToggleEnabled={(enabled) => onToggleEnabled(a._id, enabled)}
+              onRunNow={() => onRunNow(a._id)}
+              onDelete={() => onDelete(a._id)}
+              onOpenRuns={() => onOpenRuns(a._id)}
+            />
+          ))}
+        </div>
       </div>
     </aside>
   );

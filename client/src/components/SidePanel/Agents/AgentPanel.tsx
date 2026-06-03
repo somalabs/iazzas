@@ -8,13 +8,15 @@ import {
   Tools,
   SystemRoles,
   ResourceType,
+  AccessRoleIds,
   EModelEndpoint,
   PermissionBits,
   AgentCapabilities,
   isAssistantsEndpoint,
 } from 'librechat-data-provider';
+import { useUpdateResourcePermissionsMutation } from 'librechat-data-provider/react-query';
 import type { FieldNamesMarkedBoolean, Path } from 'react-hook-form';
-import type { Agent } from 'librechat-data-provider';
+import type { Agent, AgentAvatar } from 'librechat-data-provider';
 import type { TranslationKeys } from '~/hooks/useLocalize';
 import type { AgentForm, StringOption } from '~/common';
 import {
@@ -35,7 +37,7 @@ import { useSelectAgent, useLocalize, useAuthContext } from '~/hooks';
 import { useAgentDraftContext } from '~/Providers';
 import { useAgentPanelContext } from '~/Providers/AgentPanelContext';
 import AgentPanelSkeleton from './AgentPanelSkeleton';
-import { Panel, isEphemeralAgent } from '~/common';
+import { Panel, isEphemeralAgent, AVATAR_SOURCE_ICON, DEFAULT_ICON_COLOR } from '~/common';
 import AgentConfig from './AgentConfig';
 import AgentSelect from './AgentSelect';
 import AgentFooter from './AgentFooter';
@@ -83,10 +85,23 @@ export function composeAgentUpdatePayload(data: AgentForm, agent_id?: string | n
     support_contact,
     tool_options,
     avatar_action: avatarActionState,
+    avatar_icon: avatarIcon,
+    avatar_icon_color: avatarIconColor,
   } = data;
 
   const shouldResetAvatar =
     avatarActionState === 'reset' && Boolean(agent_id) && !isEphemeralAgent(agent_id);
+  const avatarPatch: { avatar?: AgentAvatar | null } = avatarIcon
+    ? {
+        avatar: {
+          source: AVATAR_SOURCE_ICON,
+          icon: avatarIcon,
+          iconColor: avatarIconColor ?? DEFAULT_ICON_COLOR,
+        },
+      }
+    : shouldResetAvatar
+      ? { avatar: null }
+      : {};
   const model = _model ?? '';
   const provider =
     (typeof _provider === 'string' ? _provider : (_provider as StringOption).value) ?? '';
@@ -108,7 +123,7 @@ export function composeAgentUpdatePayload(data: AgentForm, agent_id?: string | n
       category,
       support_contact,
       tool_options,
-      ...(shouldResetAvatar ? { avatar: null } : {}),
+      ...avatarPatch,
     },
     provider,
     model,
@@ -479,6 +494,8 @@ export default function AgentPanel() {
     },
   });
 
+  const updatePermissionsMutation = useUpdateResourcePermissionsMutation();
+
   const create = useCreateAgentMutation({
     onSuccess: async (data) => {
       setCurrentAgentId(data.id);
@@ -487,6 +504,29 @@ export default function AgentPanel() {
           data.name ?? localize('com_ui_agent')
         }`,
       });
+
+      if (getValues('is_public') === true && data._id) {
+        updatePermissionsMutation.mutate(
+          {
+            resourceType: ResourceType.AGENT,
+            resourceId: data._id,
+            data: {
+              updated: [],
+              removed: [],
+              public: true,
+              publicAccessRoleId: AccessRoleIds.AGENT_VIEWER,
+            },
+          },
+          {
+            onError: () => {
+              showToast({
+                message: localize('com_ui_permissions_failed_update'),
+                status: 'error',
+              });
+            },
+          },
+        );
+      }
 
       try {
         await handleAvatarUpload(data.id);
@@ -655,7 +695,7 @@ export default function AgentPanel() {
                 onClick={() => setCreationMode('manual')}
                 className={`px-3 py-2 text-sm transition-colors ${
                   creationMode === 'manual'
-                    ? 'border-b-2 border-green-500 font-semibold text-green-600'
+                    ? 'border-b-2 border-[var(--azzas-navy)] font-semibold text-[var(--azzas-navy)]'
                     : 'text-text-secondary hover:text-text-primary'
                 }`}
               >
@@ -666,7 +706,7 @@ export default function AgentPanel() {
                 onClick={() => setCreationMode('prompt')}
                 className={`px-3 py-2 text-sm transition-colors ${
                   creationMode === 'prompt'
-                    ? 'border-b-2 border-green-500 font-semibold text-green-600'
+                    ? 'border-b-2 border-[var(--azzas-navy)] font-semibold text-[var(--azzas-navy)]'
                     : 'text-text-secondary hover:text-text-primary'
                 }`}
               >

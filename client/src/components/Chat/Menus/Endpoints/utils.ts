@@ -148,7 +148,6 @@ export function getSelectedIcon({
     return (
       selectedEndpoint.icon ||
       React.createElement(Bot, {
-        size: 20,
         className: 'icon-md shrink-0 text-text-primary',
       })
     );

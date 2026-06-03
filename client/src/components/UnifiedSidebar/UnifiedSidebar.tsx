@@ -10,8 +10,6 @@ import store from '~/store';
 
 const COLLAPSED_WIDTH = 56;
 const EXPANDED_WIDTH = 256;
-const TRANSITION_MS = 200;
-const EASING = 'cubic-bezier(0.2, 0, 0, 1)';
 
 function UnifiedSidebar() {
   const localize = useLocalize();
@@ -50,23 +48,19 @@ function UnifiedSidebar() {
       <>
         <div
           className={cn(
-            'fixed left-0 top-0 z-[110] flex h-full bg-surface-primary-alt',
+            'sidebar-drawer-anim fixed left-0 top-0 z-[110] flex h-full bg-surface-primary-alt',
             expanded ? 'translate-x-0' : '-translate-x-full',
           )}
-          style={{
-            width: 'min(85vw, 320px)',
-            transition: `transform ${TRANSITION_MS}ms ${EASING}`,
-          }}
+          style={{ width: 'min(85vw, 320px)' }}
           {...{ inert: !expanded ? '' : undefined }}
         >
           <ExpandedPanel links={links} expanded onToggle={handleClose} />
         </div>
         <div
           className={cn(
-            'fixed inset-0 z-[109] bg-black/50',
+            'sidebar-overlay-anim fixed inset-0 z-[109] bg-black/50',
             expanded ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
           )}
-          style={{ transition: `opacity ${TRANSITION_MS}ms ${EASING}` }}
           role="presentation"
         >
           <button
@@ -82,10 +76,10 @@ function UnifiedSidebar() {
 
   return (
     <aside
-      className="relative flex h-full flex-shrink-0 overflow-hidden"
+      className="sidebar-collapse-anim relative flex h-full flex-shrink-0 overflow-hidden"
       style={{
-        width: expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH,
-        transition: `width ${TRANSITION_MS}ms ${EASING}`,
+        width: EXPANDED_WIDTH,
+        maxWidth: expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH,
       }}
       aria-label={localize('com_nav_control_panel')}
     >

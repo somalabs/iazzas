@@ -5,6 +5,7 @@ import { useOutletContext, useSearchParams, useLocation } from 'react-router-dom
 import type { TLoginLayoutContext } from '~/common';
 import { getLoginError, persistRedirectToSession } from '~/utils';
 import { ErrorMessage } from '~/components/Auth/ErrorMessage';
+import SocialLoginRender from '~/components/Auth/SocialLoginRender';
 import SocialButton from '~/components/Auth/SocialButton';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { useLocalize } from '~/hooks';
@@ -25,6 +26,10 @@ function Login() {
   const disableAutoRedirect = searchParams.get('redirect') === 'false';
 
   const [isAutoRedirectDisabled, setIsAutoRedirectDisabled] = useState(disableAutoRedirect);
+
+  const socialLoginEnabled = startupConfig?.socialLoginEnabled === true;
+  const emailLoginEnabled = startupConfig?.emailLoginEnabled === true;
+  const [showEmailForm, setShowEmailForm] = useState(!socialLoginEnabled);
 
   useEffect(() => {
     const redirectTo = searchParams.get('redirect_to');
@@ -58,6 +63,12 @@ function Login() {
     }
   }, [disableAutoRedirect, searchParams, setSearchParams]);
 
+  useEffect(() => {
+    if (error != null) {
+      setShowEmailForm(true);
+    }
+  }, [error]);
+
   const shouldAutoRedirect =
     startupConfig?.openidLoginEnabled &&
     startupConfig?.openidAutoRedirect &&
@@ -83,6 +94,7 @@ function Login() {
             enabled={startupConfig.openidLoginEnabled}
             serverDomain={startupConfig.serverDomain}
             oauthPath="openid"
+            variant="primary"
             Icon={() =>
               startupConfig.openidImageUrl ? (
                 <img src={startupConfig.openidImageUrl} alt="OpenID Logo" className="h-5 w-5" />
@@ -90,7 +102,7 @@ function Login() {
                 <OpenIDIcon />
               )
             }
-            label={startupConfig.openidLabel}
+            label={startupConfig.openidLabel || localize('com_auth_microsoft_login')}
             id="openid"
           />
         </div>
@@ -101,13 +113,34 @@ function Login() {
   return (
     <>
       {error != null && <ErrorMessage>{localize(getLoginError(error))}</ErrorMessage>}
-      {startupConfig?.emailLoginEnabled === true && (
-        <LoginForm
-          onSubmit={login}
-          startupConfig={startupConfig}
-          error={error}
-          setError={setError}
-        />
+      <SocialLoginRender startupConfig={startupConfig} emailDivider={false} />
+      {emailLoginEnabled && (
+        <>
+          {socialLoginEnabled && (
+            <button
+              type="button"
+              data-testid="show-email-form"
+              aria-expanded={showEmailForm}
+              aria-controls="email-login"
+              onClick={() => setShowEmailForm((prev) => !prev)}
+              className="mt-6 flex w-full items-center gap-3 text-sm text-text-secondary transition-colors hover:text-text-primary"
+            >
+              <span className="h-px flex-1 bg-border-medium" />
+              <span>{localize('com_auth_use_email')}</span>
+              <span className="h-px flex-1 bg-border-medium" />
+            </button>
+          )}
+          {showEmailForm && (
+            <div id="email-login">
+              <LoginForm
+                onSubmit={login}
+                startupConfig={startupConfig}
+                error={error}
+                setError={setError}
+              />
+            </div>
+          )}
+        </>
       )}
       {startupConfig?.registrationEnabled === true && (
         <p className="my-4 text-center text-sm font-light text-gray-700 dark:text-white">
@@ -115,7 +148,7 @@ function Login() {
           {localize('com_auth_no_account')}{' '}
           <a
             href={registerPage()}
-            className="inline-flex p-1 text-sm font-medium text-green-600 underline decoration-transparent transition-all duration-200 hover:text-green-700 hover:decoration-green-700 focus:text-green-700 focus:decoration-green-700 dark:text-green-500 dark:hover:text-green-400 dark:hover:decoration-green-400 dark:focus:text-green-400 dark:focus:decoration-green-400"
+            className="inline-flex p-1 text-sm font-medium text-brand-purple underline decoration-transparent transition-all duration-200 hover:decoration-brand-purple focus:decoration-brand-purple"
           >
             {localize('com_auth_sign_up')}
           </a>

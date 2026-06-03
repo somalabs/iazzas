@@ -307,7 +307,12 @@ const getAgentHandler = async (req, res, expandProperties = false) => {
     }
 
     if (!expandProperties) {
-      // VIEW permission: Basic agent info only
+      // VIEW permission: Basic agent info plus marketplace-safe metadata.
+      // Built-in capability flags only; action/MCP tool identifiers are never exposed.
+      const builtinCapabilities = [Tools.execute_code, Tools.file_search, Tools.web_search];
+      const agentTools = Array.isArray(agent.tools) ? agent.tools : [];
+      const capabilities = builtinCapabilities.filter((tool) => agentTools.includes(tool));
+
       return res.status(200).json({
         _id: agent._id,
         id: agent.id,
@@ -319,6 +324,10 @@ const getAgentHandler = async (req, res, expandProperties = false) => {
         model: agent.model,
         isPublic: agent.isPublic,
         version: agent.version,
+        category: agent.category,
+        support_contact: agent.support_contact,
+        conversation_starters: agent.conversation_starters ?? [],
+        capabilities,
         // Safe metadata
         createdAt: agent.createdAt,
         updatedAt: agent.updatedAt,
@@ -346,7 +355,7 @@ const updateAgentHandler = async (req, res) => {
   try {
     const id = req.params.id;
     const validatedData = agentUpdateSchema.parse(req.body);
-    // Preserve explicit null for avatar to allow resetting the avatar
+    // Include avatar when explicitly provided (null resets it, object sets it)
     const { avatar: avatarField, _id, ...rest } = validatedData;
     const updateData = removeNullishValues(rest);
 
@@ -354,7 +363,7 @@ const updateAgentHandler = async (req, res) => {
       updateData.model_parameters = removeNullishValues(updateData.model_parameters, true);
     }
 
-    if (avatarField === null) {
+    if (avatarField !== undefined) {
       updateData.avatar = avatarField;
     }
 

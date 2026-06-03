@@ -15,12 +15,11 @@ export default function OutputNode({ id, selected, data }: NodeProps) {
         position={Position.Top}
         id="default"
         aria-label="Entrada da Saída"
-        className="!h-3 !w-3 !rounded-full !border-2 !border-emerald-400 !bg-surface-primary"
+        className="!h-3 !w-3 !rounded-full !border-2 !border-border-medium !bg-surface-primary"
       />
       <BaseNode
         id={id}
         selected={selected}
-        accent="emerald"
         icon={<Flag className="h-3.5 w-3.5" />}
         label={localize('com_studio_flow_node_output')}
       >

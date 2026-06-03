@@ -96,7 +96,6 @@ A chave é resolvida na ordem `RAG_GOOGLE_API_KEY` > `GOOGLE_KEY` > `GOOGLE_API_
 | Variável | Valor |
 |---|---|
 | `APP_TITLE` | `IAzzas` |
-| `CUSTOM_FOOTER` | `"Azzas 2154 — Fashion & Lifestyle"` |
 | `HELP_AND_FAQ_URL` | `https://www.azzas2154.com.br` |
 
 ## Busca (Meilisearch)

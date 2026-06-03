@@ -129,6 +129,8 @@ export type NavLink = {
   description?: TranslationKeys;
   label?: string;
   icon?: LucideIcon | React.FC;
+  /** Filled variant rendered when this nav item is active. */
+  iconFilled?: LucideIcon | React.FC;
   Component?: React.ComponentType;
   onClick?: (e?: React.MouseEvent) => void;
   variant?: 'default' | 'ghost';

@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { useState, useRef } from 'react';
 import { Paperclip, ChevronUp, X } from 'lucide-react';
 import { dataService } from 'librechat-data-provider';
@@ -34,7 +35,7 @@ function readImageSize(file: File): Promise<{ width: number; height: number }> {
   });
 }
 
-export default function InlineEditor() {
+export default function InlineEditor({ imageIdx = 0 }: { imageIdx?: number }) {
   const localize = useLocalize();
   const { showToast } = useToastContext();
   const dispatch = useStudioDispatch();
@@ -79,9 +80,7 @@ export default function InlineEditor() {
         prev.map((a) => (a.id === id ? { ...a, fileId, status: 'ready' } : a)),
       );
     } catch {
-      setAttachments((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, status: 'error' } : a)),
-      );
+      setAttachments((prev) => prev.map((a) => (a.id === id ? { ...a, status: 'error' } : a)));
       showToast({ status: 'error', message: localize('com_studio_ref_upload_failed') });
     }
   }
@@ -90,11 +89,12 @@ export default function InlineEditor() {
     setAttachments((prev) => prev.filter((a) => a.id !== id));
   }
 
+  const sourceImage = selectedCreation.images[imageIdx] ?? selectedCreation.images[0];
+
   function handleSubmit() {
     if (!selectedCreation || !value.trim() || editMutation.isLoading) {
       return;
     }
-    const sourceImage = selectedCreation.images[0];
     if (!sourceImage) {
       return;
     }
@@ -143,14 +143,14 @@ export default function InlineEditor() {
       },
       {
         onSuccess: (creation) => {
-          dispatch({ type: 'UPDATE_CREATION', payload: { id: optimisticId, creation } });
+          dispatch({ type: 'REPLACE_CREATION', payload: { fromId: optimisticId, creation } });
           dispatch({ type: 'SELECT_CREATION', payload: creation });
         },
         onError: () => {
           const errored = { ...optimistic, status: 'error' as const };
           dispatch({
-            type: 'UPDATE_CREATION',
-            payload: { id: optimisticId, creation: errored },
+            type: 'REPLACE_CREATION',
+            payload: { fromId: optimisticId, creation: errored },
           });
           dispatch({ type: 'SELECT_CREATION', payload: errored });
           showToast({ status: 'error', message: localize('com_studio_edit_failed') });
@@ -163,9 +163,9 @@ export default function InlineEditor() {
     <div className="flex h-full flex-col border-t border-border-medium bg-surface-primary">
       {/* Full-screen image area */}
       <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-surface-chat">
-        {selectedCreation.images[0] ? (
+        {sourceImage ? (
           <img
-            src={selectedCreation.images[0].url}
+            src={sourceImage.url}
             alt="Selected creation"
             className="max-h-full max-w-full object-contain"
           />
@@ -177,7 +177,7 @@ export default function InlineEditor() {
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-surface-primary/70 text-text-secondary backdrop-blur-sm transition-colors hover:bg-surface-hover"
+          className="bg-surface-primary/70 absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-text-secondary backdrop-blur-sm transition-colors hover:bg-surface-hover"
           aria-label="Close editor"
         >
           <X className="h-4 w-4" />

@@ -36,6 +36,9 @@ jest.mock('~/hooks/useLocalize', () => () => (key: string, options?: any) => {
     com_agents_error_searching: 'Error searching agents',
     com_agents_search_empty_heading: 'No results found',
     com_agents_empty_state_heading: 'No agents available',
+    com_agents_empty_state_message: 'There are no agents in this category yet.',
+    com_agents_search_empty_message: 'Try a different term or adjust the filters.',
+    com_agents_search_no_results: 'No agents found for "{{query}}"',
     com_agents_loading: 'Loading...',
     com_agents_grid_announcement: '{{count}} agents in {{category}}',
     com_agents_no_more_results: "You've reached the end of the results",
@@ -100,6 +103,7 @@ const createMockResponse = (
         tools: [],
         instructions: '',
         avatar: null,
+        isPublic: true,
         provider: 'openai',
         model_parameters: {
           temperature: 0.7,
@@ -201,6 +205,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
       description: 'First test agent',
       avatar: { filepath: '/avatar1.png', source: 'local' },
       category: 'finance',
+      isPublic: true,
       authorName: 'Author 1',
       created_at: 1672531200000,
       instructions: null,
@@ -222,6 +227,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
       description: 'Second test agent',
       avatar: { filepath: '/avatar2.png', source: 'local' },
       category: 'finance',
+      isPublic: true,
       authorName: 'Author 2',
       created_at: 1672531200000,
       instructions: null,
@@ -270,7 +276,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
         requiredPermission: 1,
         category: 'finance',
         search: 'test query',
-        limit: 6,
+        limit: 12,
       });
     });
 
@@ -280,7 +286,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
       expect(mockUseMarketplaceAgentsInfiniteQuery).toHaveBeenCalledWith({
         requiredPermission: 1,
         promoted: 1,
-        limit: 6,
+        limit: 12,
       });
     });
 
@@ -289,7 +295,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
 
       expect(mockUseMarketplaceAgentsInfiniteQuery).toHaveBeenCalledWith({
         requiredPermission: 1,
-        limit: 6,
+        limit: 12,
       });
     });
 
@@ -299,7 +305,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
       expect(mockUseMarketplaceAgentsInfiniteQuery).toHaveBeenCalledWith({
         requiredPermission: 1,
         search: 'test',
-        limit: 6,
+        limit: 12,
       });
     });
   });
@@ -358,9 +364,9 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
         </Wrapper>,
       );
 
-      // Should show loading spinner
-      const spinner = document.querySelector('.text-primary');
-      expect(spinner).toBeInTheDocument();
+      // Should show loading skeletons (no mid-content spinner)
+      const skeletons = document.querySelectorAll('.animate-shimmer');
+      expect(skeletons.length).toBeGreaterThan(0);
     });
 
     it('should show empty state when no agents are available', () => {
@@ -448,7 +454,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
         </Wrapper>,
       );
 
-      expect(screen.getByText('No agents available')).toBeInTheDocument();
+      expect(screen.getByText('No agents found for "nonexistent"')).toBeInTheDocument();
     });
   });
 
@@ -480,7 +486,30 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
       expect(screen.getByText('Loading...')).toHaveClass('sr-only');
     });
 
-    it('should show end of results message when hasNextPage is false and agents exist', () => {
+    it('should show end of results message when a sizable list is fully loaded', () => {
+      const manyAgents = Array.from({ length: 12 }, (_, i) => ({
+        ...mockAgents[0],
+        id: `agent-${i}`,
+        name: `Agent ${i}`,
+      }));
+      mockUseMarketplaceAgentsInfiniteQuery.mockReturnValue({
+        ...defaultMockQueryResult,
+        data: { pages: [{ data: manyAgents }] },
+        hasNextPage: false,
+        isFetchingNextPage: false,
+      });
+
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <AgentGrid category="finance" searchQuery="" onSelectAgent={mockOnSelectAgent} />
+        </Wrapper>,
+      );
+
+      expect(screen.getByText("You've reached the end of the results")).toBeInTheDocument();
+    });
+
+    it('should not show end of results message for a small list', () => {
       mockUseMarketplaceAgentsInfiniteQuery.mockReturnValue({
         ...defaultMockQueryResult,
         hasNextPage: false,
@@ -494,7 +523,7 @@ describe('AgentGrid Integration with useGetMarketplaceAgentsQuery', () => {
         </Wrapper>,
       );
 
-      expect(screen.getByText("You've reached the end of the results")).toBeInTheDocument();
+      expect(screen.queryByText("You've reached the end of the results")).not.toBeInTheDocument();
     });
 
     it('should not show end of results message when no agents exist', () => {

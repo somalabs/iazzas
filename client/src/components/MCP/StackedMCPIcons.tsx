@@ -15,12 +15,12 @@ const sizeConfig = {
   sm: {
     icon: 'h-[18px] w-[18px]',
     container: 'h-[22px] w-[22px]',
-    overlap: '-ml-2.5',
+    overlap: '-ml-2',
   },
   md: {
     icon: 'h-5 w-5',
     container: 'h-6 w-6',
-    overlap: '-ml-3',
+    overlap: '-ml-2.5',
   },
 };
 
@@ -28,10 +28,12 @@ const variantConfig = {
   default: {
     border: 'border-border-medium',
     bg: 'bg-surface-secondary',
+    ring: 'ring-2 ring-presentation',
   },
   submenu: {
     border: 'border-surface-primary',
     bg: 'bg-surface-primary',
+    ring: 'ring-2 ring-surface-primary',
   },
 };
 
@@ -68,6 +70,7 @@ export default function StackedMCPIcons({
             'relative flex items-center justify-center rounded-full border',
             colors.border,
             colors.bg,
+            colors.ring,
             sizes.container,
             index > 0 && sizes.overlap,
           )}
@@ -87,7 +90,8 @@ export default function StackedMCPIcons({
       {overflowCount > 0 && (
         <div
           className={cn(
-            'relative flex items-center justify-center rounded-full border border-surface-primary bg-surface-tertiary text-xs font-medium text-text-secondary',
+            'relative flex items-center justify-center rounded-full bg-surface-tertiary text-[11px] font-semibold text-text-secondary md:hidden',
+            colors.ring,
             sizes.container,
             sizes.overlap,
           )}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Bot } from 'lucide-react';
 import { Skeleton } from '@librechat/client';
+import { Bot } from 'lucide-react';
 import type t from 'librechat-data-provider';
+import { AVATAR_SOURCE_ICON, DEFAULT_ICON_COLOR } from '~/common';
 
 /**
  * Extracts the avatar URL from an agent's avatar property
@@ -71,6 +72,10 @@ export const renderAgentAvatar = (
 ): React.ReactElement => {
   const { size = 'md', className = '', showBorder = true } = options;
 
+  const avatar = agent?.avatar;
+  const iconAvatar =
+    avatar && typeof avatar === 'object' && avatar.source === AVATAR_SOURCE_ICON ? avatar : null;
+
   const avatarUrl = getAgentAvatarUrl(agent);
 
   // Size mappings for responsive design
@@ -98,7 +103,31 @@ export const renderAgentAvatar = (
     xl: 'h-20 w-20',
   };
 
+  const iconFontClasses = {
+    icon: 'text-sm',
+    sm: 'text-xl sm:text-2xl',
+    md: 'text-2xl sm:text-3xl md:text-4xl',
+    lg: 'text-3xl sm:text-4xl md:text-5xl',
+    xl: 'text-4xl',
+  };
+
   const borderClasses = showBorder ? 'border-1 border-border-medium' : '';
+
+  if (iconAvatar?.icon) {
+    return (
+      <div
+        className={`relative flex items-center justify-center ${sizeClasses[size]} ${className}`}
+      >
+        <div
+          className={`flex h-full w-full items-center justify-center rounded-full ${iconFontClasses[size]} ${borderClasses}`}
+          style={{ backgroundColor: iconAvatar.iconColor ?? DEFAULT_ICON_COLOR }}
+          aria-hidden="true"
+        >
+          <span>{iconAvatar.icon}</span>
+        </div>
+      </div>
+    );
+  }
 
   if (avatarUrl) {
     return (

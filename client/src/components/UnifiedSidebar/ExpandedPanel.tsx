@@ -1,7 +1,9 @@
+/* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { memo, lazy, Suspense, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SystemRoles } from 'librechat-data-provider';
-import { Skeleton, Sidebar, Button, TooltipAnchor } from '@librechat/client';
+import { PanelLeft } from 'lucide-react';
+import { Skeleton, Button, TooltipAnchor } from '@librechat/client';
 import type { NavLink } from '~/common';
 import { CLOSE_SIDEBAR_ID } from '~/components/Chat/Menus/OpenSidebar';
 import { useGoToNewChat, useLocalize } from '~/hooks';
@@ -12,10 +14,14 @@ const BalanceWidget = lazy(() => import('~/components/Nav/BalanceWidget'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
 const ROW_BASE = 'group flex w-full items-center rounded-lg text-left transition-colors';
-const ROW_EXPANDED = 'h-auto justify-start gap-3 px-2 py-2 hover:!bg-transparent';
+const ROW_EXPANDED = 'h-auto justify-start gap-3 px-2 py-2';
 const ROW_COLLAPSED = 'h-9 w-9 justify-center p-0 hover:bg-surface-hover';
 const ICON_SLOT = 'flex h-6 w-6 flex-shrink-0 items-center justify-center';
 const ICON_HIGHLIGHT_EXPANDED = 'rounded-md transition-colors group-hover:bg-surface-hover h-8 w-8';
+// Terracota left marker (3px) + creme plate for the active nav item.
+// F2: o marcador entra deslizando da esquerda (before:animate-marker-in).
+const ACTIVE_MARKER =
+  "relative bg-canvas text-action before:absolute before:content-[''] before:left-0 before:top-[15%] before:bottom-[15%] before:w-[3px] before:rounded-r-full before:bg-ember before:animate-marker-in";
 
 const NavRouteButton = memo(function NavRouteButton({
   link,
@@ -40,6 +46,8 @@ const NavRouteButton = memo(function NavRouteButton({
     navigate(link.href!);
   }, [onClickOverride, navigate, link.href]);
 
+  const IconComponent = isNavActive && link.iconFilled ? link.iconFilled : link.icon;
+
   const element = (
     <Button
       variant="ghost"
@@ -49,30 +57,16 @@ const NavRouteButton = memo(function NavRouteButton({
       className={cn(
         ROW_BASE,
         expanded ? ROW_EXPANDED : ROW_COLLAPSED,
-        isNavActive && !expanded
-          ? 'bg-surface-active-alt text-text-primary'
-          : 'text-text-secondary',
+        !isNavActive && expanded && 'hover:!bg-transparent',
+        isNavActive ? ACTIVE_MARKER : 'text-text-secondary',
       )}
       onClick={handleClick}
     >
-      <span
-        className={cn(
-          ICON_SLOT,
-          expanded && ICON_HIGHLIGHT_EXPANDED,
-          expanded && isNavActive && 'bg-surface-active-alt text-text-primary',
-        )}
-      >
-        {link.icon && <link.icon className="h-5 w-5" aria-hidden="true" />}
+      <span className={cn(ICON_SLOT, expanded && ICON_HIGHLIGHT_EXPANDED)}>
+        {IconComponent && <IconComponent className="h-5 w-5" aria-hidden="true" />}
       </span>
       {expanded && (
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-sm font-medium text-text-primary">{label}</span>
-          {link.description && (
-            <span className="truncate text-xs text-text-secondary">
-              {localize(link.description)}
-            </span>
-          )}
-        </span>
+        <span className="min-w-0 truncate text-sm font-medium text-text-primary">{label}</span>
       )}
     </Button>
   );
@@ -99,30 +93,41 @@ function ExpandedPanel({
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
 
-  const toggleButton = (
-    <Button
+  const steelToggle = (
+    <button
+      type="button"
       id={expanded ? CLOSE_SIDEBAR_ID : undefined}
       data-testid={expanded ? 'close-sidebar-button' : 'open-sidebar-button'}
-      variant="ghost"
       aria-label={localize(toggleLabel)}
       aria-expanded={expanded}
-      className={cn(ROW_BASE, expanded ? ROW_EXPANDED : ROW_COLLAPSED)}
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
       onClick={onToggle}
     >
-      <span className={cn(ICON_SLOT, expanded && ICON_HIGHLIGHT_EXPANDED)}>
-        <Sidebar aria-hidden="true" className="h-5 w-5 text-text-primary" />
-      </span>
-    </Button>
+      <PanelLeft aria-hidden="true" className="h-5 w-5" />
+    </button>
   );
 
   return (
-    <div className="flex h-full w-full flex-shrink-0 flex-col gap-2 border-r border-border-light bg-surface-primary-alt px-2 py-2">
-      {expanded ? (
-        toggleButton
-      ) : (
-        <TooltipAnchor side="right" description={localize(toggleLabel)} render={toggleButton} />
-      )}
-      <div className="flex flex-col gap-1 overflow-y-auto">
+    <div className="flex h-full w-full flex-shrink-0 flex-col border-r border-border-light">
+      {/* Paper-white brand band with navy wordmark + steel tagline */}
+      <div className="flex h-[52px] flex-shrink-0 items-center border-b border-rule bg-paper px-3">
+        {expanded ? (
+          <>
+            <div className="flex flex-col gap-0.5">
+              <img src="assets/azzas-logo-navy.svg" alt="Azzas 2154" className="h-[18px] w-auto" />
+              <span className="font-editorial text-[10px] italic leading-none text-ink-700">
+                Fashion &amp; Lifestyle
+              </span>
+            </div>
+            <div className="ml-auto">{steelToggle}</div>
+          </>
+        ) : (
+          <TooltipAnchor side="right" description={localize(toggleLabel)} render={steelToggle} />
+        )}
+      </div>
+
+      {/* Nav body */}
+      <div className="flex flex-1 flex-col gap-1 overflow-y-auto bg-paper px-2 py-2">
         {links.map((link) => {
           if (link.adminOnly && !isAdmin) {
             return null;
@@ -148,7 +153,8 @@ function ExpandedPanel({
         })}
       </div>
 
-      <div className="mt-auto flex flex-col gap-1">
+      {/* Footer */}
+      <div className="flex flex-col gap-1 border-t border-border-light bg-paper px-2 py-2">
         <Suspense fallback={null}>
           <BalanceWidget collapsed={!expanded} />
         </Suspense>

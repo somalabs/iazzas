@@ -37,11 +37,11 @@ export default function ConditionInspector({
         </p>
         <div className="flex justify-between text-xs">
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-text-secondary" aria-hidden="true" />
             {localize('com_studio_flow_condition_edge_true')}
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-red-400" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-text-destructive" aria-hidden="true" />
             {localize('com_studio_flow_condition_edge_false')}
           </span>
         </div>

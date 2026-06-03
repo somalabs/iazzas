@@ -42,9 +42,13 @@ export default function MCPConfigDialog({
   const localize = useLocalize();
 
   const hasFields = Object.keys(fieldsSchema).length > 0;
+  const displayName = serverName
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .trim();
   const dialogTitle = hasFields
-    ? localize('com_ui_configure_mcp_variables_for', { 0: serverName })
-    : `${serverName} MCP Server`;
+    ? localize('com_ui_configure_mcp_variables_for', { 0: displayName })
+    : `${displayName} MCP Server`;
 
   const fullTitle = useMemo(() => {
     if (!serverStatus) {
@@ -72,6 +76,22 @@ export default function MCPConfigDialog({
       status: statusText,
     });
   }, [serverStatus, serverName, localize]);
+
+  const connectionState = serverStatus?.connectionState;
+  const requiresOAuth = serverStatus?.requiresOAuth ?? false;
+
+  const HeaderIcon =
+    connectionState === 'error' ? AlertTriangle : requiresOAuth ? KeyRound : PlugZap;
+
+  const headerDescription = hasFields
+    ? ''
+    : connectionState === 'connected'
+      ? localize('com_ui_mcp_connected_desc')
+      : connectionState === 'error'
+        ? localize('com_ui_mcp_error_desc')
+        : requiresOAuth
+          ? localize('com_ui_mcp_auth_needed_desc')
+          : '';
 
   /**
    * Render status badge with unified color system:
@@ -148,11 +168,21 @@ export default function MCPConfigDialog({
         title={fullTitle}
       >
         <OGDialogHeader>
-          <div className="flex items-center gap-3">
-            <OGDialogTitle className="text-xl">
-              {dialogTitle.charAt(0).toUpperCase() + dialogTitle.slice(1)}
-            </OGDialogTitle>
-            {renderStatusBadge()}
+          <div className="flex items-start gap-3">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border-light bg-surface-tertiary text-text-secondary">
+              <HeaderIcon className="size-5" aria-hidden="true" />
+            </div>
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <OGDialogTitle className="truncate text-lg font-semibold text-text-primary">
+                  {dialogTitle}
+                </OGDialogTitle>
+                {renderStatusBadge()}
+              </div>
+              {headerDescription && (
+                <p className="text-sm leading-relaxed text-text-secondary">{headerDescription}</p>
+              )}
+            </div>
           </div>
         </OGDialogHeader>
 

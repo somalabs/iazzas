@@ -23,7 +23,11 @@ const SubmitButton = React.memo(
             id="send-button"
             disabled={props.disabled}
             className={cn(
-              'rounded-full bg-text-primary p-1.5 text-text-primary outline-offset-4 transition-all duration-200 disabled:cursor-not-allowed disabled:text-text-secondary disabled:opacity-10',
+              'rounded-full p-1.5 outline-offset-4 transition-all duration-200 disabled:cursor-not-allowed',
+              // Send é o único fill navy; anel terracota acende quando há texto pra enviar.
+              props.disabled
+                ? 'text-ink-500/40 bg-transparent'
+                : 'ring-ember/60 bg-action text-on-action ring-2 ring-offset-2 ring-offset-paper',
             )}
             data-testid="send-button"
             type="submit"

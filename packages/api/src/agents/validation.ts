@@ -5,8 +5,10 @@ import type { Request, Response } from 'express';
 
 /** Avatar schema shared between create and update */
 export const agentAvatarSchema = z.object({
-  filepath: z.string(),
+  filepath: z.string().optional(),
   source: z.string(),
+  icon: z.string().optional(),
+  iconColor: z.string().optional(),
 });
 
 /** Base resource schema for tool resources */

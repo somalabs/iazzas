@@ -44,7 +44,7 @@ export default function OptionsPopover({
 
   const localize = useLocalize();
   const cardStyle =
-    'shadow-xl rounded-md min-w-[75px] font-normal bg-white border-black/10 border dark:bg-gray-700 text-black dark:text-white';
+    'shadow-xl rounded-md min-w-[75px] font-normal bg-paper border-black/10 border dark:bg-gray-700 text-black dark:text-white';
 
   if (!visible) {
     return null;
@@ -58,7 +58,7 @@ export default function OptionsPopover({
             className={cn(
               cardStyle,
               'dark:bg-gray-700',
-              'border-d-0 flex w-full flex-col overflow-hidden rounded-none border-s-0 border-t bg-white px-0 pb-[10px] dark:border-white/10 md:rounded-md md:border lg:w-[736px]',
+              'border-d-0 flex w-full flex-col overflow-hidden rounded-none border-s-0 border-t bg-paper px-0 pb-[10px] dark:border-white/10 md:rounded-md md:border lg:w-[736px]',
             )}
           >
             <div className="flex w-full items-center bg-gray-50 px-2 py-2 dark:bg-gray-700">

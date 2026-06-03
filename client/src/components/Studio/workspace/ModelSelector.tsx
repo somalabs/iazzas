@@ -51,15 +51,15 @@ export default function ModelSelector() {
         aria-label={localize('com_studio_model_label')}
         title={localize('com_studio_model_override_help')}
       >
-        <Cpu className="h-3.5 w-3.5 text-text-tertiary" strokeWidth={1.5} />
-        {current}
+        <Cpu className="h-3.5 w-3.5 flex-shrink-0 text-text-tertiary" strokeWidth={1.5} />
+        <span className="hidden sm:inline">{current}</span>
       </button>
 
       {open && (
         <div
           role="listbox"
           aria-label={localize('com_studio_model_label')}
-          className="absolute bottom-full left-0 z-50 mb-1 min-w-[200px] rounded-xl border border-border-medium bg-surface-dialog py-1 shadow-xl"
+          className="absolute bottom-full right-0 z-50 mb-1 min-w-[200px] rounded-xl border border-border-medium bg-surface-dialog py-1 shadow-xl"
         >
           <button
             role="option"
@@ -74,7 +74,7 @@ export default function ModelSelector() {
             <span className="text-sm font-medium">{autoLabel}</span>
             <span className="text-[11px] text-text-tertiary">
               {activeSchema
-                ? MODEL_DISPLAY_NAMES[activeSchema.defaultModel] ?? activeSchema.defaultModel
+                ? (MODEL_DISPLAY_NAMES[activeSchema.defaultModel] ?? activeSchema.defaultModel)
                 : MODEL_DISPLAY_NAMES['nano-banana-pro']}
             </span>
           </button>
@@ -89,9 +89,7 @@ export default function ModelSelector() {
               onClick={() => select(id)}
               className={cn(
                 'flex w-full flex-col px-3 py-2 text-left transition-colors',
-                !isAvailable(id)
-                  ? 'cursor-not-allowed opacity-40'
-                  : 'hover:bg-surface-hover',
+                !isAvailable(id) ? 'cursor-not-allowed opacity-40' : 'hover:bg-surface-hover',
                 modelOverride === id ? 'text-text-primary' : 'text-text-secondary',
               )}
             >

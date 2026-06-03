@@ -2,6 +2,7 @@ import { ThemeSelector } from '@librechat/client';
 import { TStartupConfig } from 'librechat-data-provider';
 import { ErrorMessage } from '~/components/Auth/ErrorMessage';
 import { TranslationKeys, useLocalize } from '~/hooks';
+import BrandDuotone from '~/components/ui/BrandDuotone';
 import SocialLoginRender from './SocialLoginRender';
 import { BlinkAnimation } from './BlinkAnimation';
 import { Banner } from '../Banners';
@@ -57,40 +58,42 @@ function AuthLayout({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
-      <Banner />
-      <BlinkAnimation active={isFetching}>
-        <div className="mt-6 flex h-24 w-full items-center justify-center">
-          <img
-            src="assets/azzas-logo-dark.svg"
-            className="max-h-full max-w-[280px] object-contain invert dark:invert-0"
-            alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'Azzas 2154' })}
-          />
+    <div className="relative isolate flex min-h-screen flex-col bg-canvas dark:bg-gray-900">
+      <BrandDuotone src="/assets/brand/azzas-campaign-1.jpg" imageOpacity={0.09} className="z-0" />
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <Banner />
+        <BlinkAnimation active={isFetching}>
+          <div className="mt-6 flex h-24 w-full items-center justify-center">
+            <img
+              src="assets/azzas-logo-dark.svg"
+              className="max-h-full max-w-[280px] object-contain invert dark:invert-0"
+              alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'Azzas 2154' })}
+            />
+          </div>
+        </BlinkAnimation>
+        <DisplayError />
+        <div className="absolute bottom-0 left-0 md:m-4">
+          <ThemeSelector />
         </div>
-      </BlinkAnimation>
-      <DisplayError />
-      <div className="absolute bottom-0 left-0 md:m-4">
-        <ThemeSelector />
-      </div>
 
-      <main className="flex flex-grow items-center justify-center">
-        <div className="w-authPageWidth overflow-hidden bg-white px-6 py-4 dark:bg-gray-900 sm:max-w-md sm:rounded-lg">
-          {!hasStartupConfigError && !isFetching && header && (
-            <h1
-              className="mb-4 text-center text-3xl font-semibold text-black dark:text-white"
-              style={{ userSelect: 'none' }}
-            >
-              {header}
-            </h1>
-          )}
-          {children}
-          {!pathname.includes('2fa') &&
-            (pathname.includes('login') || pathname.includes('register')) && (
+        <main className="flex flex-grow items-center justify-center">
+          <div className="w-authPageWidth overflow-hidden rounded-[14px] border border-rule bg-paper px-6 py-4 shadow-atelier dark:border-gray-700 dark:bg-gray-900 sm:max-w-md">
+            {!hasStartupConfigError && !isFetching && header && (
+              <h1
+                className="mb-4 text-center font-editorial text-3xl font-medium tracking-[-0.5px] text-text-primary dark:text-white"
+                style={{ userSelect: 'none' }}
+              >
+                {header}
+              </h1>
+            )}
+            {children}
+            {!pathname.includes('2fa') && pathname.includes('register') && (
               <SocialLoginRender startupConfig={startupConfig} />
             )}
-        </div>
-      </main>
-      <Footer startupConfig={startupConfig} />
+          </div>
+        </main>
+        <Footer startupConfig={startupConfig} />
+      </div>
     </div>
   );
 }

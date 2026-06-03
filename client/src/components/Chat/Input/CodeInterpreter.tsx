@@ -8,7 +8,7 @@ import { useBadgeRowContext } from '~/Providers';
 function CodeInterpreter() {
   const localize = useLocalize();
   const { codeInterpreter, codeApiKeyForm } = useBadgeRowContext();
-  const { toggleState: runCode, debouncedChange, isPinned } = codeInterpreter;
+  const { toggleState: runCode, debouncedChange } = codeInterpreter;
   const { badgeTriggerRef } = codeApiKeyForm;
 
   const canRunCode = useHasAccess({
@@ -21,7 +21,7 @@ function CodeInterpreter() {
   }
 
   return (
-    (runCode || isPinned) && (
+    runCode && (
       <CheckboxButton
         ref={badgeTriggerRef}
         className="max-w-fit"

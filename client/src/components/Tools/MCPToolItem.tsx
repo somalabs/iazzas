@@ -38,7 +38,7 @@ function MCPToolItem({
       return {
         text: localize('com_nav_tool_remove'),
         icon: <XCircle className="flex h-4 w-4 items-center stroke-2" aria-hidden="true" />,
-        className: 'btn btn-neutral border-token-border-light relative',
+        className: 'btn relative bg-surface-tertiary text-token-text-primary',
         disabled: false,
       };
     }
@@ -47,7 +47,8 @@ function MCPToolItem({
       return {
         text: localize('com_ui_confirm'),
         icon: <PlusCircleIcon className="flex h-4 w-4 items-center stroke-2" aria-hidden="true" />,
-        className: 'btn btn-primary relative',
+        className:
+          'btn relative border border-[var(--azzas-navy)] bg-transparent text-[var(--azzas-navy)]',
         disabled: false,
       };
     }
@@ -56,7 +57,7 @@ function MCPToolItem({
       return {
         text: localize('com_ui_initializing'),
         icon: <Wrench className="flex h-4 w-4 items-center stroke-2" aria-hidden="true" />,
-        className: 'btn btn-primary relative opacity-75 cursor-not-allowed',
+        className: 'btn relative cursor-not-allowed bg-[var(--azzas-navy)] text-white opacity-75',
         disabled: true,
       };
     }
@@ -64,7 +65,7 @@ function MCPToolItem({
     return {
       text: localize('com_ui_add'),
       icon: <PlusCircleIcon className="flex h-4 w-4 items-center stroke-2" aria-hidden="true" />,
-      className: 'btn btn-primary relative',
+      className: 'btn relative bg-[var(--azzas-navy)] text-white',
       disabled: false,
     };
   };

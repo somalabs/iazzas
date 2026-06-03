@@ -1,6 +1,7 @@
-import { Zap, Bot, GitBranch, Globe, UserCheck, Flag } from 'lucide-react';
+import { Zap, GitBranch, Globe, UserCheck, Flag, Bot } from 'lucide-react';
 import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
+
 import PaletteCard from './PaletteCard';
 import type { FlowNodeType } from 'librechat-data-provider';
 
@@ -9,51 +10,46 @@ type PaletteItem = {
   labelKey: TranslationKeys;
   descKey: TranslationKeys;
   icon: React.ReactNode;
-  accentClass: string;
 };
+
+const ICON_CLASS = 'h-3.5 w-3.5 text-text-secondary';
 
 const PALETTE_ITEMS: PaletteItem[] = [
   {
     nodeType: 'trigger',
     labelKey: 'com_studio_flow_node_trigger',
     descKey: 'com_studio_flow_node_trigger_desc',
-    icon: <Zap className="h-3.5 w-3.5 text-violet-400" />,
-    accentClass: 'bg-violet-500/10',
+    icon: <Zap className={ICON_CLASS} />,
   },
   {
     nodeType: 'agent',
     labelKey: 'com_studio_flow_node_agent',
     descKey: 'com_studio_flow_node_agent_desc',
-    icon: <Bot className="h-3.5 w-3.5 text-blue-400" />,
-    accentClass: 'bg-blue-500/10',
+    icon: <Bot className={ICON_CLASS} />,
   },
   {
     nodeType: 'condition',
     labelKey: 'com_studio_flow_node_condition',
     descKey: 'com_studio_flow_node_condition_desc',
-    icon: <GitBranch className="h-3.5 w-3.5 text-amber-400" />,
-    accentClass: 'bg-amber-500/10',
+    icon: <GitBranch className={ICON_CLASS} />,
   },
   {
     nodeType: 'http',
     labelKey: 'com_studio_flow_node_http',
     descKey: 'com_studio_flow_node_http_desc',
-    icon: <Globe className="h-3.5 w-3.5 text-sky-400" />,
-    accentClass: 'bg-sky-500/10',
+    icon: <Globe className={ICON_CLASS} />,
   },
   {
     nodeType: 'human_approval',
     labelKey: 'com_studio_flow_node_human_approval',
     descKey: 'com_studio_flow_node_human_approval_desc',
-    icon: <UserCheck className="h-3.5 w-3.5 text-orange-400" />,
-    accentClass: 'bg-orange-500/10',
+    icon: <UserCheck className={ICON_CLASS} />,
   },
   {
     nodeType: 'output',
     labelKey: 'com_studio_flow_node_output',
     descKey: 'com_studio_flow_node_output_desc',
-    icon: <Flag className="h-3.5 w-3.5 text-emerald-400" />,
-    accentClass: 'bg-emerald-500/10',
+    icon: <Flag className={ICON_CLASS} />,
   },
 ];
 
@@ -76,7 +72,6 @@ export default function Palette() {
             label={localize(item.labelKey)}
             description={localize(item.descKey)}
             icon={item.icon}
-            accentClass={item.accentClass}
           />
         ))}
       </div>

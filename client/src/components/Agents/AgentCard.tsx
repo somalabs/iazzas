@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Label, OGDialog, OGDialogTrigger } from '@librechat/client';
+import { Label, Button, OGDialog, OGDialogTrigger } from '@librechat/client';
 import type t from 'librechat-data-provider';
 import { useLocalize, TranslationKeys, useAgentCategories } from '~/hooks';
+import useStartAgentChat from '~/hooks/Agents/useStartAgentChat';
 import { cn, renderAgentAvatar, getContactDisplayName } from '~/utils';
+import { CAPABILITY_META } from './capabilities';
 import AgentDetailContent from './AgentDetailContent';
 
 interface AgentCardProps {
@@ -17,7 +19,13 @@ interface AgentCardProps {
 const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }) => {
   const localize = useLocalize();
   const { categories } = useAgentCategories();
+  const startChat = useStartAgentChat();
   const [isOpen, setIsOpen] = useState(false);
+
+  const capabilities = useMemo(
+    () => (agent.capabilities ?? []).filter((cap) => CAPABILITY_META[cap]),
+    [agent.capabilities],
+  );
 
   const categoryLabel = useMemo(() => {
     if (!agent.category) return '';
@@ -77,7 +85,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
 
           {/* Avatar */}
           <div className="flex-shrink-0 self-center">
-            <div className="overflow-hidden rounded-full shadow-[0_0_15px_rgba(0,0,0,0.3)] dark:shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            <div className="overflow-hidden rounded-full ring-1 ring-border-light">
               {renderAgentAvatar(agent, { size: 'sm', showBorder: false })}
             </div>
           </div>
@@ -85,15 +93,22 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
           {/* Content */}
           <div className="flex min-w-0 flex-1 flex-col justify-center overflow-hidden">
             {/* Agent name */}
-            <Label className="line-clamp-2 text-base font-semibold text-text-primary md:text-lg">
-              {agent.name}
-            </Label>
+            <div className="flex items-center gap-2">
+              <Label className="line-clamp-2 text-base font-semibold text-text-primary md:text-lg">
+                {agent.name}
+              </Label>
+              {agent.isPublic && (
+                <span className="text-token-text-secondary flex-shrink-0 rounded-md border border-border-light px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                  {localize('com_ui_public')}
+                </span>
+              )}
+            </div>
 
             {/* Agent description */}
             {agent.description && (
               <p
                 id={`agent-${agent.id}-description`}
-                className="mt-0.5 line-clamp-2 text-sm leading-snug text-text-secondary md:line-clamp-5"
+                className="text-token-text-secondary mt-0.5 line-clamp-2 text-sm leading-snug md:line-clamp-3"
                 aria-label={localize('com_agents_description_card', {
                   description: agent.description,
                 })}
@@ -102,15 +117,45 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
               </p>
             )}
 
-            {/* Author */}
-            {displayName && (
-              <div className="mt-1 text-xs text-text-tertiary">
-                <span className="truncate">
-                  {localize('com_ui_by_author', { 0: displayName || '' })}
-                </span>
+            {/* Author + capability glyphs */}
+            {(displayName || capabilities.length > 0) && (
+              <div className="mt-1 flex items-center gap-2 text-xs text-text-tertiary">
+                {displayName && (
+                  <span className="truncate">
+                    {localize('com_ui_by_author', { 0: displayName || '' })}
+                  </span>
+                )}
+                {capabilities.length > 0 && (
+                  <span className="flex flex-shrink-0 items-center gap-1.5">
+                    {capabilities.map((cap) => {
+                      const { icon: Icon, label } = CAPABILITY_META[cap];
+                      return (
+                        <Icon
+                          key={cap}
+                          className="size-3.5"
+                          role="img"
+                          aria-label={localize(label)}
+                        />
+                      );
+                    })}
+                  </span>
+                )}
               </div>
             )}
           </div>
+
+          {/* Quick start on hover (mouse) / focus (keyboard) */}
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              startChat(agent);
+            }}
+            className="absolute bottom-3 right-4 h-7 px-3 text-xs opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover:opacity-100"
+            aria-label={localize('com_agents_start_chat')}
+          >
+            {localize('com_agents_start_chat')}
+          </Button>
         </div>
       </OGDialogTrigger>
 

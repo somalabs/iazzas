@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { Constants, EModelEndpoint, QueryKeys } from 'librechat-data-provider';
@@ -249,10 +249,7 @@ function MCPToolSelectDialog({
     >
       <div className="fixed inset-0 bg-surface-primary opacity-60 transition-opacity dark:opacity-80" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel
-          className="relative max-h-[90vh] w-full transform overflow-hidden overflow-y-auto rounded-lg bg-surface-secondary text-left shadow-xl transition-all max-sm:h-full sm:mx-7 sm:my-8 sm:max-w-2xl lg:max-w-5xl xl:max-w-7xl"
-          style={{ minHeight: '610px' }}
-        >
+        <DialogPanel className="relative max-h-[85vh] w-full max-w-2xl transform overflow-hidden overflow-y-auto rounded-lg bg-surface-secondary text-left shadow-xl transition-all max-sm:h-full sm:mx-7 sm:my-8">
           <div className="flex items-center justify-between border-b-[1px] border-border-medium px-4 pb-4 pt-5 sm:p-6">
             <div className="flex items-center">
               <div className="text-center sm:text-left">
@@ -283,7 +280,7 @@ function MCPToolSelectDialog({
 
           {error && (
             <div
-              className="relative m-4 rounded border border-red-400 bg-red-100 px-4 py-3 text-red-700"
+              className="relative m-4 rounded border border-border-light bg-surface-primary px-4 py-3 text-red-500"
               role="alert"
             >
               {localize('com_nav_plugin_auth_error')} {errorMessage}
@@ -309,25 +306,17 @@ function MCPToolSelectDialog({
 
           <div className="p-4 sm:p-6 sm:pt-4">
             <div className="mt-4 flex flex-col gap-4">
-              <div
-                className="flex items-center justify-center space-x-4"
-                onClick={() => setConfiguringServer(null)}
-              >
-                <Search className="h-6 w-6 text-text-tertiary" />
+              <div onClick={() => setConfiguringServer(null)}>
                 <input
                   type="text"
                   value={searchValue}
                   onChange={handleSearch}
                   placeholder={localize('com_nav_tool_search')}
-                  className="w-64 rounded border border-border-medium bg-transparent px-2 py-1 text-text-primary focus:outline-none"
+                  className="w-full rounded-md border border-border-light bg-surface-primary px-3 py-2 text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--azzas-navy)]"
                 />
               </div>
 
-              <div
-                ref={gridRef}
-                className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                style={{ minHeight: '410px' }}
-              >
+              <div ref={gridRef} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {filteredServers
                   .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                   .map((serverInfo) => {

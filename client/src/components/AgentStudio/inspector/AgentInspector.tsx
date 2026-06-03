@@ -1,5 +1,5 @@
-import { Bot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Bot } from 'lucide-react';
 import { PermissionBits } from 'librechat-data-provider';
 import { useLocalize } from '~/hooks';
 import { useListAgentsQuery } from '~/data-provider';

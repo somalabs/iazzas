@@ -191,7 +191,7 @@ describe('refreshListAvatars', () => {
     );
 
     mockRefreshS3Url.mockImplementation((avatar) =>
-      Promise.resolve(avatar.filepath.replace('.jpg', '-new.jpg')),
+      Promise.resolve((avatar.filepath ?? '').replace('.jpg', '-new.jpg')),
     );
     mockUpdateAgent.mockResolvedValue({});
 

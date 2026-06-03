@@ -136,8 +136,8 @@ export default function Toolbar() {
           className={cn(
             'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
             canRun
-              ? 'bg-surface-submit text-white hover:bg-surface-submit-hover'
-              : 'bg-surface-submit/40 cursor-not-allowed text-white/60',
+              ? 'bg-surface-submit text-on-action hover:bg-surface-submit-hover'
+              : 'bg-surface-submit/40 text-on-action/60 cursor-not-allowed',
           )}
         >
           <Play className="h-3.5 w-3.5" aria-hidden="true" />

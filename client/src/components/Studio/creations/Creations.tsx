@@ -6,6 +6,7 @@ import { useStudioDeleteMutation } from '~/data-provider';
 import { useStudio, useStudioDispatch, useStudioHistory, useRetryGeneration } from '../context';
 import { MODEL_DISPLAY_NAMES, useCaseHasRequiredInputs } from '../schemas';
 import { formatStudioDate } from '../date';
+import GeneratingDot from '~/components/ui/GeneratingDot';
 import type { StudioCreation } from 'librechat-data-provider';
 
 function CreationItem({
@@ -42,9 +43,13 @@ function CreationItem({
           }`}
         >
           {thumbnail ? (
-            <img src={thumbnail} alt="" className="h-full w-full object-cover" />
+            <img
+              src={thumbnail}
+              alt=""
+              className="h-full w-full animate-photo-reveal object-cover"
+            />
           ) : creation.status === 'generating' ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-medium border-t-text-secondary" />
+            <GeneratingDot size={10} />
           ) : isError ? (
             <AlertCircle className="h-5 w-5 text-red-400" strokeWidth={1.5} />
           ) : (
@@ -79,8 +84,12 @@ function CreationItem({
             onClick={() => canRetry && onRetry(creation)}
             disabled={!canRetry}
             className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-red-500/10"
-            aria-label={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
-            title={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
+            aria-label={
+              canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')
+            }
+            title={
+              canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')
+            }
           >
             <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
           </button>
@@ -109,9 +118,7 @@ export default function Creations() {
   const { showToast } = useToastContext();
   const [search, setSearch] = useState('');
 
-  const filtered = creations.filter((c) =>
-    c.prompt.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = creations.filter((c) => c.prompt.toLowerCase().includes(search.toLowerCase()));
 
   function handleSelect(creation: StudioCreation) {
     dispatch({ type: 'SELECT_CREATION', payload: creation });
@@ -135,8 +142,7 @@ export default function Creations() {
         showToast({ status: 'success', message: localize('com_studio_deleted') });
       },
       onError: (err: unknown) => {
-        const status = (err as { response?: { status?: number } })?.response
-          ?.status;
+        const status = (err as { response?: { status?: number } })?.response?.status;
         if (status === 404) {
           // No server row under this id (still-optimistic failed card) —
           // clearing it from the UI loses nothing.
@@ -150,7 +156,7 @@ export default function Creations() {
   }
 
   return (
-    <div className="flex h-full flex-col border-r border-border-medium bg-surface-primary">
+    <div className="flex h-full flex-col">
       {/* Header tabs */}
       <div className="border-b border-border-medium px-3 py-2">
         <div className="flex items-center gap-1">

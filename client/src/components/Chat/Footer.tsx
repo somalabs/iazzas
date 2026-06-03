@@ -1,7 +1,5 @@
 import React, { useEffect, memo } from 'react';
 import TagManager from 'react-gtm-module';
-import ReactMarkdown from 'react-markdown';
-import { Constants } from 'librechat-data-provider';
 import { useGetStartupConfig } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 
@@ -24,15 +22,6 @@ function Footer({ className }: { className?: string }) {
     </a>
   );
 
-  const mainContentParts = (
-    typeof config?.customFooter === 'string'
-      ? config.customFooter
-      : '[LibreChat ' +
-        Constants.VERSION +
-        '](https://librechat.ai) - ' +
-        localize('com_ui_latest_footer')
-  ).split('|');
-
   useEffect(() => {
     if (config?.analyticsGtmId != null && typeof window.google_tag_manager === 'undefined') {
       const tagManagerArgs = {
@@ -42,34 +31,7 @@ function Footer({ className }: { className?: string }) {
     }
   }, [config?.analyticsGtmId]);
 
-  const mainContentRender = mainContentParts.map((text, index) => (
-    <React.Fragment key={`main-content-part-${index}`}>
-      <ReactMarkdown
-        components={{
-          a: ({ node: _n, href, children, ...otherProps }) => {
-            return (
-              <a
-                className="text-text-secondary underline"
-                href={href}
-                rel="noreferrer"
-                {...otherProps}
-              >
-                {children}
-              </a>
-            );
-          },
-
-          p: ({ node: _n, ...props }) => <span {...props} />,
-        }}
-      >
-        {text.trim()}
-      </ReactMarkdown>
-    </React.Fragment>
-  ));
-
-  const footerElements = [...mainContentRender, privacyPolicyRender, termsOfServiceRender].filter(
-    Boolean,
-  );
+  const footerElements = [privacyPolicyRender, termsOfServiceRender].filter(Boolean);
 
   return (
     <div className="relative w-full">

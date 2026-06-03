@@ -18,25 +18,23 @@ export default function UseCaseSelector() {
   }
 
   return (
-    <div className="flex items-center justify-between gap-2">
-      <div className="flex flex-wrap gap-1.5">
-        {USE_CASE_SCHEMAS.map((schema) => (
-          <button
-            key={schema.id}
-            type="button"
-            onClick={() => selectUC(schema.id)}
-            className={cn(
-              'rounded-full px-3 py-1 text-xs font-medium transition-all',
-              activeUseCase === schema.id
-                ? 'bg-surface-primary text-text-primary shadow ring-1 ring-border-heavy'
-                : 'bg-surface-secondary text-text-secondary hover:bg-surface-hover hover:text-text-primary',
-            )}
-            aria-pressed={activeUseCase === schema.id}
-          >
-            {schema.displayName}
-          </button>
-        ))}
-      </div>
+    <div className="flex items-center gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {USE_CASE_SCHEMAS.map((schema) => (
+        <button
+          key={schema.id}
+          type="button"
+          onClick={() => selectUC(schema.id)}
+          className={cn(
+            'flex-shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all',
+            activeUseCase === schema.id
+              ? 'bg-surface-primary text-text-primary shadow ring-1 ring-border-heavy'
+              : 'bg-surface-secondary text-text-secondary hover:bg-surface-hover hover:text-text-primary',
+          )}
+          aria-pressed={activeUseCase === schema.id}
+        >
+          {schema.displayName}
+        </button>
+      ))}
 
       <button
         type="button"
@@ -49,9 +47,7 @@ export default function UseCaseSelector() {
         )}
         aria-pressed={advancedMode}
       >
-        {advancedMode
-          ? localize('com_studio_guided_mode')
-          : localize('com_studio_advanced_mode')}
+        {advancedMode ? localize('com_studio_guided_mode') : localize('com_studio_advanced_mode')}
       </button>
     </div>
   );

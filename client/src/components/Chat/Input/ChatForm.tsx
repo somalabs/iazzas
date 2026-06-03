@@ -2,7 +2,12 @@ import { memo, useRef, useMemo, useEffect, useState, useCallback } from 'react';
 import { useWatch } from 'react-hook-form';
 import { TextareaAutosize } from '@librechat/client';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { Constants, isAssistantsEndpoint, isAgentsEndpoint } from 'librechat-data-provider';
+import {
+  Constants,
+  isAgentsEndpoint,
+  isEphemeralAgentId,
+  isAssistantsEndpoint,
+} from 'librechat-data-provider';
 import type { TConversation } from 'librechat-data-provider';
 import type { ExtendedFile, FileSetter, ConvoGenerator } from '~/common';
 import {
@@ -22,10 +27,10 @@ import {
   useFocusChatEffect,
 } from '~/hooks';
 import { mainTextareaId, BadgeItem } from '~/common';
-import AttachFileChat from './Files/AttachFileChat';
 import FileFormChat from './Files/FileFormChat';
 import { cn, removeFocusRings } from '~/utils';
 import TextareaHeader from './TextareaHeader';
+import AgentChip from './AgentChip';
 import PromptsCommand from './PromptsCommand';
 import AudioRecorder from './AudioRecorder';
 import CollapseChat from './CollapseChat';
@@ -176,14 +181,7 @@ const ChatForm = memo(function ChatForm({
 
   useQueryParams({ textAreaRef });
 
-  const { ref, ...registerProps } = methods.register('text', {
-    required: true,
-    onChange: useCallback(
-      (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-        methods.setValue('text', e.target.value, { shouldValidate: true }),
-      [methods],
-    ),
-  });
+  const { ref, ...registerProps } = methods.register('text', { required: true });
 
   const textValue = useWatch({ control: methods.control, name: 'text' });
 
@@ -231,7 +229,7 @@ const ChatForm = memo(function ChatForm({
       onSubmit={methods.handleSubmit(submitMessage)}
       className={cn(
         'mx-auto flex w-full flex-row gap-3 transition-[max-width] duration-300 sm:px-2',
-        maximizeChatSpace ? 'max-w-full' : 'md:max-w-3xl xl:max-w-4xl',
+        maximizeChatSpace ? 'max-w-full' : 'md:max-w-[760px]',
         centerFormOnLanding &&
           (conversationId == null || conversationId === Constants.NEW_CONVO) &&
           !isSubmitting &&
@@ -263,13 +261,16 @@ const ChatForm = memo(function ChatForm({
           <div
             onClick={handleContainerClick}
             className={cn(
-              'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-3xl border pb-4 text-text-primary transition-all duration-200 sm:rounded-3xl sm:pb-0',
-              isTextAreaFocused ? 'shadow-lg' : 'shadow-md',
-              isTemporary
-                ? 'border-violet-800/60 bg-violet-950/10'
-                : 'border-border-light bg-surface-chat',
+              // Composer-herói: superfície paper (branca) flutuando sobre o creme,
+              // 14px raio, hairline quente, e a única elevação da tela (shadow atelier).
+              'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-[14px] border pb-4 text-text-primary shadow-atelier transition-all duration-200 sm:rounded-[14px] sm:pb-0',
+              // Anel terracota acende ao focar/digitar (status, nunca fill).
+              isTextAreaFocused && 'ring-ember/70 ring-1',
+              isTemporary ? 'border-ink-500/40 border-dashed bg-paper' : 'border-rule bg-paper',
             )}
           >
+            {/* F4: chip "para [Agente]" + popover foto-card (só no endpoint de agentes) */}
+            <AgentChip />
             <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
             {/* WIP */}
             <EditBadges
@@ -342,7 +343,19 @@ const ChatForm = memo(function ChatForm({
               )}
             >
               <div className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
-                <AttachFileChat
+                <BadgeRow
+                  showEphemeralBadges={
+                    !!endpoint &&
+                    !isAssistantsEndpoint(endpoint) &&
+                    (!isAgentsEndpoint(endpoint) || isEphemeralAgentId(conversation?.agent_id))
+                  }
+                  isSubmitting={isSubmitting}
+                  conversationId={conversationId}
+                  specName={conversation?.spec}
+                  onChange={setBadges}
+                  isInChat={
+                    Array.isArray(conversation?.messages) && conversation.messages.length >= 1
+                  }
                   conversation={conversation}
                   disableInputs={disableInputs}
                   files={files}
@@ -350,18 +363,6 @@ const ChatForm = memo(function ChatForm({
                   setFilesLoading={setFilesLoading}
                 />
               </div>
-              <BadgeRow
-                showEphemeralBadges={
-                  !!endpoint && !isAgentsEndpoint(endpoint) && !isAssistantsEndpoint(endpoint)
-                }
-                isSubmitting={isSubmitting}
-                conversationId={conversationId}
-                specName={conversation?.spec}
-                onChange={setBadges}
-                isInChat={
-                  Array.isArray(conversation?.messages) && conversation.messages.length >= 1
-                }
-              />
               <div className="mx-auto flex" />
               {SpeechToText && (
                 <AudioRecorder

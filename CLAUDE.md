@@ -24,6 +24,7 @@ Read these before changing infra or shipping code that affects deploy:
 - [`docs/DEPLOY.md`](docs/DEPLOY.md) — deploy procedure, GHCR auth, Docker Compose flags, SSO diagnostics, rollback, known pitfalls
 - [`docs/iazzas-arquitetura.md`](docs/iazzas-arquitetura.md) — IAzzas architecture (containers, agents, web search, code interpreter, image generation)
 - [`docs/env-production.md`](docs/env-production.md) — production environment variables
+- [`docs/ci-and-quality.md`](docs/ci-and-quality.md) — every PR gate, the command to reproduce it locally, recurring false-signal pitfalls, and how to avoid CI drift
 
 ---
 
@@ -34,6 +35,18 @@ Read these before changing infra or shipping code that affects deploy:
 - Database-specific shared logic goes in `/packages/data-schemas`.
 - Frontend/backend shared API logic (endpoints, types, data-service) goes in `/packages/data-provider`.
 - Build data-provider from project root: `npm run build:data-provider`.
+
+---
+
+## CI hygiene (avoid red drift)
+
+CI on this repo drifts red from changes that don't carry their tests/keys along — not real bugs. A change is done when the gate for the area you touched is **green locally**, not when the feature works. Full gate list, local commands, and pitfalls: [`docs/ci-and-quality.md`](docs/ci-and-quality.md).
+
+- **Change a shared default → update its spec in the same commit.** Editing `i18n.ts` (`lng`/`fallbackLng`), `roles.ts` permission defaults, `config.ts`, or any schema breaks the spec that pins the old value (e.g. `permissions.spec.ts`, `Translation.spec.ts`).
+- **Edit a component → run its spec.** Grep for an adjacent `*.spec`/`*.test`; new hooks need their mock, changed render guards/props break assertions.
+- **Change a type/schema → run all four `tsc --noEmit`** (a loosened type like optional `filepath` breaks consuming specs).
+- **i18n keys must be used.** `i18n-unused-keys` fails on any unused key in `en/translation.json`. Add a key only when you wire it; remove keys you stop using. Hardcoded JSX text trips `i18next/no-literal-string` — localize it or add the `eslint-disable` escape hatch for intentional pt-BR/brand/demo copy.
+- **Fix `prettier/prettier` with `eslint --fix`, not the prettier CLI** (they diverge here). `api` tests need `cp api/test/.env.test.example api/test/.env.test`. In `zsh`, grep command output for `error`/`FAIL` — `${PIPESTATUS[0]}` lies.
 
 ---
 

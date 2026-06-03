@@ -51,7 +51,7 @@ const AgentAvatar = ({ className = '', avatar = '', agentName, size }: AgentIcon
     );
   }
 
-  return <Bot className={cn(agentName === '' ? 'icon-2xl' : '', className)} size={size} />;
+  return <Bot className={cn(agentName === '' ? 'icon-2xl' : '', className)} />;
 };
 
 const Bedrock = ({ className = '' }: IconMapProps) => {

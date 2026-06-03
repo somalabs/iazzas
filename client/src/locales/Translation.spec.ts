@@ -2,6 +2,7 @@ import i18n from './i18n';
 import English from './en/translation.json';
 import French from './fr/translation.json';
 import Spanish from './es/translation.json';
+import Portuguese from './pt-BR/translation.json';
 import { TranslationKeys } from '~/hooks';
 
 describe('i18next translation tests', () => {
@@ -27,10 +28,11 @@ describe('i18next translation tests', () => {
     expect(i18n.t('com_ui_examples')).toBe(Spanish.com_ui_examples);
   });
 
-  it('should fallback to English for an invalid language code', () => {
-    // When an invalid language is provided, i18next should fallback to English
+  it('should fall back to the default language (pt-BR) for an invalid language code', () => {
+    // The app sets pt-BR as the source of truth, so an invalid language code
+    // falls back to Portuguese rather than English.
     i18n.changeLanguage('invalid-code');
-    expect(i18n.t('com_ui_examples')).toBe(English.com_ui_examples);
+    expect(i18n.t('com_ui_examples')).toBe(Portuguese.com_ui_examples);
   });
 
   it('should return the key itself for an invalid key', () => {

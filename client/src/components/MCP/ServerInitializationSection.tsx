@@ -75,7 +75,7 @@ export default function ServerInitializationSection({
 
   // Unified button rendering
   const isReinit = shouldShowReinit;
-  const buttonVariant = isReinit ? undefined : 'default';
+  const buttonVariant = 'submit';
 
   let buttonText = '';
   if (isServerInitializing) {
@@ -95,13 +95,13 @@ export default function ServerInitializationSection({
   );
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 pt-1">
       {requiresOAuth && revokeOAuthForServer && (
         <Button
-          size="sm"
-          variant="destructive"
+          variant="outline"
           onClick={() => revokeOAuthForServer(serverName)}
           aria-label={localize('com_ui_revoke')}
+          className="text-text-destructive"
         >
           <Trash2 className="h-4 w-4" />
           {localize('com_ui_revoke')}

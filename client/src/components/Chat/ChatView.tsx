@@ -1,16 +1,29 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
 import { useForm } from 'react-hook-form';
-import { Spinner } from '@librechat/client';
+import { Spinner, useMediaQuery } from '@librechat/client';
 import { useParams } from 'react-router-dom';
 import { Constants, buildTree } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
 import type { ChatFormValues } from '~/common';
 import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } from '~/Providers';
-import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers } from '~/hooks';
+import {
+  useAddedResponse,
+  useResumeOnLoad,
+  useAdaptiveSSE,
+  useChatHelpers,
+  useLocalize,
+} from '~/hooks';
 import ConversationStarters from './Input/ConversationStarters';
+import StarterChips from './Input/StarterChips';
+import RecentWork from './RecentWork';
+import BrandDuotone from '~/components/ui/BrandDuotone';
 import { useGetMessagesByConvoId } from '~/data-provider';
+import ConversationsSection from '~/components/UnifiedSidebar/ConversationsSection';
+import AtelierDrawer from '~/components/ui/AtelierDrawer';
 import MessagesView from './Messages/MessagesView';
+import { atelierChatOpenAtom } from '~/store/atelier';
 import Presentation from './Presentation';
 import ChatForm from './Input/ChatForm';
 import Landing from './Landing';
@@ -30,9 +43,15 @@ function LoadingSpinner() {
 }
 
 function ChatView({ index = 0 }: { index?: number }) {
+  const localize = useLocalize();
   const { conversationId } = useParams();
   const rootSubmission = useRecoilValue(store.submissionByIndex(index));
-  const centerFormOnLanding = useRecoilValue(store.centerFormOnLanding);
+  const [atelierOpen, setAtelierOpen] = useAtom(atelierChatOpenAtom);
+  const isSmallScreen = useMediaQuery('(max-width: 768px)');
+
+  useEffect(() => {
+    setAtelierOpen(false);
+  }, [conversationId, setAtelierOpen]);
 
   const methods = useForm<ChatFormValues>({
     defaultValues: { text: '' },
@@ -73,7 +92,7 @@ function ChatView({ index = 0 }: { index?: number }) {
   } else if (!isLandingPage) {
     content = <MessagesView messagesTree={messagesTree} />;
   } else {
-    content = <Landing centerFormOnLanding={centerFormOnLanding} />;
+    content = <Landing />;
   }
 
   return (
@@ -81,30 +100,53 @@ function ChatView({ index = 0 }: { index?: number }) {
       <ChatContext.Provider value={chatHelpers}>
         <AddedChatContext.Provider value={addedChatHelpers}>
           <Presentation>
-            <div className="relative flex h-full w-full flex-col">
-              <Header />
-              <>
-                <div
-                  className={cn(
-                    'flex flex-col',
-                    isLandingPage
-                      ? 'flex-1 items-center justify-end sm:justify-center'
-                      : 'h-full overflow-y-auto',
-                  )}
-                >
-                  {content}
+            <div className="flex h-full w-full overflow-hidden">
+              <div className="relative flex h-full w-full min-w-0 flex-col">
+                <Header />
+                <>
                   <div
                     className={cn(
-                      'w-full',
-                      isLandingPage && 'max-w-3xl transition-all duration-200 xl:max-w-4xl',
+                      'flex flex-col',
+                      isLandingPage
+                        ? 'relative isolate h-full items-center overflow-y-auto pt-20'
+                        : 'h-full overflow-y-auto',
                     )}
                   >
-                    <ChatForm index={index} />
-                    {isLandingPage ? <ConversationStarters /> : <Footer />}
+                    {isLandingPage && (
+                      <BrandDuotone
+                        src="/assets/brand/azzas-campaign-1.jpg"
+                        anchor="bottom"
+                        imageOpacity={0.08}
+                        className="-z-10"
+                      />
+                    )}
+                    {content}
+                    <div
+                      className={cn(
+                        'mx-auto w-full',
+                        isLandingPage && 'max-w-[760px] transition-all duration-200',
+                      )}
+                    >
+                      <ChatForm index={index} />
+                      {isLandingPage && <StarterChips />}
+                      {isLandingPage ? <ConversationStarters /> : <Footer />}
+                      {isLandingPage && <RecentWork />}
+                    </div>
                   </div>
-                </div>
-                {isLandingPage && <Footer />}
-              </>
+                  {isLandingPage && <Footer />}
+                </>
+              </div>
+              <AtelierDrawer
+                open={atelierOpen}
+                title={localize('com_ui_atelier')}
+                hideTitle
+                headerClassName="h-[52px] px-4"
+                onClose={() => setAtelierOpen(false)}
+                overlay={isSmallScreen}
+                bodyClassName="p-0"
+              >
+                <ConversationsSection />
+              </AtelierDrawer>
             </div>
           </Presentation>
         </AddedChatContext.Provider>

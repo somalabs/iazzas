@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Workflow, Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Workflow, Plus, MoreHorizontal, Pencil, Trash2, Play, History } from 'lucide-react';
 import {
   Button,
   Spinner,
   useToastContext,
+  useMediaQuery,
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuContent,
@@ -13,8 +14,10 @@ import {
   OGDialogTemplate,
 } from '@librechat/client';
 import type { Flow } from 'librechat-data-provider';
-import { useFlowsQuery, useDeleteFlowMutation } from '~/data-provider';
+import { useFlowsQuery, useDeleteFlowMutation, useRunFlowMutation } from '~/data-provider';
 import { useAgentsAccessRedirect } from '~/hooks/Agents';
+import FlowRunsSheet from '~/components/AgentStudio/runs/FlowRunsSheet';
+import ScreenHeader from '~/components/ui/ScreenHeader';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -24,21 +27,27 @@ export default function FlowsHome() {
   const hasAccess = useAgentsAccessRedirect();
   const { data: flowsData, isLoading } = useFlowsQuery();
   const flows = flowsData?.flows ?? null;
-
   if (!hasAccess) {
     return null;
   }
 
   return (
-    <main
-      className="h-full w-full overflow-y-auto bg-surface-primary"
-      aria-label={localize('com_ui_ux_nav_flows')}
-    >
-      <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
-        <Header onCreate={() => navigate('/d/flows/novo')} />
-        <FlowsGrid flows={isLoading ? null : flows} />
-      </div>
-    </main>
+    <div className="relative flex h-full w-full overflow-hidden">
+      <ScreenHeader>
+        <span className="pl-2 text-sm font-semibold text-text-primary">
+          {localize('com_ui_ux_nav_flows')}
+        </span>
+      </ScreenHeader>
+      <main
+        className="min-w-0 flex-1 overflow-y-auto bg-surface-primary"
+        aria-label={localize('com_ui_ux_nav_flows')}
+      >
+        <div className="mx-auto w-full max-w-6xl px-6 pb-8 pt-[84px] sm:px-8">
+          <Header onCreate={() => navigate('/d/flows/novo')} />
+          <FlowsGrid flows={isLoading ? null : flows} />
+        </div>
+      </main>
+    </div>
   );
 }
 
@@ -47,7 +56,7 @@ function Header({ onCreate }: { onCreate: () => void }) {
   return (
     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-2xl font-semibold text-text-primary">
+        <h1 className="font-editorial text-2xl font-medium tracking-[-0.5px] text-text-primary">
           {localize('com_ui_ux_flows_home_title')}
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
@@ -55,7 +64,7 @@ function Header({ onCreate }: { onCreate: () => void }) {
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <Button onClick={onCreate}>
+        <Button onClick={onCreate} className="bg-action text-on-action hover:bg-action-hover">
           <Plus className="size-4" />
           {localize('com_ui_ux_flows_home_create')}
         </Button>
@@ -106,8 +115,10 @@ function FlowsGrid({ flows }: { flows: Flow[] | null }) {
 function FlowCard({ flow }: { flow: Flow }) {
   const localize = useLocalize();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const { showToast } = useToastContext();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const deleteFlow = useDeleteFlowMutation({
     onSuccess: () => {
@@ -119,23 +130,47 @@ function FlowCard({ flow }: { flow: Flow }) {
     },
   });
 
-  const open = () => navigate(`/d/flows/${flow._id}`);
+  const runFlow = useRunFlowMutation();
+
+  const openEditor = () => navigate(`/d/flows/${flow._id}`);
+
+  const handleRun = () =>
+    runFlow.mutate(
+      { id: flow._id, input: '' },
+      {
+        onSuccess: () => {
+          showToast({ message: localize('com_studio_flow_run_started'), status: 'success' });
+          setHistoryOpen(true);
+        },
+        onError: () =>
+          showToast({ message: localize('com_studio_flow_run_error'), status: 'error' }),
+      },
+    );
+
+  // On mobile the flow editor is not usable, so the card is display-only;
+  // all actions happen through the card menu (run / history / delete).
+  const interactive = !isMobile;
 
   return (
     <div
       className={cn(
-        'group relative flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4',
-        'cursor-pointer transition-colors hover:border-border-medium hover:bg-surface-tertiary',
+        'group relative flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4 transition-colors',
+        interactive &&
+          'cursor-pointer hover:border-border-medium hover:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary',
       )}
-      onClick={open}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          open();
-        }
-      }}
-      role="button"
-      tabIndex={0}
+      onClick={interactive ? openEditor : undefined}
+      onKeyDown={
+        interactive
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openEditor();
+              }
+            }
+          : undefined
+      }
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
       aria-label={flow.name}
     >
       <div className="flex items-start gap-3">
@@ -144,12 +179,25 @@ function FlowCard({ flow }: { flow: Flow }) {
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-medium text-text-primary">{flow.name}</h3>
-          <p className="mt-1 text-xs text-text-tertiary">
+          <p className="mt-1 text-xs text-text-secondary">
             {flow.nodes?.length ?? 0} {localize('com_ui_ux_flows_home_card_nodes')}
           </p>
         </div>
-        <CardMenu onEdit={open} onDelete={() => setDeleteOpen(true)} />
+        <CardMenu
+          isMobile={isMobile}
+          onEdit={openEditor}
+          onRun={handleRun}
+          onHistory={() => setHistoryOpen(true)}
+          onDelete={() => setDeleteOpen(true)}
+        />
       </div>
+
+      <FlowRunsSheet
+        flowId={flow._id}
+        flowName={flow.name}
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+      />
 
       <OGDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <OGDialogTemplate
@@ -163,7 +211,7 @@ function FlowCard({ flow }: { flow: Flow }) {
           }
           selection={{
             selectHandler: () => deleteFlow.mutate({ id: flow._id }),
-            selectClasses: 'bg-red-500 hover:bg-red-600 text-white',
+            selectClasses: 'bg-surface-destructive hover:bg-surface-destructive-hover text-white',
             selectText: localize('com_ui_delete'),
           }}
         />
@@ -172,15 +220,44 @@ function FlowCard({ flow }: { flow: Flow }) {
   );
 }
 
-function CardMenu({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
+function CardMenu({
+  isMobile,
+  onEdit,
+  onRun,
+  onHistory,
+  onDelete,
+}: {
+  isMobile: boolean;
+  onEdit: () => void;
+  onRun: () => void;
+  onHistory: () => void;
+  onDelete: () => void;
+}) {
   const localize = useLocalize();
   const stop = (e: React.MouseEvent) => e.stopPropagation();
   const items = useMemo(
-    () => [
-      { label: localize('com_ui_edit'), icon: Pencil, onClick: onEdit },
-      { label: localize('com_ui_delete'), icon: Trash2, onClick: onDelete, destructive: true },
-    ],
-    [localize, onEdit, onDelete],
+    () =>
+      isMobile
+        ? [
+            { label: localize('com_studio_flow_run_button'), icon: Play, onClick: onRun },
+            { label: localize('com_studio_flow_runs_title'), icon: History, onClick: onHistory },
+            {
+              label: localize('com_ui_delete'),
+              icon: Trash2,
+              onClick: onDelete,
+              destructive: true,
+            },
+          ]
+        : [
+            { label: localize('com_ui_edit'), icon: Pencil, onClick: onEdit },
+            {
+              label: localize('com_ui_delete'),
+              icon: Trash2,
+              onClick: onDelete,
+              destructive: true,
+            },
+          ],
+    [isMobile, localize, onEdit, onRun, onHistory, onDelete],
   );
 
   return (
@@ -191,7 +268,7 @@ function CardMenu({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => vo
             size="sm"
             variant="ghost"
             aria-label={localize('com_ui_more_options')}
-            className="size-8 p-0 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
+            className="size-11 p-0 opacity-100 transition-opacity data-[state=open]:opacity-100 md:size-8 md:opacity-0 md:group-hover:opacity-100"
           >
             <MoreHorizontal className="size-4" />
           </Button>
@@ -204,7 +281,9 @@ function CardMenu({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => vo
                 e.stopPropagation();
                 item.onClick();
               }}
-              className={cn(item.destructive && 'text-red-500 focus:text-red-500')}
+              className={cn(
+                item.destructive && 'text-text-destructive focus:text-text-destructive',
+              )}
             >
               <item.icon className="mr-2 size-4" />
               {item.label}

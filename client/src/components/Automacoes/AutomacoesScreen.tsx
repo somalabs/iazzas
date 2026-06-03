@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react';
 import { useToastContext, useMediaQuery } from '@librechat/client';
 import {
   useAutomationsQuery,
@@ -7,9 +6,10 @@ import {
   useRunAutomationMutation,
   useDeleteAutomationMutation,
 } from '~/data-provider';
-import { useGoToNewChat, useLocalize } from '~/hooks';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { AutomacoesProvider, useAutomacoesContext } from './context';
+import ScreenHeader from '~/components/ui/ScreenHeader';
 import AutomationList from './AutomationList';
 import AutomationEditor from './AutomationEditor';
 import RunsDrawer from './RunsDrawer';
@@ -25,9 +25,33 @@ function EmptyEditorState() {
   );
 }
 
+type AutomationsEmptyStateProps = {
+  canCreate: boolean;
+  onCreate: () => void;
+};
+
+function AutomationsEmptyState({ canCreate, onCreate }: AutomationsEmptyStateProps) {
+  const localize = useLocalize();
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
+      <h2 className="font-editorial text-3xl font-medium tracking-[-0.5px] text-text-primary">
+        {localize('com_automacoes_empty_state')}
+      </h2>
+      {canCreate && (
+        <button
+          type="button"
+          onClick={onCreate}
+          className="rounded-lg bg-surface-submit px-5 py-2.5 text-sm font-medium text-white hover:bg-surface-submit-hover"
+        >
+          {localize('com_automacoes_create_btn')}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function AutomacoesView() {
   const localize = useLocalize();
-  const goToNewChat = useGoToNewChat();
   const { showToast } = useToastContext();
   const { state, dispatch } = useAutomacoesContext();
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -88,56 +112,56 @@ function AutomacoesView() {
   };
 
   const showEditor = state.isCreating || !!state.selectedId;
-
-  const backToList = isMobile && showEditor;
+  const showEmptyState = automations.length === 0 && !showEditor;
 
   return (
-    <div className="flex h-full flex-col">
-      <header
-        role="banner"
-        className="flex h-12 flex-shrink-0 items-center gap-2 border-b border-border-light bg-surface-primary px-4"
-      >
-        <button
-          type="button"
-          onClick={() => (backToList ? dispatch({ type: 'CANCEL' }) : goToNewChat())}
-          className="rounded-lg p-1.5 text-text-tertiary hover:bg-surface-hover hover:text-text-primary"
-          aria-label={backToList ? localize('com_automacoes_back_to_list') : 'Voltar ao chat'}
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        </button>
+    <div className="relative flex h-full flex-col">
+      <ScreenHeader>
         <h1 className="text-sm font-semibold text-text-primary">
           {localize('com_automacoes_page_title')}
         </h1>
-      </header>
+      </ScreenHeader>
 
-      <div className="flex flex-1 overflow-hidden">
-        {(!isMobile || !showEditor) && (
-          <AutomationList
-            automations={automations}
-            selectedId={state.selectedId}
+      <div className="flex flex-1 overflow-hidden pt-[52px]">
+        {showEmptyState ? (
+          <AutomationsEmptyState
             canCreate={canCreate}
-            onSelect={(id) => dispatch({ type: 'SELECT', payload: id })}
             onCreate={() => dispatch({ type: 'CREATE' })}
-            onToggleEnabled={handleToggleEnabled}
-            onRunNow={handleRunNow}
-            onDelete={handleDelete}
-            onOpenRuns={(id) => dispatch({ type: 'OPEN_RUNS', payload: id })}
-            className={cn(isMobile && 'w-full flex-1 border-r-0')}
           />
-        )}
-
-        {(!isMobile || showEditor) && (
-          <main className="flex flex-1 flex-col overflow-hidden" aria-label="Editor de automação">
-            {showEditor ? (
-              <AutomationEditor
-                automation={selectedAutomation}
-                onSaved={handleSaved}
-                onCancel={() => dispatch({ type: 'CANCEL' })}
+        ) : (
+          <>
+            {(!isMobile || !showEditor) && (
+              <AutomationList
+                automations={automations}
+                selectedId={state.selectedId}
+                canCreate={canCreate}
+                onSelect={(id) => dispatch({ type: 'SELECT', payload: id })}
+                onCreate={() => dispatch({ type: 'CREATE' })}
+                onToggleEnabled={handleToggleEnabled}
+                onRunNow={handleRunNow}
+                onDelete={handleDelete}
+                onOpenRuns={(id) => dispatch({ type: 'OPEN_RUNS', payload: id })}
+                className={cn(isMobile && 'w-full flex-1 border-r-0')}
               />
-            ) : (
-              <EmptyEditorState />
             )}
-          </main>
+
+            {(!isMobile || showEditor) && (
+              <main
+                className="flex flex-1 flex-col overflow-hidden"
+                aria-label="Editor de automação"
+              >
+                {showEditor ? (
+                  <AutomationEditor
+                    automation={selectedAutomation}
+                    onSaved={handleSaved}
+                    onCancel={() => dispatch({ type: 'CANCEL' })}
+                  />
+                ) : (
+                  <EmptyEditorState />
+                )}
+              </main>
+            )}
+          </>
         )}
 
         {state.runsAutomationId && (

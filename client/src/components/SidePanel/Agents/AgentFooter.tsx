@@ -121,7 +121,7 @@ export default function AgentFooter({
           !permissionsLoading && <DuplicateAgent agent_id={agent_id} />}
         {/* Submit Button */}
         <button
-          className="btn btn-primary focus:shadow-outline flex h-9 w-full items-center justify-center px-4 py-2 font-semibold text-white hover:bg-green-600 focus:border-green-500"
+          className="flex h-9 w-full items-center justify-center rounded-md bg-[var(--surface-submit)] px-4 py-2 font-semibold text-white transition-colors hover:bg-[var(--surface-submit-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring-primary)] focus-visible:ring-offset-2 disabled:opacity-50"
           type="submit"
           disabled={isSaving}
           aria-busy={isSaving}

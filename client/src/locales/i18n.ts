@@ -1,6 +1,5 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Import your JSON translations
 import translationEn from './en/translation.json';
@@ -91,22 +90,20 @@ export const resources = {
   uk: { translation: translationUk },
 } as const;
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    fallbackLng: {
-      'zh-TW': ['zh-Hant', 'en'],
-      'zh-HK': ['zh-Hant', 'en'],
-      zh: ['zh-Hans', 'en'],
-      default: ['en'],
-    },
-    fallbackNS: 'translation',
-    ns: ['translation'],
-    debug: false,
-    defaultNS,
-    resources,
-    interpolation: { escapeValue: false },
-  });
+i18n.use(initReactI18next).init({
+  lng: 'pt-BR',
+  fallbackLng: {
+    'zh-TW': ['zh-Hant', 'en'],
+    'zh-HK': ['zh-Hant', 'en'],
+    zh: ['zh-Hans', 'en'],
+    default: ['pt-BR'],
+  },
+  fallbackNS: 'translation',
+  ns: ['translation'],
+  debug: false,
+  defaultNS,
+  resources,
+  interpolation: { escapeValue: false },
+});
 
 export default i18n;

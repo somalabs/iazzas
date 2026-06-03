@@ -2,6 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Sidebar collapse/expand (LEM-80) — animate max-width (not width) with ease-out-expo
+   to avoid layout thrashing; mobile drawer slides via transform, overlay fades via opacity.
+   Honor reduced-motion with an instant swap. */
+.sidebar-collapse-anim {
+  transition: max-width 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-drawer-anim {
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-overlay-anim {
+  transition: opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-collapse-anim,
+  .sidebar-drawer-anim,
+  .sidebar-overlay-anim {
+    transition: none;
+  }
+}
+
+/* Reasoning label shimmer — Claude-style animated sweep while the model is still
+   reasoning. Functional loading feedback only (never decorative); collapses to a
+   static muted color under reduced-motion. */
+.reasoning-shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--text-tertiary) 0%,
+    var(--text-tertiary) 35%,
+    var(--text-primary) 50%,
+    var(--text-tertiary) 65%,
+    var(--text-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: reasoning-shimmer 2s linear infinite;
+}
+@keyframes reasoning-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reasoning-shimmer {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: var(--text-secondary);
+    color: var(--text-secondary);
+  }
+}
+
 /* Custom Variables */
 :root {
   --white: #fff;
@@ -51,7 +107,7 @@
   --amber-800: #92400e;
   --amber-900: #78350f;
   --amber-950: #451a03;
-  --brand-purple: #ab68ff;
+  --brand-purple: var(--action);
   --gizmo-gray-500: #999;
   --gizmo-gray-600: #666;
   --gizmo-gray-950: #0f0f0f;
@@ -66,6 +122,20 @@
   --azzas-ink: #000000;
   --azzas-ink-soft: #595959;
   --azzas-ink-faint: #999999;
+
+  /* Redesign P0-B — sistema de cor único (fonte de verdade §1 do REDESIGN) */
+  --canvas: #f9f6ea; /* creme: fundo do app inteiro. NUNCA branco puro. */
+  --paper: #ffffff; /* cards/composer flutuantes sobre o creme */
+  --rule: #e6e0cf; /* hairline quente; nunca borda cinza */
+  --ink-900: #1c2b38; /* títulos */
+  --ink-700: #3d5a73; /* steel: texto secundário, ícones em repouso */
+  --ink-500: #6e7e8c; /* helper/caption */
+  --action: #274566; /* azzas-navy — ÚNICA cor de fill de botão no produto */
+  --action-hover: #1c3450;
+  --on-action: #f9f6ea;
+  --ember: #c25a3c; /* terracota — só status ativo/live e marcador de nav ativa. Nunca botão. */
+  --focus-rgb: 39 69 102; /* navy em componentes rgba(... / .14) — foco/seleção */
+
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -74,40 +144,40 @@
   --markdown-font-size: 1rem;
 }
 html {
-  --brand-purple: var(--azzas-navy);
-  --presentation: var(--white);
-  --text-primary: var(--azzas-ink);
-  --text-secondary: var(--azzas-ink-soft);
-  --text-secondary-alt: var(--azzas-ink-soft);
-  --text-tertiary: var(--azzas-ink-faint);
+  --brand-purple: var(--action);
+  --presentation: var(--canvas);
+  --text-primary: var(--ink-900);
+  --text-secondary: var(--ink-700);
+  --text-secondary-alt: var(--ink-700);
+  --text-tertiary: var(--ink-500);
   --text-warning: var(--amber-500);
   --text-destructive: var(--red-600);
-  --ring-primary: var(--azzas-navy);
-  --header-primary: var(--white);
-  --header-hover: var(--azzas-surface-cream);
-  --header-button-hover: var(--azzas-surface-cream);
+  --ring-primary: var(--action);
+  --header-primary: var(--paper);
+  --header-hover: var(--azzas-surface-warm);
+  --header-button-hover: var(--azzas-surface-warm);
   --surface-active: var(--azzas-blue-light);
   --surface-active-alt: var(--azzas-surface-warm);
   --surface-hover: var(--azzas-surface-warm);
   --surface-hover-alt: var(--azzas-blue-light);
-  --surface-primary: var(--white);
-  --surface-primary-alt: var(--azzas-surface-cream);
+  --surface-primary: var(--canvas);
+  --surface-primary-alt: var(--canvas);
   --surface-primary-contrast: var(--azzas-surface-warm);
-  --surface-secondary: var(--azzas-surface-cream);
+  --surface-secondary: var(--canvas);
   --surface-secondary-alt: var(--azzas-surface-warm);
   --surface-tertiary: var(--azzas-surface-warm);
-  --surface-tertiary-alt: var(--white);
-  --surface-dialog: var(--white);
-  --surface-submit: var(--azzas-navy);
-  --surface-submit-hover: var(--azzas-steel);
+  --surface-tertiary-alt: var(--paper);
+  --surface-dialog: var(--paper);
+  --surface-submit: var(--action);
+  --surface-submit-hover: var(--action-hover);
   --surface-destructive: var(--red-700);
   --surface-destructive-hover: var(--red-800);
-  --surface-chat: var(--white);
-  --border-light: var(--azzas-surface-warm);
-  --border-medium-alt: var(--azzas-blue-light);
-  --border-medium: var(--azzas-blue-light);
-  --border-heavy: var(--azzas-ink-faint);
-  --border-xheavy: var(--azzas-ink-soft);
+  --surface-chat: var(--canvas);
+  --border-light: var(--rule);
+  --border-medium-alt: var(--rule);
+  --border-medium: var(--rule);
+  --border-heavy: var(--ink-700);
+  --border-xheavy: var(--ink-900);
   --border-destructive: var(--red-600);
   /* These are test styles */
 
@@ -123,7 +193,7 @@ html {
   --muted-foreground: 0 0% 45.1%;
   --accent: 0 0% 96.1%;
   --accent-foreground: 0 0% 9%;
-  --destructive: 0 84.2% 60.2%;
+  --destructive: 11 60% 38%;
   --destructive-foreground: 0 0% 98%;
   --border: 0 0% 89.8%;
   --input: 0 0% 89.8%;
@@ -1516,6 +1586,7 @@ button {
 body,
 html {
   height: 100%;
+  background-color: var(--canvas);
 }
 
 .dark body,
@@ -1527,6 +1598,12 @@ html {
 #__next,
 #root {
   height: 100%;
+  background-color: var(--canvas);
+}
+
+.dark #__next,
+.dark #root {
+  background-color: var(--surface-primary);
 }
 
 .markdown {
@@ -2597,13 +2674,17 @@ html {
 }
 
 :focus-visible {
-  outline: 2px solid #000;
+  outline: 2px solid rgba(var(--focus-rgb) / 0.14);
   outline-offset: 2px;
 }
 
 .dark :focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid rgba(var(--focus-rgb) / 0.14);
   outline-offset: 2px;
+}
+
+::selection {
+  background-color: rgba(var(--focus-rgb) / 0.14);
 }
 
 .popover-ui {

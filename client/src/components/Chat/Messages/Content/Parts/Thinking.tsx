@@ -1,16 +1,16 @@
-import { useState, useMemo, memo, useCallback, useRef, useId, type MouseEvent } from 'react';
+import { useState, useMemo, memo, useCallback, useId, type MouseEvent } from 'react';
 import { useAtomValue } from 'jotai';
-import { BrainCircuit, ChevronDown, ChevronUp } from 'lucide-react';
-import { Clipboard, CheckMark, TooltipAnchor } from '@librechat/client';
-import type { FocusEvent, FC } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { Clipboard, CheckMark } from '@librechat/client';
+import type { FC } from 'react';
 import { useLocalize, useExpandCollapse } from '~/hooks';
 import { showThinkingAtom } from '~/store/showThinking';
 import { fontSizeAtom } from '~/store/fontSize';
 import { cn } from '~/utils';
 
 /**
- * ThinkingContent - Displays the actual thinking/reasoning content
- * Used by both legacy text-based messages and modern content parts
+ * ThinkingContent - Renders the reasoning text.
+ * Quiet, Claude-style aside: no card or fill, just a left guide rail and muted text.
  */
 export const ThinkingContent: FC<{
   children: React.ReactNode;
@@ -18,16 +18,17 @@ export const ThinkingContent: FC<{
   const fontSize = useAtomValue(fontSizeAtom);
 
   return (
-    <div className="relative rounded-lg border border-border-light bg-surface-secondary p-3 pb-8 text-text-secondary">
+    <div className="border-l border-border-medium pl-4 text-text-secondary">
       <p className={cn('whitespace-pre-wrap leading-[26px]', fontSize)}>{children}</p>
     </div>
   );
 });
 
 /**
- * ThinkingButton - Toggle button for expanding/collapsing thinking content
- * Shows lightbulb icon by default, chevron on hover
- * Shared between legacy Thinking component and modern ContentParts
+ * ThinkingButton - Disclosure row for the reasoning section.
+ * A single rotating chevron plus a muted label; the label shimmers while the model is
+ * still reasoning. Copy appears on hover once expanded.
+ * Shared between the legacy Thinking component and modern Reasoning.
  */
 export const ThinkingButton = memo(
   ({
@@ -65,34 +66,27 @@ export const ThinkingButton = memo(
     );
 
     return (
-      <div className="group/thinking flex w-full items-center justify-between gap-2">
+      <div className="group/thinking flex w-full items-center gap-1">
         <button
           type="button"
           onClick={onClick}
           aria-expanded={isExpanded}
           aria-controls={contentId}
           className={cn(
-            'group/button flex flex-1 items-center justify-start rounded-lg leading-[18px]',
+            'group/button flex flex-1 items-center justify-start gap-1.5 rounded-md text-left text-text-secondary transition-colors duration-150 hover:text-text-primary',
             fontSize,
           )}
         >
-          <span className="relative mr-1.5 inline-flex h-[18px] w-[18px] items-center justify-center">
-            <BrainCircuit
-              className={cn(
-                'icon-sm absolute text-text-secondary opacity-100 transition-opacity group-hover/button:opacity-0',
-                isStreaming && 'animate-pulse',
-              )}
-              aria-hidden="true"
-            />
-            <ChevronDown
-              className={cn(
-                'icon-sm absolute transform-gpu text-text-primary opacity-0 transition-all duration-300 group-hover/button:opacity-100',
-                isExpanded && 'rotate-180',
-              )}
-              aria-hidden="true"
-            />
+          <ChevronRight
+            className={cn(
+              'icon-sm shrink-0 transform-gpu text-text-tertiary transition-transform duration-200 group-hover/button:text-text-primary',
+              isExpanded && 'rotate-90',
+            )}
+            aria-hidden="true"
+          />
+          <span className={cn('select-none font-medium', isStreaming && 'reasoning-shimmer')}>
+            {label}
           </span>
-          {label}
         </button>
         {content && showCopyButton && (
           <button
@@ -104,12 +98,12 @@ export const ThinkingButton = memo(
                 : localize('com_ui_copy_thoughts_to_clipboard')
             }
             className={cn(
-              'rounded-lg p-1.5 text-text-secondary-alt',
+              'rounded-md p-1 text-text-tertiary transition-opacity',
               isExpanded
                 ? 'opacity-0 group-focus-within/thinking-container:opacity-100 group-hover/thinking-container:opacity-100'
                 : 'opacity-0',
               'hover:bg-surface-hover hover:text-text-primary',
-              'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white',
+              'focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action',
             )}
           >
             <span className="sr-only">
@@ -118,113 +112,11 @@ export const ThinkingButton = memo(
                 : localize('com_ui_copy_thoughts_to_clipboard')}
             </span>
             {isCopied ? (
-              <CheckMark className="h-[18px] w-[18px]" aria-hidden="true" />
+              <CheckMark className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <Clipboard size="19" aria-hidden="true" />
+              <Clipboard size="16" aria-hidden="true" />
             )}
           </button>
-        )}
-      </div>
-    );
-  },
-);
-
-/**
- * FloatingThinkingBar - Floating bar with expand/collapse and copy buttons
- * Shows on hover/focus, positioned at bottom right of thinking content
- * Inspired by CodeBlock's FloatingCodeBar pattern
- */
-export const FloatingThinkingBar = memo(
-  ({
-    isVisible,
-    isExpanded,
-    onClick,
-    content,
-    contentId,
-  }: {
-    isVisible: boolean;
-    isExpanded: boolean;
-    onClick: (e: MouseEvent<HTMLButtonElement>) => void;
-    content?: string;
-    contentId: string;
-  }) => {
-    const localize = useLocalize();
-    const [isCopied, setIsCopied] = useState(false);
-
-    const handleCopy = useCallback(
-      (e: MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation();
-        if (content) {
-          navigator.clipboard.writeText(content);
-          setIsCopied(true);
-          setTimeout(() => setIsCopied(false), 2000);
-        }
-      },
-      [content],
-    );
-
-    const collapseTooltip = isExpanded
-      ? localize('com_ui_collapse_thoughts')
-      : localize('com_ui_expand_thoughts');
-
-    const copyTooltip = isCopied
-      ? localize('com_ui_copied_to_clipboard')
-      : localize('com_ui_copy_thoughts_to_clipboard');
-
-    return (
-      <div
-        className={cn(
-          'absolute bottom-3 right-3 hidden items-center gap-2 transition-opacity duration-150 sm:flex',
-          isVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
-        )}
-      >
-        <TooltipAnchor
-          description={collapseTooltip}
-          render={
-            <button
-              type="button"
-              tabIndex={isVisible ? 0 : -1}
-              onClick={onClick}
-              aria-label={collapseTooltip}
-              aria-expanded={isExpanded}
-              aria-controls={contentId}
-              className={cn(
-                'flex items-center justify-center rounded p-1.5 text-text-tertiary',
-                'hover:bg-surface-hover hover:text-text-primary',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy',
-              )}
-            >
-              {isExpanded ? (
-                <ChevronUp className="h-[18px] w-[18px]" aria-hidden="true" />
-              ) : (
-                <ChevronDown className="h-[18px] w-[18px]" aria-hidden="true" />
-              )}
-            </button>
-          }
-        />
-        {content && (
-          <TooltipAnchor
-            description={copyTooltip}
-            render={
-              <button
-                type="button"
-                tabIndex={isVisible ? 0 : -1}
-                onClick={handleCopy}
-                aria-label={copyTooltip}
-                className={cn(
-                  'flex items-center justify-center rounded p-1.5 text-text-tertiary',
-                  'hover:bg-surface-hover hover:text-text-primary',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-heavy',
-                )}
-              >
-                {isCopied ? (
-                  <CheckMark className="h-[18px] w-[18px]" aria-hidden="true" />
-                ) : (
-                  <Clipboard size="18" aria-hidden="true" />
-                )}
-              </button>
-            }
-          />
         )}
       </div>
     );
@@ -235,49 +127,18 @@ export const FloatingThinkingBar = memo(
  * Thinking Component (LEGACY SYSTEM)
  *
  * Used for simple text-based messages with `:::thinking:::` markers.
- * This handles the old message format where text contains embedded thinking blocks.
- *
- * Pattern: `:::thinking\n{content}\n:::\n{response}`
- *
- * Used by:
- * - MessageContent.tsx for plain text messages
- * - Legacy message format compatibility
- * - User messages when manually adding thinking content
- *
  * For modern structured content (agents/assistants), see Reasoning.tsx component.
  */
 const Thinking = memo(({ children }: { children: React.ReactNode }) => {
   const localize = useLocalize();
   const showThinking = useAtomValue(showThinkingAtom);
   const [isExpanded, setIsExpanded] = useState(showThinking);
-  const [isBarVisible, setIsBarVisible] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const contentId = useId();
   const { style: expandStyle, ref: expandRef } = useExpandCollapse(isExpanded);
 
   const handleClick = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setIsExpanded((prev) => !prev);
-  }, []);
-
-  const handleFocus = useCallback(() => {
-    setIsBarVisible(true);
-  }, []);
-
-  const handleBlur = useCallback((e: FocusEvent) => {
-    if (!containerRef.current?.contains(e.relatedTarget as Node)) {
-      setIsBarVisible(false);
-    }
-  }, []);
-
-  const handleMouseEnter = useCallback(() => {
-    setIsBarVisible(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (!containerRef.current?.contains(document.activeElement)) {
-      setIsBarVisible(false);
-    }
   }, []);
 
   const label = useMemo(() => localize('com_ui_thoughts'), [localize]);
@@ -295,15 +156,8 @@ const Thinking = memo(({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="group/thinking-container"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-    >
-      <div className="mb-4 pb-2 pt-2">
+    <div className="group/thinking-container">
+      <div className="mb-2 pt-2">
         <ThinkingButton
           isExpanded={isExpanded}
           onClick={handleClick}
@@ -317,18 +171,11 @@ const Thinking = memo(({ children }: { children: React.ReactNode }) => {
         role="group"
         aria-label={label}
         aria-hidden={!isExpanded || undefined}
-        className={cn(isExpanded && 'mb-8')}
+        className={cn(isExpanded && 'mb-4')}
         style={expandStyle}
       >
-        <div className="relative overflow-hidden" ref={expandRef}>
+        <div className="overflow-hidden" ref={expandRef}>
           <ThinkingContent>{children}</ThinkingContent>
-          <FloatingThinkingBar
-            isVisible={isBarVisible && isExpanded}
-            isExpanded={isExpanded}
-            onClick={handleClick}
-            content={textContent}
-            contentId={contentId}
-          />
         </div>
       </div>
     </div>
@@ -337,7 +184,6 @@ const Thinking = memo(({ children }: { children: React.ReactNode }) => {
 
 ThinkingButton.displayName = 'ThinkingButton';
 ThinkingContent.displayName = 'ThinkingContent';
-FloatingThinkingBar.displayName = 'FloatingThinkingBar';
 Thinking.displayName = 'Thinking';
 
 export default Thinking;

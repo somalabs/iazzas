@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { useLocalize } from '~/hooks';
 import { useFlowContext } from '../context';
 import { FieldGroup, FieldLabel, FieldHint, InspectorInput, InspectorTextarea } from './shared';
@@ -54,7 +55,10 @@ export default function ApprovalInspector({
           id={`approval-timeout-${nodeId}`}
           value={data.timeoutHours != null ? String(data.timeoutHours) : ''}
           onChange={(v) => {
-            if (v === '') { update({ timeoutHours: undefined }); return; }
+            if (v === '') {
+              update({ timeoutHours: undefined });
+              return;
+            }
             const n = parseInt(v, 10);
             if (!Number.isNaN(n) && n > 0) update({ timeoutHours: n });
           }}
@@ -68,11 +72,11 @@ export default function ApprovalInspector({
         </p>
         <div className="flex justify-between text-xs">
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-text-secondary" aria-hidden="true" />
             Aprovado
           </span>
           <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-red-400" aria-hidden="true" />
+            <span className="h-2 w-2 rounded-full bg-text-destructive" aria-hidden="true" />
             Rejeitado
           </span>
         </div>

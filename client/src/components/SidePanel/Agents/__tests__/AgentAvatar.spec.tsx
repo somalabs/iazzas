@@ -1,7 +1,6 @@
 /**
  * @jest-environment jsdom
  */
-/* eslint-disable i18next/no-literal-string */
 
 import { render, fireEvent } from '@testing-library/react';
 import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
@@ -22,16 +21,6 @@ jest.mock('~/data-provider', () => ({
 
 jest.mock('~/hooks', () => ({
   useLocalize: () => (key: string) => key,
-}));
-
-jest.mock('../Images', () => ({
-  AgentAvatarRender: () => <div data-testid="avatar-render" />,
-  NoImage: () => <div data-testid="no-avatar" />,
-  AvatarMenu: ({ onReset }: { onReset: () => void }) => (
-    <button type="button" data-testid="reset-avatar" onClick={onReset}>
-      Reset
-    </button>
-  ),
 }));
 
 const defaultFormValues: AgentForm = {
@@ -68,8 +57,8 @@ const defaultFormValues: AgentForm = {
   avatar_action: null,
 };
 
-describe('AgentAvatar reset menu', () => {
-  it('clears preview and file state when reset is triggered', () => {
+describe('AgentAvatar reset', () => {
+  it('clears preview and file state when remove is triggered', () => {
     let methodsRef!: UseFormReturn<AgentForm>;
     const Wrapper = () => {
       methodsRef = useForm<AgentForm>({
@@ -93,8 +82,10 @@ describe('AgentAvatar reset menu', () => {
       );
     };
 
-    const { getByTestId } = render(<Wrapper />);
-    fireEvent.click(getByTestId('reset-avatar'));
+    const { getByLabelText, getByText } = render(<Wrapper />);
+    // Open the avatar picker popover, then click Remove (image tab is default).
+    fireEvent.click(getByLabelText('com_ui_upload_agent_avatar_label'));
+    fireEvent.click(getByText('com_ui_remove'));
 
     expect(methodsRef.getValues('avatar_preview')).toBe('');
     expect(methodsRef.getValues('avatar_file')).toBeNull();

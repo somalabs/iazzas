@@ -8,19 +8,15 @@ import {
   AgentCapabilities,
   isAssistantsEndpoint,
 } from 'librechat-data-provider';
+import type { AgentAvatar } from 'librechat-data-provider';
 import type { AgentForm, StringOption } from '~/common';
-import {
-  removeFocusOutlines,
-  processAgentOption,
-  createProviderOption,
-  defaultTextProps,
-  validateEmail,
-  cn,
-} from '~/utils';
+import { processAgentOption, createProviderOption, validateEmail, cn } from '~/utils';
 import { MCPToolSelectDialog } from '~/components/Tools';
 import useAgentCapabilities from '~/hooks/Agents/useAgentCapabilities';
 import { useFileMapContext, useAgentPanelContext } from '~/Providers';
 import AgentCategorySelector from './AgentCategorySelector';
+import MemoizedAvatar from './AgentAvatar';
+import VisibilityToggle from './VisibilityToggle';
 import { useLocalize, useVisibleTools } from '~/hooks';
 import { useGetAgentFiles } from '~/data-provider';
 import MaxAgentSteps from './Advanced/MaxAgentSteps';
@@ -34,11 +30,12 @@ import Artifacts from './Artifacts';
 import CodeForm from './Code/Form';
 import MCPTools from './MCPTools';
 
-const labelClass = 'mb-2 text-token-text-primary block text-sm font-medium';
+const labelClass = 'mb-2 block text-sm font-medium text-text-primary';
 const inputClass = cn(
-  defaultTextProps,
-  'flex w-full px-3 py-2 border-border-light bg-surface-secondary focus-visible:ring-2 focus-visible:ring-ring-primary',
-  removeFocusOutlines,
+  'flex w-full rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-sm text-text-primary',
+  'placeholder:text-text-tertiary outline-none transition-colors',
+  'focus-visible:ring-2 focus-visible:ring-ring-primary',
+  'disabled:cursor-not-allowed disabled:opacity-50',
 );
 
 export default function AgentConfig() {
@@ -148,50 +145,62 @@ export default function AgentConfig() {
 
   const { mcpServerNames } = useVisibleTools(tools, undefined, mcpServersMap);
 
+  const avatarValue =
+    typeof agent === 'object' && agent && 'avatar' in agent
+      ? (agent.avatar as AgentAvatar | null)
+      : null;
+
   return (
     <>
-      <div className="h-auto pt-1">
-        {/* Name */}
-        <div className="mb-4">
-          <label className={labelClass} htmlFor="name">
-            {localize('com_ui_name')}
-            <span className="text-red-500">*</span>
-          </label>
-          <Controller
-            name="name"
-            rules={{ required: localize('com_ui_agent_name_is_required') }}
-            control={control}
-            render={({ field }) => (
-              <>
-                <input
-                  {...field}
-                  value={field.value ?? ''}
-                  maxLength={256}
-                  className={inputClass}
-                  id="name"
-                  type="text"
-                  placeholder={localize('com_agents_name_placeholder')}
-                  aria-label={localize('com_ui_name')}
-                />
-                <div
-                  className={cn(
-                    'mt-1 w-56 text-sm text-red-500',
-                    errors.name ? 'visible h-auto' : 'invisible h-0',
-                  )}
-                  role="alert"
-                >
-                  {errors.name ? errors.name.message : ' '}
-                </div>
-              </>
-            )}
-          />
+      <div className="h-auto pt-6">
+        {/* Identity */}
+        <div className="mb-5 flex items-center gap-4">
+          <div className="flex-shrink-0">
+            <MemoizedAvatar avatar={avatarValue} />
+          </div>
+          <div className="flex-1">
+            <label className={labelClass} htmlFor="name">
+              {localize('com_ui_name')}
+              <span className="text-text-destructive">*</span>
+            </label>
+            <Controller
+              name="name"
+              rules={{ required: localize('com_ui_agent_name_is_required') }}
+              control={control}
+              render={({ field }) => (
+                <>
+                  <input
+                    {...field}
+                    value={field.value ?? ''}
+                    maxLength={256}
+                    className={inputClass}
+                    id="name"
+                    type="text"
+                    placeholder={localize('com_agents_name_placeholder')}
+                    aria-label={localize('com_ui_name')}
+                  />
+                  <div
+                    className={cn(
+                      'mt-1 w-56 text-sm text-text-destructive',
+                      errors.name ? 'visible h-auto' : 'invisible h-0',
+                    )}
+                    role="alert"
+                  >
+                    {errors.name ? errors.name.message : ' '}
+                  </div>
+                </>
+              )}
+            />
+          </div>
         </div>
+        {/* Marketplace visibility — its own setting row, separated from identity */}
+        <VisibilityToggle />
         {/* Instructions */}
         <Instructions />
         {/* Category */}
         <div className="mb-4">
           <label className={labelClass} htmlFor="category-selector">
-            {localize('com_ui_category')} <span className="text-red-500">*</span>
+            {localize('com_ui_category')} <span className="text-text-destructive">*</span>
           </label>
           <AgentCategorySelector className="w-full" />
         </div>
@@ -201,7 +210,7 @@ export default function AgentConfig() {
           contextEnabled ||
           webSearchEnabled) && (
           <div className="mb-4 flex w-full flex-col items-start gap-3">
-            <label className="text-token-text-primary block text-sm font-medium">
+            <label className="block text-sm font-medium text-text-primary">
               {localize('com_ui_ux_agent_capacidades')}
             </label>
             {codeEnabled && <CodeForm />}
@@ -227,7 +236,7 @@ export default function AgentConfig() {
           {/* Provider */}
           <div className="mb-4">
             <label className={labelClass} htmlFor="provider">
-              {localize('com_ui_provider')} <span className="text-red-500">*</span>
+              {localize('com_ui_provider')} <span className="text-text-destructive">*</span>
             </label>
             <Controller
               name="provider"
@@ -266,7 +275,7 @@ export default function AgentConfig() {
           {/* Model */}
           <div className="mb-4">
             <label className={labelClass} htmlFor="model">
-              {localize('com_ui_model')} <span className="text-red-500">*</span>
+              {localize('com_ui_model')} <span className="text-text-destructive">*</span>
             </label>
             <Controller
               name="model"
@@ -317,7 +326,7 @@ export default function AgentConfig() {
           <div className="mb-4">
             <div className="mb-1.5 flex items-center gap-2">
               <span>
-                <label className="text-token-text-primary block text-sm font-medium">
+                <label className="block text-sm font-medium text-text-primary">
                   {localize('com_ui_support_contact')}
                 </label>
               </span>
@@ -344,7 +353,10 @@ export default function AgentConfig() {
                       <input
                         {...field}
                         value={field.value ?? ''}
-                        className={cn(inputClass, error ? 'border-2 border-red-500' : '')}
+                        className={cn(
+                          inputClass,
+                          error ? 'border-2 border-border-destructive' : '',
+                        )}
                         id="support-contact-name"
                         type="text"
                         placeholder={localize('com_ui_support_contact_name_placeholder')}
@@ -355,7 +367,7 @@ export default function AgentConfig() {
                       {error && (
                         <span
                           id="support-contact-name-error"
-                          className="text-sm text-red-500 transition duration-300 ease-in-out"
+                          className="text-sm text-text-destructive transition duration-300 ease-in-out"
                           role="alert"
                           aria-live="polite"
                         >
@@ -385,7 +397,10 @@ export default function AgentConfig() {
                       <input
                         {...field}
                         value={field.value ?? ''}
-                        className={cn(inputClass, error ? 'border-2 border-red-500' : '')}
+                        className={cn(
+                          inputClass,
+                          error ? 'border-2 border-border-destructive' : '',
+                        )}
                         id="support-contact-email"
                         type="email"
                         placeholder={localize('com_ui_support_contact_email_placeholder')}
@@ -396,7 +411,7 @@ export default function AgentConfig() {
                       {error && (
                         <span
                           id="support-contact-email-error"
-                          className="text-sm text-red-500 transition duration-300 ease-in-out"
+                          className="text-sm text-text-destructive transition duration-300 ease-in-out"
                           role="alert"
                           aria-live="polite"
                         >

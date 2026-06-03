@@ -1,5 +1,5 @@
 import debounce from 'lodash/debounce';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import { Constants } from 'librechat-data-provider';
 import type { TEndpointOption } from 'librechat-data-provider';
@@ -19,6 +19,7 @@ import { useInteractionHealthCheck } from '~/data-provider';
 import { useChatContext } from '~/Providers/ChatContext';
 import { globalAudioId } from '~/common';
 import { useLocalize } from '~/hooks';
+import { composerPlaceholders } from './placeholders';
 import store from '~/store';
 
 type KeyEvent = KeyboardEvent<HTMLTextAreaElement>;
@@ -36,6 +37,10 @@ export default function useTextarea({
 }) {
   const localize = useLocalize();
   const getSender = useGetSender();
+  /** Sorteia um placeholder do balde uma vez por montagem do composer (sem rotação em tela). */
+  const [placeholderPick] = useState(
+    () => composerPlaceholders[Math.floor(Math.random() * composerPlaceholders.length)],
+  );
   const isComposing = useRef(false);
   const agentsMap = useAgentsMapContext();
   const { handleFiles } = useFileHandling();
@@ -82,6 +87,12 @@ export default function useTextarea({
       const currentEndpoint = conversation?.endpoint ?? '';
       const currentAgentId = conversation?.agent_id ?? '';
       const currentAssistantId = conversation?.assistant_id ?? '';
+      // Os modelSpecs IAzzas (Flash/Pro) rodam sobre o agente ephemeral, mas são
+      // um chat normal — não o rascunho do criador de agentes. O `spec` ativo
+      // distingue do PreviewChatView (que usa ephemeral sem setar spec).
+      if (conversation?.spec) {
+        return placeholderPick;
+      }
       if (currentAgentId === Constants.CONSTRUTOR_AGENT_ID) {
         return localize('com_ui_ux_placeholder_construtor');
       }
@@ -145,6 +156,7 @@ export default function useTextarea({
     conversation,
     latestMessage,
     isNotAppendable,
+    placeholderPick,
   ]);
 
   const handleKeyDown = useCallback(

@@ -41,6 +41,7 @@ export default function Message(props: TMessageProps) {
   const fontSize = useAtomValue(fontSizeAtom);
   const maximizeChatSpace = useRecoilValue(store.maximizeChatSpace);
   const { children, messageId = null, isCreatedByUser } = message ?? {};
+  const isUser = isCreatedByUser === true;
 
   const name = useMemo(() => {
     let result = '';
@@ -88,13 +89,20 @@ export default function Message(props: TMessageProps) {
     if (hasParallelContent) {
       return 'md:max-w-[58rem] xl:max-w-[70rem]';
     }
-    return 'md:max-w-[47rem] xl:max-w-[55rem]';
+    return 'md:max-w-[47rem] xl:max-w-[47rem]';
   };
 
   const baseClasses = {
     common: 'group mx-auto flex flex-1 gap-3 transition-all duration-300 transform-gpu',
     chat: getChatWidthClass(),
   };
+
+  let turnColumnWidth = 'w-11/12';
+  if (hasParallelContent) {
+    turnColumnWidth = 'w-full';
+  } else if (isUser) {
+    turnColumnWidth = 'max-w-[80%]';
+  }
 
   return (
     <>
@@ -103,13 +111,18 @@ export default function Message(props: TMessageProps) {
         onWheel={handleScroll}
         onTouchMove={handleScroll}
       >
-        <div className="m-auto justify-center p-4 py-2 md:gap-6">
+        <div className="m-auto justify-center px-4 py-3 md:gap-6">
           <div
             id={messageId ?? ''}
             aria-label={getMessageAriaLabel(message, localize)}
-            className={cn(baseClasses.common, baseClasses.chat, 'message-render')}
+            className={cn(
+              baseClasses.common,
+              baseClasses.chat,
+              'message-render',
+              isUser && !hasParallelContent && 'justify-end',
+            )}
           >
-            {!hasParallelContent && (
+            {!hasParallelContent && !isUser && (
               <div className="relative flex flex-shrink-0 flex-col items-center">
                 <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full pt-0.5">
                   <MessageIcon iconData={iconData} assistant={assistant} agent={agent} />
@@ -119,20 +132,31 @@ export default function Message(props: TMessageProps) {
             <div
               className={cn(
                 'relative flex flex-col',
-                hasParallelContent ? 'w-full' : 'w-11/12',
-                isCreatedByUser ? 'user-turn' : 'agent-turn',
+                turnColumnWidth,
+                isUser ? 'user-turn items-end' : 'agent-turn',
               )}
             >
-              {!hasParallelContent && (
-                <h2 className={cn('select-none font-semibold text-text-primary', fontSize)}>
+              {!hasParallelContent && !isUser && (
+                <h2 className={cn('mb-1 select-none font-medium text-text-secondary', fontSize)}>
                   <span className="sr-only">
                     {getHeaderPrefixForScreenReader(message, localize)}
                   </span>
                   {name}
                 </h2>
               )}
-              <div className="flex flex-col gap-1">
-                <div className="flex min-h-[20px] max-w-full flex-grow flex-col gap-0">
+              {isUser && (
+                <span className="sr-only">{getHeaderPrefixForScreenReader(message, localize)}</span>
+              )}
+              <div className={cn('flex flex-col gap-1', isUser && 'w-full items-end')}>
+                <div
+                  className={cn(
+                    'flex min-h-[20px] max-w-full flex-grow flex-col gap-0',
+                    isUser &&
+                      !edit &&
+                      'w-fit rounded-2xl bg-surface-active px-4 py-2.5 text-text-primary',
+                    isUser && edit && 'w-full',
+                  )}
+                >
                   <ContentParts
                     edit={edit}
                     isLast={isLast}
