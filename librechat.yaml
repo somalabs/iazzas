@@ -208,7 +208,7 @@ fileConfig:
         - image/png
         - image/webp
     agents:
-      fileLimit: 10
+      fileLimit: 30
       fileSizeLimit: 25
       supportedMimeTypes:
         - application/pdf
