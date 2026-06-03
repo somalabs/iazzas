@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Workflow, Plus, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { Workflow, Plus, MoreHorizontal, Pencil, Trash2, Play, History } from 'lucide-react';
 import {
   Button,
   Spinner,
   useToastContext,
+  useMediaQuery,
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuContent,
@@ -13,8 +14,9 @@ import {
   OGDialogTemplate,
 } from '@librechat/client';
 import type { Flow } from 'librechat-data-provider';
-import { useFlowsQuery, useDeleteFlowMutation } from '~/data-provider';
+import { useFlowsQuery, useDeleteFlowMutation, useRunFlowMutation } from '~/data-provider';
 import { useAgentsAccessRedirect } from '~/hooks/Agents';
+import FlowRunsSheet from '~/components/AgentStudio/runs/FlowRunsSheet';
 import ScreenHeader from '~/components/ui/ScreenHeader';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
@@ -113,8 +115,10 @@ function FlowsGrid({ flows }: { flows: Flow[] | null }) {
 function FlowCard({ flow }: { flow: Flow }) {
   const localize = useLocalize();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const { showToast } = useToastContext();
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const deleteFlow = useDeleteFlowMutation({
     onSuccess: () => {
@@ -126,24 +130,47 @@ function FlowCard({ flow }: { flow: Flow }) {
     },
   });
 
-  const open = () => navigate(`/d/flows/${flow._id}`);
+  const runFlow = useRunFlowMutation();
+
+  const openEditor = () => navigate(`/d/flows/${flow._id}`);
+
+  const handleRun = () =>
+    runFlow.mutate(
+      { id: flow._id, input: '' },
+      {
+        onSuccess: () => {
+          showToast({ message: localize('com_studio_flow_run_started'), status: 'success' });
+          setHistoryOpen(true);
+        },
+        onError: () =>
+          showToast({ message: localize('com_studio_flow_run_error'), status: 'error' }),
+      },
+    );
+
+  // On mobile the flow editor is not usable, so the card is display-only;
+  // all actions happen through the card menu (run / history / delete).
+  const interactive = !isMobile;
 
   return (
     <div
       className={cn(
-        'group relative flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4',
-        'cursor-pointer transition-colors hover:border-border-medium hover:bg-surface-tertiary',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary',
+        'group relative flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4 transition-colors',
+        interactive &&
+          'cursor-pointer hover:border-border-medium hover:bg-surface-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary',
       )}
-      onClick={open}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          open();
-        }
-      }}
-      role="button"
-      tabIndex={0}
+      onClick={interactive ? openEditor : undefined}
+      onKeyDown={
+        interactive
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openEditor();
+              }
+            }
+          : undefined
+      }
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
       aria-label={flow.name}
     >
       <div className="flex items-start gap-3">
@@ -156,8 +183,21 @@ function FlowCard({ flow }: { flow: Flow }) {
             {flow.nodes?.length ?? 0} {localize('com_ui_ux_flows_home_card_nodes')}
           </p>
         </div>
-        <CardMenu onEdit={open} onDelete={() => setDeleteOpen(true)} />
+        <CardMenu
+          isMobile={isMobile}
+          onEdit={openEditor}
+          onRun={handleRun}
+          onHistory={() => setHistoryOpen(true)}
+          onDelete={() => setDeleteOpen(true)}
+        />
       </div>
+
+      <FlowRunsSheet
+        flowId={flow._id}
+        flowName={flow.name}
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+      />
 
       <OGDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <OGDialogTemplate
@@ -180,15 +220,44 @@ function FlowCard({ flow }: { flow: Flow }) {
   );
 }
 
-function CardMenu({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
+function CardMenu({
+  isMobile,
+  onEdit,
+  onRun,
+  onHistory,
+  onDelete,
+}: {
+  isMobile: boolean;
+  onEdit: () => void;
+  onRun: () => void;
+  onHistory: () => void;
+  onDelete: () => void;
+}) {
   const localize = useLocalize();
   const stop = (e: React.MouseEvent) => e.stopPropagation();
   const items = useMemo(
-    () => [
-      { label: localize('com_ui_edit'), icon: Pencil, onClick: onEdit },
-      { label: localize('com_ui_delete'), icon: Trash2, onClick: onDelete, destructive: true },
-    ],
-    [localize, onEdit, onDelete],
+    () =>
+      isMobile
+        ? [
+            { label: localize('com_studio_flow_run_button'), icon: Play, onClick: onRun },
+            { label: localize('com_studio_flow_runs_title'), icon: History, onClick: onHistory },
+            {
+              label: localize('com_ui_delete'),
+              icon: Trash2,
+              onClick: onDelete,
+              destructive: true,
+            },
+          ]
+        : [
+            { label: localize('com_ui_edit'), icon: Pencil, onClick: onEdit },
+            {
+              label: localize('com_ui_delete'),
+              icon: Trash2,
+              onClick: onDelete,
+              destructive: true,
+            },
+          ],
+    [isMobile, localize, onEdit, onRun, onHistory, onDelete],
   );
 
   return (
