@@ -338,7 +338,7 @@ mcpServers:
     headers:
       Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
-    title: "Mídia & CRM"
+    title: "Mídia e CRM"
     description: |
       Cruza mídia paga e CRM multicanal das marcas do grupo direto do chat, sobre os projetos de BI de marketing (soma-crm-bi, soma-bi-ga4, soma-dl-refined-online).
 
@@ -362,7 +362,7 @@ mcpServers:
     headers:
       Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
     timeout: 60000
-    title: "People / RH"
+    title: "People RH"
     description: |
       Consulta self-service do seu cadastro de colaborador a partir da sua matrícula — sem abrir chamado com o RH.
 
