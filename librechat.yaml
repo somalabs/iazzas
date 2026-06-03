@@ -16,7 +16,7 @@ registration:
 
 endpoints:
   agents:
-    capabilities: ["execute_code", "file_search", "actions", "tools", "web_search"]
+    capabilities: ["execute_code", "file_search", "actions", "tools", "web_search", "artifacts"]
 
 modelSpecs:
   enforce: false
@@ -35,6 +35,7 @@ modelSpecs:
       webSearch: true
       fileSearch: true
       executeCode: true
+      artifacts: true
       mcpServers:
         - "azzas_vendas_linx"
         - "azzas_devolucoes"
@@ -87,6 +88,7 @@ modelSpecs:
       webSearch: true
       fileSearch: true
       executeCode: true
+      artifacts: true
       mcpServers:
         - "azzas_vendas_linx"
         - "azzas_devolucoes"

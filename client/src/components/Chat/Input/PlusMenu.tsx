@@ -1,6 +1,14 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import * as Ariakit from '@ariakit/react';
-import { Check, Plus, Globe, Settings, Paperclip, TerminalSquareIcon } from 'lucide-react';
+import {
+  Check,
+  Plus,
+  Globe,
+  Settings,
+  Paperclip,
+  WandSparkles,
+  TerminalSquareIcon,
+} from 'lucide-react';
 import { TooltipAnchor, DropdownPopup, VectorIcon } from '@librechat/client';
 import {
   AuthType,
@@ -14,7 +22,6 @@ import type { MenuItemProps, ExtendedFile, FileSetter } from '~/common';
 import { useLocalize, useHasAccess, useAgentCapabilities } from '~/hooks';
 import { useBadgeRowContext, useAgentDraftContextOptional } from '~/Providers';
 import useComposerUpload, { FileUpload } from './Files/useComposerUpload';
-import ArtifactsSubMenu from './ArtifactsSubMenu';
 import { useGetStartupConfig } from '~/data-provider';
 import MCPSubMenu from './MCPSubMenu';
 import { cn } from '~/utils';
@@ -135,18 +142,6 @@ function PlusMenu({
     const current = artifacts.toggleState;
     artifacts.debouncedChange({ value: !current || current === '' ? ArtifactModes.DEFAULT : '' });
   }, [artifacts]);
-  const handleShadcnToggle = useCallback(() => {
-    const current = artifacts.toggleState;
-    artifacts.debouncedChange({
-      value: current === ArtifactModes.SHADCNUI ? ArtifactModes.DEFAULT : ArtifactModes.SHADCNUI,
-    });
-  }, [artifacts]);
-  const handleCustomToggle = useCallback(() => {
-    const current = artifacts.toggleState;
-    artifacts.debouncedChange({
-      value: current === ArtifactModes.CUSTOM ? ArtifactModes.DEFAULT : ArtifactModes.CUSTOM,
-    });
-  }, [artifacts]);
 
   const toggleItem = (
     active: boolean,
@@ -243,18 +238,14 @@ function PlusMenu({
     );
   }
   if (showTools && artifactsEnabled) {
-    toolItems.push({
-      hideOnClick: false,
-      render: (props) => (
-        <ArtifactsSubMenu
-          {...props}
-          artifactsMode={artifacts.toggleState as string}
-          handleArtifactsToggle={handleArtifactsToggle}
-          handleShadcnToggle={handleShadcnToggle}
-          handleCustomToggle={handleCustomToggle}
-        />
+    toolItems.push(
+      toggleItem(
+        !!artifacts.toggleState,
+        <WandSparkles className="icon-md" aria-hidden="true" />,
+        localize('com_ui_artifacts'),
+        handleArtifactsToggle,
       ),
-    });
+    );
   }
 
   const { availableMCPServers } = mcpServerManager;
