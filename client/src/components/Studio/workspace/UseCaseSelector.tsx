@@ -47,9 +47,7 @@ export default function UseCaseSelector() {
         )}
         aria-pressed={advancedMode}
       >
-        {advancedMode
-          ? localize('com_studio_guided_mode')
-          : localize('com_studio_advanced_mode')}
+        {advancedMode ? localize('com_studio_guided_mode') : localize('com_studio_advanced_mode')}
       </button>
     </div>
   );

@@ -60,6 +60,11 @@ jest.mock('react-i18next', () => {
     ...actual,
     useTranslation: () => {
       const i18n = require('~/locales/i18n').default;
+      // The app defaults to Portuguese (pt-BR) in production, but unit tests
+      // assert English UI copy. Force English so component tests stay deterministic.
+      if (i18n.language !== 'en') {
+        i18n.changeLanguage('en');
+      }
       return {
         t: (key, options) => i18n.t(key, options),
         i18n: {

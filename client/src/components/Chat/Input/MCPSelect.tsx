@@ -37,18 +37,7 @@ function MCPSelectContent() {
     return selectableServers.filter((s) => mcpValues.includes(s.serverName));
   }, [selectableServers, mcpValues]);
 
-  const displayText = useMemo(() => {
-    if (selectedCount === 0) {
-      return null;
-    }
-    if (selectedCount === 1) {
-      const server = selectableServers.find((s) => s.serverName === mcpValues?.[0]);
-      return server?.config?.title || mcpValues?.[0];
-    }
-    return localize('com_ui_x_selected', { 0: selectedCount });
-  }, [selectedCount, selectableServers, mcpValues, localize]);
-
-  if (!isPinned && mcpValues?.length === 0) {
+  if (!isPinned && selectedCount === 0) {
     return null;
   }
 
@@ -62,6 +51,7 @@ function MCPSelectContent() {
           disabled={isOpen}
           render={
             <Ariakit.MenuButton
+              aria-label={placeholderText}
               className={cn(
                 'group relative inline-flex items-center justify-center gap-1.5',
                 'border border-border-medium text-sm font-medium transition-all',
@@ -73,16 +63,20 @@ function MCPSelectContent() {
             />
           }
         >
-          <StackedMCPIcons selectedServers={selectedServers} maxIcons={3} iconSize="sm" />
-          <span className="hidden truncate text-text-primary md:block">
-            {displayText || placeholderText}
-          </span>
-          <ChevronDown
-            className={cn(
-              'hidden h-3 w-3 text-text-secondary transition-transform md:block',
-              isOpen && 'rotate-180',
+          <span className="flex items-center gap-1.5">
+            <StackedMCPIcons selectedServers={selectedServers} maxIcons={3} iconSize="md" />
+            {selectedCount > 3 && (
+              <span className="hidden items-center rounded-full bg-surface-tertiary px-1.5 py-0.5 text-[11px] font-semibold text-text-secondary md:inline-flex">
+                +{selectedCount - 3}
+              </span>
             )}
-          />
+            <ChevronDown
+              className={cn(
+                'h-3 w-3 text-text-secondary transition-transform',
+                isOpen && 'rotate-180',
+              )}
+            />
+          </span>
         </TooltipAnchor>
 
         <Ariakit.Menu

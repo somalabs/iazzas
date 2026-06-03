@@ -43,7 +43,11 @@ function CreationItem({
           }`}
         >
           {thumbnail ? (
-            <img src={thumbnail} alt="" className="h-full w-full animate-photo-reveal object-cover" />
+            <img
+              src={thumbnail}
+              alt=""
+              className="h-full w-full animate-photo-reveal object-cover"
+            />
           ) : creation.status === 'generating' ? (
             <GeneratingDot size={10} />
           ) : isError ? (
@@ -80,8 +84,12 @@ function CreationItem({
             onClick={() => canRetry && onRetry(creation)}
             disabled={!canRetry}
             className="flex h-7 w-7 items-center justify-center rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-red-500/10"
-            aria-label={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
-            title={canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')}
+            aria-label={
+              canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')
+            }
+            title={
+              canRetry ? localize('com_studio_retry') : localize('com_studio_retry_unavailable')
+            }
           >
             <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
           </button>
@@ -110,9 +118,7 @@ export default function Creations() {
   const { showToast } = useToastContext();
   const [search, setSearch] = useState('');
 
-  const filtered = creations.filter((c) =>
-    c.prompt.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = creations.filter((c) => c.prompt.toLowerCase().includes(search.toLowerCase()));
 
   function handleSelect(creation: StudioCreation) {
     dispatch({ type: 'SELECT_CREATION', payload: creation });
@@ -136,8 +142,7 @@ export default function Creations() {
         showToast({ status: 'success', message: localize('com_studio_deleted') });
       },
       onError: (err: unknown) => {
-        const status = (err as { response?: { status?: number } })?.response
-          ?.status;
+        const status = (err as { response?: { status?: number } })?.response?.status;
         if (status === 404) {
           // No server row under this id (still-optimistic failed card) —
           // clearing it from the UI loses nothing.

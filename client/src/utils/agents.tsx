@@ -145,7 +145,7 @@ export const renderAgentAvatar = (
 
   return (
     <div className={`relative flex items-center justify-center ${sizeClasses[size]} ${className}`}>
-      <Bot className={`text-text-primary ${iconSizeClasses[size]}`} />
+      <Bot className={`text-text-primary ${iconSizeClasses[size]}`} strokeWidth={1.5} />
     </div>
   );
 };

@@ -15,7 +15,7 @@ interface ArtifactsToggleState {
 function Artifacts() {
   const localize = useLocalize();
   const { artifacts } = useBadgeRowContext();
-  const { toggleState, debouncedChange, isPinned } = artifacts;
+  const { toggleState, debouncedChange } = artifacts;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isButtonExpanded, setIsButtonExpanded] = useState(false);
@@ -70,7 +70,7 @@ function Artifacts() {
     }
   }, [isCustomEnabled, debouncedChange]);
 
-  if (!isEnabled && !isPinned) {
+  if (!isEnabled) {
     return null;
   }
 

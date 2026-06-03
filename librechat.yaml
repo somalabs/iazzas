@@ -7,8 +7,9 @@ interface:
   multiConvo: false
   temporaryChat: false
   peoplePicker: { users: false, groups: false, roles: false }
-  marketplace: { use: false }
+  marketplace: { use: true }
   remoteAgents: { use: false }
+  agents: { public: true }
 
 registration:
   socialLogins: ['openid']

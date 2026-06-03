@@ -57,7 +57,7 @@ export default function VisibilityToggle() {
   }
 
   return (
-    <div className="mt-3 flex items-center justify-between gap-3">
+    <div className="mb-5 mt-3 flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
         <Globe
           className={isPublic ? 'size-4 text-[var(--azzas-navy)]' : 'size-4 text-text-secondary'}

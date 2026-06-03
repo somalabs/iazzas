@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { useState, memo, useRef, useEffect } from 'react';
 import { useAtom } from 'jotai';
 import * as Menu from '@ariakit/react/menu';
@@ -141,7 +142,6 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           translate: '0 -4px',
         }}
       >
-
         <div className="ml-3 mr-2 py-2 text-sm text-ink-700" role="note">
           {user?.email ?? localize('com_nav_user')}
         </div>
@@ -170,7 +170,10 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
           {localize('com_nav_settings')}
         </Menu.MenuItem>
         <DropdownMenuSeparator />
-        <Menu.MenuItem onClick={() => logout()} className="flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-md px-1 py-2 text-sm text-ink-700 hover:bg-canvas">
+        <Menu.MenuItem
+          onClick={() => logout()}
+          className="flex w-[calc(100%-1.25rem)] items-center gap-2 rounded-md px-1 py-2 text-sm text-ink-700 hover:bg-canvas"
+        >
           <LogOut className="icon-md" aria-hidden="true" />
           {localize('com_nav_log_out')}
         </Menu.MenuItem>

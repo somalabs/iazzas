@@ -14,7 +14,7 @@ export default function BuilderEmptyState() {
   const localize = useLocalize();
   const { setValue } = useChatFormContext();
 
-  const useExample = useCallback(
+  const applyExample = useCallback(
     (text: string) => {
       setValue('text', text, { shouldValidate: true, shouldDirty: true });
       const input = document.querySelector<HTMLTextAreaElement>('[data-testid="text-input"]');
@@ -31,10 +31,10 @@ export default function BuilderEmptyState() {
       >
         <Sparkles className="h-5 w-5 text-white" />
       </span>
-      <h2 className="text-lg font-semibold text-token-text-primary">
+      <h2 className="text-token-text-primary text-lg font-semibold">
         {localize('com_agents_builder_empty_title')}
       </h2>
-      <p className="mt-1.5 text-sm text-token-text-secondary">
+      <p className="text-token-text-secondary mt-1.5 text-sm">
         {localize('com_agents_builder_empty_subtitle')}
       </p>
       <div className="mt-5 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
@@ -44,8 +44,8 @@ export default function BuilderEmptyState() {
             <button
               key={key}
               type="button"
-              onClick={() => useExample(text)}
-              className="rounded-lg border border-border-light bg-surface-secondary px-3 py-2.5 text-left text-sm text-token-text-secondary transition-colors hover:border-[var(--azzas-navy)] hover:text-token-text-primary"
+              onClick={() => applyExample(text)}
+              className="text-token-text-secondary hover:text-token-text-primary rounded-lg border border-border-light bg-surface-secondary px-3 py-2.5 text-left text-sm transition-colors hover:border-[var(--azzas-navy)]"
             >
               {text}
             </button>

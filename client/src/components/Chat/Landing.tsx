@@ -71,7 +71,7 @@ export default function Landing() {
 
   return (
     <div
-      className={`flex shrink-0 transform-gpu flex-col items-center justify-center overflow-hidden pb-16 transition-all duration-200 max-h-full ${getDynamicMargin}`}
+      className={`flex max-h-full shrink-0 transform-gpu flex-col items-center justify-center overflow-hidden pb-16 transition-all duration-200 ${getDynamicMargin}`}
     >
       <div ref={contentRef} className="flex flex-col items-center gap-0 p-2">
         <SplitText

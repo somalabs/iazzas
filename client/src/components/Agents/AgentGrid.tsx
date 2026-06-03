@@ -1,18 +1,22 @@
 import React, { useMemo, useEffect } from 'react';
-import { Spinner } from '@librechat/client';
+import { Spinner, Button } from '@librechat/client';
 import { PermissionBits } from 'librechat-data-provider';
 import type t from 'librechat-data-provider';
 import { useMarketplaceAgentsInfiniteQuery } from '~/data-provider/Agents';
 import { useAgentCategories, useLocalize } from '~/hooks';
 import { useInfiniteScroll } from '~/hooks/useInfiniteScroll';
+import Skeleton from '~/components/ui/Skeleton';
 import { useHasData } from './SmartLoader';
 import ErrorDisplay from './ErrorDisplay';
 import AgentCard from './AgentCard';
+
+const GRID_CLASS = 'grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))]';
 
 interface AgentGridProps {
   category: string;
   searchQuery: string;
   onSelectAgent: (agent: t.Agent) => void;
+  onClearSearch?: () => void;
   scrollElementRef?: React.RefObject<HTMLElement>;
 }
 
@@ -23,6 +27,7 @@ const AgentGrid: React.FC<AgentGridProps> = ({
   category,
   searchQuery,
   onSelectAgent,
+  onClearSearch,
   scrollElementRef,
 }) => {
   const localize = useLocalize();
@@ -40,7 +45,7 @@ const AgentGrid: React.FC<AgentGridProps> = ({
       promoted?: 0 | 1;
     } = {
       requiredPermission: PermissionBits.VIEW, // View permission for marketplace viewing
-      limit: 6,
+      limit: 12,
     };
 
     // Handle search
@@ -131,10 +136,22 @@ const AgentGrid: React.FC<AgentGridProps> = ({
     return categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1);
   };
 
-  // Simple loading spinner
-  const loadingSpinner = (
-    <div className="flex justify-center py-12">
-      <Spinner className="h-8 w-8 text-primary" />
+  // Card skeletons that mirror the grid footprint (no mid-content spinner)
+  const loadingSkeleton = (
+    <div className={GRID_CLASS} aria-hidden="true">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="flex h-32 gap-5 rounded-xl bg-surface-tertiary px-6 py-4 md:h-36 lg:h-40"
+        >
+          <Skeleton className="size-12 self-center rounded-full" />
+          <div className="flex flex-1 flex-col justify-center gap-2">
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-2/3" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 
@@ -164,17 +181,22 @@ const AgentGrid: React.FC<AgentGridProps> = ({
     >
       {/* Handle empty results with enhanced accessibility */}
       {(!currentAgents || currentAgents.length === 0) && !isLoading && !isFetching ? (
-        <div
-          className="py-12 text-center text-text-secondary"
-          role="status"
-          aria-live="polite"
-          aria-label={
-            searchQuery
-              ? localize('com_agents_search_empty_heading')
-              : localize('com_agents_empty_state_heading')
-          }
-        >
-          <h3 className="mb-2 text-lg font-medium">{localize('com_agents_empty_state_heading')}</h3>
+        <div className="py-16 text-center" role="status" aria-live="polite">
+          <h3 className="mb-1 text-lg font-medium text-text-primary">
+            {searchQuery
+              ? localize('com_agents_search_no_results', { query: searchQuery })
+              : localize('com_agents_empty_state_heading')}
+          </h3>
+          <p className="text-sm text-text-secondary">
+            {searchQuery
+              ? localize('com_agents_search_empty_message')
+              : localize('com_agents_empty_state_message')}
+          </p>
+          {searchQuery && onClearSearch && (
+            <Button variant="outline" size="sm" className="mt-4" onClick={onClearSearch}>
+              {localize('com_agents_clear_search')}
+            </Button>
+          )}
         </div>
       ) : (
         <>
@@ -189,7 +211,7 @@ const AgentGrid: React.FC<AgentGridProps> = ({
           {/* Agent grid - 2 per row with proper semantic structure */}
           {currentAgents && currentAgents.length > 0 && (
             <div
-              className="mx-4 grid grid-cols-1 gap-6 md:grid-cols-2"
+              className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))]"
               role="grid"
               aria-label={localize('com_agents_grid_announcement', {
                 count: currentAgents.length,
@@ -217,8 +239,8 @@ const AgentGrid: React.FC<AgentGridProps> = ({
             </div>
           )}
 
-          {/* End of results indicator */}
-          {!hasNextPage && currentAgents && currentAgents.length > 0 && (
+          {/* End of results - only worth saying once the list is sizable */}
+          {!hasNextPage && currentAgents && currentAgents.length >= 12 && (
             <div className="mt-8 text-center">
               <p className="text-sm text-text-secondary">
                 {localize('com_agents_no_more_results')}
@@ -231,7 +253,7 @@ const AgentGrid: React.FC<AgentGridProps> = ({
   );
 
   if (isLoading || (isFetching && !isFetchingNextPage)) {
-    return loadingSpinner;
+    return loadingSkeleton;
   }
   return mainContent;
 };

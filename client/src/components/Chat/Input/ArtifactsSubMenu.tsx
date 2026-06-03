@@ -7,8 +7,8 @@ import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 interface ArtifactsSubMenuProps {
-  isArtifactsPinned: boolean;
-  setIsArtifactsPinned: (value: boolean) => void;
+  isArtifactsPinned?: boolean;
+  setIsArtifactsPinned?: (value: boolean) => void;
   artifactsMode: string;
   handleArtifactsToggle: () => void;
   handleShadcnToggle: () => void;
@@ -66,23 +66,25 @@ const ArtifactsSubMenu = React.forwardRef<HTMLDivElement, ArtifactsSubMenuProps>
               <span>{localize('com_ui_artifacts')}</span>
               {isEnabled && <ChevronRight className="ml-auto h-3 w-3" aria-hidden="true" />}
             </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsArtifactsPinned(!isArtifactsPinned);
-              }}
-              className={cn(
-                'rounded p-1 transition-all duration-200',
-                'hover:bg-surface-tertiary hover:shadow-sm',
-                !isArtifactsPinned && 'text-text-secondary hover:text-text-primary',
-              )}
-              aria-label={isArtifactsPinned ? 'Unpin' : 'Pin'}
-            >
-              <div className="h-4 w-4">
-                <PinIcon unpin={isArtifactsPinned} />
-              </div>
-            </button>
+            {setIsArtifactsPinned && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsArtifactsPinned(!isArtifactsPinned);
+                }}
+                className={cn(
+                  'rounded p-1 transition-all duration-200',
+                  'hover:bg-surface-tertiary hover:shadow-sm',
+                  !isArtifactsPinned && 'text-text-secondary hover:text-text-primary',
+                )}
+                aria-label={isArtifactsPinned ? 'Unpin' : 'Pin'}
+              >
+                <div className="h-4 w-4">
+                  <PinIcon unpin={isArtifactsPinned} />
+                </div>
+              </button>
+            )}
           </Ariakit.MenuItem>
 
           {isEnabled && (

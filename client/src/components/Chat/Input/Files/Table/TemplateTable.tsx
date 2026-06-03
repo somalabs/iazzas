@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { DotsIcon, TrashIcon } from '@librechat/client';
 
 export default function Template() {

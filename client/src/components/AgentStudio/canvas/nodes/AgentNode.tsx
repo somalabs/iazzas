@@ -15,12 +15,11 @@ export default function AgentNode({ id, selected, data }: NodeProps) {
         position={Position.Top}
         id="default"
         aria-label="Entrada do Agente"
-        className="!h-3 !w-3 !rounded-full !border-2 !border-blue-400 !bg-surface-primary"
+        className="!h-3 !w-3 !rounded-full !border-2 !border-border-medium !bg-surface-primary"
       />
       <BaseNode
         id={id}
         selected={selected}
-        accent="blue"
         icon={<Bot className="h-3.5 w-3.5" />}
         label={localize('com_studio_flow_node_agent')}
       >
@@ -37,7 +36,7 @@ export default function AgentNode({ id, selected, data }: NodeProps) {
         position={Position.Bottom}
         id="default"
         aria-label="Saída do Agente"
-        className="!h-3 !w-3 !rounded-full !border-2 !border-blue-400 !bg-surface-primary"
+        className="!h-3 !w-3 !rounded-full !border-2 !border-border-medium !bg-surface-primary"
       />
     </div>
   );

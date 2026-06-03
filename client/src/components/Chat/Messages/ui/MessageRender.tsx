@@ -170,7 +170,7 @@ const MessageRender = memo(function MessageRender({
     if (hasParallelContent) {
       return 'md:max-w-[58rem] xl:max-w-[70rem]';
     }
-    return 'md:max-w-[47rem] xl:max-w-[55rem]';
+    return 'md:max-w-[47rem] xl:max-w-[47rem]';
   };
 
   const baseClasses = {
@@ -182,6 +182,14 @@ const MessageRender = memo(function MessageRender({
     focus: 'focus:outline-none focus:ring-2 focus:ring-border-xheavy',
   };
 
+  const isUser = msg.isCreatedByUser === true;
+  let turnColumnWidth = 'w-11/12';
+  if (hasParallelContent) {
+    turnColumnWidth = 'w-full';
+  } else if (isUser) {
+    turnColumnWidth = 'max-w-[80%]';
+  }
+
   return (
     <div
       id={msg.messageId}
@@ -191,9 +199,10 @@ const MessageRender = memo(function MessageRender({
         baseClasses.chat,
         conditionalClasses.focus,
         'message-render',
+        isUser && !hasParallelContent && 'justify-end',
       )}
     >
-      {!hasParallelContent && (
+      {!hasParallelContent && !isUser && (
         <div className="relative flex flex-shrink-0 flex-col items-center">
           <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full">
             <MessageIcon iconData={iconData} assistant={assistant} agent={agent} />
@@ -204,19 +213,28 @@ const MessageRender = memo(function MessageRender({
       <div
         className={cn(
           'relative flex flex-col',
-          hasParallelContent ? 'w-full' : 'w-11/12',
-          msg.isCreatedByUser ? 'user-turn' : 'agent-turn',
+          turnColumnWidth,
+          isUser ? 'user-turn items-end' : 'agent-turn',
         )}
       >
-        {!hasParallelContent && (
-          <h2 className={cn('select-none font-semibold', fontSize)}>
+        {!hasParallelContent && !isUser && (
+          <h2 className={cn('mb-1 select-none font-medium text-text-secondary', fontSize)}>
             <span className="sr-only">{getHeaderPrefixForScreenReader(msg, localize)}</span>
             {messageLabel}
           </h2>
         )}
+        {isUser && <span className="sr-only">{getHeaderPrefixForScreenReader(msg, localize)}</span>}
 
-        <div className="flex flex-col gap-1">
-          <div className="flex min-h-[20px] max-w-full flex-grow flex-col gap-0">
+        <div className={cn('flex flex-col gap-1', isUser && 'w-full items-end')}>
+          <div
+            className={cn(
+              'flex min-h-[20px] max-w-full flex-grow flex-col gap-0',
+              isUser &&
+                !edit &&
+                'w-fit rounded-2xl bg-surface-active px-4 py-2.5 text-text-primary',
+              isUser && edit && 'w-full',
+            )}
+          >
             <MessageContext.Provider value={messageContextValue}>
               <MessageContent
                 ask={ask}

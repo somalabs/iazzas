@@ -258,6 +258,8 @@ export type Agent = {
   model: string | null;
   model_parameters: AgentModelParameters;
   conversation_starters?: string[];
+  /** Marketplace-safe built-in capability flags (execute_code, file_search, web_search) returned at VIEW level */
+  capabilities?: string[];
   tool_resources?: AgentToolResources;
   /** @deprecated Use edges instead */
   agent_ids?: string[];

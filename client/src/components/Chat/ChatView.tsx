@@ -8,7 +8,13 @@ import { Constants, buildTree } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
 import type { ChatFormValues } from '~/common';
 import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } from '~/Providers';
-import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers, useLocalize } from '~/hooks';
+import {
+  useAddedResponse,
+  useResumeOnLoad,
+  useAdaptiveSSE,
+  useChatHelpers,
+  useLocalize,
+} from '~/hooks';
 import ConversationStarters from './Input/ConversationStarters';
 import StarterChips from './Input/StarterChips';
 import RecentWork from './RecentWork';
@@ -97,38 +103,38 @@ function ChatView({ index = 0 }: { index?: number }) {
             <div className="flex h-full w-full overflow-hidden">
               <div className="relative flex h-full w-full min-w-0 flex-col">
                 <Header />
-              <>
-                <div
-                  className={cn(
-                    'flex flex-col',
-                    isLandingPage
-                      ? 'relative isolate h-full items-center overflow-y-auto pt-20'
-                      : 'h-full overflow-y-auto',
-                  )}
-                >
-                  {isLandingPage && (
-                    <BrandDuotone
-                      src="/assets/brand/azzas-campaign-1.jpg"
-                      anchor="bottom"
-                      imageOpacity={0.08}
-                      className="-z-10"
-                    />
-                  )}
-                  {content}
+                <>
                   <div
                     className={cn(
-                      'mx-auto w-full',
-                      isLandingPage && 'max-w-[760px] transition-all duration-200',
+                      'flex flex-col',
+                      isLandingPage
+                        ? 'relative isolate h-full items-center overflow-y-auto pt-20'
+                        : 'h-full overflow-y-auto',
                     )}
                   >
-                    <ChatForm index={index} />
-                    {isLandingPage && <StarterChips />}
-                    {isLandingPage ? <ConversationStarters /> : <Footer />}
-                    {isLandingPage && <RecentWork />}
+                    {isLandingPage && (
+                      <BrandDuotone
+                        src="/assets/brand/azzas-campaign-1.jpg"
+                        anchor="bottom"
+                        imageOpacity={0.08}
+                        className="-z-10"
+                      />
+                    )}
+                    {content}
+                    <div
+                      className={cn(
+                        'mx-auto w-full',
+                        isLandingPage && 'max-w-[760px] transition-all duration-200',
+                      )}
+                    >
+                      <ChatForm index={index} />
+                      {isLandingPage && <StarterChips />}
+                      {isLandingPage ? <ConversationStarters /> : <Footer />}
+                      {isLandingPage && <RecentWork />}
+                    </div>
                   </div>
-                </div>
-                {isLandingPage && <Footer />}
-              </>
+                  {isLandingPage && <Footer />}
+                </>
               </div>
               <AtelierDrawer
                 open={atelierOpen}

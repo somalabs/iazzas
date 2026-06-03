@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from '@librechat/client';
 import { useLocalize } from '~/hooks';
-import { cn } from '~/utils';
 
 // Comprehensive error type that handles all possible error structures
 type ApiError =
@@ -178,14 +177,9 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onRetry, cont
       <div className="mx-auto max-w-md space-y-4">
         {/* Error icon with proper accessibility */}
         <div className="flex justify-center">
-          <div
-            className={cn(
-              'flex h-12 w-12 items-center justify-center rounded-full',
-              'bg-red-100 dark:bg-red-900/20',
-            )}
-          >
+          <div className="bg-surface-destructive/15 flex h-12 w-12 items-center justify-center rounded-full">
             <svg
-              className="h-6 w-6 text-red-600 dark:text-red-400"
+              className="h-6 w-6 text-text-destructive"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2}
@@ -205,23 +199,14 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onRetry, cont
 
         {/* Error content with proper headings and structure */}
         <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white" id="error-title">
+          <h3 className="text-lg font-semibold text-text-primary" id="error-title">
             {title}
           </h3>
-          <p
-            className="text-gray-600 dark:text-gray-400"
-            id="error-message"
-            aria-describedby="error-title"
-          >
+          <p className="text-text-secondary" id="error-message" aria-describedby="error-title">
             {message}
           </p>
-          <p
-            className="text-sm text-gray-500 dark:text-gray-500"
-            id="error-suggestion"
-            role="note"
-            aria-label={`Suggestion: ${suggestion}`}
-          >
-            💡 {suggestion}
+          <p className="text-sm text-text-tertiary" id="error-suggestion" role="note">
+            {suggestion}
           </p>
         </div>
 
@@ -232,12 +217,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onRetry, cont
               onClick={onRetry}
               variant="outline"
               size="sm"
-              className={cn(
-                'border-red-300 text-red-700 hover:bg-red-50 focus:ring-2 focus:ring-red-500',
-                'dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20 dark:focus:ring-red-400',
-              )}
               aria-describedby="error-message error-suggestion"
-              aria-label={`Retry action. ${message}`}
             >
               {localize('com_agents_error_retry')}
             </Button>

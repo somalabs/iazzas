@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { memo, lazy, Suspense, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SystemRoles } from 'librechat-data-provider';
@@ -113,11 +114,7 @@ function ExpandedPanel({
         {expanded ? (
           <>
             <div className="flex flex-col gap-0.5">
-              <img
-                src="assets/azzas-logo-navy.svg"
-                alt="Azzas 2154"
-                className="h-[18px] w-auto"
-              />
+              <img src="assets/azzas-logo-navy.svg" alt="Azzas 2154" className="h-[18px] w-auto" />
               <span className="font-editorial text-[10px] italic leading-none text-ink-700">
                 Fashion &amp; Lifestyle
               </span>

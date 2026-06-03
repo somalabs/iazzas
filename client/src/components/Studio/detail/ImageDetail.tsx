@@ -173,7 +173,9 @@ export default function ImageDetail() {
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center text-text-secondary">
             <AlertCircle className="h-8 w-8 text-red-500" />
             <span className="text-sm font-medium">{localize('com_studio_generation_failed')}</span>
-            <span className="text-xs text-text-tertiary">{localize('com_studio_generation_failed_hint')}</span>
+            <span className="text-xs text-text-tertiary">
+              {localize('com_studio_generation_failed_hint')}
+            </span>
           </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-text-tertiary">
@@ -186,7 +188,7 @@ export default function ImageDetail() {
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-3 top-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-surface-primary/70 text-text-secondary backdrop-blur-sm transition-colors hover:bg-surface-hover"
+          className="bg-surface-primary/70 absolute right-3 top-3 z-20 flex h-7 w-7 items-center justify-center rounded-full text-text-secondary backdrop-blur-sm transition-colors hover:bg-surface-hover"
           aria-label={localize('com_studio_close_detail')}
         >
           <X className="h-4 w-4" />
@@ -195,7 +197,7 @@ export default function ImageDetail() {
         {/* Image picker — hidden when sheet is expanded to avoid overlap */}
         {images.length > 1 && !sheetExpanded && (
           <div
-            className="absolute left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium bg-surface-primary/80 px-2 py-1.5 backdrop-blur-sm"
+            className="bg-surface-primary/80 absolute left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border-medium px-2 py-1.5 backdrop-blur-sm"
             style={{ bottom: SHEET_PEEK_HEIGHT }}
           >
             {images.map((img, i) => (
@@ -205,12 +207,18 @@ export default function ImageDetail() {
                 onClick={() => setImageIdx(i)}
                 className={cn(
                   'h-10 w-10 overflow-hidden rounded-md border-2 transition-colors',
-                  i === imageIdx ? 'border-text-primary' : 'border-transparent opacity-60 hover:opacity-100',
+                  i === imageIdx
+                    ? 'border-text-primary'
+                    : 'border-transparent opacity-60 hover:opacity-100',
                 )}
                 aria-label={`Imagem ${i + 1} de ${images.length}`}
                 aria-pressed={i === imageIdx}
               >
-                <img src={img.thumbnailUrl ?? img.url} alt={`Variação ${i + 1}`} className="h-full w-full object-cover" />
+                <img
+                  src={img.thumbnailUrl ?? img.url}
+                  alt={`Variação ${i + 1}`}
+                  className="h-full w-full object-cover"
+                />
               </button>
             ))}
           </div>
@@ -228,7 +236,9 @@ export default function ImageDetail() {
             type="button"
             onClick={() => setSheetExpanded((v) => !v)}
             className="flex w-full flex-col items-center pb-1 pt-2"
-            aria-label={sheetExpanded ? localize('com_studio_close_detail') : localize('com_studio_details')}
+            aria-label={
+              sheetExpanded ? localize('com_studio_close_detail') : localize('com_studio_details')
+            }
             aria-expanded={sheetExpanded}
           >
             <div className="h-1 w-8 rounded-full bg-border-heavy" />
@@ -245,7 +255,11 @@ export default function ImageDetail() {
               <div className="text-xs text-text-tertiary">
                 {date}
                 {selectedCreation.collectionName && (
-                  <> · {localize('com_studio_saved_in')} <span className="text-text-secondary">{selectedCreation.collectionName}</span></>
+                  <>
+                    {' '}
+                    · {localize('com_studio_saved_in')}{' '}
+                    <span className="text-text-secondary">{selectedCreation.collectionName}</span>
+                  </>
                 )}
               </div>
               <div className="space-y-1">
@@ -261,7 +275,9 @@ export default function ImageDetail() {
                     onClick={() => setPromptExpanded((v) => !v)}
                     className="text-[11px] text-text-tertiary underline hover:text-text-secondary"
                   >
-                    {promptExpanded ? localize('com_studio_see_less') : localize('com_studio_see_more')}
+                    {promptExpanded
+                      ? localize('com_studio_see_less')
+                      : localize('com_studio_see_more')}
                   </button>
                 )}
               </div>
@@ -270,9 +286,15 @@ export default function ImageDetail() {
                   {localize('com_studio_settings')}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded-md border border-border-medium px-2 py-0.5 text-[11px] text-text-secondary">{selectedCreation.aspectRatio}</span>
-                  <span className="rounded-md border border-border-medium px-2 py-0.5 text-[11px] text-text-secondary">{model}</span>
-                  <span className="rounded-md border border-border-medium px-2 py-0.5 text-[11px] text-text-secondary">{selectedCreation.resolution}</span>
+                  <span className="rounded-md border border-border-medium px-2 py-0.5 text-[11px] text-text-secondary">
+                    {selectedCreation.aspectRatio}
+                  </span>
+                  <span className="rounded-md border border-border-medium px-2 py-0.5 text-[11px] text-text-secondary">
+                    {model}
+                  </span>
+                  <span className="rounded-md border border-border-medium px-2 py-0.5 text-[11px] text-text-secondary">
+                    {selectedCreation.resolution}
+                  </span>
                 </div>
               </div>
               {selectedCreation.referenceCount > 0 && (
@@ -424,7 +446,9 @@ export default function ImageDetail() {
                     onClick={() => setPromptExpanded((v) => !v)}
                     className="text-[11px] text-text-tertiary underline hover:text-text-secondary"
                   >
-                    {promptExpanded ? localize('com_studio_see_less') : localize('com_studio_see_more')}
+                    {promptExpanded
+                      ? localize('com_studio_see_less')
+                      : localize('com_studio_see_more')}
                   </button>
                 )}
               </div>

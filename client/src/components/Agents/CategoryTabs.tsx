@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useMediaQuery } from '@librechat/client';
 import type t from 'librechat-data-provider';
 import { useLocalize, TranslationKeys } from '~/hooks';
@@ -21,12 +21,12 @@ interface CategoryTabsProps {
 }
 
 /**
- * CategoryTabs - Component for displaying category tabs with counts
+ * CategoryTabs - Component for displaying category tabs
  *
  * Renders a tabbed navigation interface showing agent categories.
- * Includes loading states, empty state handling, and displays counts for each category.
+ * Includes loading states and empty state handling.
  * Uses database-driven category labels with no hardcoded values.
- * Features multi-row wrapping for better responsive behavior.
+ * Wraps to multiple rows on desktop; scrolls horizontally on mobile.
  */
 const CategoryTabs: React.FC<CategoryTabsProps> = ({
   categories,
@@ -36,6 +36,18 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
 }) => {
   const localize = useLocalize();
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // Keep the active tab in view on the mobile horizontal scroller
+  useEffect(() => {
+    if (!isSmallScreen) {
+      return;
+    }
+    const activeEl = listRef.current?.querySelector<HTMLButtonElement>(
+      `#category-tab-${CSS.escape(activeTab)}`,
+    );
+    activeEl?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [activeTab, isSmallScreen]);
 
   /** Helper function to get category display name from database data */
   const getCategoryDisplayName = (category: t.TCategory) => {
@@ -121,8 +133,13 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
 
   // Main tabs content
   const tabsContent = (
-    <div className="w-full pb-2">
+    <div className="relative w-full pb-2">
+      {/* Edge fade hinting at more categories off-screen (mobile scroller) */}
+      {isSmallScreen && (
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-presentation to-transparent" />
+      )}
       <div
+        ref={listRef}
         className={cn(
           'px-4',
           isSmallScreen

@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { TextareaAutosize } from '@librechat/client';
 import { ContentTypes } from 'librechat-data-provider';
 import { Lightbulb, MessageSquare } from 'lucide-react';
-import { useUpdateMessageContentMutation } from 'librechat-data-provider/react-query';
 import type { Agents } from 'librechat-data-provider';
 import type { TEditProps } from '~/common';
 import { useMessagesOperations, useMessagesConversation } from '~/Providers';
@@ -27,7 +26,7 @@ const EditTextPart = ({
 }) => {
   const localize = useLocalize();
   const { conversation } = useMessagesConversation();
-  const { ask, getMessages, setMessages } = useMessagesOperations();
+  const { ask, getMessages } = useMessagesOperations();
 
   const { conversationId = '' } = conversation ?? {};
   const message = useMemo(
@@ -40,7 +39,6 @@ const EditTextPart = ({
   const getAddedConvo = useGetAddedConvo();
 
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const updateMessageContentMutation = useUpdateMessageContentMutation(conversationId ?? '');
 
   const isRTL = chatDirection?.toLowerCase() === 'rtl';
 
@@ -93,44 +91,6 @@ const EditTextPart = ({
     enterEdit(true);
   };
 
-  const updateMessage = (data: { text: string }) => {
-    const messages = getMessages();
-    if (!messages) {
-      return;
-    }
-    updateMessageContentMutation.mutate({
-      index,
-      conversationId: conversationId ?? '',
-      text: data.text,
-      messageId,
-    });
-
-    const isInMessages = messages.some((msg) => msg.messageId === messageId);
-    if (!isInMessages) {
-      return enterEdit(true);
-    }
-
-    const updatedContent = message?.content?.map((part, idx) => {
-      if (part.type === ContentTypes.TEXT && idx === index) {
-        return { ...part, text: data.text };
-      }
-      return part;
-    });
-
-    setMessages(
-      messages.map((msg) =>
-        msg.messageId === messageId
-          ? {
-              ...msg,
-              content: updatedContent,
-            }
-          : msg,
-      ),
-    );
-
-    enterEdit(true);
-  };
-
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Escape') {
@@ -166,7 +126,7 @@ const EditTextPart = ({
           </span>
         </div>
       )}
-      <div className="bg-token-main-surface-primary relative flex w-full flex-grow flex-col overflow-hidden rounded-2xl border border-border-medium text-text-primary [&:has(textarea:focus)]:border-border-heavy [&:has(textarea:focus)]:shadow-[0_2px_6px_rgba(0,0,0,.05)]">
+      <div className="bg-token-main-surface-primary relative flex w-full flex-grow flex-col overflow-hidden rounded-2xl border border-border-medium text-text-primary transition-shadow duration-150 [&:has(textarea:focus)]:border-action [&:has(textarea:focus)]:shadow-[0_0_0_3px_rgba(39,69,102,0.14)]">
         <TextareaAutosize
           {...registerProps}
           ref={(e) => {
@@ -187,23 +147,22 @@ const EditTextPart = ({
           dir={isRTL ? 'rtl' : 'ltr'}
         />
       </div>
-      <div className="mt-2 flex w-full justify-center text-center">
+      <div className="mt-2 flex w-full flex-wrap items-center justify-end gap-2">
+        <span className="mr-auto hidden select-none text-xs text-text-tertiary sm:inline">
+          {localize('com_ui_edit_shortcut_hint')}
+        </span>
         <button
-          className="btn btn-primary relative mr-2"
+          className="btn relative bg-transparent text-text-secondary transition-colors hover:bg-surface-hover"
+          onClick={() => enterEdit(true)}
+        >
+          {localize('com_ui_cancel')}
+        </button>
+        <button
+          className="btn relative bg-action text-on-action transition-colors hover:bg-action-hover disabled:opacity-50"
           disabled={isSubmitting}
           onClick={handleSubmit(resubmitMessage)}
         >
-          {localize('com_ui_save_submit')}
-        </button>
-        <button
-          className="btn btn-secondary relative mr-2"
-          disabled={isSubmitting}
-          onClick={handleSubmit(updateMessage)}
-        >
-          {localize('com_ui_save')}
-        </button>
-        <button className="btn btn-neutral relative" onClick={() => enterEdit(true)}>
-          {localize('com_ui_cancel')}
+          {localize('com_ui_submit')}
         </button>
       </div>
     </Container>

@@ -112,6 +112,11 @@ jest.mock('~/Providers', () => ({
   })),
 }));
 
+jest.mock('~/hooks/Agents/useStartAgentChat', () => ({
+  __esModule: true,
+  default: () => jest.fn(),
+}));
+
 // Mock @librechat/client toast context
 jest.mock('@librechat/client', () => ({
   ...jest.requireActual('@librechat/client'),
@@ -334,7 +339,7 @@ describe('Accessibility Improvements', () => {
         </Wrapper>,
       );
 
-      const card = screen.getByRole('button');
+      const card = screen.getByRole('button', { name: /agent\./i });
       expect(card).toHaveAttribute('aria-label', 'Test Agent agent. A test agent for testing');
       expect(card).toHaveAttribute('aria-describedby', 'agent-test-agent-description');
       expect(card).toHaveAttribute('role', 'button');
@@ -348,7 +353,7 @@ describe('Accessibility Improvements', () => {
         </Wrapper>,
       );
 
-      const card = screen.getByRole('button');
+      const card = screen.getByRole('button', { name: /agent\./i });
 
       // Card should be keyboard accessible - actual dialog behavior is handled by Radix
       expect(card).toHaveAttribute('tabIndex', '0');
@@ -458,7 +463,7 @@ describe('Accessibility Improvements', () => {
       // Check empty state accessibility
       const emptyState = screen.getByRole('status');
       expect(emptyState).toHaveAttribute('aria-live', 'polite');
-      expect(emptyState).toHaveAttribute('aria-label', 'No agents found');
+      expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('No agents found');
     });
   });
 
@@ -489,7 +494,7 @@ describe('Accessibility Improvements', () => {
       const onRetry = jest.fn();
       render(<ErrorDisplay error={mockError} onRetry={onRetry} />);
 
-      const retryButton = screen.getByRole('button', { name: /retry action/i });
+      const retryButton = screen.getByRole('button', { name: /try again/i });
       expect(retryButton).toHaveAttribute('aria-describedby', 'error-message error-suggestion');
 
       fireEvent.click(retryButton);
@@ -504,7 +509,7 @@ describe('Accessibility Improvements', () => {
 
       // Check suggestion note
       const suggestion = screen.getByRole('note');
-      expect(suggestion).toHaveAttribute('aria-label', expect.stringContaining('Suggestion:'));
+      expect(suggestion).toHaveTextContent(/refreshing the page/i);
     });
   });
 

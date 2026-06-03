@@ -22,6 +22,42 @@
   }
 }
 
+/* Reasoning label shimmer — Claude-style animated sweep while the model is still
+   reasoning. Functional loading feedback only (never decorative); collapses to a
+   static muted color under reduced-motion. */
+.reasoning-shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--text-tertiary) 0%,
+    var(--text-tertiary) 35%,
+    var(--text-primary) 50%,
+    var(--text-tertiary) 65%,
+    var(--text-tertiary) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: reasoning-shimmer 2s linear infinite;
+}
+@keyframes reasoning-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reasoning-shimmer {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: var(--text-secondary);
+    color: var(--text-secondary);
+  }
+}
+
 /* Custom Variables */
 :root {
   --white: #fff;

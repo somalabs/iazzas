@@ -74,7 +74,7 @@ describe('ErrorDisplay', () => {
         screen.getByText('Unable to load agents. Please try refreshing the page.'),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('💡 Try refreshing the page or check your network connection'),
+        screen.getByText('Try refreshing the page or check your network connection'),
       ).toBeInTheDocument();
     });
 
@@ -108,9 +108,7 @@ describe('ErrorDisplay', () => {
 
       expect(screen.getByText('Connection Problem')).toBeInTheDocument();
       expect(screen.getByText('Unable to connect to the server.')).toBeInTheDocument();
-      expect(
-        screen.getByText('💡 Check your internet connection and try again.'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Check your internet connection and try again.')).toBeInTheDocument();
     });
 
     it('handles timeout errors', () => {
@@ -173,7 +171,7 @@ describe('ErrorDisplay', () => {
       expect(screen.getByText('Invalid Request')).toBeInTheDocument();
       expect(screen.getByText('Please enter a search term to find agents')).toBeInTheDocument();
       expect(
-        screen.getByText('💡 Enter a search term to find agents by name or description'),
+        screen.getByText('Enter a search term to find agents by name or description'),
       ).toBeInTheDocument();
     });
 
@@ -189,7 +187,7 @@ describe('ErrorDisplay', () => {
 
       expect(screen.getByText('Server Error')).toBeInTheDocument();
       expect(screen.getByText('The server is temporarily unavailable.')).toBeInTheDocument();
-      expect(screen.getByText('💡 Please try again in a few moments.')).toBeInTheDocument();
+      expect(screen.getByText('Please try again in a few moments.')).toBeInTheDocument();
     });
   });
 
@@ -267,7 +265,7 @@ describe('ErrorDisplay', () => {
         screen.getByText('We encountered an issue while loading the content.'),
       ).toBeInTheDocument();
       expect(
-        screen.getByText('💡 Please try refreshing the page or try again later.'),
+        screen.getByText('Please try refreshing the page or try again later.'),
       ).toBeInTheDocument();
     });
 

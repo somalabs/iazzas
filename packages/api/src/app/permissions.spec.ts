@@ -399,12 +399,12 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.USE]: true,
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: false,
-        [Permissions.SHARE_PUBLIC]: false,
+        [Permissions.SHARE_PUBLIC]: true,
       },
       [PermissionTypes.TEMPORARY_CHAT]: { [Permissions.USE]: true },
       [PermissionTypes.RUN_CODE]: { [Permissions.USE]: true },
       [PermissionTypes.WEB_SEARCH]: { [Permissions.USE]: true },
-      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: false },
+      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: true },
       [PermissionTypes.PEOPLE_PICKER]: {
         [Permissions.VIEW_USERS]: false,
         [Permissions.VIEW_GROUPS]: false,
@@ -564,12 +564,12 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.USE]: true,
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: false,
-        [Permissions.SHARE_PUBLIC]: false,
+        [Permissions.SHARE_PUBLIC]: true,
       },
       [PermissionTypes.TEMPORARY_CHAT]: { [Permissions.USE]: true },
       [PermissionTypes.RUN_CODE]: { [Permissions.USE]: false },
       [PermissionTypes.WEB_SEARCH]: { [Permissions.USE]: true },
-      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: false },
+      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: true },
       [PermissionTypes.PEOPLE_PICKER]: {
         [Permissions.VIEW_USERS]: false,
         [Permissions.VIEW_GROUPS]: false,
@@ -716,12 +716,12 @@ describe('updateInterfacePermissions - permissions', () => {
         [Permissions.USE]: true,
         [Permissions.CREATE]: true,
         [Permissions.SHARE]: false,
-        [Permissions.SHARE_PUBLIC]: false,
+        [Permissions.SHARE_PUBLIC]: true,
       },
       [PermissionTypes.TEMPORARY_CHAT]: { [Permissions.USE]: true },
       [PermissionTypes.RUN_CODE]: { [Permissions.USE]: true },
       [PermissionTypes.WEB_SEARCH]: { [Permissions.USE]: true },
-      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: false },
+      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: true },
       [PermissionTypes.PEOPLE_PICKER]: {
         [Permissions.VIEW_USERS]: false,
         [Permissions.VIEW_GROUPS]: false,
@@ -878,7 +878,7 @@ describe('updateInterfacePermissions - permissions', () => {
       [PermissionTypes.TEMPORARY_CHAT]: { [Permissions.USE]: true },
       [PermissionTypes.RUN_CODE]: { [Permissions.USE]: true },
       [PermissionTypes.WEB_SEARCH]: { [Permissions.USE]: true },
-      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: false },
+      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: true },
       [PermissionTypes.PEOPLE_PICKER]: {
         [Permissions.VIEW_USERS]: false,
         [Permissions.VIEW_GROUPS]: false,
@@ -1040,7 +1040,7 @@ describe('updateInterfacePermissions - permissions', () => {
       [PermissionTypes.TEMPORARY_CHAT]: { [Permissions.USE]: true },
       [PermissionTypes.RUN_CODE]: { [Permissions.USE]: true },
       [PermissionTypes.WEB_SEARCH]: { [Permissions.USE]: true },
-      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: false },
+      [PermissionTypes.MARKETPLACE]: { [Permissions.USE]: true },
       [PermissionTypes.PEOPLE_PICKER]: {
         [Permissions.VIEW_USERS]: false,
         [Permissions.VIEW_GROUPS]: false,
@@ -1293,7 +1293,7 @@ describe('updateInterfacePermissions - permissions', () => {
       [Permissions.USE]: true,
       [Permissions.CREATE]: true,
       [Permissions.SHARE]: false,
-      [Permissions.SHARE_PUBLIC]: false,
+      [Permissions.SHARE_PUBLIC]: true,
     });
 
     expect(adminCall[1][PermissionTypes.AGENTS]).toEqual({
@@ -2144,7 +2144,7 @@ describe('updateInterfacePermissions - permissions', () => {
     expect(userCall[1][PermissionTypes.AGENTS]).toHaveProperty(Permissions.SHARE_PUBLIC);
     // USER role default for SHARE is false
     expect(userCall[1][PermissionTypes.AGENTS][Permissions.SHARE]).toBe(false);
-    expect(userCall[1][PermissionTypes.AGENTS][Permissions.SHARE_PUBLIC]).toBe(false);
+    expect(userCall[1][PermissionTypes.AGENTS][Permissions.SHARE_PUBLIC]).toBe(true);
 
     // PROMPTS: same backfill behaviour
     expect(userCall[1][PermissionTypes.PROMPTS]).toHaveProperty(Permissions.SHARE);
@@ -2278,7 +2278,7 @@ describe('updateInterfacePermissions - permissions', () => {
       [Permissions.USE]: true,
       [Permissions.CREATE]: true,
       [Permissions.SHARE]: false,
-      [Permissions.SHARE_PUBLIC]: false,
+      [Permissions.SHARE_PUBLIC]: true,
     });
 
     expect(adminCall[1][PermissionTypes.AGENTS]).toEqual({

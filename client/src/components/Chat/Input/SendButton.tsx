@@ -26,8 +26,8 @@ const SubmitButton = React.memo(
               'rounded-full p-1.5 outline-offset-4 transition-all duration-200 disabled:cursor-not-allowed',
               // Send é o único fill navy; anel terracota acende quando há texto pra enviar.
               props.disabled
-                ? 'bg-transparent text-ink-500/40'
-                : 'bg-action text-on-action ring-2 ring-ember/60 ring-offset-2 ring-offset-paper',
+                ? 'text-ink-500/40 bg-transparent'
+                : 'ring-ember/60 bg-action text-on-action ring-2 ring-offset-2 ring-offset-paper',
             )}
             data-testid="send-button"
             type="submit"

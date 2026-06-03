@@ -5,9 +5,10 @@ import { useMediaQuery } from '@librechat/client';
 import { getConfigDefaults, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { useGetStartupConfig } from '~/data-provider';
 import ExportAndShareMenu from './ExportAndShareMenu';
-import { OpenSidebar, PresetsMenu } from './Menus';
+import ScreenHeader from '~/components/ui/ScreenHeader';
 import AtelierTrigger from '~/components/ui/AtelierTrigger';
 import BookmarkMenu from './Menus/BookmarkMenu';
+import { PresetsMenu } from './Menus';
 import { TemporaryChat } from './TemporaryChat';
 import { atelierChatOpenAtom } from '~/store/atelier';
 import AddMultiConvo from './AddMultiConvo';
@@ -44,48 +45,36 @@ function Header() {
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const [atelierOpen, setAtelierOpen] = useAtom(atelierChatOpenAtom);
 
-  return (
-    <div className="absolute top-0 z-10 flex h-[52px] w-full items-center justify-between border-b border-border-light bg-surface-primary/90 p-2 font-semibold text-text-primary backdrop-blur-sm">
-      <div className="hide-scrollbar flex w-full items-center justify-between gap-2 overflow-x-auto">
-        <div className="mx-1 flex items-center">
-          <OpenSidebar className="md:hidden" />
-          {!(navVisible && isSmallScreen) && (
-            <div
-              className={cn(
-                'flex items-center gap-2 pl-2',
-                !isSmallScreen ? 'transition-all duration-200 ease-in-out' : '',
-              )}
-            >
-              {interfaceConfig.presets === true && interfaceConfig.modelSelect && <PresetsMenu />}
-              {hasAccessToBookmarks === true && <BookmarkMenu />}
-              {hasAccessToMultiConvo === true && <AddMultiConvo />}
-              {isSmallScreen && (
-                <>
-                  <ExportAndShareMenu
-                    isSharedButtonEnabled={startupConfig?.sharedLinksEnabled ?? false}
-                  />
-                  {hasAccessToTemporaryChat === true && <TemporaryChat />}
-                </>
-              )}
-            </div>
-          )}
-        </div>
+  const exportAndShare = (
+    <>
+      <ExportAndShareMenu isSharedButtonEnabled={startupConfig?.sharedLinksEnabled ?? false} />
+      {hasAccessToTemporaryChat === true && <TemporaryChat />}
+    </>
+  );
 
-        {!isSmallScreen && (
-          <div className="flex items-center gap-2">
-            <ExportAndShareMenu
-              isSharedButtonEnabled={startupConfig?.sharedLinksEnabled ?? false}
-            />
-            {hasAccessToTemporaryChat === true && <TemporaryChat />}
-          </div>
-        )}
-      </div>
-      <AtelierTrigger
-        open={atelierOpen}
-        onToggle={() => setAtelierOpen((prev) => !prev)}
-        className="mr-1"
-      />
-    </div>
+  return (
+    <ScreenHeader
+      right={
+        <>
+          {!isSmallScreen && exportAndShare}
+          <AtelierTrigger open={atelierOpen} onToggle={() => setAtelierOpen((prev) => !prev)} />
+        </>
+      }
+    >
+      {!(navVisible && isSmallScreen) && (
+        <div
+          className={cn(
+            'flex items-center gap-2 pl-2',
+            !isSmallScreen ? 'transition-all duration-200 ease-in-out' : '',
+          )}
+        >
+          {interfaceConfig.presets === true && interfaceConfig.modelSelect && <PresetsMenu />}
+          {hasAccessToBookmarks === true && <BookmarkMenu />}
+          {hasAccessToMultiConvo === true && <AddMultiConvo />}
+          {isSmallScreen && exportAndShare}
+        </div>
+      )}
+    </ScreenHeader>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { useMediaQuery } from '@librechat/client';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
@@ -10,7 +10,6 @@ import { SidePanelGroup } from '~/components/SidePanel';
 import CategoryTabs from './CategoryTabs';
 import SearchBar from './SearchBar';
 import AgentGrid from './AgentGrid';
-import { cn } from '~/utils';
 
 interface AgentMarketplaceProps {
   className?: string;
@@ -19,9 +18,9 @@ interface AgentMarketplaceProps {
 /**
  * AgentMarketplace - Main component for browsing and discovering agents
  *
- * Provides tabbed navigation for different agent categories,
- * search functionality, and detailed agent view through a modal dialog.
- * Uses URL parameters for state persistence and deep linking.
+ * Provides tabbed navigation for different agent categories, search, and a
+ * detailed agent view through a modal dialog. Category state lives in the URL
+ * for deep linking; switching categories swaps the grid with a quick crossfade.
  */
 const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) => {
   const localize = useLocalize();
@@ -31,27 +30,17 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
 
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
 
-  // Get URL parameters
   const searchQuery = searchParams.get('q') || '';
 
-  // Animation state
-  type Direction = 'left' | 'right';
-  // Initialize with a default value to prevent rendering issues
   const [displayCategory, setDisplayCategory] = useState<string>(category || 'all');
-  const [nextCategory, setNextCategory] = useState<string | null>(null);
-  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
-  const [animationDirection, setAnimationDirection] = useState<Direction>('right');
 
-  // Ref for the scrollable container to enable infinite scroll
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Set page title
   useDocumentTitle(`${localize('com_agents_marketplace')} | IAzzas`);
 
   // Ensure endpoints config is loaded first (required for agent queries)
   useGetEndpointsQuery();
 
-  // Fetch categories using existing query pattern
   const categoriesQuery = useGetAgentCategoriesQuery({
     staleTime: 1000 * 60 * 15, // 15 minutes - categories rarely change
     refetchOnWindowFocus: false,
@@ -59,7 +48,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
     refetchOnMount: false,
   });
 
-  // Handle initial category when on /agents without a category
+  // Default to the "promoted" tab when landing on /agents without a category
   useEffect(() => {
     if (
       !category &&
@@ -69,109 +58,85 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
     ) {
       const hasPromoted = categoriesQuery.data.some((cat) => cat.value === 'promoted');
       if (hasPromoted) {
-        // If promoted exists, update display to show it
         setDisplayCategory('promoted');
       }
     }
   }, [category, categoriesQuery.data, displayCategory]);
 
-  /**
-   * Handle agent card selection - updates URL for deep linking
-   */
+  // Sync display when the URL changes (back/forward, deep link)
+  useEffect(() => {
+    if (category && category !== displayCategory) {
+      setDisplayCategory(category);
+    }
+  }, [category, displayCategory]);
+
   const handleAgentSelect = (agent: t.Agent) => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set('agent_id', agent.id);
     setSearchParams(newParams);
   };
 
-  /**
-   * Determine ordered tabs to compute indices for direction
-   */
-  const orderedTabs = useMemo<string[]>(() => {
-    const dynamic = (categoriesQuery.data || []).map((c) => c.value);
-    // Only include values that actually exist in the categories
-    const set = new Set<string>(dynamic);
-    return Array.from(set);
-  }, [categoriesQuery.data]);
-
-  const getTabIndex = useCallback(
-    (tab: string): number => {
-      const idx = orderedTabs.indexOf(tab);
-      return idx >= 0 ? idx : 0;
-    },
-    [orderedTabs],
-  );
-
-  /**
-   * Handle category tab selection changes with directional animation
-   */
+  /** Switch category, preserving any active search params */
   const handleTabChange = (tabValue: string) => {
-    if (tabValue === displayCategory || isTransitioning) {
-      // Ignore redundant or rapid clicks during transition
+    if (tabValue === displayCategory) {
       return;
     }
-
-    const currentIndex = getTabIndex(displayCategory);
-    const newIndex = getTabIndex(tabValue);
-    const direction: Direction = newIndex > currentIndex ? 'right' : 'left';
-
-    setAnimationDirection(direction);
-    setNextCategory(tabValue);
-    setIsTransitioning(true);
-
-    // Update URL immediately, preserving current search params
+    setDisplayCategory(tabValue);
     const currentSearchParams = searchParams.toString();
-    const searchParamsStr = currentSearchParams ? `?${currentSearchParams}` : '';
-    if (tabValue === 'promoted') {
-      navigate(`/agents${searchParamsStr}`);
-    } else {
-      navigate(`/agents/${tabValue}${searchParamsStr}`);
-    }
-
-    // Complete transition after 300ms
-    window.setTimeout(() => {
-      setDisplayCategory(tabValue);
-      setNextCategory(null);
-      setIsTransitioning(false);
-    }, 300);
+    const suffix = currentSearchParams ? `?${currentSearchParams}` : '';
+    navigate(tabValue === 'promoted' ? `/agents${suffix}` : `/agents/${tabValue}${suffix}`);
   };
 
-  /**
-   * Sync display when URL changes externally (back/forward)
-   */
-  useEffect(() => {
-    if (category && category !== displayCategory && !isTransitioning) {
-      // URL changed externally, update display without animation
-      setDisplayCategory(category);
-    }
-  }, [category, displayCategory, isTransitioning]);
-
-  // No longer needed with keyframes
-
-  /**
-   * Handle search query changes
-   *
-   * @param query - The search query string
-   */
   const handleSearch = (query: string) => {
     const newParams = new URLSearchParams(searchParams);
-    const currentCategory = displayCategory;
-
     if (query.trim()) {
       newParams.set('q', query.trim());
     } else {
       newParams.delete('q');
     }
-
-    // Always preserve current category when searching or clearing search
-    if (currentCategory === 'promoted') {
-      navigate(`/agents${newParams.toString() ? `?${newParams.toString()}` : ''}`);
-    } else {
-      navigate(
-        `/agents/${currentCategory}${newParams.toString() ? `?${newParams.toString()}` : ''}`,
-      );
-    }
+    const suffix = newParams.toString() ? `?${newParams.toString()}` : '';
+    navigate(
+      displayCategory === 'promoted' ? `/agents${suffix}` : `/agents/${displayCategory}${suffix}`,
+    );
   };
+
+  /** Resolve the slim description shown above the grid for the active category */
+  const categoryDescription = useMemo<string>(() => {
+    if (displayCategory === 'promoted') {
+      return localize('com_agents_recommended');
+    }
+    if (displayCategory === 'all') {
+      return localize('com_agents_all_description');
+    }
+    const categoryData = categoriesQuery.data?.find((cat) => cat.value === displayCategory);
+    if (!categoryData?.description) {
+      return '';
+    }
+    return categoryData.description.startsWith('com_')
+      ? localize(categoryData.description as TranslationKeys)
+      : categoryData.description;
+  }, [displayCategory, categoriesQuery.data, localize]);
+
+  // Press "/" to jump to the search field (ignored while typing)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) {
+        return;
+      }
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || target?.isContentEditable) {
+        return;
+      }
+      const input = document.getElementById('agent-search') as HTMLInputElement | null;
+      if (input) {
+        e.preventDefault();
+        input.focus();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const hasAccessToMarketplace = useHasAccess({
     permissionType: PermissionTypes.MARKETPLACE,
@@ -192,19 +157,19 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
   if (!hasAccessToMarketplace) {
     return null;
   }
+
   return (
     <div className={`relative flex w-full grow overflow-hidden bg-presentation ${className}`}>
       <SidePanelGroup>
         <main className="flex h-full flex-col overflow-hidden" role="main">
-          {/* Scrollable container */}
           <div
             ref={scrollContainerRef}
             className="scrollbar-gutter-stable relative flex h-full flex-col overflow-y-auto overflow-x-hidden"
           >
-            {/* Hero Section - scrolls away */}
+            {/* Hero - desktop only, scrolls away */}
             {!isSmallScreen && (
               <div className="container mx-auto max-w-4xl">
-                <div className={cn('mb-8 text-center', 'mt-12')}>
+                <div className="mb-8 mt-12 text-center">
                   <h1 className="mb-3 text-3xl font-bold tracking-tight text-text-primary md:text-5xl">
                     {localize('com_agents_marketplace')}
                   </h1>
@@ -214,18 +179,23 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                 </div>
               </div>
             )}
-            {/* Sticky wrapper for search bar and categories */}
+
+            {/* Sticky search bar and categories */}
             <div className="sticky top-0 z-10 bg-presentation pb-4">
               <div className="container mx-auto max-w-4xl px-4">
-                {/* Search bar */}
+                {/* Compact title on mobile, where the hero is hidden */}
+                {isSmallScreen && (
+                  <h1 className="pb-3 pt-4 text-xl font-bold tracking-tight text-text-primary">
+                    {localize('com_agents_marketplace')}
+                  </h1>
+                )}
+
                 <div className="mx-auto flex max-w-2xl gap-2 pb-6">
                   <SearchBar value={searchQuery} onSearch={handleSearch} />
                   {/* TODO: Remove this once we have a better way to handle admin settings */}
-                  {/* Admin Settings */}
                   <MarketplaceAdminSettings />
                 </div>
 
-                {/* Category tabs */}
                 <CategoryTabs
                   categories={categoriesQuery.data || []}
                   activeTab={displayCategory}
@@ -234,168 +204,24 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                 />
               </div>
             </div>
-            {/* Scrollable content area */}
-            <div className="container mx-auto max-w-4xl px-4 pb-8">
-              {/* Two-pane animated container wrapping category header + grid */}
-              <div className="relative overflow-hidden">
-                {/* Current content pane */}
-                <div
-                  className={cn(
-                    isTransitioning &&
-                      (animationDirection === 'right'
-                        ? 'motion-safe:animate-slide-out-left'
-                        : 'motion-safe:animate-slide-out-right'),
-                  )}
-                  key={`pane-current-${displayCategory}`}
-                >
-                  {/* Category header - only show when not searching */}
-                  {!searchQuery && (
-                    <div className="mb-6 mt-6">
-                      {(() => {
-                        // Get category data for display
-                        const getCategoryData = () => {
-                          if (displayCategory === 'promoted') {
-                            return {
-                              name: localize('com_agents_top_picks'),
-                              description: localize('com_agents_recommended'),
-                            };
-                          }
-                          if (displayCategory === 'all') {
-                            return {
-                              name: localize('com_agents_all'),
-                              description: localize('com_agents_all_description'),
-                            };
-                          }
 
-                          // Find the category in the API data
-                          const categoryData = categoriesQuery.data?.find(
-                            (cat) => cat.value === displayCategory,
-                          );
-                          if (categoryData) {
-                            return {
-                              name: categoryData.label?.startsWith('com_')
-                                ? localize(categoryData.label as TranslationKeys)
-                                : categoryData.label,
-                              description: categoryData.description?.startsWith('com_')
-                                ? localize(categoryData.description as TranslationKeys)
-                                : categoryData.description || '',
-                            };
-                          }
+            {/* Grid - wider container than the hero to use horizontal space */}
+            <div className="container mx-auto max-w-6xl px-4 pb-8">
+              {!searchQuery && categoryDescription && (
+                <p className="mb-6 mt-6 text-left text-text-secondary">{categoryDescription}</p>
+              )}
 
-                          // Fallback for unknown categories
-                          return {
-                            name:
-                              displayCategory.charAt(0).toUpperCase() + displayCategory.slice(1),
-                            description: '',
-                          };
-                        };
-
-                        const { name, description } = getCategoryData();
-
-                        return (
-                          <div className="text-left">
-                            <h2 className="text-2xl font-bold text-text-primary">{name}</h2>
-                            {description && (
-                              <p className="mt-2 text-text-secondary">{description}</p>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
-
-                  {/* Agent grid */}
-                  <AgentGrid
-                    key={`grid-${displayCategory}`}
-                    category={displayCategory}
-                    searchQuery={searchQuery}
-                    onSelectAgent={handleAgentSelect}
-                    scrollElementRef={scrollContainerRef}
-                  />
-                </div>
-
-                {/* Next content pane, only during transition */}
-                {isTransitioning && nextCategory && (
-                  <div
-                    className={cn(
-                      'absolute inset-0',
-                      animationDirection === 'right'
-                        ? 'motion-safe:animate-slide-in-right'
-                        : 'motion-safe:animate-slide-in-left',
-                    )}
-                    key={`pane-next-${nextCategory}-${animationDirection}`}
-                  >
-                    {/* Category header - only show when not searching */}
-                    {!searchQuery && (
-                      <div className="mb-6 mt-6">
-                        {(() => {
-                          // Get category data for display
-                          const getCategoryData = () => {
-                            if (nextCategory === 'promoted') {
-                              return {
-                                name: localize('com_agents_top_picks'),
-                                description: localize('com_agents_recommended'),
-                              };
-                            }
-                            if (nextCategory === 'all') {
-                              return {
-                                name: localize('com_agents_all'),
-                                description: localize('com_agents_all_description'),
-                              };
-                            }
-
-                            // Find the category in the API data
-                            const categoryData = categoriesQuery.data?.find(
-                              (cat) => cat.value === nextCategory,
-                            );
-                            if (categoryData) {
-                              return {
-                                name: categoryData.label?.startsWith('com_')
-                                  ? localize(categoryData.label as TranslationKeys)
-                                  : categoryData.label,
-                                description: categoryData.description?.startsWith('com_')
-                                  ? localize(
-                                      categoryData.description as Parameters<typeof localize>[0],
-                                    )
-                                  : categoryData.description || '',
-                              };
-                            }
-
-                            // Fallback for unknown categories
-                            return {
-                              name:
-                                (nextCategory || '').charAt(0).toUpperCase() +
-                                (nextCategory || '').slice(1),
-                              description: '',
-                            };
-                          };
-
-                          const { name, description } = getCategoryData();
-
-                          return (
-                            <div className="text-left">
-                              <h2 className="text-2xl font-bold text-text-primary">{name}</h2>
-                              {description && (
-                                <p className="mt-2 text-text-secondary">{description}</p>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    )}
-
-                    {/* Agent grid */}
-                    <AgentGrid
-                      key={`grid-${nextCategory}`}
-                      category={nextCategory}
-                      searchQuery={searchQuery}
-                      onSelectAgent={handleAgentSelect}
-                      scrollElementRef={scrollContainerRef}
-                    />
-                  </div>
-                )}
-
-                {/* Note: Using Tailwind keyframes for slide in/out animations */}
+              <div
+                key={`grid-pane-${displayCategory}-${searchQuery}`}
+                className="mt-6 motion-safe:animate-fade-in-fast"
+              >
+                <AgentGrid
+                  category={displayCategory}
+                  searchQuery={searchQuery}
+                  onSelectAgent={handleAgentSelect}
+                  onClearSearch={() => handleSearch('')}
+                  scrollElementRef={scrollContainerRef}
+                />
               </div>
             </div>
           </div>

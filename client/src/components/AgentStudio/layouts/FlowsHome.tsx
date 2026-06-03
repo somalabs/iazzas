@@ -15,8 +15,7 @@ import {
 import type { Flow } from 'librechat-data-provider';
 import { useFlowsQuery, useDeleteFlowMutation } from '~/data-provider';
 import { useAgentsAccessRedirect } from '~/hooks/Agents';
-import AtelierDrawer from '~/components/ui/AtelierDrawer';
-import AtelierTrigger from '~/components/ui/AtelierTrigger';
+import ScreenHeader from '~/components/ui/ScreenHeader';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -26,48 +25,31 @@ export default function FlowsHome() {
   const hasAccess = useAgentsAccessRedirect();
   const { data: flowsData, isLoading } = useFlowsQuery();
   const flows = flowsData?.flows ?? null;
-  const [atelierOpen, setAtelierOpen] = useState(false);
-
   if (!hasAccess) {
     return null;
   }
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="relative flex h-full w-full overflow-hidden">
+      <ScreenHeader>
+        <span className="pl-2 text-sm font-semibold text-text-primary">
+          {localize('com_ui_ux_nav_flows')}
+        </span>
+      </ScreenHeader>
       <main
         className="min-w-0 flex-1 overflow-y-auto bg-surface-primary"
         aria-label={localize('com_ui_ux_nav_flows')}
       >
-        <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
-          <Header
-            onCreate={() => navigate('/d/flows/novo')}
-            atelierOpen={atelierOpen}
-            onToggleAtelier={() => setAtelierOpen((prev) => !prev)}
-          />
+        <div className="mx-auto w-full max-w-6xl px-6 pb-8 pt-[84px] sm:px-8">
+          <Header onCreate={() => navigate('/d/flows/novo')} />
           <FlowsGrid flows={isLoading ? null : flows} />
         </div>
       </main>
-
-      <AtelierDrawer
-        open={atelierOpen}
-        title={localize('com_ui_atelier')}
-        onClose={() => setAtelierOpen(false)}
-      >
-        <p className="text-xs text-text-tertiary">{localize('com_ui_atelier_empty')}</p>
-      </AtelierDrawer>
     </div>
   );
 }
 
-function Header({
-  onCreate,
-  atelierOpen,
-  onToggleAtelier,
-}: {
-  onCreate: () => void;
-  atelierOpen: boolean;
-  onToggleAtelier: () => void;
-}) {
+function Header({ onCreate }: { onCreate: () => void }) {
   const localize = useLocalize();
   return (
     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -80,14 +62,10 @@ function Header({
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <Button
-          onClick={onCreate}
-          className="bg-action text-on-action hover:bg-action-hover"
-        >
+        <Button onClick={onCreate} className="bg-action text-on-action hover:bg-action-hover">
           <Plus className="size-4" />
           {localize('com_ui_ux_flows_home_create')}
         </Button>
-        <AtelierTrigger open={atelierOpen} onToggle={onToggleAtelier} />
       </div>
     </header>
   );
@@ -155,6 +133,7 @@ function FlowCard({ flow }: { flow: Flow }) {
       className={cn(
         'group relative flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4',
         'cursor-pointer transition-colors hover:border-border-medium hover:bg-surface-tertiary',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary',
       )}
       onClick={open}
       onKeyDown={(e) => {
@@ -173,7 +152,7 @@ function FlowCard({ flow }: { flow: Flow }) {
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-medium text-text-primary">{flow.name}</h3>
-          <p className="mt-1 text-xs text-text-tertiary">
+          <p className="mt-1 text-xs text-text-secondary">
             {flow.nodes?.length ?? 0} {localize('com_ui_ux_flows_home_card_nodes')}
           </p>
         </div>
@@ -192,7 +171,7 @@ function FlowCard({ flow }: { flow: Flow }) {
           }
           selection={{
             selectHandler: () => deleteFlow.mutate({ id: flow._id }),
-            selectClasses: 'bg-red-500 hover:bg-red-600 text-white',
+            selectClasses: 'bg-surface-destructive hover:bg-surface-destructive-hover text-white',
             selectText: localize('com_ui_delete'),
           }}
         />
@@ -220,7 +199,7 @@ function CardMenu({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => vo
             size="sm"
             variant="ghost"
             aria-label={localize('com_ui_more_options')}
-            className="size-8 p-0 opacity-0 transition-opacity group-hover:opacity-100 data-[state=open]:opacity-100"
+            className="size-11 p-0 opacity-100 transition-opacity data-[state=open]:opacity-100 md:size-8 md:opacity-0 md:group-hover:opacity-100"
           >
             <MoreHorizontal className="size-4" />
           </Button>
@@ -233,7 +212,9 @@ function CardMenu({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => vo
                 e.stopPropagation();
                 item.onClick();
               }}
-              className={cn(item.destructive && 'text-red-500 focus:text-red-500')}
+              className={cn(
+                item.destructive && 'text-text-destructive focus:text-text-destructive',
+              )}
             >
               <item.icon className="mr-2 size-4" />
               {item.label}

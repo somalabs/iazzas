@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { useMemo, useRef, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Constants, isAgentsEndpoint } from 'librechat-data-provider';
@@ -23,7 +24,12 @@ export default function AgentChip() {
 
   const btnRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
+  const [menuPos, setMenuPos] = useState<{
+    left: number;
+    top?: number;
+    bottom?: number;
+    maxHeight: number;
+  } | null>(null);
 
   const { agentsList, presets, modelSpecs, endpointsConfig, options } = useMentions({
     assistantMap: assistantsMap || {},
@@ -47,10 +53,7 @@ export default function AgentChip() {
     [options],
   );
 
-  const items = useMemo(
-    () => [...specOptions, ...(agentsList ?? [])],
-    [specOptions, agentsList],
-  );
+  const items = useMemo(() => [...specOptions, ...(agentsList ?? [])], [specOptions, agentsList]);
 
   const isItemActive = useCallback(
     (item: MentionOption) =>
@@ -77,7 +80,18 @@ export default function AgentChip() {
     if (!open) {
       const r = btnRef.current?.getBoundingClientRect();
       if (r) {
-        setCoords({ top: r.bottom + 6, left: r.left });
+        const margin = 12;
+        const gap = 6;
+        const width = 320;
+        const spaceBelow = window.innerHeight - r.bottom - margin;
+        const spaceAbove = r.top - margin;
+        const openUp = spaceBelow < 280 && spaceAbove > spaceBelow;
+        const left = Math.max(margin, Math.min(r.left, window.innerWidth - width - margin));
+        setMenuPos(
+          openUp
+            ? { left, bottom: window.innerHeight - r.top + gap, maxHeight: spaceAbove }
+            : { left, top: r.bottom + gap, maxHeight: spaceBelow },
+        );
       }
     }
     setOpen((o) => !o);
@@ -103,13 +117,18 @@ export default function AgentChip() {
         <ChevronDown className="h-3 w-3" aria-hidden="true" />
       </button>
 
-      {open && coords && (
+      {open && menuPos && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
           <div
             role="listbox"
-            className="fixed z-50 max-h-[60vh] w-[320px] overflow-y-auto rounded-[14px] border border-rule bg-paper p-2 shadow-atelier"
-            style={{ top: coords.top, left: coords.left }}
+            className="fixed z-50 w-[320px] overflow-y-auto rounded-[14px] border border-rule bg-paper p-2 shadow-atelier"
+            style={{
+              left: menuPos.left,
+              top: menuPos.top,
+              bottom: menuPos.bottom,
+              maxHeight: Math.min(menuPos.maxHeight, window.innerHeight * 0.6),
+            }}
           >
             <div className="flex flex-col gap-2">
               <div>
@@ -141,7 +160,16 @@ export default function AgentChip() {
                           )}
                         >
                           {isPro ? (
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
                               <path d="M4 19V11" />
                               <path d="M10 19V5" />
                               <path d="M16 19v-9" />

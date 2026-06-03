@@ -74,7 +74,7 @@ export default function ModelSelector() {
             <span className="text-sm font-medium">{autoLabel}</span>
             <span className="text-[11px] text-text-tertiary">
               {activeSchema
-                ? MODEL_DISPLAY_NAMES[activeSchema.defaultModel] ?? activeSchema.defaultModel
+                ? (MODEL_DISPLAY_NAMES[activeSchema.defaultModel] ?? activeSchema.defaultModel)
                 : MODEL_DISPLAY_NAMES['nano-banana-pro']}
             </span>
           </button>
@@ -89,9 +89,7 @@ export default function ModelSelector() {
               onClick={() => select(id)}
               className={cn(
                 'flex w-full flex-col px-3 py-2 text-left transition-colors',
-                !isAvailable(id)
-                  ? 'cursor-not-allowed opacity-40'
-                  : 'hover:bg-surface-hover',
+                !isAvailable(id) ? 'cursor-not-allowed opacity-40' : 'hover:bg-surface-hover',
                 modelOverride === id ? 'text-text-primary' : 'text-text-secondary',
               )}
             >

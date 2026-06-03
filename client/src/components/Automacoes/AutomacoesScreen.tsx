@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useToastContext, useMediaQuery } from '@librechat/client';
 import {
@@ -11,8 +10,7 @@ import {
 import { useGoToNewChat, useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 import { AutomacoesProvider, useAutomacoesContext } from './context';
-import AtelierDrawer from '~/components/ui/AtelierDrawer';
-import AtelierTrigger from '~/components/ui/AtelierTrigger';
+import ScreenHeader from '~/components/ui/ScreenHeader';
 import AutomationList from './AutomationList';
 import AutomationEditor from './AutomationEditor';
 import RunsDrawer from './RunsDrawer';
@@ -59,7 +57,6 @@ function AutomacoesView() {
   const { showToast } = useToastContext();
   const { state, dispatch } = useAutomacoesContext();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const [atelierOpen, setAtelierOpen] = useState(false);
 
   const canCreate = true;
 
@@ -122,11 +119,8 @@ function AutomacoesView() {
   const backToList = isMobile && showEditor;
 
   return (
-    <div className="flex h-full flex-col">
-      <header
-        role="banner"
-        className="flex h-12 flex-shrink-0 items-center gap-2 border-b border-border-light bg-surface-primary px-4"
-      >
+    <div className="relative flex h-full flex-col">
+      <ScreenHeader>
         <button
           type="button"
           onClick={() => (backToList ? dispatch({ type: 'CANCEL' }) : goToNewChat())}
@@ -138,14 +132,9 @@ function AutomacoesView() {
         <h1 className="text-sm font-semibold text-text-primary">
           {localize('com_automacoes_page_title')}
         </h1>
-        <AtelierTrigger
-          open={atelierOpen}
-          onToggle={() => setAtelierOpen((prev) => !prev)}
-          className="ml-auto"
-        />
-      </header>
+      </ScreenHeader>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden pt-[52px]">
         {showEmptyState ? (
           <AutomationsEmptyState
             canCreate={canCreate}
@@ -187,20 +176,12 @@ function AutomacoesView() {
           </>
         )}
 
-        {state.runsAutomationId ? (
+        {state.runsAutomationId && (
           <RunsDrawer
             automationName={runsAutomation?.name}
             runs={runs}
             onClose={() => dispatch({ type: 'CLOSE_RUNS' })}
           />
-        ) : (
-          <AtelierDrawer
-            open={atelierOpen}
-            title={localize('com_ui_atelier')}
-            onClose={() => setAtelierOpen(false)}
-          >
-            <p className="text-xs text-text-tertiary">{localize('com_ui_atelier_empty')}</p>
-          </AtelierDrawer>
         )}
       </div>
     </div>

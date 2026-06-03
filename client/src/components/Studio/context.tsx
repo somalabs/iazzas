@@ -179,9 +179,7 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
       // the real ID, then insert the fresh creation at the top. This is
       // idempotent regardless of poll/onSuccess ordering.
       const { fromId, creation } = action.payload;
-      const filtered = state.creations.filter(
-        (c) => c.id !== fromId && c.id !== creation.id,
-      );
+      const filtered = state.creations.filter((c) => c.id !== fromId && c.id !== creation.id);
       return { ...state, creations: [creation, ...filtered] };
     }
     case 'REMOVE_CREATION': {
@@ -198,14 +196,10 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
       // Once the server has its own generating row (it persists one up
       // front now), it's the source of truth — drop client-only optimistic
       // generating items so they don't show up twice.
-      const serverHasGenerating = action.payload.some(
-        (c) => c.status === 'generating',
-      );
+      const serverHasGenerating = action.payload.some((c) => c.status === 'generating');
       const localOnly = serverHasGenerating
         ? []
-        : state.creations.filter(
-            (c) => c.status === 'generating' && !serverIds.has(c.id),
-          );
+        : state.creations.filter((c) => c.status === 'generating' && !serverIds.has(c.id));
       // Polling refreshes the list while a generation is in flight; if the
       // user is sitting on the detail of that creation, the snapshot in
       // selectedCreation goes stale (still shows the spinner after the
@@ -213,8 +207,7 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
       // detail panel updates without requiring a manual reselect.
       const refreshedSelection =
         state.selectedCreation &&
-        (action.payload.find((c) => c.id === state.selectedCreation!.id) ??
-          state.selectedCreation);
+        (action.payload.find((c) => c.id === state.selectedCreation!.id) ?? state.selectedCreation);
       return {
         ...state,
         creations: [...localOnly, ...action.payload],
@@ -278,8 +271,7 @@ export function useStudioHistory() {
     {
       // While a project is still generating (e.g. after a page refresh
       // mid-generation), poll so it flips to done/error on its own.
-      refetchInterval: (d) =>
-        d?.items?.some((i) => i.status === 'generating') ? 4000 : false,
+      refetchInterval: (d) => (d?.items?.some((i) => i.status === 'generating') ? 4000 : false),
     },
   );
   // On a fresh mount (e.g. after F5 mid-generation) the optimistic local

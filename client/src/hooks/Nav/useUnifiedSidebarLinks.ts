@@ -1,5 +1,13 @@
 import { useMemo } from 'react';
-import { CalendarClock, ShieldCheck, MessageSquare, Sparkles, Bot, GitBranch, Zap } from 'lucide-react';
+import {
+  CalendarClock,
+  ShieldCheck,
+  MessageSquare,
+  Sparkles,
+  Bot,
+  GitBranch,
+  Zap,
+} from 'lucide-react';
 import type { NavLink } from '~/common';
 
 /**

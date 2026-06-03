@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import * as Ariakit from '@ariakit/react';
 import { TFeedback, TFeedbackTag, getTagsForRating } from 'librechat-data-provider';
 import {
-  Button,
   OGDialog,
   OGDialogContent,
   OGDialogTitle,
@@ -275,6 +274,14 @@ export default function Feedback({
     setOpenDialog(false);
   }, [handleFeedback]);
 
+  const selectedTag = feedback?.tag?.key && feedback.tag.key !== 'other' ? feedback.tag : undefined;
+  const SelectedTagIcon = selectedTag
+    ? ICONS[selectedTag.icon as keyof typeof ICONS] || AlertCircle
+    : AlertCircle;
+  const selectedTagLabel = selectedTag
+    ? localize(selectedTag.label as Parameters<typeof localize>[0])
+    : undefined;
+
   const renderSingleFeedbackButton = () => {
     if (!feedback) return null;
     const isThumbsUp = feedback.rating === 'thumbsUp';
@@ -314,25 +321,52 @@ export default function Feedback({
         />
       )}
       <OGDialog open={openDialog} onOpenChange={setOpenDialog}>
-        <OGDialogContent className="w-11/12 max-w-lg">
-          <OGDialogTitle className="text-token-text-primary text-lg font-semibold leading-6">
-            {localize('com_ui_feedback_more_information')}
-          </OGDialogTitle>
-          <textarea
-            className="w-full rounded-xl border border-border-light bg-transparent p-2 text-text-primary"
-            value={feedback?.text || ''}
-            onChange={handleTextChange}
-            rows={4}
-            placeholder={localize('com_ui_feedback_placeholder')}
-            maxLength={500}
-          />
-          <div className="mt-4 flex items-end justify-end gap-2">
-            <Button variant="destructive" onClick={handleDialogClear}>
-              {localize('com_ui_delete')}
-            </Button>
-            <Button variant="submit" onClick={handleDialogSave} disabled={!feedback?.text?.trim()}>
-              {localize('com_ui_save')}
-            </Button>
+        <OGDialogContent className="w-11/12 max-w-md gap-0 bg-paper p-6">
+          <div className="flex flex-col gap-1 pr-7">
+            <OGDialogTitle className="text-lg font-semibold leading-6 text-ink-900">
+              {localize('com_ui_feedback_more_information')}
+            </OGDialogTitle>
+            <p className="text-sm leading-relaxed text-ink-500">
+              {localize('com_ui_feedback_subtitle')}
+            </p>
+          </div>
+          {selectedTagLabel && (
+            <div className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full border border-rule bg-canvas px-3 py-1 text-xs font-medium text-ink-700">
+              <SelectedTagIcon size="14" aria-hidden="true" />
+              <span>{selectedTagLabel}</span>
+            </div>
+          )}
+          <div className="relative mt-4">
+            <textarea
+              // eslint-disable-next-line jsx-a11y/no-autofocus -- feedback modal intentionally focuses its input on open
+              autoFocus
+              className="min-h-[120px] w-full resize-none rounded-xl border border-rule bg-canvas p-3 pb-7 text-sm leading-relaxed text-ink-900 transition-shadow duration-150 placeholder:text-ink-500 focus:border-action focus:shadow-[0_0_0_3px_rgba(39,69,102,0.14)] focus:outline-none"
+              value={feedback?.text || ''}
+              onChange={handleTextChange}
+              rows={4}
+              placeholder={localize('com_ui_feedback_placeholder')}
+              maxLength={500}
+            />
+            <span className="pointer-events-none absolute bottom-2.5 right-3 text-xs tabular-nums text-ink-500">
+              {feedback?.text?.length ?? 0}/500
+            </span>
+          </div>
+          <div className="mt-5 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={handleDialogClear}
+              className="rounded-md px-3 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-surface-hover"
+            >
+              {localize('com_ui_feedback_remove')}
+            </button>
+            <button
+              type="button"
+              onClick={handleDialogSave}
+              disabled={!feedback?.text?.trim()}
+              className="rounded-md bg-action px-4 py-2 text-sm font-medium text-on-action transition-colors hover:bg-action-hover disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {localize('com_ui_submit')}
+            </button>
           </div>
         </OGDialogContent>
       </OGDialog>

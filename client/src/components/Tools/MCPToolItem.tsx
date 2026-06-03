@@ -57,8 +57,7 @@ function MCPToolItem({
       return {
         text: localize('com_ui_initializing'),
         icon: <Wrench className="flex h-4 w-4 items-center stroke-2" aria-hidden="true" />,
-        className:
-          'btn relative cursor-not-allowed bg-[var(--azzas-navy)] text-white opacity-75',
+        className: 'btn relative cursor-not-allowed bg-[var(--azzas-navy)] text-white opacity-75',
         disabled: true,
       };
     }

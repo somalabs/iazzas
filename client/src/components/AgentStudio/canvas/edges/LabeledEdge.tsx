@@ -20,16 +20,13 @@ export default function LabeledEdge({
     targetPosition,
   });
 
-  const isTrue = sourceHandleId === 'true' || sourceHandleId === 'approved';
   const isFalse = sourceHandleId === 'false' || sourceHandleId === 'rejected';
 
-  const labelColor = isTrue
-    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-    : isFalse
-      ? 'bg-red-500/15 text-red-400 border-red-500/30'
-      : 'bg-surface-secondary text-text-secondary border-border-light';
+  const labelColor = isFalse
+    ? 'bg-destructive/10 text-text-destructive border-border-destructive/30'
+    : 'bg-surface-secondary text-text-secondary border-border-light';
 
-  const strokeColor = isTrue ? '#34d399' : isFalse ? '#f87171' : 'var(--border-medium)';
+  const strokeColor = isFalse ? 'var(--border-destructive)' : 'var(--border-medium)';
 
   return (
     <>

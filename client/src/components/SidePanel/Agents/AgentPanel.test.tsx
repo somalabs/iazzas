@@ -87,6 +87,7 @@ jest.mock('librechat-data-provider/react-query', () => ({
     data: { permissionBits: 0xffffffff }, // All permissions
     isLoading: false,
   }),
+  useUpdateResourcePermissionsMutation: () => ({ mutate: jest.fn(), mutateAsync: jest.fn() }),
   hasPermissions: (_bits: number, _required: number) => true, // Always return true for tests
 }));
 

@@ -26,7 +26,7 @@ export default function IconPicker({
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <p className="mb-2 text-sm font-medium text-token-text-primary">
+        <p className="text-token-text-primary mb-2 text-sm font-medium">
           {localize('com_ui_avatar_pick_icon')}
         </p>
         <div className="grid grid-cols-6 gap-2">
@@ -48,7 +48,7 @@ export default function IconPicker({
         </div>
       </div>
       <div>
-        <p className="mb-2 text-sm font-medium text-token-text-primary">
+        <p className="text-token-text-primary mb-2 text-sm font-medium">
           {localize('com_ui_avatar_pick_color')}
         </p>
         <div className="flex gap-2">
@@ -62,7 +62,7 @@ export default function IconPicker({
               style={{ backgroundColor: color }}
               className={
                 'h-7 w-7 rounded-full border border-border-light ' +
-                (iconColor === color ? 'ring-2 ring-offset-2 ring-[var(--azzas-navy)]' : '')
+                (iconColor === color ? 'ring-2 ring-[var(--azzas-navy)] ring-offset-2' : '')
               }
             />
           ))}

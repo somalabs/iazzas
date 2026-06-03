@@ -34,7 +34,7 @@ export default function OpenSidebar({ className }: { className?: string }) {
           aria-expanded={false}
           aria-controls="chat-history-nav"
           className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary',
+            'flex h-11 w-11 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary md:h-8 md:w-8',
             className,
           )}
           onClick={handleClick}

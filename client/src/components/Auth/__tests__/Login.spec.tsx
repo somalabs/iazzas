@@ -126,22 +126,13 @@ jest.mock('react-router-dom', () => ({
 test('renders SSO-first with a single set of providers and collapsed email form', () => {
   setup();
 
-  expect(getByTestId(document.body, 'openid')).toHaveAttribute(
-    'href',
-    'mock-server/oauth/openid',
-  );
-  expect(getByTestId(document.body, 'google')).toHaveAttribute(
-    'href',
-    'mock-server/oauth/google',
-  );
+  expect(getByTestId(document.body, 'openid')).toHaveAttribute('href', 'mock-server/oauth/openid');
+  expect(getByTestId(document.body, 'google')).toHaveAttribute('href', 'mock-server/oauth/google');
   expect(getByTestId(document.body, 'facebook')).toHaveAttribute(
     'href',
     'mock-server/oauth/facebook',
   );
-  expect(getByTestId(document.body, 'github')).toHaveAttribute(
-    'href',
-    'mock-server/oauth/github',
-  );
+  expect(getByTestId(document.body, 'github')).toHaveAttribute('href', 'mock-server/oauth/github');
   expect(getByTestId(document.body, 'discord')).toHaveAttribute(
     'href',
     'mock-server/oauth/discord',

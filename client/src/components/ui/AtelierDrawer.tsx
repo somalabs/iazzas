@@ -36,7 +36,6 @@ export default function AtelierDrawer({
 
   const panel = (
     <aside
-      role="complementary"
       aria-label={title}
       className={cn(
         'flex h-full w-[320px] flex-shrink-0 animate-atelier-in flex-col border-l border-rule bg-paper motion-reduce:animate-none',
@@ -44,7 +43,9 @@ export default function AtelierDrawer({
         className,
       )}
     >
-      <div className={cn('flex items-center justify-between border-b border-rule', headerClassName)}>
+      <div
+        className={cn('flex items-center justify-between border-b border-rule', headerClassName)}
+      >
         <div className="min-w-0">
           {!hideTitle && (
             <p className="truncate text-xs font-semibold text-text-primary">{title}</p>
@@ -77,7 +78,7 @@ export default function AtelierDrawer({
         role="presentation"
         aria-hidden="true"
         onClick={onClose}
-        className="fixed inset-0 z-40 bg-ink-900/30 motion-safe:animate-fade-in"
+        className="bg-ink-900/30 fixed inset-0 z-40 motion-safe:animate-fade-in"
       />
       {panel}
     </>

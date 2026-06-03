@@ -2,7 +2,12 @@ import { memo, useRef, useMemo, useEffect, useState, useCallback } from 'react';
 import { useWatch } from 'react-hook-form';
 import { TextareaAutosize } from '@librechat/client';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { Constants, isAssistantsEndpoint, isAgentsEndpoint } from 'librechat-data-provider';
+import {
+  Constants,
+  isAgentsEndpoint,
+  isEphemeralAgentId,
+  isAssistantsEndpoint,
+} from 'librechat-data-provider';
 import type { TConversation } from 'librechat-data-provider';
 import type { ExtendedFile, FileSetter, ConvoGenerator } from '~/common';
 import {
@@ -22,7 +27,6 @@ import {
   useFocusChatEffect,
 } from '~/hooks';
 import { mainTextareaId, BadgeItem } from '~/common';
-import AttachFileChat from './Files/AttachFileChat';
 import FileFormChat from './Files/FileFormChat';
 import { cn, removeFocusRings } from '~/utils';
 import TextareaHeader from './TextareaHeader';
@@ -261,10 +265,8 @@ const ChatForm = memo(function ChatForm({
               // 14px raio, hairline quente, e a única elevação da tela (shadow atelier).
               'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-[14px] border pb-4 text-text-primary shadow-atelier transition-all duration-200 sm:rounded-[14px] sm:pb-0',
               // Anel terracota acende ao focar/digitar (status, nunca fill).
-              isTextAreaFocused && 'ring-1 ring-ember/70',
-              isTemporary
-                ? 'border-dashed border-ink-500/40 bg-paper'
-                : 'border-rule bg-paper',
+              isTextAreaFocused && 'ring-ember/70 ring-1',
+              isTemporary ? 'border-ink-500/40 border-dashed bg-paper' : 'border-rule bg-paper',
             )}
           >
             {/* F4: chip "para [Agente]" + popover foto-card (só no endpoint de agentes) */}
@@ -341,7 +343,19 @@ const ChatForm = memo(function ChatForm({
               )}
             >
               <div className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
-                <AttachFileChat
+                <BadgeRow
+                  showEphemeralBadges={
+                    !!endpoint &&
+                    !isAssistantsEndpoint(endpoint) &&
+                    (!isAgentsEndpoint(endpoint) || isEphemeralAgentId(conversation?.agent_id))
+                  }
+                  isSubmitting={isSubmitting}
+                  conversationId={conversationId}
+                  specName={conversation?.spec}
+                  onChange={setBadges}
+                  isInChat={
+                    Array.isArray(conversation?.messages) && conversation.messages.length >= 1
+                  }
                   conversation={conversation}
                   disableInputs={disableInputs}
                   files={files}
@@ -349,18 +363,6 @@ const ChatForm = memo(function ChatForm({
                   setFilesLoading={setFilesLoading}
                 />
               </div>
-              <BadgeRow
-                showEphemeralBadges={
-                  !!endpoint && !isAgentsEndpoint(endpoint) && !isAssistantsEndpoint(endpoint)
-                }
-                isSubmitting={isSubmitting}
-                conversationId={conversationId}
-                specName={conversation?.spec}
-                onChange={setBadges}
-                isInChat={
-                  Array.isArray(conversation?.messages) && conversation.messages.length >= 1
-                }
-              />
               <div className="mx-auto flex" />
               {SpeechToText && (
                 <AudioRecorder

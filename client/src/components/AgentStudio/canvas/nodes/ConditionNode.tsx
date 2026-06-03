@@ -15,12 +15,11 @@ export default function ConditionNode({ id, selected, data }: NodeProps) {
         position={Position.Top}
         id="default"
         aria-label="Entrada da Condição"
-        className="!h-3 !w-3 !rounded-full !border-2 !border-amber-400 !bg-surface-primary"
+        className="!h-3 !w-3 !rounded-full !border-2 !border-border-medium !bg-surface-primary"
       />
       <BaseNode
         id={id}
         selected={selected}
-        accent="amber"
         icon={<GitBranch className="h-3.5 w-3.5" />}
         label={localize('com_studio_flow_node_condition')}
       >
@@ -33,8 +32,12 @@ export default function ConditionNode({ id, selected, data }: NodeProps) {
         )}
       </BaseNode>
       <div className="flex justify-between px-3 text-[9px]">
-        <span className="text-red-400">{localize('com_studio_flow_condition_edge_false')}</span>
-        <span className="text-emerald-400">{localize('com_studio_flow_condition_edge_true')}</span>
+        <span className="text-text-destructive">
+          {localize('com_studio_flow_condition_edge_false')}
+        </span>
+        <span className="text-text-secondary">
+          {localize('com_studio_flow_condition_edge_true')}
+        </span>
       </div>
       <Handle
         type="source"
@@ -42,7 +45,7 @@ export default function ConditionNode({ id, selected, data }: NodeProps) {
         id="false"
         aria-label="Saída Falso"
         style={{ left: '25%' }}
-        className="!h-3 !w-3 !rounded-full !border-2 !border-red-400 !bg-surface-primary"
+        className="!h-3 !w-3 !rounded-full !border-2 !border-border-destructive !bg-surface-primary"
       />
       <Handle
         type="source"
@@ -50,7 +53,7 @@ export default function ConditionNode({ id, selected, data }: NodeProps) {
         id="true"
         aria-label="Saída Verdadeiro"
         style={{ left: '75%' }}
-        className="!h-3 !w-3 !rounded-full !border-2 !border-emerald-400 !bg-surface-primary"
+        className="!h-3 !w-3 !rounded-full !border-2 !border-border-medium !bg-surface-primary"
       />
     </div>
   );

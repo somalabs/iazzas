@@ -64,6 +64,11 @@ jest.mock('../AgentDetailContent', () => ({
   default: () => <div data-testid="agent-detail-content">Agent Detail Content</div>,
 }));
 
+jest.mock('~/hooks/Agents/useStartAgentChat', () => ({
+  __esModule: true,
+  default: () => jest.fn(),
+}));
+
 // Mock Providers
 jest.mock('~/Providers', () => ({
   useChatContext: jest.fn(() => ({
@@ -221,7 +226,7 @@ describe('AgentCard', () => {
       </Wrapper>,
     );
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /agent\./i });
     // Card should be clickable - the actual dialog behavior is handled by Radix
     expect(card).toBeInTheDocument();
     expect(() => fireEvent.click(card)).not.toThrow();
@@ -234,7 +239,7 @@ describe('AgentCard', () => {
       </Wrapper>,
     );
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /agent\./i });
     // Card should respond to keyboard - the actual dialog behavior is handled by Radix
     expect(() => fireEvent.keyDown(card, { key: 'Enter' })).not.toThrow();
   });
@@ -246,7 +251,7 @@ describe('AgentCard', () => {
       </Wrapper>,
     );
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /agent\./i });
     // Card should respond to keyboard - the actual dialog behavior is handled by Radix
     expect(() => fireEvent.keyDown(card, { key: ' ' })).not.toThrow();
   });
@@ -258,7 +263,7 @@ describe('AgentCard', () => {
       </Wrapper>,
     );
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /agent\./i });
     fireEvent.keyDown(card, { key: 'Escape' });
 
     expect(mockOnSelect).not.toHaveBeenCalled();
@@ -271,7 +276,7 @@ describe('AgentCard', () => {
       </Wrapper>,
     );
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /agent\./i });
     expect(card).toHaveClass('custom-class');
   });
 
@@ -315,7 +320,7 @@ describe('AgentCard', () => {
       </Wrapper>,
     );
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /agent\./i });
     expect(card).toHaveAttribute('tabIndex', '0');
     expect(card).toHaveAttribute(
       'aria-label',
@@ -386,7 +391,7 @@ describe('AgentCard', () => {
       </Wrapper>,
     );
 
-    const card = screen.getByRole('button');
+    const card = screen.getByRole('button', { name: /agent\./i });
     // Should not throw when clicking without onSelect
     expect(() => fireEvent.click(card)).not.toThrow();
   });

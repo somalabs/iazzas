@@ -13,7 +13,6 @@ export default function TriggerNode({ id, selected, data }: NodeProps) {
       <BaseNode
         id={id}
         selected={selected}
-        accent="violet"
         icon={<Zap className="h-3.5 w-3.5" />}
         label={localize('com_studio_flow_node_trigger')}
       >
@@ -26,7 +25,7 @@ export default function TriggerNode({ id, selected, data }: NodeProps) {
         position={Position.Bottom}
         id="default"
         aria-label="Saída do Trigger"
-        className="!h-3 !w-3 !rounded-full !border-2 !border-violet-400 !bg-surface-primary"
+        className="!h-3 !w-3 !rounded-full !border-2 !border-border-medium !bg-surface-primary"
       />
     </div>
   );

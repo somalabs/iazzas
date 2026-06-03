@@ -316,10 +316,7 @@ function MCPToolSelectDialog({
                 />
               </div>
 
-              <div
-                ref={gridRef}
-                className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-              >
+              <div ref={gridRef} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {filteredServers
                   .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                   .map((serverInfo) => {

@@ -1,10 +1,17 @@
 import crypto from 'node:crypto';
-import { Constants, ResourceType, actionDelimiter } from 'librechat-data-provider';
+import { Tools, Constants, ResourceType, actionDelimiter } from 'librechat-data-provider';
 import type { FilterQuery, Model, Types } from 'mongoose';
 import type { IAgent, IAclEntry } from '~/types';
 import logger from '~/config/winston';
 
 const { mcp_delimiter } = Constants;
+
+/** Built-in tools safe to surface as capabilities in the marketplace */
+const MARKETPLACE_CAPABILITIES: string[] = [
+  Tools.execute_code,
+  Tools.file_search,
+  Tools.web_search,
+];
 
 export interface AgentDeps {
   /** Removes all ACL permissions for a resource. Injected from PermissionService. */
@@ -665,6 +672,7 @@ export function createAgentMethods(mongoose: typeof import('mongoose'), deps: Ag
       category: 1,
       support_contact: 1,
       is_promoted: 1,
+      tools: 1,
     }).sort({ updatedAt: -1, _id: 1 });
 
     if (isPaginated && normalizedLimit) {
@@ -679,6 +687,11 @@ export function createAgentMethods(mongoose: typeof import('mongoose'), deps: Ag
         if (agent.author) {
           agent.author = (agent.author as Types.ObjectId).toString();
         }
+        // Expose only marketplace-safe built-in capability flags; never leak
+        // action/MCP tool identifiers to list consumers.
+        const agentTools = Array.isArray(agent.tools) ? (agent.tools as string[]) : [];
+        agent.capabilities = MARKETPLACE_CAPABILITIES.filter((tool) => agentTools.includes(tool));
+        delete agent.tools;
         return agent;
       },
     );

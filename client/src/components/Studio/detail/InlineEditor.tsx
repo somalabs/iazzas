@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { useState, useRef } from 'react';
 import { Paperclip, ChevronUp, X } from 'lucide-react';
 import { dataService } from 'librechat-data-provider';
@@ -79,9 +80,7 @@ export default function InlineEditor({ imageIdx = 0 }: { imageIdx?: number }) {
         prev.map((a) => (a.id === id ? { ...a, fileId, status: 'ready' } : a)),
       );
     } catch {
-      setAttachments((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, status: 'error' } : a)),
-      );
+      setAttachments((prev) => prev.map((a) => (a.id === id ? { ...a, status: 'error' } : a)));
       showToast({ status: 'error', message: localize('com_studio_ref_upload_failed') });
     }
   }
@@ -149,7 +148,10 @@ export default function InlineEditor({ imageIdx = 0 }: { imageIdx?: number }) {
         },
         onError: () => {
           const errored = { ...optimistic, status: 'error' as const };
-          dispatch({ type: 'REPLACE_CREATION', payload: { fromId: optimisticId, creation: errored } });
+          dispatch({
+            type: 'REPLACE_CREATION',
+            payload: { fromId: optimisticId, creation: errored },
+          });
           dispatch({ type: 'SELECT_CREATION', payload: errored });
           showToast({ status: 'error', message: localize('com_studio_edit_failed') });
         },
@@ -175,7 +177,7 @@ export default function InlineEditor({ imageIdx = 0 }: { imageIdx?: number }) {
         <button
           type="button"
           onClick={handleClose}
-          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-surface-primary/70 text-text-secondary backdrop-blur-sm transition-colors hover:bg-surface-hover"
+          className="bg-surface-primary/70 absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-text-secondary backdrop-blur-sm transition-colors hover:bg-surface-hover"
           aria-label="Close editor"
         >
           <X className="h-4 w-4" />

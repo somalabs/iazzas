@@ -34,13 +34,16 @@ export default function BrandDuotone({
         src={src}
         alt=""
         className={cn(
-          'h-full w-full object-cover grayscale contrast-[1.05]',
+          'h-full w-full object-cover contrast-[1.05] grayscale',
           anchor === 'bottom' ? 'object-bottom' : 'object-center',
         )}
         style={{ opacity: imageOpacity }}
       />
       {/* Sombras viram navy → leitura de duotone */}
-      <div className="absolute inset-0 bg-action mix-blend-multiply" style={{ opacity: imageOpacity }} />
+      <div
+        className="absolute inset-0 bg-action mix-blend-multiply"
+        style={{ opacity: imageOpacity }}
+      />
       {/* Dissolve no creme em ambas as bordas: o material vive no terço inferior
           mas nunca encosta numa borda dura — sem emenda visível ao rolar */}
       {fade && (

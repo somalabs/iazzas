@@ -124,7 +124,7 @@ export default function Settings({
           <div className={cn('fixed inset-0 flex w-screen items-center justify-center p-4')}>
             <DialogPanel
               className={cn(
-                'flex flex-col h-[80vh] max-h-[640px] overflow-hidden rounded-xl rounded-b-lg bg-paper pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:w-[680px]',
+                'flex h-[80vh] max-h-[640px] flex-col overflow-hidden rounded-xl rounded-b-lg bg-paper pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:w-[680px]',
               )}
             >
               <DialogTitle
@@ -168,9 +168,7 @@ export default function Settings({
                     aria-label="Settings"
                     className={cn(
                       'min-w-auto max-w-auto relative -ml-[8px] flex flex-shrink-0 flex-col flex-nowrap overflow-auto sm:max-w-none',
-                      isSmallScreen
-                        ? 'flex-row rounded-lg bg-canvas'
-                        : 'sticky top-0 h-full',
+                      isSmallScreen ? 'flex-row rounded-lg bg-canvas' : 'sticky top-0 h-full',
                     )}
                     onKeyDown={handleKeyDown}
                   >
@@ -181,7 +179,7 @@ export default function Settings({
                           'group relative z-10 m-1 flex items-center justify-start gap-2 rounded-lg px-2 py-1.5 transition-all duration-200 ease-in-out',
                           isSmallScreen
                             ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-ink-700 radix-state-active:bg-canvas radix-state-active:text-action'
-                            : 'relative bg-transparent text-ink-700 radix-state-active:bg-canvas radix-state-active:text-action radix-state-active:before:absolute radix-state-active:before:left-0 radix-state-active:before:top-[20%] radix-state-active:before:bottom-[20%] radix-state-active:before:w-1 radix-state-active:before:rounded-r-full radix-state-active:before:bg-ember',
+                            : 'relative bg-transparent text-ink-700 radix-state-active:bg-canvas radix-state-active:text-action radix-state-active:before:absolute radix-state-active:before:bottom-[20%] radix-state-active:before:left-0 radix-state-active:before:top-[20%] radix-state-active:before:w-1 radix-state-active:before:rounded-r-full radix-state-active:before:bg-ember',
                         )}
                         value={value}
                         ref={(el) => (tabRefs.current[value] = el)}

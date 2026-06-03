@@ -11,16 +11,12 @@ import React, {
 import { Badge } from '@librechat/client';
 import { useRecoilValue, useRecoilCallback } from 'recoil';
 import type { LucideIcon } from 'lucide-react';
-import CodeInterpreter from './CodeInterpreter';
+import type { TConversation } from 'librechat-data-provider';
 import { BadgeRowProvider } from '~/Providers';
-import ToolsDropdown from './ToolsDropdown';
-import type { BadgeItem } from '~/common';
+import type { BadgeItem, ExtendedFile, FileSetter } from '~/common';
+import PlusMenu from './PlusMenu';
 import { useChatBadges } from '~/hooks';
 import ToolDialogs from './ToolDialogs';
-import FileSearch from './FileSearch';
-import Artifacts from './Artifacts';
-import MCPSelect from './MCPSelect';
-import WebSearch from './WebSearch';
 import store from '~/store';
 
 interface BadgeRowProps {
@@ -31,6 +27,11 @@ interface BadgeRowProps {
   specName?: string | null;
   isSubmitting?: boolean;
   isInChat: boolean;
+  conversation: TConversation | null;
+  disableInputs?: boolean;
+  files: Map<string, ExtendedFile>;
+  setFiles: FileSetter;
+  setFilesLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface BadgeWrapperProps {
@@ -148,6 +149,11 @@ function BadgeRow({
   onChange,
   onToggle,
   isInChat,
+  conversation,
+  disableInputs,
+  files,
+  setFiles,
+  setFilesLoading,
 }: BadgeRowProps) {
   const [orderedBadges, setOrderedBadges] = useState<BadgeItem[]>([]);
   const [dragState, dispatch] = useReducer(dragReducer, {
@@ -328,7 +334,14 @@ function BadgeRow({
       isSubmitting={isSubmitting}
     >
       <div ref={containerRef} className="relative flex flex-wrap items-center gap-2">
-        {showEphemeralBadges === true && <ToolsDropdown />}
+        <PlusMenu
+          conversation={conversation}
+          disabled={disableInputs}
+          showTools={showEphemeralBadges === true}
+          files={files}
+          setFiles={setFiles}
+          setFilesLoading={setFilesLoading}
+        />
         {tempBadges.map((badge, index) => (
           <React.Fragment key={badge.id}>
             {dragState.draggedBadge && dragState.insertIndex === index && ghostBadge && (
@@ -367,15 +380,6 @@ function BadgeRow({
               isInChat={isInChat}
             />
           </div>
-        )}
-        {showEphemeralBadges === true && (
-          <>
-            <WebSearch />
-            <CodeInterpreter />
-            <FileSearch />
-            <Artifacts />
-            <MCPSelect />
-          </>
         )}
         {ghostBadge && (
           <div

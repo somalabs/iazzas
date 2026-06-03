@@ -7,7 +7,7 @@ import { useBadgeRowContext } from '~/Providers';
 function FileSearch() {
   const localize = useLocalize();
   const { fileSearch } = useBadgeRowContext();
-  const { toggleState: fileSearchEnabled, debouncedChange, isPinned } = fileSearch;
+  const { toggleState: fileSearchEnabled, debouncedChange } = fileSearch;
 
   const canUseFileSearch = useHasAccess({
     permissionType: PermissionTypes.FILE_SEARCH,
@@ -20,7 +20,7 @@ function FileSearch() {
 
   return (
     <>
-      {(fileSearchEnabled || isPinned) && (
+      {fileSearchEnabled && (
         <CheckboxButton
           className="max-w-fit"
           checked={fileSearchEnabled}

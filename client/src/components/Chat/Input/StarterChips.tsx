@@ -11,7 +11,10 @@ import { cn } from '~/utils';
  * Cada chip carrega um ícone discreto sinalizando a base/ferramenta conectada.
  * Creme + hairline, nunca navy (o navy é só o send).
  */
-const SvgIcon = ({ children, className }: { children: React.ReactNode } & SVGProps<SVGSVGElement>) => (
+const SvgIcon = ({
+  children,
+  className,
+}: { children: React.ReactNode } & SVGProps<SVGSVGElement>) => (
   <svg
     className={className}
     viewBox="0 0 24 24"
@@ -114,7 +117,7 @@ const StarterChips = () => {
           onClick={() => handlePick(prompt)}
           className={cn(
             'group inline-flex items-center rounded-full border border-rule bg-canvas px-3.5 py-1.5 text-[13px] text-text-secondary',
-            'transition-[transform,color,border-color] duration-150 hover:-translate-y-px hover:border-action/40 hover:text-text-primary',
+            'hover:border-action/40 transition-[transform,color,border-color] duration-150 hover:-translate-y-px hover:text-text-primary',
             'motion-reduce:transition-colors motion-reduce:hover:translate-y-0',
           )}
         >

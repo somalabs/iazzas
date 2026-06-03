@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Compass, Pencil, Copy, Trash2, Bot } from 'lucide-react';
 
-import AtelierDrawer from '~/components/ui/AtelierDrawer';
-import AtelierTrigger from '~/components/ui/AtelierTrigger';
+import ScreenHeader from '~/components/ui/ScreenHeader';
 import InlineConfirm from '~/components/ui/InlineConfirm';
 import { Button, Spinner, useToastContext } from '@librechat/client';
 import type { Agent } from 'librechat-data-provider';
@@ -26,51 +25,34 @@ export default function AgentesHome() {
     { requiredPermission: permissionLevel },
     { select: (res) => res.data },
   );
-  const [atelierOpen, setAtelierOpen] = useState(false);
-
   if (!hasAccess) {
     return null;
   }
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="relative flex h-full w-full overflow-hidden">
+      <ScreenHeader>
+        <h1 className="pl-2 text-sm font-semibold text-text-primary">
+          {localize('com_ui_ux_nav_agentes')}
+        </h1>
+      </ScreenHeader>
       <main
         className="min-w-0 flex-1 overflow-y-auto bg-surface-primary"
         aria-label={localize('com_ui_ux_nav_agentes')}
       >
-        <div className="mx-auto w-full max-w-6xl px-6 py-8 sm:px-8">
+        <div className="mx-auto w-full max-w-6xl px-6 pb-8 pt-[84px] sm:px-8">
           <Header
             onCreate={() => navigate('/d/agentes/novo')}
             onMarketplace={() => navigate('/agents')}
-            atelierOpen={atelierOpen}
-            onToggleAtelier={() => setAtelierOpen((prev) => !prev)}
           />
           <AgentsGrid agents={agents ?? null} />
         </div>
       </main>
-
-      <AtelierDrawer
-        open={atelierOpen}
-        title={localize('com_ui_atelier')}
-        onClose={() => setAtelierOpen(false)}
-      >
-        <p className="text-xs text-text-tertiary">{localize('com_ui_atelier_empty')}</p>
-      </AtelierDrawer>
     </div>
   );
 }
 
-function Header({
-  onCreate,
-  onMarketplace,
-  atelierOpen,
-  onToggleAtelier,
-}: {
-  onCreate: () => void;
-  onMarketplace: () => void;
-  atelierOpen: boolean;
-  onToggleAtelier: () => void;
-}) {
+function Header({ onCreate, onMarketplace }: { onCreate: () => void; onMarketplace: () => void }) {
   const localize = useLocalize();
   return (
     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -87,14 +69,10 @@ function Header({
           <Compass className="size-4" />
           {localize('com_ui_ux_agentes_home_explore')}
         </Button>
-        <Button
-          onClick={onCreate}
-          className="bg-action text-on-action hover:bg-action-hover"
-        >
+        <Button onClick={onCreate} className="bg-action text-on-action hover:bg-action-hover">
           <Plus className="size-4" />
           {localize('com_ui_ux_agentes_home_create')}
         </Button>
-        <AtelierTrigger open={atelierOpen} onToggle={onToggleAtelier} />
       </div>
     </header>
   );
@@ -131,15 +109,15 @@ function AgentsGrid({ agents }: { agents: Agent[] | null }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {agents.map((agent) => (
-        <AgentCard key={agent.id} agent={agent} />
+    <div className="divide-y divide-rule overflow-hidden rounded-xl border border-rule bg-paper">
+      {agents.map((agent, index) => (
+        <AgentCard key={agent.id} agent={agent} index={index} />
       ))}
     </div>
   );
 }
 
-function AgentCard({ agent }: { agent: Agent }) {
+function AgentCard({ agent, index }: { agent: Agent; index: number }) {
   const localize = useLocalize();
   const navigate = useNavigate();
   const { showToast } = useToastContext();
@@ -176,8 +154,10 @@ function AgentCard({ agent }: { agent: Agent }) {
   return (
     <div
       className={cn(
-        'group relative flex flex-col gap-3 rounded-xl border border-border-light bg-surface-secondary p-4',
-        'cursor-pointer transition-colors hover:border-border-medium hover:bg-surface-tertiary',
+        'flex items-center gap-3 px-4 py-2.5 transition-colors',
+        'cursor-pointer hover:bg-surface-tertiary',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action focus-visible:ring-offset-1',
+        index % 2 === 1 && 'bg-surface-primary',
       )}
       onClick={openInChat}
       onKeyDown={(e) => {
@@ -193,21 +173,17 @@ function AgentCard({ agent }: { agent: Agent }) {
         description: agent.description ?? '',
       })}
     >
-      <div className="flex items-start gap-3">
-        <div className="shrink-0">
-          {renderAgentAvatar(agent, { size: 'sm', showBorder: false })}
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-medium text-text-primary">
-            {agent.name || agent.id}
-          </h3>
-          {agent.description ? (
-            <p className="mt-1 line-clamp-2 text-xs text-text-secondary">{agent.description}</p>
-          ) : null}
-        </div>
+      <span className="flex shrink-0 overflow-hidden rounded-lg bg-[#27456614]">
+        {renderAgentAvatar(agent, { size: 'sm', showBorder: false })}
+      </span>
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate text-sm font-medium text-ink-900">{agent.name || agent.id}</h3>
+        {agent.description ? (
+          <p className="truncate text-xs text-ink-700">{agent.description}</p>
+        ) : null}
       </div>
 
-      <div className="mt-auto border-t border-rule pt-2">
+      <div className="flex shrink-0 items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
         {confirmDelete ? (
           <InlineConfirm
             message={localize('com_ui_delete_agent_confirm')}
@@ -218,12 +194,8 @@ function AgentCard({ agent }: { agent: Agent }) {
             onConfirm={() => deleteAgent.mutate({ agent_id: agent.id ?? '' })}
           />
         ) : (
-          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-            <RowAction
-              icon={Pencil}
-              label={localize('com_ui_edit')}
-              onClick={goEdit}
-            />
+          <>
+            <RowAction icon={Pencil} label={localize('com_ui_edit')} onClick={goEdit} />
             <RowAction
               icon={Copy}
               label={localize('com_ui_duplicate')}
@@ -232,9 +204,10 @@ function AgentCard({ agent }: { agent: Agent }) {
             <RowAction
               icon={Trash2}
               label={localize('com_ui_delete')}
+              danger
               onClick={() => setConfirmDelete(true)}
             />
-          </div>
+          </>
         )}
       </div>
     </div>
@@ -245,22 +218,29 @@ function RowAction({
   icon: Icon,
   label,
   onClick,
+  danger,
 }: {
   icon: React.ElementType;
   label: string;
   onClick: () => void;
+  danger?: boolean;
 }) {
   return (
     <button
       type="button"
+      aria-label={label}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
-      className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-ink-700 transition-colors hover:bg-surface-hover hover:text-ink-900"
+      className={cn(
+        'flex size-7 items-center justify-center rounded-md text-ink-700 transition-colors',
+        danger
+          ? 'hover:bg-[#c25a3c1a] hover:text-ember'
+          : 'hover:bg-surface-tertiary hover:text-ink-900',
+      )}
     >
-      <Icon className="h-3 w-3" aria-hidden="true" />
-      {label}
+      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
     </button>
   );
 }

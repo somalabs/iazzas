@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { TConversation } from 'librechat-data-provider';
 import { useConversationsInfiniteQuery } from '~/data-provider';
-import { useAuthContext, useLocalize } from '~/hooks';
+import { useAuthContext, useLocalize, useNavigateToConvo } from '~/hooks';
 
 /**
  * "Retome de onde parou" (F5 / P2-A) — seção editorial de trabalho-recente
@@ -29,7 +28,7 @@ function formatDate(d?: string) {
 
 export default function RecentWork() {
   const localize = useLocalize();
-  const navigate = useNavigate();
+  const { navigateToConvo } = useNavigateToConvo();
   const { isAuthenticated } = useAuthContext();
   const { data } = useConversationsInfiniteQuery(
     {},
@@ -38,9 +37,7 @@ export default function RecentWork() {
 
   const recent = useMemo<TConversation[]>(() => {
     const first = data?.pages?.[0]?.conversations ?? [];
-    return first
-      .filter((c) => c.conversationId && c.conversationId !== 'new')
-      .slice(0, 3);
+    return first.filter((c) => c.conversationId && c.conversationId !== 'new').slice(0, 3);
   }, [data]);
 
   // Conta nova / sem histórico: faixa de campanha full-bleed (zero-state desenhado).
@@ -52,10 +49,13 @@ export default function RecentWork() {
             src={BRAND_IMAGES[0]}
             alt=""
             aria-hidden="true"
-            className="absolute inset-0 h-full w-full object-cover grayscale contrast-[1.05]"
+            className="absolute inset-0 h-full w-full object-cover contrast-[1.05] grayscale"
             style={{ opacity: 0.55 }}
           />
-          <div className="absolute inset-0 bg-action mix-blend-multiply" style={{ opacity: 0.45 }} />
+          <div
+            className="absolute inset-0 bg-action mix-blend-multiply"
+            style={{ opacity: 0.45 }}
+          />
           <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
             <p className="font-editorial text-xl font-medium text-on-action">
               {localize('com_ui_first_creation')}
@@ -80,7 +80,7 @@ export default function RecentWork() {
           <button
             key={c.conversationId}
             type="button"
-            onClick={() => navigate(`/c/${c.conversationId}`)}
+            onClick={() => navigateToConvo(c)}
             className="group text-left"
           >
             <p className="line-clamp-1 font-editorial text-[15px] font-semibold text-text-primary">
@@ -92,14 +92,13 @@ export default function RecentWork() {
                 src={BRAND_IMAGES[i % BRAND_IMAGES.length]}
                 alt=""
                 aria-hidden="true"
-                className="h-full w-full object-cover grayscale contrast-[1.05] transition-transform duration-300 group-hover:scale-105"
+                className="h-full w-full object-cover contrast-[1.05] grayscale transition-transform duration-300 group-hover:scale-105"
                 style={{ opacity: 0.85 }}
               />
             </div>
           </button>
         ))}
       </div>
-
     </section>
   );
 }
