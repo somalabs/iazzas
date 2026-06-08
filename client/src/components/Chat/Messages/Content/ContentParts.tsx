@@ -7,7 +7,7 @@ import type {
   Agents,
 } from 'librechat-data-provider';
 import { ParallelContentRenderer, type PartWithIndex } from './ParallelContent';
-import { mapAttachments, groupSequentialToolCalls } from '~/utils';
+import { mapAttachments, groupAgentParts } from '~/utils';
 import { MessageContext, SearchContext } from '~/Providers';
 import { EditTextPart, EmptyText } from './Parts';
 import MemoryArtifacts from './MemoryArtifacts';
@@ -216,7 +216,7 @@ const ContentParts = memo(function ContentParts({
       sequentialParts.push({ part, idx });
     }
   });
-  const groupedParts = groupSequentialToolCalls(sequentialParts);
+  const groupedParts = groupAgentParts(sequentialParts);
 
   return (
     <SearchContext.Provider value={{ searchResults }}>
@@ -230,6 +230,24 @@ const ContentParts = memo(function ContentParts({
         if (group.type === 'single') {
           const { part, idx } = group.part;
           return renderPart(part, idx, idx === lastContentIdx);
+        }
+        if (group.type === 'reasoning-group') {
+          // Collapse all reasoning steps of the turn into ONE disclosure by
+          // rendering a single synthetic THINK part with the concatenated text.
+          const combined = group.parts
+            .map(({ part }) => {
+              const think = (part as { think?: string | { value?: string } }).think;
+              return typeof think === 'string' ? think : (think?.value ?? '');
+            })
+            .filter(Boolean)
+            .join('\n\n');
+          const firstIdx = group.parts[0].idx;
+          const containsLast = group.parts.some((p) => p.idx === lastContentIdx);
+          const reasoningPart = {
+            type: ContentTypes.THINK,
+            think: combined,
+          } as unknown as TMessageContentParts;
+          return renderPart(reasoningPart, firstIdx, containsLast);
         }
         return (
           <ToolCallGroup
