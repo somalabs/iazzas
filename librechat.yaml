@@ -210,7 +210,7 @@ webSearch:
 fileConfig:
   endpoints:
     google:
-      fileLimit: 10
+      fileLimit: 30
       fileSizeLimit: 25
       supportedMimeTypes:
         - application/pdf
