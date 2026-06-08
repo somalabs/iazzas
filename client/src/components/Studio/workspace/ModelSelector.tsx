@@ -75,7 +75,7 @@ export default function ModelSelector() {
             <span className="text-[11px] text-text-tertiary">
               {activeSchema
                 ? (MODEL_DISPLAY_NAMES[activeSchema.defaultModel] ?? activeSchema.defaultModel)
-                : MODEL_DISPLAY_NAMES['nano-banana-pro']}
+                : MODEL_DISPLAY_NAMES['nano-banana-2']}
             </span>
           </button>
           {ALL_MODELS.map(([id, name]) => (

@@ -6,7 +6,7 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
     displayName: 'Variantes de Cor',
     description: 'Mude o colorway da peça preservando silhueta, textura e construção.',
     defaultModel: 'flux-kontext',
-    uiDefaults: { aspectRatio: '4:5', imageCount: 4, resolution: '2K' },
+    uiDefaults: { aspectRatio: '3:4', imageCount: 1, resolution: '2K' },
     imageSlots: [
       {
         id: 'product_image',
@@ -56,7 +56,7 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
     displayName: 'Aplicar Estampa',
     description: 'Aplique uma estampa ou arte na superfície da peça.',
     defaultModel: 'nano-banana-2',
-    uiDefaults: { aspectRatio: '4:5', imageCount: 4, resolution: '2K' },
+    uiDefaults: { aspectRatio: '3:4', imageCount: 1, resolution: '2K' },
     imageSlots: [
       {
         id: 'product_image',
@@ -141,7 +141,7 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
     displayName: 'Produto em Modelo',
     description: 'Exiba uma peça sendo usada por uma modelo.',
     defaultModel: 'nano-banana-pro',
-    uiDefaults: { aspectRatio: '2:3', imageCount: 4, resolution: '2K' },
+    uiDefaults: { aspectRatio: '3:4', imageCount: 1, resolution: '2K' },
     compliance: {
       requiresHumanReview: true,
       reviewReason:
@@ -211,7 +211,7 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
     description:
       'Crie composições a partir de múltiplas referências de estilo, peças ou personagem.',
     defaultModel: 'nano-banana-pro',
-    uiDefaults: { aspectRatio: '4:5', imageCount: 4, resolution: '2K' },
+    uiDefaults: { aspectRatio: '3:4', imageCount: 1, resolution: '2K' },
     compliance: {
       requiresHumanReview: true,
       reviewReason:
@@ -285,7 +285,7 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
     displayName: 'Sketch-to-Render',
     description: 'Converta um sketch, flat ou CAD em um render fotorrealista ou editorial.',
     defaultModel: 'nano-banana-pro',
-    uiDefaults: { aspectRatio: '4:5', imageCount: 4, resolution: '2K' },
+    uiDefaults: { aspectRatio: '3:4', imageCount: 1, resolution: '2K' },
     imageSlots: [
       {
         id: 'sketch_image',
@@ -354,7 +354,7 @@ export const USE_CASE_SCHEMAS: StudioUseCaseSchema[] = [
     description:
       'A partir de uma foto de produto, gere um desenho técnico de moda (flat/CAD) como ponto de partida para desenvolvimento.',
     defaultModel: 'nano-banana-pro',
-    uiDefaults: { aspectRatio: '4:5', imageCount: 2, resolution: '2K' },
+    uiDefaults: { aspectRatio: '3:4', imageCount: 1, resolution: '2K' },
     imageSlots: [
       {
         id: 'product_image',
