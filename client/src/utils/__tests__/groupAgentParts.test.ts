@@ -43,6 +43,22 @@ describe('groupAgentParts', () => {
     expect(groups.map((g) => g.type)).toEqual(['single', 'single']);
   });
 
+  it('ignores empty/whitespace text boundaries between steps (keeps one group)', () => {
+    const groups = groupAgentParts(
+      wrap([
+        think('a'),
+        tool('consultar_bq_mcp_x'),
+        text(''),
+        tool('describe_table_mcp_x'),
+        text('   '),
+        tool('consultar_bq_mcp_x'),
+      ]),
+    );
+    expect(groups.map((g) => g.type)).toEqual(['reasoning-group', 'tool-group']);
+    const toolGroup = groups[1] as { type: 'tool-group'; parts: unknown[] };
+    expect(toolGroup.parts).toHaveLength(3);
+  });
+
   it('flushes buffers when a text part interrupts the sequence', () => {
     const groups = groupAgentParts(
       wrap([

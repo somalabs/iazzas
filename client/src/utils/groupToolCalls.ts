@@ -74,6 +74,21 @@ function isReasoningPart(part: TMessageContentParts): boolean {
   );
 }
 
+/**
+ * Empty / whitespace-only TEXT parts are emitted between agent steps as
+ * boundaries; they render to nothing (see Part.tsx). They must NOT flush the
+ * reasoning/tool buffers — otherwise an interleaved turn fragments back into
+ * many rows. Only real (non-empty) text flushes.
+ */
+function isIgnorableTextPart(part: TMessageContentParts): boolean {
+  if (part.type !== ContentTypes.TEXT) {
+    return false;
+  }
+  const raw = (part as unknown as { text?: string | { value?: string } }).text;
+  const text = typeof raw === 'string' ? raw : raw?.value;
+  return typeof text !== 'string' || text.length === 0 || /^\s*$/.test(text);
+}
+
 function isPlainGroupableToolCall(part: TMessageContentParts): boolean {
   if (part.type !== ContentTypes.TOOL_CALL) {
     return false;
@@ -130,11 +145,16 @@ export function groupAgentParts(parts: PartWithIndex[]): AgentGroupedPart[] {
     tools = [];
   };
 
+  const lastIdx = parts.length > 0 ? parts[parts.length - 1].idx : -1;
+
   for (const item of parts) {
     if (isReasoningPart(item.part)) {
       reasoning.push(item);
     } else if (isPlainGroupableToolCall(item.part)) {
       tools.push(item);
+    } else if (isIgnorableTextPart(item.part) && item.idx !== lastIdx) {
+      // Empty step-boundary text: drop it without breaking the grouping.
+      continue;
     } else {
       flush();
       result.push({ type: 'single', part: item });
