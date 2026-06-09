@@ -101,6 +101,12 @@ const agentSchema = new Schema<IAgent>(
       default: false,
       index: true,
     },
+    /** Platform-curated trust badge. Only admins can set this (see /agents/:id/verify). */
+    is_verified: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     /** When true, the agent is reachable as a handoff target but hidden from agent listings. */
     hidden: {
       type: Boolean,

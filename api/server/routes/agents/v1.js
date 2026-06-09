@@ -1,7 +1,9 @@
 const express = require('express');
 const { generateCheckAccess } = require('@librechat/api');
+const { SystemCapabilities } = require('@librechat/data-schemas');
 const { PermissionTypes, Permissions, PermissionBits } = require('librechat-data-provider');
 const { requireJwtAuth, configMiddleware, canAccessAgentResource } = require('~/server/middleware');
+const { requireCapability } = require('~/server/middleware/roles/capabilities');
 const v1 = require('~/server/controllers/agents/v1');
 const { getRoleByName } = require('~/models');
 const actions = require('./actions');
@@ -9,6 +11,8 @@ const tools = require('./tools');
 
 const router = express.Router();
 const avatar = express.Router();
+
+const requireAdminAccess = requireCapability(SystemCapabilities.ACCESS_ADMIN);
 
 const checkAgentAccess = generateCheckAccess({
   permissionType: PermissionTypes.AGENTS,
@@ -146,6 +150,15 @@ router.post(
   }),
   v1.revertAgentVersion,
 );
+
+/**
+ * Sets or clears the platform-curated verification badge on an agent (admin only).
+ * @route PATCH /agents/:id/verify
+ * @param {string} req.params.id - Agent identifier.
+ * @param {boolean} req.body.is_verified - Whether the agent should be verified.
+ * @returns {Agent} 200 - Success response - application/json
+ */
+router.patch('/:id/verify', requireAdminAccess, v1.verifyAgent);
 
 /**
  * Returns a list of agents.

@@ -403,6 +403,47 @@ export const useRevertAgentVersionMutation = (
   );
 };
 
+/**
+ * Hook for setting/clearing the platform-curated verification badge on an agent (admin only)
+ */
+export const useVerifyAgentMutation = (options?: {
+  onSuccess?: (agent: t.Agent, variables: { agent_id: string; is_verified: boolean }) => void;
+  onError?: (error: Error, variables: { agent_id: string; is_verified: boolean }) => void;
+}): UseMutationResult<t.Agent, Error, { agent_id: string; is_verified: boolean }> => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ agent_id, is_verified }: { agent_id: string; is_verified: boolean }) => {
+      return dataService.verifyAgent({ agent_id, is_verified });
+    },
+    {
+      onSuccess: (updatedAgent, variables) => {
+        queryClient.setQueryData<t.Agent>([QueryKeys.agent, variables.agent_id], (prev) =>
+          prev ? { ...prev, is_verified: updatedAgent.is_verified } : updatedAgent,
+        );
+
+        allAgentViewAndEditQueryKeys.forEach((key) => {
+          const listRes = queryClient.getQueryData<t.AgentListResponse>([QueryKeys.agents, key]);
+          if (!listRes) {
+            return;
+          }
+          queryClient.setQueryData<t.AgentListResponse>([QueryKeys.agents, key], {
+            ...listRes,
+            data: listRes.data.map((agent) =>
+              agent.id === variables.agent_id
+                ? { ...agent, is_verified: updatedAgent.is_verified }
+                : agent,
+            ),
+          });
+        });
+
+        invalidateAgentMarketplaceQueries(queryClient);
+        options?.onSuccess?.(updatedAgent, variables);
+      },
+      onError: (error, variables) => options?.onError?.(error as Error, variables),
+    },
+  );
+};
+
 export const invalidateAgentMarketplaceQueries = (queryClient: QueryClient) => {
   queryClient.invalidateQueries([QueryKeys.marketplaceAgents]);
 };

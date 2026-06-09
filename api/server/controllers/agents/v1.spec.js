@@ -74,6 +74,7 @@ const {
   createAgent: createAgentHandler,
   updateAgent: updateAgentHandler,
   getListAgents: getListAgentsHandler,
+  verifyAgent: verifyAgentHandler,
 } = require('./v1');
 
 const {
@@ -1778,6 +1779,64 @@ describe('Agent Controllers - Mass Assignment Protection', () => {
       const response = mockRes.json.mock.calls[0][0];
       expect(response.edges).toHaveLength(1);
       expect(response.edges[0].from).toBe(ownedAgent.id);
+    });
+  });
+
+  describe('verifyAgentHandler', () => {
+    // Admin gating is enforced at the route (requireCapability(ACCESS_ADMIN));
+    // these tests exercise the handler behavior directly.
+    const createAgentDoc = (overrides = {}) =>
+      Agent.create({
+        id: `agent_${nanoid()}`,
+        provider: 'openai',
+        model: 'gpt-4',
+        author: new mongoose.Types.ObjectId(),
+        ...overrides,
+      });
+
+    test('sets the verification flag and returns the updated agent', async () => {
+      const agent = await createAgentDoc();
+      mockReq.params = { id: agent.id };
+      mockReq.body = { is_verified: true };
+
+      await verifyAgentHandler(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      const response = mockRes.json.mock.calls[0][0];
+      expect(response.is_verified).toBe(true);
+
+      const inDb = await Agent.findOne({ id: agent.id });
+      expect(inDb.is_verified).toBe(true);
+    });
+
+    test('clears the verification flag', async () => {
+      const agent = await createAgentDoc({ is_verified: true });
+      mockReq.params = { id: agent.id };
+      mockReq.body = { is_verified: false };
+
+      await verifyAgentHandler(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json.mock.calls[0][0].is_verified).toBe(false);
+    });
+
+    test('rejects a non-boolean is_verified with 400', async () => {
+      const agent = await createAgentDoc();
+      mockReq.params = { id: agent.id };
+      mockReq.body = { is_verified: 'yes' };
+
+      await verifyAgentHandler(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+
+    test('returns 404 for a non-existent agent', async () => {
+      mockReq.params = { id: 'agent_does_not_exist' };
+      mockReq.body = { is_verified: true };
+
+      await verifyAgentHandler(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(404);
     });
   });
 });

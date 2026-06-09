@@ -272,6 +272,8 @@ export type Agent = {
   version?: number;
   category?: string;
   support_contact?: SupportContact;
+  /** Platform-curated trust badge, settable only by admins. */
+  is_verified?: boolean;
   /** When true, the agent is reachable as a handoff target but hidden from agent listings. */
   hidden?: boolean;
   /** Per-tool configuration options (deferred loading, allowed callers, etc.) */

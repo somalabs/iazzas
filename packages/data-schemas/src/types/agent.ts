@@ -39,6 +39,8 @@ export interface IAgent extends Omit<Document, 'model'> {
   category: string;
   support_contact?: ISupportContact;
   is_promoted?: boolean;
+  /** Platform-curated trust badge, settable only by admins. */
+  is_verified?: boolean;
   /** When true, the agent is reachable as a handoff target but hidden from agent listings. */
   hidden?: boolean;
   /** MCP server names extracted from tools for efficient querying */
