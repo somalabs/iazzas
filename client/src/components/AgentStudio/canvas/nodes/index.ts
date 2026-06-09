@@ -3,6 +3,7 @@ import TriggerNode from './TriggerNode';
 import AgentNode from './AgentNode';
 import ConditionNode from './ConditionNode';
 import HttpNode from './HttpNode';
+import McpNode from './McpNode';
 import ApprovalNode from './ApprovalNode';
 import OutputNode from './OutputNode';
 
@@ -11,6 +12,7 @@ export const nodeTypes: NodeTypes = {
   agent: AgentNode,
   condition: ConditionNode,
   http: HttpNode,
+  mcp: McpNode,
   human_approval: ApprovalNode,
   output: OutputNode,
 };

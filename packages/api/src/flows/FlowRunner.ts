@@ -15,6 +15,7 @@ import { triggerNode } from './nodes/triggerNode';
 import { agentNode } from './nodes/agentNode';
 import { conditionNode } from './nodes/conditionNode';
 import { httpNode } from './nodes/httpNode';
+import { mcpNode } from './nodes/mcpNode';
 import { humanNode } from './nodes/humanNode';
 import { outputNode } from './nodes/outputNode';
 
@@ -23,6 +24,7 @@ const EXECUTORS: Record<FlowNode['type'], FlowNodeExecutor> = {
   agent: agentNode,
   condition: conditionNode,
   http: httpNode,
+  mcp: mcpNode,
   human_approval: humanNode,
   output: outputNode,
 };
@@ -125,8 +127,7 @@ export class FlowRunner {
       try {
         result = await EXECUTORS[node.type](node, ctx, this.deps, carry);
       } catch (err) {
-        const message =
-          err instanceof FlowRunError ? err.message : 'Node execution failed';
+        const message = err instanceof FlowRunError ? err.message : 'Node execution failed';
         entry.status = 'failed';
         entry.error = message;
         entry.completedAt = this.deps.now().toISOString();

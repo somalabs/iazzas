@@ -41,6 +41,8 @@ const defaultDataForType = (nodeType: FlowNodeType): FlowNodeData => {
       return { type: 'condition', criterio: '' };
     case 'http':
       return { type: 'http', method: 'GET', url: '', headers: [], timeout: 10000 };
+    case 'mcp':
+      return { type: 'mcp', serverName: '', toolName: '', args: '' };
     case 'human_approval':
       return { type: 'human_approval', prompt: '' };
     case 'output':

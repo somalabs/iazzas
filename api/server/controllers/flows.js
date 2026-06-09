@@ -6,9 +6,18 @@ const { getResourcePermissionsMap } = require('~/server/services/PermissionServi
 const repo = require('~/server/services/Flows/repository');
 const { runAgent } = require('~/server/services/Flows/runAgent');
 const { runJudge } = require('~/server/services/Flows/runJudge');
+const { runMcpTool } = require('~/server/services/Flows/runMcpTool');
 const db = require('~/models');
 
-const NODE_TYPES = new Set(['trigger', 'agent', 'condition', 'http', 'human_approval', 'output']);
+const NODE_TYPES = new Set([
+  'trigger',
+  'agent',
+  'condition',
+  'http',
+  'mcp',
+  'human_approval',
+  'output',
+]);
 const PAGE_LIMIT = 20;
 
 /** Structural errors that must block persistence (mirrors client hasBlockingErrors). */
@@ -132,6 +141,8 @@ function buildDeps(req) {
       const r = await fetch(url, init);
       return { status: r.status, text: () => r.text() };
     },
+    invokeMcpTool: ({ serverName, toolName, args }) =>
+      runMcpTool({ req, serverName, toolName, args }),
   };
 }
 

@@ -1,10 +1,4 @@
-import type {
-  Flow,
-  FlowNode,
-  FlowEdge,
-  FlowNodeRun,
-  FlowRunStatus,
-} from 'librechat-data-provider';
+import type { Flow, FlowNode, FlowEdge, FlowNodeRun, FlowRunStatus } from 'librechat-data-provider';
 
 /** Frozen view of a flow captured at dispatch time. */
 export type FlowSnapshot = Pick<Flow, 'name' | 'nodes' | 'edges'>;
@@ -94,6 +88,15 @@ export interface FlowRunnerDeps {
     url: string,
     init: { method: string; headers: Record<string, string>; body?: string; signal: AbortSignal },
   ) => Promise<{ status: number; text: () => Promise<string> }>;
+  /**
+   * Invokes a single tool on a configured MCP server and returns its text output.
+   * The /api controller wires this to the real MCP manager (`callTool`).
+   */
+  invokeMcpTool: (params: {
+    serverName: string;
+    toolName: string;
+    args: Record<string, unknown>;
+  }) => Promise<{ output: string }>;
 }
 
 /**

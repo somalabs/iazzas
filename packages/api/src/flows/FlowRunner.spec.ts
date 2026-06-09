@@ -55,6 +55,24 @@ describe('FlowRunner.run', () => {
     expect(calls[calls.length - 1].status).toBe('success');
   });
 
+  it('runs an mcp node and carries its output downstream', async () => {
+    const snap: FlowSnapshot = {
+      name: 'F',
+      nodes: [
+        n('t', 'trigger'),
+        n('m', 'mcp', { serverName: 'azzas_vendas_linx', toolName: 'consultar', args: '{"q":"{{trigger.input}}"}' }),
+        n('o', 'output'),
+      ],
+      edges: [e('t', 'm'), e('m', 'o')],
+    };
+    const invokeMcpTool = jest.fn().mockResolvedValue({ output: 'mcp-result' });
+    const res = await new FlowRunner(snap, mkDeps({ invokeMcpTool }), mkSink().sink).run('Q1');
+    expect(res.status).toBe('success');
+    expect(res.output).toBe('mcp-result');
+    expect(res.context['m.output']).toBe('mcp-result');
+    expect(invokeMcpTool.mock.calls[0][0].args).toEqual({ q: 'Q1' });
+  });
+
   it('routes through a condition true branch', async () => {
     const snap: FlowSnapshot = {
       name: 'F',
