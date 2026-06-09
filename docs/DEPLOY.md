@@ -2,7 +2,7 @@
 
 Runbook operacional pra deployar mudanças em produção. Complementa `docs/iazzas-arquitetura.md` (arquitetura) e `docs/env-production.md` (variáveis de ambiente).
 
-Produção: https://ai-azzas.somalabs.com.br
+Produção: https://iazzas.somalabs.com.br (migrado de ai-azzas.somalabs.com.br em 2026-06-09; ai-azzas deve redirecionar 301 → iazzas)
 
 ---
 
@@ -56,7 +56,7 @@ A VM está em `iazzas` (GCP project `soma-ai-hub`, zona `us-central1-a`). Repo c
    docker compose -f deploy-compose.yml logs --tail=30 <service>
    ```
 
-8. Smoke test no browser (aba anônima): `https://ai-azzas.somalabs.com.br`
+8. Smoke test no browser (aba anônima): `https://iazzas.somalabs.com.br`
 
 ### Mudança apenas de `.env` (sem rebuild)
 
@@ -88,7 +88,7 @@ docker compose -f deploy-compose.yml up -d --no-deps --force-recreate api
 - O orphan container `iazzas-iazzas-code-gateway-1` aparece em todo `up` como warning. Inofensivo — cleanup com `--remove-orphans` quando tiver janela.
 
 ### Env vars críticas (LibreChat)
-- `DOMAIN_SERVER` e `DOMAIN_CLIENT` precisam ser `https://ai-azzas.somalabs.com.br` (não `localhost`). Versão atual respeita literalmente — diferentemente de versões antigas que detectavam do request.
+- `DOMAIN_SERVER` e `DOMAIN_CLIENT` precisam ser `https://iazzas.somalabs.com.br` (não `localhost`). Versão atual respeita literalmente — diferentemente de versões antigas que detectavam do request.
 - `OPENID_CALLBACK_URL=/oauth/openid/callback` (sem `/api/`). É o que o Authentik tem registrado.
 - `OPENID_REUSE_TOKENS=` (vazio). **Workaround crítico**: o Authentik não está emitindo refresh token. Se um dia o Ricardo habilitar refresh no provider, voltar pra `=true`.
 - `OPENID_SCOPE="openid profile email offline_access"` (com `offline_access`).
@@ -110,8 +110,8 @@ docker compose -f deploy-compose.yml up -d --no-deps --force-recreate api
 ### Diagnóstico geral
 - Logs da API: `docker compose -f deploy-compose.yml logs --tail=N api` (recente: `--since=2m`).
 - Status: `docker compose -f deploy-compose.yml ps`.
-- Rota chega no backend? `curl -s -o /dev/null -w "HTTP %{http_code} | %{content_type} | %{size_download}\n" https://ai-azzas.somalabs.com.br/<rota>`. Se vier `text/html` com ~5198 bytes é SPA fallback (rota não encaminhada).
-- Asset do build certo? Comparar SHA com o local: `curl -s https://ai-azzas.somalabs.com.br/assets/<arquivo> | sha256sum`.
+- Rota chega no backend? `curl -s -o /dev/null -w "HTTP %{http_code} | %{content_type} | %{size_download}\n" https://iazzas.somalabs.com.br/<rota>`. Se vier `text/html` com ~5198 bytes é SPA fallback (rota não encaminhada).
+- Asset do build certo? Comparar SHA com o local: `curl -s https://iazzas.somalabs.com.br/assets/<arquivo> | sha256sum`.
 
 ### Rollback de emergência
 
@@ -127,7 +127,7 @@ docker compose -f deploy-compose.yml up -d --no-deps --force-recreate api
 
 ## Pendências conhecidas
 
-- **Authentik refresh token:** habilitar emissão de refresh token no provider `iazzas-librechat` (admin do Authentik). Sem isso, o workaround `OPENID_REUSE_TOKENS=` vazio é o que mantém sessões funcionando.
+- **Authentik refresh token:** habilitar emissão de refresh token no provider `iazzas` (admin do Authentik; renomeado de `iazzas-librechat` em 2026-06-09). Sem isso, o workaround `OPENID_REUSE_TOKENS=` vazio é o que mantém sessões funcionando.
 - **Favicon `<link>` relativo:** o template HTML do client tem `<link rel="icon" href="assets/favicon-32x32.png">` (sem `/`). Em rotas profundas o browser resolve errado. Fix: trocar pra path absoluto e novo build CI.
 - **Renomear package** `iazzas-api` → `iazzas` (a imagem bundla API + client, o sufixo `-api` engana).
 - **Cleanup orphan container** `iazzas-iazzas-code-gateway-1` na VM.

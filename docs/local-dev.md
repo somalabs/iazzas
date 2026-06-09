@@ -29,7 +29,7 @@
 
 ## SSO Azzas ID em local — **não funciona**
 
-O callback OAuth do Authentik (prod) e do Azure AD direto está registrado para o domínio público do IAzzas (`ai-azzas.somalabs.com.br`), **não** para `localhost`. Logo, **fluxo SSO local quebra no callback**.
+O callback OAuth do Authentik (prod) e do Azure AD direto está registrado para o domínio público do IAzzas (`iazzas.somalabs.com.br`), **não** para `localhost`. Logo, **fluxo SSO local quebra no callback**.
 
 Como o login por email/senha está hardcoded como `false` (decisão de segurança — ver `api/server/routes/config.js`), localmente você fica sem nenhum caminho de login disponível por padrão.
 

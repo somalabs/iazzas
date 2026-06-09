@@ -13,8 +13,8 @@ Referência das variáveis de ambiente necessárias para rodar o IAzzas em produ
 | `HOST` * | `0.0.0.0` | Bind address |
 | `PORT` * | `3080` | Porta do backend |
 | `MONGO_URI` * | `mongodb+srv://user:pass@cluster/IAzzas` | Conexão MongoDB |
-| `DOMAIN_CLIENT` * | `https://iazzas.azzas2154.com.br` | URL pública do frontend |
-| `DOMAIN_SERVER` * | `https://iazzas.azzas2154.com.br` | URL pública do backend |
+| `DOMAIN_CLIENT` * | `https://iazzas.somalabs.com.br` | URL pública do frontend |
+| `DOMAIN_SERVER` * | `https://iazzas.somalabs.com.br` | URL pública do backend |
 | `TRUST_PROXY` | `1` | Hops de proxy reverso |
 | `NO_INDEX` | `true` | Bloqueia indexação por buscadores |
 | `NODE_ENV` | `production` | Ativa otimizações de produção |
@@ -140,8 +140,8 @@ App Registration única no tenant Azzas. Passo a passo:
 1. Portal Azure → **Entra ID** → **App registrations** → **New registration**
 2. Nome: `IAzzas M365 Connector`
 3. Account types: **Single tenant**
-4. Redirect URI (Web): `${DOMAIN_SERVER}/ms365/auth/callback`
-   (ex: `https://iazzas.azzas2154.com.br/ms365/auth/callback`)
+4. Redirect URI (Web): `${DOMAIN_SERVER}/api/mcp/microsoft365/oauth/callback`
+   (ex: `https://iazzas.somalabs.com.br/api/mcp/microsoft365/oauth/callback`)
 5. Após criar, ir em **API permissions** → **Add a permission** → **Microsoft Graph** → **Delegated permissions** e adicionar:
    - `User.Read`
    - `offline_access`
