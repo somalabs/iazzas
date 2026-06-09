@@ -686,6 +686,11 @@ const getListAgentsHandler = async (req, res) => {
     // Base filter
     const filter = {};
 
+    // Hide handoff-only agents from listings unless explicitly requested
+    if (req.query.includeHidden !== '1') {
+      filter.hidden = { $ne: true };
+    }
+
     // Handle category filter - only apply if category is defined
     if (category !== undefined && category.trim() !== '') {
       filter.category = category;

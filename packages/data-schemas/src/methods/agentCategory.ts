@@ -20,7 +20,7 @@ export function createAgentCategoryMethods(mongoose: typeof import('mongoose')) 
     const Agent = mongoose.models.Agent;
 
     const categoryCounts = await Agent.aggregate([
-      { $match: { category: { $exists: true, $ne: null } } },
+      { $match: { category: { $exists: true, $ne: null }, hidden: { $ne: true } } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
     ]);
 

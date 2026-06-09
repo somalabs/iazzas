@@ -49,6 +49,8 @@ export type AgentForm = {
   recursion_limit?: number;
   support_contact?: SupportContact;
   category: string;
+  /** When true, the agent is reachable as a handoff target but hidden from agent listings. */
+  hidden?: boolean;
   /** User-controlled marketplace visibility, mapped to the public SHARE_PUBLIC ACL. */
   is_public?: boolean;
   // Avatar management fields

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ControlCombobox } from '@librechat/client';
+import { ControlCombobox, Switch, Label } from '@librechat/client';
 import { Controller, useWatch, useFormContext } from 'react-hook-form';
 import { useGetModelsQuery } from 'librechat-data-provider/react-query';
 import {
@@ -335,6 +335,34 @@ export default function AgentConfig() {
                 control={control}
                 defaultValue={[]}
                 render={({ field }) => <AgentHandoffs field={field} currentAgentId={agent_id} />}
+              />
+            </div>
+          )}
+          {handoffEnabled && (
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-md border border-border-light bg-surface-primary p-3">
+              <div className="flex flex-col">
+                <Label
+                  htmlFor="agent-hidden-toggle"
+                  className="cursor-pointer text-sm font-medium text-text-primary"
+                >
+                  {localize('com_ui_agent_hidden')}
+                </Label>
+                <span className="text-xs text-text-secondary">
+                  {localize('com_ui_agent_hidden_desc')}
+                </span>
+              </div>
+              <Controller
+                name="hidden"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="agent-hidden-toggle"
+                    checked={field.value ?? false}
+                    onCheckedChange={field.onChange}
+                    aria-label={localize('com_ui_agent_hidden')}
+                    className="data-[state=checked]:bg-[var(--azzas-navy)]"
+                  />
+                )}
               />
             </div>
           )}

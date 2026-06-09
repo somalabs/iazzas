@@ -101,6 +101,12 @@ const agentSchema = new Schema<IAgent>(
       default: false,
       index: true,
     },
+    /** When true, the agent is reachable as a handoff target but hidden from agent listings. */
+    hidden: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     /** MCP server names extracted from tools for efficient querying */
     mcpServerNames: {
       type: [String],

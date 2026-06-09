@@ -631,6 +631,8 @@
   "com_ui_agent_handoff_prompt_key_placeholder": "Identifique o conteúdo repassado (padrão: instructions)",
   "com_ui_agent_handoff_prompt_placeholder": "Opcional — normalmente deixe vazio. O agente que recebe a transferência já vê a conversa inteira, então não precisa de instruções extras. Preencha só para passar uma instrução específica (ex: focar ou reformular a tarefa).",
   "com_ui_agent_handoffs": "Transferências entre agentes",
+  "com_ui_agent_hidden": "Agente oculto (só transferência)",
+  "com_ui_agent_hidden_desc": "Mantém este agente acessível como destino de transferência, mas o esconde da lista de agentes, pra ninguém selecioná-lo diretamente.",
   "com_ui_agent_recursion_limit": "Máximo de passos do agente",
   "com_ui_agent_recursion_limit_info": "Limita quantos passos o agente pode executar antes de parar.",
   "com_ui_agent_version": "Versão",

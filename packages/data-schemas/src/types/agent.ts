@@ -39,6 +39,8 @@ export interface IAgent extends Omit<Document, 'model'> {
   category: string;
   support_contact?: ISupportContact;
   is_promoted?: boolean;
+  /** When true, the agent is reachable as a handoff target but hidden from agent listings. */
+  hidden?: boolean;
   /** MCP server names extracted from tools for efficient querying */
   mcpServerNames?: string[];
   /** Per-tool configuration (defer_loading, allowed_callers) */

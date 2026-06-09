@@ -272,6 +272,8 @@ export type Agent = {
   version?: number;
   category?: string;
   support_contact?: SupportContact;
+  /** When true, the agent is reachable as a handoff target but hidden from agent listings. */
+  hidden?: boolean;
   /** Per-tool configuration options (deferred loading, allowed callers, etc.) */
   tool_options?: AgentToolOptions;
 };
@@ -298,6 +300,7 @@ export type AgentCreateParams = {
   | 'recursion_limit'
   | 'category'
   | 'support_contact'
+  | 'hidden'
   | 'tool_options'
 >;
 
@@ -322,6 +325,7 @@ export type AgentUpdateParams = {
   | 'recursion_limit'
   | 'category'
   | 'support_contact'
+  | 'hidden'
   | 'tool_options'
 >;
 
