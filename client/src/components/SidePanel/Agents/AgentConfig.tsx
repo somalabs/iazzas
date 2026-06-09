@@ -21,6 +21,7 @@ import { useLocalize, useVisibleTools } from '~/hooks';
 import { useGetAgentFiles } from '~/data-provider';
 import MaxAgentSteps from './Advanced/MaxAgentSteps';
 import AgentChain from './Advanced/AgentChain';
+import AgentHandoffs from './Advanced/AgentHandoffs';
 import AdvancedSection from './AdvancedSection';
 import Instructions from './Instructions';
 import FileContext from './FileContext';
@@ -100,6 +101,11 @@ export default function AgentConfig() {
 
   const chainEnabled = useMemo(
     () => agentsConfig?.capabilities.includes(AgentCapabilities.chain) ?? false,
+    [agentsConfig],
+  );
+
+  const handoffEnabled = useMemo(
+    () => agentsConfig?.capabilities.includes(AgentCapabilities.handoff) ?? false,
     [agentsConfig],
   );
 
@@ -319,6 +325,16 @@ export default function AgentConfig() {
                 control={control}
                 defaultValue={[]}
                 render={({ field }) => <AgentChain field={field} currentAgentId={agent_id} />}
+              />
+            </div>
+          )}
+          {handoffEnabled && (
+            <div className="mb-4">
+              <Controller
+                name="edges"
+                control={control}
+                defaultValue={[]}
+                render={({ field }) => <AgentHandoffs field={field} currentAgentId={agent_id} />}
               />
             </div>
           )}

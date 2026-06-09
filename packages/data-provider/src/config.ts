@@ -226,6 +226,7 @@ export enum AgentCapabilities {
   context = 'context',
   tools = 'tools',
   chain = 'chain',
+  handoff = 'handoff',
   ocr = 'ocr',
 }
 
@@ -1059,15 +1060,16 @@ export type SummarizationConfig = z.infer<typeof summarizationConfigSchema>;
 
 const customEndpointsSchema = z.array(endpointSchema.partial()).optional();
 
-const ssoRuleMatchSchema = z.object({
-  claim: z.string(),
-  value: z.string().optional(),
-  pattern: z.string().optional(),
-  contains: z.string().optional(),
-}).refine(
-  (m) => [m.value, m.pattern, m.contains].filter(Boolean).length === 1,
-  { message: 'Exactly one of value, pattern, or contains is required' },
-);
+const ssoRuleMatchSchema = z
+  .object({
+    claim: z.string(),
+    value: z.string().optional(),
+    pattern: z.string().optional(),
+    contains: z.string().optional(),
+  })
+  .refine((m) => [m.value, m.pattern, m.contains].filter(Boolean).length === 1, {
+    message: 'Exactly one of value, pattern, or contains is required',
+  });
 
 const ssoRuleSchema = z.object({
   match: ssoRuleMatchSchema,

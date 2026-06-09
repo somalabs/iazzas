@@ -16,7 +16,7 @@ registration:
 
 endpoints:
   agents:
-    capabilities: ["execute_code", "file_search", "actions", "tools", "web_search", "artifacts"]
+    capabilities: ["execute_code", "file_search", "actions", "tools", "web_search", "artifacts", "handoff"]
 
 modelSpecs:
   enforce: false
