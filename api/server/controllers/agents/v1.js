@@ -89,6 +89,17 @@ const validateEdgeAgentAccess = async (edges, userId, userRole) => {
 };
 
 /**
+ * Stamps the source (`from`) of every handoff edge with the owning agent's id.
+ * Edges persisted on an agent are always its outgoing transfers, so `from` must
+ * equal the agent's own id. The client cannot know the id of a not-yet-created
+ * agent (it sends `from: ''`), so the server is the authoritative source.
+ * @param {import('librechat-data-provider').GraphEdge[]} edges
+ * @param {string} agentId
+ * @returns {import('librechat-data-provider').GraphEdge[]}
+ */
+const stampEdgeSource = (edges, agentId) => edges.map((edge) => ({ ...edge, from: agentId }));
+
+/**
  * Filters tools to only include those the user is authorized to use.
  * MCP tools must match the exact format `{toolName}_mcp_{serverName}` (exactly 2 segments).
  * Multi-delimiter keys are rejected to prevent authorization/execution mismatch.
@@ -200,6 +211,10 @@ const createAgentHandler = async (req, res) => {
     agentData.id = `agent_${nanoid()}`;
     agentData.author = userId;
     agentData.tools = [];
+
+    if (agentData.edges?.length) {
+      agentData.edges = stampEdgeSource(agentData.edges, agentData.id);
+    }
 
     const hasMCPTools = tools.some((t) => t?.includes(Constants.mcp_delimiter));
     const [availableTools, configServers] = await Promise.all([
@@ -376,6 +391,7 @@ const updateAgentHandler = async (req, res) => {
           agent_ids: unauthorized,
         });
       }
+      updateData.edges = stampEdgeSource(updateData.edges, id);
     }
 
     // Convert OCR to context in incoming updateData
@@ -518,6 +534,10 @@ const duplicateAgentHandler = async (req, res) => {
       id: newAgentId,
       author: userId,
     });
+
+    if (newAgentData.edges?.length) {
+      newAgentData.edges = stampEdgeSource(newAgentData.edges, newAgentId);
+    }
 
     const newActionsList = [];
     const originalActions = (await db.getActions({ agent_id: id }, true)) ?? [];

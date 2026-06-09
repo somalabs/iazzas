@@ -1676,6 +1676,25 @@ describe('Agent Controllers - Mass Assignment Protection', () => {
       expect(mockRes.status).toHaveBeenCalledWith(201);
     });
 
+    test('createAgentHandler should stamp edge `from` with the new agent id, overriding the client value', async () => {
+      const permMap = new Map([[targetAgent._id.toString(), PermissionBits.VIEW]]);
+      getResourcePermissionsMap.mockResolvedValueOnce(permMap);
+
+      mockReq.body = {
+        name: 'Orchestrator Agent',
+        provider: 'openai',
+        model: 'gpt-4',
+        edges: [{ from: 'stale_or_empty_from', to: targetAgent.id, edgeType: 'handoff' }],
+      };
+
+      await createAgentHandler(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+      const response = mockRes.json.mock.calls[0][0];
+      expect(response.edges).toHaveLength(1);
+      expect(response.edges[0].from).toBe(response.id);
+    });
+
     test('createAgentHandler should allow edges referencing non-existent agents (self-reference at create time)', async () => {
       mockReq.body = {
         name: 'Self-Ref Agent',
@@ -1733,6 +1752,32 @@ describe('Agent Controllers - Mass Assignment Protection', () => {
       expect(mockRes.status).not.toHaveBeenCalledWith(403);
       const response = mockRes.json.mock.calls[0][0];
       expect(response.name).toBe('Renamed Agent');
+    });
+
+    test('updateAgentHandler should stamp edge `from` with the agent id, overriding the client value', async () => {
+      const ownedAgent = await Agent.create({
+        id: `agent_${nanoid()}`,
+        author: mockReq.user.id,
+        name: 'Owned Agent',
+        provider: 'openai',
+        model: 'gpt-4',
+        tools: [],
+      });
+
+      const permMap = new Map([[targetAgent._id.toString(), PermissionBits.VIEW]]);
+      getResourcePermissionsMap.mockResolvedValueOnce(permMap);
+
+      mockReq.params = { id: ownedAgent.id };
+      mockReq.body = {
+        edges: [{ from: 'stale_or_empty_from', to: targetAgent.id, edgeType: 'handoff' }],
+      };
+
+      await updateAgentHandler(mockReq, mockRes);
+
+      expect(mockRes.status).not.toHaveBeenCalledWith(403);
+      const response = mockRes.json.mock.calls[0][0];
+      expect(response.edges).toHaveLength(1);
+      expect(response.edges[0].from).toBe(ownedAgent.id);
     });
   });
 });
