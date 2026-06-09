@@ -685,10 +685,11 @@ const getListAgentsHandler = async (req, res) => {
     }
     // Base filter
     const filter = {};
+    const andConditions = [];
 
-    // Hide handoff-only agents from listings unless explicitly requested
+    // Hide handoff-only agents from listings, but always show owners their own
     if (req.query.includeHidden !== '1') {
-      filter.hidden = { $ne: true };
+      andConditions.push({ $or: [{ hidden: { $ne: true } }, { author: userId }] });
     }
 
     // Handle category filter - only apply if category is defined
@@ -707,7 +708,11 @@ const getListAgentsHandler = async (req, res) => {
     if (search && search.trim() !== '') {
       const safeSearch = escapeRegex(search.trim().slice(0, MAX_SEARCH_LEN));
       const regex = new RegExp(safeSearch, 'i');
-      filter.$or = [{ name: regex }, { description: regex }];
+      andConditions.push({ $or: [{ name: regex }, { description: regex }] });
+    }
+
+    if (andConditions.length > 0) {
+      filter.$and = andConditions;
     }
 
     // Get agent IDs the user has VIEW access to via ACL
