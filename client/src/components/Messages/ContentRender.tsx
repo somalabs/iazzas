@@ -6,6 +6,7 @@ import type { TMessageProps, TMessageIcon, TMessageChatContext } from '~/common'
 import { useAttachments, useLocalize, useMessageActions, useContentMetadata } from '~/hooks';
 import { cn, getHeaderPrefixForScreenReader, getMessageAriaLabel } from '~/utils';
 import ContentParts from '~/components/Chat/Messages/Content/ContentParts';
+import VerifiedBadge from '~/components/Agents/VerifiedBadge';
 import PlaceholderRow from '~/components/Chat/Messages/ui/PlaceholderRow';
 import SiblingSwitch from '~/components/Chat/Messages/SiblingSwitch';
 import HoverButtons from '~/components/Chat/Messages/HoverButtons';
@@ -209,9 +210,15 @@ const ContentRender = memo(function ContentRender({
         )}
       >
         {!hasParallelContent && !isUser && (
-          <h2 className={cn('mb-1 select-none font-medium text-text-secondary', fontSize)}>
+          <h2
+            className={cn(
+              'mb-1 flex select-none items-center gap-1.5 font-medium text-text-secondary',
+              fontSize,
+            )}
+          >
             <span className="sr-only">{getHeaderPrefixForScreenReader(msg, localize)}</span>
             {messageLabel}
+            {agent?.is_verified && <VerifiedBadge size="sm" />}
           </h2>
         )}
         {isUser && <span className="sr-only">{getHeaderPrefixForScreenReader(msg, localize)}</span>}

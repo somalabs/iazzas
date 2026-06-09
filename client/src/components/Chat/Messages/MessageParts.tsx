@@ -6,6 +6,7 @@ import type { TMessageProps, TMessageIcon } from '~/common';
 import { useMessageHelpers, useLocalize, useAttachments, useContentMetadata } from '~/hooks';
 import { cn, getHeaderPrefixForScreenReader, getMessageAriaLabel } from '~/utils';
 import MessageIcon from '~/components/Chat/Messages/MessageIcon';
+import VerifiedBadge from '~/components/Agents/VerifiedBadge';
 import ContentParts from './Content/ContentParts';
 import { fontSizeAtom } from '~/store/fontSize';
 import SiblingSwitch from './SiblingSwitch';
@@ -137,11 +138,17 @@ export default function Message(props: TMessageProps) {
               )}
             >
               {!hasParallelContent && !isUser && (
-                <h2 className={cn('mb-1 select-none font-medium text-text-secondary', fontSize)}>
+                <h2
+                  className={cn(
+                    'mb-1 flex select-none items-center gap-1.5 font-medium text-text-secondary',
+                    fontSize,
+                  )}
+                >
                   <span className="sr-only">
                     {getHeaderPrefixForScreenReader(message, localize)}
                   </span>
                   {name}
+                  {agent?.is_verified && <VerifiedBadge size="sm" />}
                 </h2>
               )}
               {isUser && (
