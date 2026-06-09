@@ -5,6 +5,7 @@ import { EModelEndpoint, parseEphemeralAgentId, stripAgentIdSuffix } from 'libre
 import type { TMessage, Agent } from 'librechat-data-provider';
 import { useBranchMessageMutation } from '~/data-provider/Messages';
 import MessageIcon from '~/components/Share/MessageIcon';
+import VerifiedBadge from '~/components/Agents/VerifiedBadge';
 import { useAgentsMapContext } from '~/Providers';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
@@ -117,6 +118,7 @@ export default function SiblingHeader({
           />
         </div>
         <span className="truncate text-sm font-medium text-text-primary">{displayName}</span>
+        {agent?.is_verified && <VerifiedBadge size="sm" />}
       </div>
       <button
         type="button"
