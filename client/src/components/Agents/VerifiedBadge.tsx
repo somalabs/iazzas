@@ -8,8 +8,14 @@ interface VerifiedBadgeProps {
   size?: 'sm' | 'md';
 }
 
+const SIZE_CLASS: Record<NonNullable<VerifiedBadgeProps['size']>, string> = {
+  sm: 'size-5',
+  md: 'size-7',
+};
+
 /**
  * Platform-curated trust badge shown next to verified (homologated) agents.
+ * Rendered as a solid blue seal with a white check (Instagram-style).
  */
 const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({ className = '', size = 'sm' }) => {
   const localize = useLocalize();
@@ -20,7 +26,8 @@ const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({ className = '', size = 's
       <BadgeCheck
         role="img"
         aria-label={label}
-        className={cn('text-blue-500', size === 'sm' ? 'size-4' : 'size-5', className)}
+        strokeWidth={2.25}
+        className={cn('fill-blue-500 text-white', SIZE_CLASS[size], className)}
       />
     </span>
   );

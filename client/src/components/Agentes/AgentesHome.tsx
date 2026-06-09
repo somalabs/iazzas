@@ -4,6 +4,7 @@ import { Plus, Compass, Pencil, Copy, Trash2, Bot } from 'lucide-react';
 
 import ScreenHeader from '~/components/ui/ScreenHeader';
 import InlineConfirm from '~/components/ui/InlineConfirm';
+import VerifiedBadge from '~/components/Agents/VerifiedBadge';
 import { Button, Spinner, useToastContext } from '@librechat/client';
 import type { Agent } from 'librechat-data-provider';
 import {
@@ -177,7 +178,12 @@ function AgentCard({ agent, index }: { agent: Agent; index: number }) {
         {renderAgentAvatar(agent, { size: 'sm', showBorder: false })}
       </span>
       <div className="min-w-0 flex-1">
-        <h3 className="truncate text-sm font-medium text-ink-900">{agent.name || agent.id}</h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="min-w-0 truncate text-sm font-medium text-ink-900">
+            {agent.name || agent.id}
+          </h3>
+          {agent.is_verified && <VerifiedBadge size="sm" />}
+        </div>
         {agent.description ? (
           <p className="truncate text-xs text-ink-700">{agent.description}</p>
         ) : null}
