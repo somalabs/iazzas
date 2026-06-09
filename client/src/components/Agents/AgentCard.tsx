@@ -6,6 +6,7 @@ import useStartAgentChat from '~/hooks/Agents/useStartAgentChat';
 import { cn, renderAgentAvatar, getContactDisplayName } from '~/utils';
 import { CAPABILITY_META } from './capabilities';
 import AgentDetailContent from './AgentDetailContent';
+import VerifiedBadge from './VerifiedBadge';
 
 interface AgentCardProps {
   agent: t.Agent;
@@ -97,6 +98,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
               <Label className="line-clamp-2 text-base font-semibold text-text-primary md:text-lg">
                 {agent.name}
               </Label>
+              {agent.is_verified && <VerifiedBadge />}
               {agent.isPublic && (
                 <span className="text-token-text-secondary flex-shrink-0 rounded-md border border-border-light px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
                   {localize('com_ui_public')}

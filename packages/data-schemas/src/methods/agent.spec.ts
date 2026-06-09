@@ -53,6 +53,7 @@ let addAgentResourceFile: AgentMethods['addAgentResourceFile'];
 let removeAgentResourceFiles: AgentMethods['removeAgentResourceFiles'];
 let getListAgentsByAccess: AgentMethods['getListAgentsByAccess'];
 let generateActionMetadataHash: AgentMethods['generateActionMetadataHash'];
+let setAgentVerified: AgentMethods['setAgentVerified'];
 
 const getActions = jest.fn().mockResolvedValue([]);
 
@@ -95,6 +96,7 @@ beforeAll(async () => {
   removeAgentResourceFiles = methods.removeAgentResourceFiles;
   getListAgentsByAccess = methods.getListAgentsByAccess;
   generateActionMetadataHash = methods.generateActionMetadataHash;
+  setAgentVerified = methods.setAgentVerified;
 
   await mongoose.connect(mongoUri);
 
@@ -3072,6 +3074,36 @@ describe('Agent Methods', () => {
 
       expect(updated?.versions).toHaveLength(2);
       expect(updated?.agent_ids).toEqual(['agent1']);
+    });
+  });
+
+  describe('setAgentVerified', () => {
+    beforeEach(async () => {
+      await Agent.deleteMany({});
+    });
+
+    test('sets the verification flag without creating a version snapshot', async () => {
+      const agent = await createBasicAgent();
+      expect(agent.is_verified).toBeFalsy();
+      const versionsBefore = agent.versions?.length ?? 0;
+
+      const verified = await setAgentVerified(agent.id, true);
+
+      expect(verified?.is_verified).toBe(true);
+      expect(verified?.versions?.length ?? 0).toBe(versionsBefore);
+    });
+
+    test('clears the verification flag', async () => {
+      const agent = await createBasicAgent({ is_verified: true });
+
+      const cleared = await setAgentVerified(agent.id, false);
+
+      expect(cleared?.is_verified).toBe(false);
+    });
+
+    test('returns null for a non-existent agent', async () => {
+      const result = await setAgentVerified('agent_does_not_exist', true);
+      expect(result).toBeNull();
     });
   });
 });

@@ -515,6 +515,14 @@ export const revertAgentVersion = ({
   version_index: number;
 }): Promise<a.Agent> => request.post(endpoints.revertAgentVersion(agent_id), { version_index });
 
+export const verifyAgent = ({
+  agent_id,
+  is_verified,
+}: {
+  agent_id: string;
+  is_verified: boolean;
+}): Promise<a.Agent> => request.patch(endpoints.verifyAgent(agent_id), { is_verified });
+
 /* Marketplace */
 
 /**

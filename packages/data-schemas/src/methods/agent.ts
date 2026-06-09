@@ -672,6 +672,7 @@ export function createAgentMethods(mongoose: typeof import('mongoose'), deps: Ag
       category: 1,
       support_contact: 1,
       is_promoted: 1,
+      is_verified: 1,
       tools: 1,
     }).sort({ updatedAt: -1, _id: 1 });
 
@@ -754,6 +755,19 @@ export function createAgentMethods(mongoose: typeof import('mongoose'), deps: Ag
     return await Agent.countDocuments({ is_promoted: true });
   }
 
+  /**
+   * Sets the platform-curated verification flag on an agent. Intended for admin use only;
+   * deliberately bypasses {@link updateAgent} so toggling curation does not create a version snapshot.
+   */
+  async function setAgentVerified(id: string, isVerified: boolean): Promise<IAgent | null> {
+    const Agent = mongoose.models.Agent as Model<IAgent>;
+    return (await Agent.findOneAndUpdate(
+      { id },
+      { is_verified: isVerified },
+      { new: true },
+    ).lean()) as IAgent | null;
+  }
+
   /** Removes an agent from the favorites of specified users. */
   async function removeAgentFromUserFavorites(
     resourceId: string,
@@ -782,6 +796,7 @@ export function createAgentMethods(mongoose: typeof import('mongoose'), deps: Ag
     deleteUserAgents,
     revertAgentVersion,
     countPromotedAgents,
+    setAgentVerified,
     addAgentResourceFile,
     getListAgentsByAccess,
     removeAgentResourceFiles,

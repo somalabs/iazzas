@@ -1,12 +1,14 @@
 import React, { useMemo } from 'react';
-import { Link, Pin, PinOff } from 'lucide-react';
+import { Link, Pin, PinOff, BadgeCheck, BadgeX } from 'lucide-react';
+import { SystemRoles } from 'librechat-data-provider';
 import { OGDialogContent, Button, useToastContext } from '@librechat/client';
 import type t from 'librechat-data-provider';
-import { useLocalize, useFavorites } from '~/hooks';
-import { useGetAgentByIdQuery } from '~/data-provider/Agents';
+import { useLocalize, useFavorites, useAuthContext } from '~/hooks';
+import { useGetAgentByIdQuery, useVerifyAgentMutation } from '~/data-provider/Agents';
 import useStartAgentChat from '~/hooks/Agents/useStartAgentChat';
 import { renderAgentAvatar } from '~/utils';
 import { CAPABILITY_META } from './capabilities';
+import VerifiedBadge from './VerifiedBadge';
 
 interface SupportContact {
   name?: string;
@@ -27,10 +29,12 @@ interface AgentDetailContentProps {
  */
 const AgentDetailContent: React.FC<AgentDetailContentProps> = ({ agent }) => {
   const localize = useLocalize();
+  const { user } = useAuthContext();
   const { showToast } = useToastContext();
   const startChat = useStartAgentChat();
   const { isFavoriteAgent, toggleFavoriteAgent } = useFavorites();
   const isFavorite = isFavoriteAgent(agent?.id);
+  const isAdmin = user?.role === SystemRoles.ADMIN;
 
   /**
    * Lazy-load the full (VIEW-level) agent when the dialog opens. The marketplace
@@ -51,6 +55,27 @@ const AgentDetailContent: React.FC<AgentDetailContentProps> = ({ agent }) => {
     () => (detail.conversation_starters ?? []).filter((text) => text.trim()).slice(0, 4),
     [detail.conversation_starters],
   );
+
+  const isVerified = detail.is_verified ?? false;
+  const verifyMutation = useVerifyAgentMutation({
+    onSuccess: (updated) => {
+      showToast({
+        message: updated.is_verified
+          ? localize('com_agents_verify_success')
+          : localize('com_agents_unverify_success'),
+      });
+    },
+    onError: () => {
+      showToast({ message: localize('com_agents_verify_error'), status: 'error' });
+    },
+  });
+
+  const handleToggleVerify = () => {
+    if (!agent?.id) {
+      return;
+    }
+    verifyMutation.mutate({ agent_id: agent.id, is_verified: !isVerified });
+  };
 
   const handleFavoriteClick = () => {
     if (agent) {
@@ -105,10 +130,11 @@ const AgentDetailContent: React.FC<AgentDetailContentProps> = ({ agent }) => {
       <div className="mt-6 flex justify-center">{renderAgentAvatar(detail, { size: 'xl' })}</div>
 
       {/* Agent name */}
-      <div className="mt-3 text-center">
+      <div className="mt-3 flex items-center justify-center gap-2 text-center">
         <h2 className="text-2xl font-bold text-text-primary">
           {detail?.name || localize('com_agents_loading')}
         </h2>
+        {isVerified && <VerifiedBadge size="md" />}
       </div>
 
       {/* Contact info */}
@@ -188,6 +214,26 @@ const AgentDetailContent: React.FC<AgentDetailContentProps> = ({ agent }) => {
           {localize('com_agents_start_chat')}
         </Button>
       </div>
+
+      {/* Admin-only verification toggle */}
+      {isAdmin && (
+        <div className="mb-4 flex justify-center px-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleToggleVerify}
+            disabled={verifyMutation.isLoading || !agent?.id}
+            className="gap-2"
+          >
+            {isVerified ? (
+              <BadgeX className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <BadgeCheck className="h-4 w-4" aria-hidden="true" />
+            )}
+            {isVerified ? localize('com_agents_unverify') : localize('com_agents_verify')}
+          </Button>
+        </div>
+      )}
     </OGDialogContent>
   );
 };
