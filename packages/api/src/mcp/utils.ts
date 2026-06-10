@@ -1,7 +1,55 @@
+import { logger } from '@librechat/data-schemas';
 import { Constants } from 'librechat-data-provider';
 import type { ParsedServerConfig } from '~/mcp/types';
 
 export const mcpToolPattern = new RegExp(`^.+${Constants.mcp_delimiter}.+$`);
+
+/**
+ * Filters a server's tools against an optional allowlist of exact names and `*`
+ * glob patterns (e.g. `list-mail-*`). Drastically cuts token overhead and
+ * hallucination for servers with large tool catalogs (e.g. Microsoft 365).
+ *
+ * Fail-open: an allowlist that matches nothing is treated as absent (all tools
+ * surfaced) so a stale or mistyped list never silently disables a server.
+ */
+export function filterToolsByAllowlist<T extends { name: string }>(
+  serverName: string,
+  tools: T[],
+  availableTools?: string[],
+): T[] {
+  if (!availableTools?.length) {
+    return tools;
+  }
+
+  const exact = new Set<string>();
+  const globs: RegExp[] = [];
+  for (const pattern of availableTools) {
+    if (pattern.includes('*')) {
+      globs.push(new RegExp(`^${escapeRegex(pattern).replace(/\\\*/g, '.*')}$`));
+    } else {
+      exact.add(pattern);
+    }
+  }
+
+  const matched = tools.filter(
+    (tool) => exact.has(tool.name) || globs.some((glob) => glob.test(tool.name)),
+  );
+
+  if (matched.length === 0) {
+    logger.warn(
+      `[MCP][${serverName}] availableTools matched 0 of ${tools.length} tools; surfacing all tools (fail-open). Verify the allowlist names.`,
+    );
+    return tools;
+  }
+
+  if (matched.length < tools.length) {
+    logger.info(
+      `[MCP][${serverName}] availableTools allowlist applied: ${matched.length}/${tools.length} tools surfaced.`,
+    );
+  }
+
+  return matched;
+}
 
 /** Checks that `customUserVars` is present AND non-empty (guards against truthy `{}`) */
 export function hasCustomUserVars(config: Pick<ParsedServerConfig, 'customUserVars'>): boolean {

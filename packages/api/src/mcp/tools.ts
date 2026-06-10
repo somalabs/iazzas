@@ -1,6 +1,7 @@
 import { logger } from '@librechat/data-schemas';
 import { Constants } from 'librechat-data-provider';
 import { normalizeJsonSchema, resolveJsonSchemaRefs } from './zod';
+import { filterToolsByAllowlist } from './utils';
 import type { JsonSchemaType } from '@librechat/agents';
 import type { LCAvailableTools, LCFunctionTool } from './types';
 
@@ -28,8 +29,9 @@ export function createMCPToolCacheService(deps: MCPToolCacheDeps) {
     userId: string;
     serverName: string;
     tools: MCPToolInput[] | null;
+    availableTools?: string[];
   }): Promise<LCAvailableTools> {
-    const { userId, serverName, tools } = params;
+    const { userId, serverName, tools, availableTools } = params;
     try {
       const serverTools: LCAvailableTools = {};
       const mcpDelimiter = Constants.mcp_delimiter;
@@ -39,7 +41,9 @@ export function createMCPToolCacheService(deps: MCPToolCacheDeps) {
         return serverTools;
       }
 
-      for (const tool of tools) {
+      const allowedTools = filterToolsByAllowlist(serverName, tools, availableTools);
+
+      for (const tool of allowedTools) {
         const name = `${tool.name}${mcpDelimiter}${serverName}`;
         const parameters: JsonSchemaType = tool.inputSchema
           ? (normalizeJsonSchema(
@@ -59,7 +63,7 @@ export function createMCPToolCacheService(deps: MCPToolCacheDeps) {
 
       await setCachedTools(serverTools, { userId, serverName });
       logger.debug(
-        `[MCP Cache] Updated ${tools.length} tools for server ${serverName} (user: ${userId})`,
+        `[MCP Cache] Updated ${allowedTools.length} tools for server ${serverName} (user: ${userId})`,
       );
       return serverTools;
     } catch (error) {

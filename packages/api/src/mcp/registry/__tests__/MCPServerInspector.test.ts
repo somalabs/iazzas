@@ -433,5 +433,51 @@ describe('MCPServerInspector', () => {
 
       expect(result).toEqual({});
     });
+
+    describe('availableTools allowlist', () => {
+      beforeEach(() => {
+        mockConnection.client.listTools = jest.fn().mockResolvedValue({
+          tools: [
+            { name: 'list-mail-messages', description: 'List mail', inputSchema: {} },
+            { name: 'send-mail', description: 'Send mail', inputSchema: {} },
+            { name: 'list-planner-tasks', description: 'Planner', inputSchema: {} },
+            { name: 'get-user-presence', description: 'Presence', inputSchema: {} },
+          ],
+        });
+      });
+
+      it('surfaces only exact-name matches when an allowlist is provided', async () => {
+        const result = await MCPServerInspector.getToolFunctions('m365', mockConnection, [
+          'list-mail-messages',
+          'send-mail',
+        ]);
+
+        expect(Object.keys(result)).toEqual(['list-mail-messages_mcp_m365', 'send-mail_mcp_m365']);
+      });
+
+      it('supports `*` glob patterns', async () => {
+        const result = await MCPServerInspector.getToolFunctions('m365', mockConnection, [
+          'list-mail-*',
+        ]);
+
+        expect(Object.keys(result)).toEqual(['list-mail-messages_mcp_m365']);
+      });
+
+      it('fails open (surfaces all tools) when the allowlist matches nothing', async () => {
+        const result = await MCPServerInspector.getToolFunctions('m365', mockConnection, [
+          'does-not-exist',
+        ]);
+
+        expect(Object.keys(result)).toHaveLength(4);
+      });
+
+      it('surfaces all tools when the allowlist is empty or omitted', async () => {
+        const omitted = await MCPServerInspector.getToolFunctions('m365', mockConnection);
+        const empty = await MCPServerInspector.getToolFunctions('m365', mockConnection, []);
+
+        expect(Object.keys(omitted)).toHaveLength(4);
+        expect(Object.keys(empty)).toHaveLength(4);
+      });
+    });
   });
 });

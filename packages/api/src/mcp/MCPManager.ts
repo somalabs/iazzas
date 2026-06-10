@@ -168,10 +168,19 @@ export class MCPManager extends UserConnectionManager {
     serverName: string,
   ): Promise<t.LCAvailableTools | null> {
     try {
+      const serverConfig = await MCPServersRegistry.getInstance().getServerConfig(
+        serverName,
+        userId,
+      );
+      const availableTools = serverConfig?.availableTools;
       //try get the appConnection (if the config is not in the app level anymore any existing connection will disconnect and get will return null)
       const existingAppConnection = await this.appConnections?.get(serverName);
       if (existingAppConnection) {
-        return MCPServerInspector.getToolFunctions(serverName, existingAppConnection);
+        return MCPServerInspector.getToolFunctions(
+          serverName,
+          existingAppConnection,
+          availableTools,
+        );
       }
 
       const userConnections = this.getUserConnections(userId);
@@ -182,7 +191,11 @@ export class MCPManager extends UserConnectionManager {
         return null;
       }
 
-      return MCPServerInspector.getToolFunctions(serverName, userConnections.get(serverName)!);
+      return MCPServerInspector.getToolFunctions(
+        serverName,
+        userConnections.get(serverName)!,
+        availableTools,
+      );
     } catch (error) {
       logger.warn(
         `[getServerToolFunctions] Error getting tool functions for server ${serverName}`,

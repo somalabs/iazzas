@@ -174,6 +174,7 @@ async function reinitMCPServer({
         userId: user.id,
         serverName,
         tools,
+        availableTools: serverConfig?.availableTools,
       });
     }
 

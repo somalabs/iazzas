@@ -7,6 +7,36 @@ function generateResourceId(text: string): string {
   return crypto.createHash('sha256').update(text).digest('hex').substring(0, 10);
 }
 
+const DEFAULT_TOOL_RESPONSE_MAX_CHARS = 20000;
+
+const TOOL_RESPONSE_TRUNCATION_NOTICE =
+  '\n\n[... resposta truncada por exceder o limite de contexto. Refine a consulta (filtros, datas, top/limit), pagine ou peça o próximo trecho para ver mais. ...]';
+
+/**
+ * Resolves the max character budget for a single MCP tool response before it is
+ * truncated. Large tool responses (e.g. paginated Graph API payloads) otherwise
+ * accumulate verbatim in conversation history, inflating subsequent prompts and
+ * triggering provider price tiers. `MCP_TOOL_RESPONSE_MAX_CHARS=0` disables it.
+ */
+function getToolResponseMaxChars(): number {
+  const raw = process.env.MCP_TOOL_RESPONSE_MAX_CHARS;
+  if (raw == null || raw.trim() === '') {
+    return DEFAULT_TOOL_RESPONSE_MAX_CHARS;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return DEFAULT_TOOL_RESPONSE_MAX_CHARS;
+  }
+  return parsed;
+}
+
+export function truncateToolText(text: string, maxChars = getToolResponseMaxChars()): string {
+  if (maxChars <= 0 || text.length <= maxChars) {
+    return text;
+  }
+  return text.slice(0, maxChars) + TOOL_RESPONSE_TRUNCATION_NOTICE;
+}
+
 const RECOGNIZED_PROVIDERS = new Set([
   'google',
   'anthropic',
@@ -93,7 +123,7 @@ export function formatToolContent(
   provider: t.Provider,
 ): t.FormattedContentResult {
   if (!RECOGNIZED_PROVIDERS.has(provider)) {
-    return [parseAsString(result), undefined];
+    return [truncateToolText(parseAsString(result)), undefined];
   }
 
   const content = result?.content ?? [];
@@ -171,6 +201,8 @@ export function formatToolContent(
       currentTextBlock += (currentTextBlock ? '\n\n' : '') + stringified;
     }
   }
+
+  currentTextBlock = truncateToolText(currentTextBlock);
 
   if (uiResources.length > 0) {
     const uiInstructions = `

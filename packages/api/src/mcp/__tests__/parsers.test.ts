@@ -1,4 +1,4 @@
-import { formatToolContent } from '../parsers';
+import { formatToolContent, truncateToolText } from '../parsers';
 import type * as t from '../types';
 
 describe('formatToolContent', () => {
@@ -403,6 +403,56 @@ describe('formatToolContent', () => {
       const [content, artifacts] = formatToolContent(result, 'google');
       expect(content).toBe('Response with metadata');
       expect(artifacts).toBeUndefined();
+    });
+  });
+
+  describe('tool response truncation', () => {
+    const originalEnv = process.env.MCP_TOOL_RESPONSE_MAX_CHARS;
+
+    afterEach(() => {
+      if (originalEnv == null) {
+        delete process.env.MCP_TOOL_RESPONSE_MAX_CHARS;
+      } else {
+        process.env.MCP_TOOL_RESPONSE_MAX_CHARS = originalEnv;
+      }
+    });
+
+    it('truncateToolText leaves short text untouched', () => {
+      expect(truncateToolText('short', 100)).toBe('short');
+    });
+
+    it('truncateToolText caps long text and appends a notice', () => {
+      const result = truncateToolText('x'.repeat(50), 10);
+      expect(result.startsWith('x'.repeat(10))).toBe(true);
+      expect(result).toContain('truncada');
+      expect(result.length).toBeGreaterThan(10);
+    });
+
+    it('truncateToolText is disabled when maxChars is 0', () => {
+      const text = 'y'.repeat(1000);
+      expect(truncateToolText(text, 0)).toBe(text);
+    });
+
+    it('truncates large recognized-provider responses', () => {
+      process.env.MCP_TOOL_RESPONSE_MAX_CHARS = '20';
+      const result: t.MCPToolCallResponse = {
+        content: [{ type: 'text', text: 'z'.repeat(500) }],
+      };
+
+      const [content] = formatToolContent(result, 'google');
+      expect(content).toContain('truncada');
+      expect(content.startsWith('z'.repeat(20))).toBe(true);
+    });
+
+    it('truncates large unrecognized-provider responses', () => {
+      process.env.MCP_TOOL_RESPONSE_MAX_CHARS = '20';
+      const result: t.MCPToolCallResponse = {
+        content: [{ type: 'text', text: 'w'.repeat(500) }],
+      };
+
+      const [content] = formatToolContent(result, 'unknown' as t.Provider);
+      expect(content).toContain('truncada');
+      expect(content.startsWith('w'.repeat(20))).toBe(true);
     });
   });
 });

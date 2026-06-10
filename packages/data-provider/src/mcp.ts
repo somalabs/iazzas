@@ -28,6 +28,14 @@ const BaseOptionsSchema = z.object({
   /** Controls visibility in chat dropdown menu (MCPSelect) */
   chatMenu: z.boolean().optional(),
   /**
+   * Optional allowlist of tool names surfaced to the model for this server.
+   * Accepts exact tool names and `*` glob patterns (e.g. `list-mail-*`).
+   * When set, only matching tools are exposed — sharply cutting token overhead
+   * and hallucination for servers with large tool catalogs (e.g. Microsoft 365).
+   * Fail-open: if the allowlist matches no tools, all tools are surfaced.
+   */
+  availableTools: z.array(z.string()).optional(),
+  /**
    * Controls server instruction behavior:
    * - undefined/not set: No instructions included (default)
    * - true: Use server-provided instructions

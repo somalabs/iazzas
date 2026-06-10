@@ -3,8 +3,8 @@ import type { JsonSchemaType } from '@librechat/data-schemas';
 import type { MCPConnection } from '~/mcp/connection';
 import type * as t from '~/mcp/types';
 import { isMCPDomainAllowed, extractMCPServerDomain } from '~/auth/domain';
+import { hasCustomUserVars, isUserSourced, filterToolsByAllowlist } from '~/mcp/utils';
 import { MCPConnectionFactory } from '~/mcp/MCPConnectionFactory';
-import { hasCustomUserVars, isUserSourced } from '~/mcp/utils';
 import { MCPDomainNotAllowedError } from '~/mcp/errors';
 import { detectOAuthRequirement } from '~/mcp/oauth';
 import { isEnabled } from '~/utils';
@@ -124,6 +124,7 @@ export class MCPServerInspector {
     this.config.toolFunctions = await MCPServerInspector.getToolFunctions(
       this.serverName,
       this.connection!,
+      this.config.availableTools,
     );
   }
 
@@ -131,16 +132,19 @@ export class MCPServerInspector {
    * Converts server tools to LibreChat-compatible tool functions format.
    * @param serverName - The name of the server
    * @param connection - The MCP connection
+   * @param availableTools - Optional allowlist (exact names and `*` globs) of tools to expose
    * @returns Tool functions formatted for LibreChat
    */
   public static async getToolFunctions(
     serverName: string,
     connection: MCPConnection,
+    availableTools?: string[],
   ): Promise<t.LCAvailableTools> {
     const { tools }: t.MCPToolListResponse = await connection.client.listTools();
+    const allowed = filterToolsByAllowlist(serverName, tools, availableTools);
 
     const toolFunctions: t.LCAvailableTools = {};
-    tools.forEach((tool) => {
+    allowed.forEach((tool) => {
       const name = `${tool.name}${Constants.mcp_delimiter}${serverName}`;
       toolFunctions[name] = {
         type: 'function',

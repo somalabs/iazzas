@@ -101,6 +101,55 @@ describe('createMCPToolCacheService', () => {
         updateMCPServerTools({ userId: 'u1', serverName: 'srv', tools }),
       ).rejects.toThrow('Redis down');
     });
+
+    describe('availableTools allowlist', () => {
+      const tools: MCPToolInput[] = [
+        { name: 'list-mail-messages' },
+        { name: 'send-mail' },
+        { name: 'list-planner-tasks' },
+        { name: 'get-user-presence' },
+      ];
+
+      it('caches only allowlisted tools (exact + glob)', async () => {
+        const deps = createMockDeps();
+        const { updateMCPServerTools } = createMCPToolCacheService(deps);
+
+        const result = await updateMCPServerTools({
+          userId: 'u1',
+          serverName: 'm365',
+          tools,
+          availableTools: ['list-mail-*', 'send-mail'],
+        });
+
+        expect(Object.keys(result)).toEqual([
+          `list-mail-messages${Constants.mcp_delimiter}m365`,
+          `send-mail${Constants.mcp_delimiter}m365`,
+        ]);
+      });
+
+      it('fails open and caches all tools when the allowlist matches nothing', async () => {
+        const deps = createMockDeps();
+        const { updateMCPServerTools } = createMCPToolCacheService(deps);
+
+        const result = await updateMCPServerTools({
+          userId: 'u1',
+          serverName: 'm365',
+          tools,
+          availableTools: ['nope-*'],
+        });
+
+        expect(Object.keys(result)).toHaveLength(4);
+      });
+
+      it('caches all tools when no allowlist is provided', async () => {
+        const deps = createMockDeps();
+        const { updateMCPServerTools } = createMCPToolCacheService(deps);
+
+        const result = await updateMCPServerTools({ userId: 'u1', serverName: 'm365', tools });
+
+        expect(Object.keys(result)).toHaveLength(4);
+      });
+    });
   });
 
   describe('mergeAppTools', () => {

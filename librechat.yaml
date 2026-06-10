@@ -508,6 +508,71 @@ mcpServers:
     startup: false
     requiresOAuth: true
     oauth: {}
+    # O ms-365-mcp-server expõe ~250 ferramentas (Graph API inteira: SharePoint,
+    # Planner, To-Do, Groups, presence, meetings etc.). Para uso geral isso infla
+    # o contexto e induz alucinação. availableTools curam o catálogo às ~50 mais
+    # usadas (Mail, Calendário, Teams, OneDrive, OneNote, Excel). Fail-open: se
+    # nenhum nome casar, todas as tools voltam (ver MCPServerInspector).
+    availableTools:
+      # Mail
+      - list-mail-messages
+      - list-mail-folders
+      - list-mail-folder-messages
+      - get-mail-message
+      - send-mail
+      - create-draft-email
+      - reply-mail-message
+      - reply-all-mail-message
+      - forward-mail-message
+      - delete-mail-message
+      - move-mail-message
+      - list-mail-attachments
+      # Calendário
+      - list-calendar-events
+      - get-calendar-event
+      - create-calendar-event
+      - update-calendar-event
+      - delete-calendar-event
+      - cancel-calendar-event
+      - get-calendar-view
+      - find-meeting-times
+      - list-calendars
+      # Teams / Chat
+      - list-chats
+      - get-chat
+      - list-chat-messages
+      - send-chat-message
+      - reply-to-chat-message
+      - list-joined-teams
+      - list-team-channels
+      - list-channel-messages
+      - send-channel-message
+      - reply-to-channel-message
+      - list-team-members
+      # OneDrive
+      - list-drives
+      - list-folder-files
+      - get-drive-item
+      - search-onedrive-files
+      - upload-file-content
+      - create-drive-item-share-link
+      # OneNote
+      - list-onenote-notebooks
+      - list-onenote-notebook-sections
+      - list-onenote-section-pages
+      - get-onenote-page-content
+      - create-onenote-page
+      # Excel
+      - list-excel-worksheets
+      - list-excel-tables
+      - get-excel-range
+      - get-excel-used-range
+      - update-excel-range
+      - list-excel-table-rows
+      - add-excel-table-rows
+      # Perfil / busca
+      - get-current-user
+      - search-query
     title: "Microsoft 365"
     description: |
       Conecta com sua conta Azzas e dá acesso integrado a Outlook, Teams, OneDrive, OneNote e Excel direto do chat.

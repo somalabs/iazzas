@@ -169,6 +169,21 @@ A `MS365_MCP_PUBLIC_URL` que o container recebe é derivada automaticamente de
 Certificates & secrets, atualizar `MS365_CLIENT_SECRET` no `.env` e
 `docker compose up -d --no-deps --force-recreate ms365-mcp`.
 
+## MCP — Controle de custo e contexto
+
+Dois mecanismos evitam que MCPs com catálogo grande ou respostas verbosas (M365,
+BigQuery, etc.) inflem o histórico e disparem o tier de tarifa dobrada do Gemini Pro
+(>200k tokens). Ver [`docs/iazzas-arquitetura.md`].
+
+| Variável | Default | Descrição |
+|---|---|---|
+| `MCP_TOOL_RESPONSE_MAX_CHARS` | `20000` | Limite de caracteres por resposta de tool MCP antes do truncamento (com marcador instruindo o modelo a paginar/refinar). Vale para **todos** os MCPs. `0` desativa. |
+
+**Allowlist de tools (config-only, no `librechat.yaml`):** o campo `availableTools`
+em um servidor MCP limita quais tools são expostas ao modelo (aceita nomes exatos e
+globs `*`, ex. `list-mail-*`). O `microsoft365` já vem curado para ~50 tools (de ~250).
+Fail-open: se nenhum nome casar, todas as tools voltam (ver log `availableTools matched 0`).
+
 ## Rate Limiting / Moderação
 
 | Variável | Valor | Descrição |
