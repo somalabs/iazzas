@@ -28,6 +28,12 @@ const BaseOptionsSchema = z.object({
   /** Controls visibility in chat dropdown menu (MCPSelect) */
   chatMenu: z.boolean().optional(),
   /**
+   * Marks the server as not yet generally available. The connector still appears
+   * in the picker but is dimmed, badged "in development", and cannot be selected —
+   * used to preview an integration that isn't production-ready. Flip off when ready.
+   */
+  inDevelopment: z.boolean().optional(),
+  /**
    * Optional allowlist of tool names surfaced to the model for this server.
    * Accepts exact tool names and `*` glob patterns (e.g. `list-mail-*`).
    * When set, only matching tools are exposed — sharply cutting token overhead

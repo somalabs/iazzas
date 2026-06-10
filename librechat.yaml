@@ -444,6 +444,9 @@ mcpServers:
     startup: false
     requiresOAuth: true
     oauth: {}
+    # Ainda não 100% homologado — exibido esmaecido e como "em desenvolvimento",
+    # sem permitir conexão. Remover quando o conector estiver pronto.
+    inDevelopment: true
     title: "Atlassian"
     description: |
       Acesso integrado a Jira e Confluence direto do chat — consulta, busca, criação e atualização sem sair da conversa.
