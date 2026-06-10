@@ -1,11 +1,10 @@
 name: 'generate_embeddings'
 on:
+  # Trigger de push removido: o IAzzas não usa o doc-search por embeddings do
+  # upstream (sem backend Supabase), então rodava em todo commit de docs/** e
+  # falhava com "supabaseUrl is required". Mantido só como dispatch manual caso
+  # o Supabase venha a ser configurado no futuro.
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
 
 jobs:
   generate:
