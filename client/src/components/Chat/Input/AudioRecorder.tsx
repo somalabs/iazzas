@@ -106,20 +106,32 @@ export default memo(function AudioRecorder({
     return <ListeningIcon className="stroke-text-secondary" />;
   };
 
+  const getStateLabel = () => {
+    if (isListening === true) {
+      return localize('com_ui_speech_listening');
+    }
+    if (isLoading === true) {
+      return localize('com_ui_speech_transcribing');
+    }
+    return localize('com_ui_use_micrphone');
+  };
+  const stateLabel = getStateLabel();
+
   return (
     <TooltipAnchor
-      description={localize('com_ui_use_micrphone')}
+      description={stateLabel}
       render={
         <button
           id="audio-recorder"
           type="button"
-          aria-label={localize('com_ui_use_micrphone')}
+          aria-label={stateLabel}
           onClick={isListening === true ? handleStopRecording : handleStartRecording}
           disabled={disabled}
           className={cn(
             'flex size-9 items-center justify-center rounded-full p-1 transition-colors hover:bg-surface-hover',
+            isListening === true && 'animate-pulse bg-surface-hover',
           )}
-          title={localize('com_ui_use_micrphone')}
+          title={stateLabel}
           aria-pressed={isListening}
         >
           {renderIcon()}

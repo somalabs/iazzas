@@ -1,14 +1,41 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { Paperclip } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useRecoilValue } from 'recoil';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { TextareaAutosize, TooltipAnchor } from '@librechat/client';
-import type { TEditProps } from '~/common';
-import { useMessagesOperations } from '~/Providers';
+import type { TMessage, TFile } from 'librechat-data-provider';
+import type { TEditProps, ExtendedFile } from '~/common';
+import { useMessagesOperations, useMessagesConversation } from '~/Providers';
+import { useFileHandlingNoChatContext, useLocalize } from '~/hooks';
+import FileContainer from '../../Input/Files/FileContainer';
+import { cn, removeFocusRings, getCachedPreview } from '~/utils';
+import Image from '../../Input/Files/Image';
 import { useGetAddedConvo } from '~/hooks/Chat';
-import { cn, removeFocusRings } from '~/utils';
-import { useLocalize } from '~/hooks';
 import Container from './Container';
 import store from '~/store';
+
+const seedEditFiles = (files?: TMessage['files']): Map<string, ExtendedFile> => {
+  const map = new Map<string, ExtendedFile>();
+  (files ?? []).forEach((file) => {
+    if (!file.file_id) {
+      return;
+    }
+    map.set(file.file_id, {
+      file_id: file.file_id,
+      filepath: file.filepath,
+      filename: file.filename,
+      type: file.type,
+      height: file.height,
+      width: file.width,
+      size: file.bytes ?? 0,
+      source: file.source,
+      preview: file.filepath,
+      progress: 1,
+      attached: true,
+    });
+  });
+  return map;
+};
 
 const EditMessage = ({
   text,
@@ -31,6 +58,50 @@ const EditMessage = ({
   const isRTL = chatDirection === 'rtl';
 
   const getAddedConvo = useGetAddedConvo();
+  const { conversation } = useMessagesConversation();
+
+  const canEditFiles = message.isCreatedByUser === true;
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [editFiles, setEditFiles] = useState<Map<string, ExtendedFile>>(() =>
+    seedEditFiles(message.files),
+  );
+  const { handleFileChange, abortUpload } = useFileHandlingNoChatContext(undefined, {
+    files: editFiles,
+    setFiles: setEditFiles,
+    conversation,
+  });
+
+  const editFileList = Array.from(editFiles.values());
+  const isUploadingFiles = editFileList.some((file) => file.progress < 1);
+
+  const removeEditFile = useCallback(
+    (fileId: string) => {
+      const file = editFiles.get(fileId);
+      if (abortUpload && file && file.progress < 1) {
+        abortUpload();
+      }
+      setEditFiles((prev) => {
+        const next = new Map(prev);
+        next.delete(fileId);
+        return next;
+      });
+    },
+    [editFiles, abortUpload],
+  );
+
+  const buildOverrideFiles = (): TMessage['files'] =>
+    editFileList
+      .filter((file) => file.file_id && file.progress >= 1)
+      .map(
+        (file): TFile =>
+          ({
+            file_id: file.file_id,
+            filepath: file.filepath,
+            type: file.type ?? '',
+            height: file.height,
+            width: file.width,
+          }) as TFile,
+      );
 
   const { register, handleSubmit, setValue } = useForm({
     defaultValues: {
@@ -56,7 +127,7 @@ const EditMessage = ({
           conversationId,
         },
         {
-          overrideFiles: message.files,
+          overrideFiles: buildOverrideFiles(),
           addedConvo: getAddedConvo() || undefined,
         },
       );
@@ -130,6 +201,43 @@ const EditMessage = ({
           dir={isRTL ? 'rtl' : 'ltr'}
         />
       </div>
+      {canEditFiles && (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          {editFileList.map((file) => {
+            const isImage = file.type?.startsWith('image') ?? false;
+            return (
+              <div key={file.file_id} style={{ flexBasis: '70px', flexGrow: 0, flexShrink: 0 }}>
+                {isImage ? (
+                  <Image
+                    url={getCachedPreview(file.file_id) ?? file.preview ?? file.filepath}
+                    onDelete={() => removeEditFile(file.file_id)}
+                    progress={file.progress}
+                    source={file.source}
+                  />
+                ) : (
+                  <FileContainer file={file} onDelete={() => removeEditFile(file.file_id)} />
+                )}
+              </div>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label={localize('com_sidepanel_attach_files')}
+            className="flex h-9 items-center gap-1.5 rounded-xl border border-border-medium px-3 text-sm text-text-secondary transition-colors hover:bg-surface-hover"
+          >
+            <Paperclip className="icon-sm" />
+            {localize('com_sidepanel_attach_files')}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+      )}
       <div className="mt-2 flex w-full flex-wrap items-center justify-end gap-2">
         <span className="mr-auto hidden select-none text-xs text-text-tertiary sm:inline">
           {localize('com_ui_edit_shortcut_hint')}
@@ -146,7 +254,7 @@ const EditMessage = ({
             <button
               ref={submitButtonRef}
               className="btn relative bg-action text-on-action transition-colors hover:bg-action-hover disabled:opacity-50"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploadingFiles}
               onClick={handleSubmit(resubmitMessage)}
             >
               {localize('com_ui_submit')}

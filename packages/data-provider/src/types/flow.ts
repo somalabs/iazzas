@@ -3,6 +3,7 @@ export type FlowNodeType =
   | 'agent'
   | 'condition'
   | 'http'
+  | 'mcp'
   | 'human_approval'
   | 'output';
 
@@ -44,6 +45,15 @@ export type HttpNodeData = {
   timeout: number;
 };
 
+export type McpNodeData = {
+  type: 'mcp';
+  serverName: string;
+  toolName: string;
+  /** JSON string with `{{...}}` placeholders; interpolated at run time, then parsed. */
+  args?: string;
+  label?: string;
+};
+
 export type HumanApprovalNodeData = {
   type: 'human_approval';
   prompt: string;
@@ -62,6 +72,7 @@ export type FlowNodeData =
   | AgentNodeData
   | ConditionNodeData
   | HttpNodeData
+  | McpNodeData
   | HumanApprovalNodeData
   | OutputNodeData;
 

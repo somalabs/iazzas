@@ -4,6 +4,7 @@ import TriggerInspector from './TriggerInspector';
 import AgentInspector from './AgentInspector';
 import ConditionInspector from './ConditionInspector';
 import HttpInspector from './HttpInspector';
+import McpInspector from './McpInspector';
 import ApprovalInspector from './ApprovalInspector';
 import OutputInspector from './OutputInspector';
 import type { FlowNodeData } from 'librechat-data-provider';
@@ -48,6 +49,8 @@ function renderInspector(id: string, data: FlowNodeData) {
       return <ConditionInspector nodeId={id} data={data} />;
     case 'http':
       return <HttpInspector nodeId={id} data={data} />;
+    case 'mcp':
+      return <McpInspector nodeId={id} data={data} />;
     case 'human_approval':
       return <ApprovalInspector nodeId={id} data={data} />;
     case 'output':

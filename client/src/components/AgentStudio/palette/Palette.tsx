@@ -1,4 +1,4 @@
-import { Zap, GitBranch, Globe, UserCheck, Flag, Bot } from 'lucide-react';
+import { Zap, GitBranch, Globe, Plug, UserCheck, Flag, Bot } from 'lucide-react';
 import type { TranslationKeys } from '~/hooks';
 import { useLocalize } from '~/hooks';
 
@@ -38,6 +38,12 @@ const PALETTE_ITEMS: PaletteItem[] = [
     labelKey: 'com_studio_flow_node_http',
     descKey: 'com_studio_flow_node_http_desc',
     icon: <Globe className={ICON_CLASS} />,
+  },
+  {
+    nodeType: 'mcp',
+    labelKey: 'com_studio_flow_node_mcp',
+    descKey: 'com_studio_flow_node_mcp_desc',
+    icon: <Plug className={ICON_CLASS} />,
   },
   {
     nodeType: 'human_approval',

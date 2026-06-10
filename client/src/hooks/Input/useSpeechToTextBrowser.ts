@@ -23,7 +23,6 @@ const useSpeechToTextBrowser = (
   const timeoutRef = useRef<NodeJS.Timeout | null>();
   const [autoSendText] = useRecoilState(store.autoSendText);
   const [languageSTT] = useRecoilState<string>(store.languageSTT);
-  const [autoTranscribeAudio] = useRecoilState<boolean>(store.autoTranscribeAudio);
 
   const {
     listening,
@@ -42,6 +41,14 @@ const useSpeechToTextBrowser = (
 
     if (lastInterim.current === interimTranscript) {
       return;
+    }
+
+    // The user is speaking again — cancel any pending auto-send armed by the
+    // previous finalTranscript so we don't submit mid-sentence during a
+    // natural pause and cut the user off.
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
 
     setText(interimTranscript);
@@ -95,9 +102,12 @@ const useSpeechToTextBrowser = (
     if (isListening === true) {
       SpeechRecognition.stopListening();
     } else {
+      // Keep listening through natural pauses so dictation isn't cut off
+      // mid-sentence. The recognizer only stops when the user taps the mic
+      // again (the speech settings tab that toggled this isn't exposed here).
       SpeechRecognition.startListening({
         language: languageSTT,
-        continuous: autoTranscribeAudio,
+        continuous: true,
       });
     }
   };
@@ -111,6 +121,7 @@ const useSpeechToTextBrowser = (
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
