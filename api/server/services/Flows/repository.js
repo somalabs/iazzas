@@ -11,8 +11,8 @@ const { AgentFlow, AgentFlowRun } = require('~/db/models');
  * call site (explicit signature over implicit closure).
  */
 
-const listFlows = ({ tenantId, cursor, limit }) => {
-  const query = { tenantId };
+const listFlows = ({ tenantId, author, cursor, limit }) => {
+  const query = { tenantId, author };
   if (cursor) {
     query._id = { $lt: cursor };
   }
@@ -22,20 +22,21 @@ const listFlows = ({ tenantId, cursor, limit }) => {
     .lean();
 };
 
-const getFlow = ({ tenantId, id }) => AgentFlow.findOne({ _id: id, tenantId }).lean();
+const getFlow = ({ tenantId, author, id }) =>
+  AgentFlow.findOne({ _id: id, tenantId, author }).lean();
 
-const createFlow = ({ tenantId, name, nodes, edges }) =>
-  AgentFlow.create({ tenantId, name, nodes, edges });
+const createFlow = ({ tenantId, author, name, nodes, edges }) =>
+  AgentFlow.create({ tenantId, author, name, nodes, edges });
 
-const updateFlow = ({ tenantId, id, name, nodes, edges }) =>
+const updateFlow = ({ tenantId, author, id, name, nodes, edges }) =>
   AgentFlow.findOneAndUpdate(
-    { _id: id, tenantId },
+    { _id: id, tenantId, author },
     { $set: { name, nodes, edges } },
     { new: true },
   ).lean();
 
-const deleteFlow = async ({ tenantId, id }) => {
-  const res = await AgentFlow.deleteOne({ _id: id, tenantId });
+const deleteFlow = async ({ tenantId, author, id }) => {
+  const res = await AgentFlow.deleteOne({ _id: id, tenantId, author });
   return res.deletedCount > 0;
 };
 
@@ -52,8 +53,7 @@ const createRun = ({ tenantId, flowId, input, flowSnapshot, flowVersion }) =>
     startedAt: new Date(),
   });
 
-const getRun = ({ tenantId, runId }) =>
-  AgentFlowRun.findOne({ _id: runId, tenantId });
+const getRun = ({ tenantId, runId }) => AgentFlowRun.findOne({ _id: runId, tenantId });
 
 const saveRunState = ({ tenantId, runId, status, nodeRuns, context, pausedNodeId, completedAt }) =>
   AgentFlowRun.findOneAndUpdate(

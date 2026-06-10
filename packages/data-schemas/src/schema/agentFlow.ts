@@ -7,6 +7,12 @@ const agentFlowSchema = new Schema<IAgentFlow>(
       type: String,
       required: true,
     },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
     nodes: {
       type: Schema.Types.Mixed,
       default: [],
@@ -26,6 +32,6 @@ const agentFlowSchema = new Schema<IAgentFlow>(
   },
 );
 
-agentFlowSchema.index({ tenantId: 1, updatedAt: -1 });
+agentFlowSchema.index({ tenantId: 1, author: 1, updatedAt: -1 });
 
 export default agentFlowSchema;

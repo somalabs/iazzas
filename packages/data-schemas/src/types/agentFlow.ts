@@ -9,6 +9,7 @@ import type {
 
 export interface IAgentFlow extends Document {
   tenantId?: string;
+  author: Types.ObjectId;
   name: string;
   nodes: FlowNode[];
   edges: FlowEdge[];

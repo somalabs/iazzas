@@ -154,6 +154,7 @@ const listFlows = async (req, res) => {
   try {
     const rows = await repo.listFlows({
       tenantId: req.user.tenantId,
+      author: req.user.id,
       cursor: cur.value,
       limit: PAGE_LIMIT,
     });
@@ -167,7 +168,11 @@ const listFlows = async (req, res) => {
 
 const getFlow = async (req, res) => {
   try {
-    const flow = await repo.getFlow({ tenantId: req.user.tenantId, id: req.params.id });
+    const flow = await repo.getFlow({
+      tenantId: req.user.tenantId,
+      author: req.user.id,
+      id: req.params.id,
+    });
     if (!flow) {
       return res.status(404).json({ error: 'Flow not found' });
     }
@@ -190,6 +195,7 @@ const createFlow = async (req, res) => {
   try {
     const flow = await repo.createFlow({
       tenantId: req.user.tenantId,
+      author: req.user.id,
       name: req.body.name.trim(),
       nodes: normalizeNodes(req.body.nodes),
       edges: req.body.edges,
@@ -213,6 +219,7 @@ const updateFlow = async (req, res) => {
   try {
     const flow = await repo.updateFlow({
       tenantId: req.user.tenantId,
+      author: req.user.id,
       id: req.params.id,
       name: req.body.name.trim(),
       nodes: normalizeNodes(req.body.nodes),
@@ -230,7 +237,11 @@ const updateFlow = async (req, res) => {
 
 const deleteFlow = async (req, res) => {
   try {
-    const ok = await repo.deleteFlow({ tenantId: req.user.tenantId, id: req.params.id });
+    const ok = await repo.deleteFlow({
+      tenantId: req.user.tenantId,
+      author: req.user.id,
+      id: req.params.id,
+    });
     if (!ok) {
       return res.status(404).json({ error: 'Flow not found' });
     }
@@ -264,7 +275,11 @@ const runFlow = async (req, res) => {
     return res.status(422).json({ error: 'input must be a string' });
   }
   try {
-    const flow = await repo.getFlow({ tenantId: req.user.tenantId, id: req.params.id });
+    const flow = await repo.getFlow({
+      tenantId: req.user.tenantId,
+      author: req.user.id,
+      id: req.params.id,
+    });
     if (!flow) {
       return res.status(404).json({ error: 'Flow not found' });
     }
@@ -351,7 +366,11 @@ const listRuns = async (req, res) => {
     return;
   }
   try {
-    const flow = await repo.getFlow({ tenantId: req.user.tenantId, id: req.params.id });
+    const flow = await repo.getFlow({
+      tenantId: req.user.tenantId,
+      author: req.user.id,
+      id: req.params.id,
+    });
     if (!flow) {
       return res.status(404).json({ error: 'Flow not found' });
     }
