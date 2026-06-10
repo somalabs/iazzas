@@ -124,6 +124,10 @@ export const useEndpoints = ({
           acc[agent.id] = agent?.avatar?.filepath;
           return acc;
         }, {});
+        result.agentAvatars = agents?.reduce((acc, agent) => {
+          acc[agent.id] = agent?.avatar;
+          return acc;
+        }, {});
       }
 
       // Handle assistants case

@@ -2,17 +2,38 @@ import React, { Fragment } from 'react';
 import { VisuallyHidden } from '@ariakit/react';
 import { CheckCircle2, EarthIcon } from 'lucide-react';
 import { isAgentsEndpoint, isAssistantsEndpoint } from 'librechat-data-provider';
-import type { TModelSpec } from 'librechat-data-provider';
+import type { TModelSpec, Agent } from 'librechat-data-provider';
 import type { Endpoint } from '~/common';
 import { useModelSelectorContext } from '../ModelSelectorContext';
 import { CustomMenuItem as MenuItem } from '../CustomMenu';
 import SpecIcon from './SpecIcon';
-import { cn } from '~/utils';
+import { cn, renderAgentAvatar } from '~/utils';
 
 interface SearchResultsProps {
   results: (TModelSpec | Endpoint)[] | null;
   localize: (phraseKey: any, options?: any) => string;
   searchValue: string;
+}
+
+function renderSearchResultAvatar(endpoint: Endpoint, modelId: string, modelName: string) {
+  if (isAgentsEndpoint(endpoint.value) && endpoint.agentAvatars?.[modelId]) {
+    return renderAgentAvatar({ avatar: endpoint.agentAvatars[modelId], name: modelName } as Agent, {
+      size: 'icon',
+      showBorder: false,
+    });
+  }
+  if (endpoint.modelIcons?.[modelId]) {
+    return (
+      <div className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full">
+        <img
+          src={endpoint.modelIcons[modelId]}
+          alt={modelName}
+          className="h-full w-full object-cover"
+        />
+      </div>
+    );
+  }
+  return null;
 }
 
 export function SearchResults({ results, localize, searchValue }: SearchResultsProps) {
@@ -171,15 +192,7 @@ export function SearchResults({ results, localize, searchValue }: SearchResultsP
                       className="flex w-full cursor-pointer items-center justify-start rounded-lg px-3 py-2 pl-6 text-sm"
                     >
                       <div className="flex items-center gap-2">
-                        {endpoint.modelIcons?.[modelId] && (
-                          <div className="flex h-5 w-5 items-center justify-center overflow-hidden rounded-full">
-                            <img
-                              src={endpoint.modelIcons[modelId]}
-                              alt={modelName}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        )}
+                        {renderSearchResultAvatar(endpoint, modelId, modelName)}
                         <span>{modelName}</span>
                       </div>
                       {isGlobal && (

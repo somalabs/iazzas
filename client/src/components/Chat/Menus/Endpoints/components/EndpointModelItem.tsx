@@ -2,11 +2,12 @@ import React, { useRef, useState, useEffect } from 'react';
 import { VisuallyHidden } from '@ariakit/react';
 import { CheckCircle2, EarthIcon, Pin, PinOff } from 'lucide-react';
 import { isAgentsEndpoint, isAssistantsEndpoint } from 'librechat-data-provider';
+import type { Agent } from 'librechat-data-provider';
 import { useModelSelectorContext } from '../ModelSelectorContext';
 import { CustomMenuItem as MenuItem } from '../CustomMenu';
 import { useFavorites, useLocalize } from '~/hooks';
 import type { Endpoint } from '~/common';
-import { cn } from '~/utils';
+import { cn, renderAgentAvatar } from '~/utils';
 
 interface EndpointModelItemProps {
   modelId: string | null;
@@ -90,6 +91,15 @@ export function EndpointModelItem({ modelId, endpoint }: EndpointModelItemProps)
     const isAgentOrAssistant =
       isAgentsEndpoint(endpoint.value) || isAssistantsEndpoint(endpoint.value);
     const showEndpointIcon = isAgentOrAssistant && endpoint.icon;
+
+    const agentAvatar =
+      modelId && isAgentsEndpoint(endpoint.value) ? endpoint.agentAvatars?.[modelId] : undefined;
+    if (agentAvatar) {
+      return renderAgentAvatar({ avatar: agentAvatar, name: modelName } as Agent, {
+        size: 'icon',
+        showBorder: false,
+      });
+    }
 
     const getContent = () => {
       if (avatarUrl) {

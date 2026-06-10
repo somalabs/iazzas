@@ -1,5 +1,6 @@
 import React from 'react';
 import { TStartupConfig } from 'librechat-data-provider';
+import type { Agent } from 'librechat-data-provider';
 
 export interface Endpoint {
   value: string;
@@ -10,6 +11,8 @@ export interface Endpoint {
   agentNames?: Record<string, string>;
   assistantNames?: Record<string, string>;
   modelIcons?: Record<string, string | undefined>;
+  /** Full agent avatar (icon or image) keyed by agent id, for rich avatar rendering */
+  agentAvatars?: Record<string, Agent['avatar']>;
 }
 
 export interface SelectedValues {

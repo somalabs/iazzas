@@ -2,6 +2,7 @@ import React from 'react';
 import { Bot } from 'lucide-react';
 import { isAgentsEndpoint, isAssistantsEndpoint } from 'librechat-data-provider';
 import type {
+  Agent,
   TModelSpec,
   TAgentsMap,
   TAssistantsMap,
@@ -9,6 +10,7 @@ import type {
 } from 'librechat-data-provider';
 import type { useLocalize } from '~/hooks';
 import SpecIcon from '~/components/Chat/Menus/Endpoints/components/SpecIcon';
+import { renderAgentAvatar } from '~/utils';
 import { Endpoint, SelectedValues } from '~/common';
 
 export function filterItems<
@@ -130,6 +132,13 @@ export function getSelectedIcon({
     const selectedEndpoint = mappedEndpoints.find((e) => e.value === endpoint);
     if (!selectedEndpoint) {
       return null;
+    }
+
+    if (selectedEndpoint.agentAvatars?.[model]) {
+      return renderAgentAvatar(
+        { avatar: selectedEndpoint.agentAvatars[model], name: model } as Agent,
+        { size: 'icon', showBorder: false },
+      );
     }
 
     if (selectedEndpoint.modelIcons?.[model]) {
