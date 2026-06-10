@@ -4,6 +4,7 @@ import { EModelEndpoint, Constants } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
 import MessageIcon from '~/components/Share/MessageIcon';
 import { useLocalize, useExpandCollapse } from '~/hooks';
+import { useGetAgentByIdQuery } from '~/data-provider';
 import { useAgentsMapContext } from '~/Providers';
 import { cn } from '~/utils';
 
@@ -25,12 +26,23 @@ const AgentHandoff: React.FC<AgentHandoffProps> = ({ name, args: _args = '' }) =
     return name.replace(Constants.LC_TRANSFER_TO_, '');
   }, [name]);
 
-  const targetAgent = useMemo(() => {
+  const mappedAgent = useMemo(() => {
     if (!targetAgentId || !agentsMap) {
       return null;
     }
-    return agentsMap[targetAgentId];
+    return agentsMap[targetAgentId] ?? null;
   }, [agentsMap, targetAgentId]);
+
+  /**
+   * Handoff targets are frequently "hidden" agents (handoff-only), which are excluded
+   * from the listing that builds agentsMap. Fetch by id as a fallback so the transfer
+   * step shows the real specialist name/avatar instead of the generic agent label.
+   */
+  const { data: fetchedAgent } = useGetAgentByIdQuery(targetAgentId, {
+    enabled: !!targetAgentId && !mappedAgent,
+  });
+
+  const targetAgent = mappedAgent ?? fetchedAgent ?? null;
 
   const args = useMemo(() => {
     if (typeof _args === 'string') {

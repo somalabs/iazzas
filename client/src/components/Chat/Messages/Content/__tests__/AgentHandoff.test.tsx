@@ -28,6 +28,12 @@ jest.mock('~/Providers', () => ({
   }),
 }));
 
+jest.mock('~/data-provider', () => ({
+  useGetAgentByIdQuery: (id: string | null | undefined, opts?: { enabled?: boolean }) => ({
+    data: opts?.enabled && id === 'hidden-agent-456' ? { name: 'ESG' } : undefined,
+  }),
+}));
+
 jest.mock('~/components/Share/MessageIcon', () => ({
   __esModule: true,
   default: () => <div data-testid="message-icon" />,
@@ -93,5 +99,16 @@ describe('AgentHandoff - A11Y accessibility stubs', () => {
 
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
+  });
+
+  it('resolves a hidden handoff-target agent name via the fetch fallback', () => {
+    renderAgentHandoff({
+      name: 'lc_transfer_to_hidden-agent-456',
+      args: '{"key":"value"}',
+    });
+
+    const button = screen.getByRole('button');
+    expect(button.getAttribute('aria-label')).toContain('Transferred to');
+    expect(button.getAttribute('aria-label')).toContain('ESG');
   });
 });
