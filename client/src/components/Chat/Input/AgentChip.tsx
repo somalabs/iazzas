@@ -2,8 +2,9 @@
 import { useMemo, useRef, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Constants, isAgentsEndpoint } from 'librechat-data-provider';
+import type { Agent } from 'librechat-data-provider';
 import type { MentionOption } from '~/common';
-import { useChatContext, useAssistantsMapContext } from '~/Providers';
+import { useChatContext, useAssistantsMapContext, useAgentsMapContext } from '~/Providers';
 import useMentions from '~/hooks/Input/useMentions';
 import useSelectMention from '~/hooks/Input/useSelectMention';
 import { useGetConversation, useLocalize } from '~/hooks';
@@ -16,10 +17,46 @@ import { cn } from '~/utils';
  * endpoint de agentes — não muda nada nos demais. Popover é position:fixed p/
  * escapar do overflow-hidden do composer.
  */
+function AgentItemAvatar({ agent, label }: { agent?: Agent; label: string }) {
+  const avatar = agent?.avatar;
+  if (avatar && typeof avatar === 'object') {
+    if (avatar.source === 'icon' && avatar.icon) {
+      return (
+        <span
+          aria-hidden="true"
+          className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full text-[15px]"
+          style={{ backgroundColor: avatar.iconColor ?? 'var(--azzas-navy)' }}
+        >
+          {avatar.icon}
+        </span>
+      );
+    }
+    if (avatar.filepath) {
+      return (
+        <img
+          src={avatar.filepath}
+          alt=""
+          aria-hidden="true"
+          className="h-[30px] w-[30px] flex-shrink-0 rounded-full object-cover"
+        />
+      );
+    }
+  }
+  return (
+    <span
+      aria-hidden="true"
+      className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-surface-hover text-[12px] font-bold text-text-secondary"
+    >
+      {label.trim().charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
 export default function AgentChip() {
   const localize = useLocalize();
   const { conversation, newConversation } = useChatContext();
   const assistantsMap = useAssistantsMapContext();
+  const agentsMap = useAgentsMapContext();
   const getConversation = useGetConversation(0);
 
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -214,12 +251,10 @@ export default function AgentChip() {
                             : 'border-transparent hover:bg-surface-hover',
                         )}
                       >
-                        <span
-                          aria-hidden="true"
-                          className="flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-full bg-surface-hover text-[12px] font-bold text-text-secondary"
-                        >
-                          {String(item.label).trim().charAt(0).toUpperCase()}
-                        </span>
+                        <AgentItemAvatar
+                          agent={agentsMap?.[String(item.value)]}
+                          label={String(item.label)}
+                        />
                         <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-text-primary">
                           {item.label}
                         </span>
