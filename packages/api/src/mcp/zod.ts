@@ -269,6 +269,13 @@ const GEMINI_UNSUPPORTED_KEYS = new Set([
   'contentEncoding',
   'contentMediaType',
   'contentSchema',
+  // Numeric validators outside Gemini's OpenAPI 3.0 subset — passing them raises
+  // HTTP 400 "Unknown name 'exclusiveMinimum': Cannot find field" (seen with Miro
+  // tool schemas). Gemini keeps `minimum`/`maximum`; only the exclusive/multipleOf
+  // variants are rejected. Stripping only widens validation, so it stays safe.
+  'exclusiveMinimum',
+  'exclusiveMaximum',
+  'multipleOf',
 ]);
 
 /**

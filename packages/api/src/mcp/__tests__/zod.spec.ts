@@ -2415,6 +2415,27 @@ describe('normalizeJsonSchema', () => {
     expect(result.properties.a).toEqual({ type: 'string' });
   });
 
+  it('should strip exclusiveMinimum/exclusiveMaximum/multipleOf inside properties (Miro MCP regression)', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        x: { type: 'number', minimum: 0, maximum: 100, exclusiveMinimum: 0, exclusiveMaximum: 100 },
+        y: { type: 'integer', multipleOf: 5 },
+      },
+    } as any;
+
+    const result = normalizeJsonSchema(schema);
+
+    expect(result.properties.x).not.toHaveProperty('exclusiveMinimum');
+    expect(result.properties.x).not.toHaveProperty('exclusiveMaximum');
+    expect(result.properties.y).not.toHaveProperty('multipleOf');
+    // Supported numeric validators are preserved.
+    expect(result.properties.x.minimum).toBe(0);
+    expect(result.properties.x.maximum).toBe(100);
+    expect(result.properties.x.type).toBe('number');
+    expect(result.properties.y.type).toBe('integer');
+  });
+
   it('should strip propertyNames at nested levels (Notion MCP regression)', () => {
     const schema = {
       type: 'object',
