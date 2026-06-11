@@ -48,7 +48,11 @@ export function createAdminAnalyticsHandlers(deps: AdminAnalyticsDeps) {
 
       const groupBy = parseGroupBy(q.groupBy);
 
-      const matchStage: Record<string, unknown> = { createdAt: { $gte: startDate, $lte: endDate } };
+      const matchStage: Record<string, unknown> = {
+        createdAt: { $gte: startDate, $lte: endDate },
+        // 'credits' transactions are balance grants/top-ups, not API spend — exclude from analytics.
+        tokenType: { $ne: 'credits' },
+      };
       if (typeof q.userId === 'string' && q.userId) {
         matchStage['user'] = new mongoose.Types.ObjectId(q.userId);
       }
@@ -136,27 +140,32 @@ export function createAdminAnalyticsHandlers(deps: AdminAnalyticsDeps) {
         totalTokens: kpiRaw.totalTokens ?? 0,
         totalCreditsSpent: kpiRaw.totalCreditsSpent ?? 0,
         activeUsers,
-        avgCreditsPerUser: activeUsers > 0 ? Math.round((kpiRaw.totalCreditsSpent ?? 0) / activeUsers) : 0,
+        avgCreditsPerUser:
+          activeUsers > 0 ? Math.round((kpiRaw.totalCreditsSpent ?? 0) / activeUsers) : 0,
       };
 
       const totalCredits = kpis.totalCreditsSpent;
-      const byModel = ((facetResult?.byModelRaw ?? []) as Array<{
-        _id: string | null;
-        tokens: number;
-        credits: number;
-      }>).map((row) => ({
+      const byModel = (
+        (facetResult?.byModelRaw ?? []) as Array<{
+          _id: string | null;
+          tokens: number;
+          credits: number;
+        }>
+      ).map((row) => ({
         model: row._id ?? 'unknown',
         tokens: row.tokens,
         credits: row.credits,
         percentage: totalCredits > 0 ? Math.round((row.credits / totalCredits) * 1000) / 10 : 0,
       }));
 
-      const topUsers = ((facetResult?.topUsersRaw ?? []) as Array<{
-        _id: mongoose.Types.ObjectId;
-        tokens: number;
-        credits: number;
-        userDoc: Array<{ name?: string; email?: string }>;
-      }>).map((row) => {
+      const topUsers = (
+        (facetResult?.topUsersRaw ?? []) as Array<{
+          _id: mongoose.Types.ObjectId;
+          tokens: number;
+          credits: number;
+          userDoc: Array<{ name?: string; email?: string }>;
+        }>
+      ).map((row) => {
         const doc = row.userDoc[0] ?? {};
         return {
           userId: row._id.toString(),
@@ -187,7 +196,9 @@ export function createAdminAnalyticsHandlers(deps: AdminAnalyticsDeps) {
   async function getModels(_req: ServerRequest, res: Response) {
     try {
       const models = await TransactionModel.distinct('model', { model: { $ne: null } });
-      return res.status(200).json({ models: (models as unknown as string[]).filter(Boolean).sort() });
+      return res
+        .status(200)
+        .json({ models: (models as unknown as string[]).filter(Boolean).sort() });
     } catch (error) {
       logger.error('[adminAnalytics] getModels error:', error);
       return res.status(500).json({ error: 'Failed to fetch models' });
