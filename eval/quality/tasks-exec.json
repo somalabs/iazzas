@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ex01-resumo-diretoria",
+    "category": "escrita-exec",
+    "prompt": "Escreva um resumo executivo (máximo 150 palavras) para a diretoria a partir destes fatos: no 3º trimestre a marca cresceu 8% em volume de transações, mas o ticket médio caiu 12% e a receita ficou estável; a participação da fase OFF (liquidação) subiu de 18% para 31% das vendas. Comece pela conclusão e termine com a decisão que você recomenda.",
+    "checks": ["<=150 palavras", "começa pela conclusão (BLUF)", "usa os números dados sem inventar", "termina com recomendação/decisão clara"]
+  },
+  {
+    "id": "ex02-bullets-board",
+    "category": "escrita-exec",
+    "prompt": "Condense o parágrafo a seguir em no máximo 4 bullets para um slide de diretoria, cada bullet com no máximo 14 palavras, mantendo só o que muda decisão: 'A campanha de inverno teve ROAS de 4,2 no Google Ads, acima da meta de 3,5, puxada principalmente por calçados; o e-mail marketing converteu 2,1%, abaixo do histórico de 3%, por causa de baixa entregabilidade; o CAC subiu 18% no período por maior concorrência em mídia paga; recomenda-se realocar verba de e-mail para search e revisar a base de e-mail.'",
+    "checks": ["<=4 bullets", "cada bullet <=14 palavras", "preserva ROAS/e-mail/CAC/recomendação", "sem enrolação"]
+  },
+  {
+    "id": "ex03-memo-interno",
+    "category": "escrita-exec",
+    "prompt": "Escreva um comunicado interno curto (máx 120 palavras) anunciando que, a partir do próximo mês, os relatórios de venda diária passarão a ser acessados pelo IAzzas (chat) em vez do antigo dashboard, que será desativado. Tom claro e tranquilizador, diga o porquê em uma linha, o que muda na prática e onde pedir ajuda.",
+    "checks": ["<=120 palavras", "explica o porquê", "diz o que muda na prática", "tom claro/tranquilizador", "canal de ajuda"]
+  },
+  {
+    "id": "ex04-kpi-narrativa",
+    "category": "escrita-exec",
+    "prompt": "Transforme estes KPIs em um único parágrafo de newsletter interna (máx 90 palavras), em tom positivo mas honesto: venda líquida +6% YoY; margem bruta -1,5 p.p.; base de clientes ativos +9%; taxa de devolução estável em 14%. Não use bullet, só prosa fluida.",
+    "checks": ["<=90 palavras", "só prosa (sem bullets)", "usa os 4 KPIs corretamente", "tom positivo mas honesto (não esconde a queda de margem)"]
+  },
+  {
+    "id": "ex05-comunicado-cliente",
+    "category": "escrita-exec",
+    "prompt": "Escreva uma mensagem para clientes (máx 100 palavras) pedindo desculpas por um atraso logístico que afetou entregas da Black Friday, explicando sem jargão o que houve, o que está sendo feito, e oferecendo um cupom de 15% na próxima compra. Tom empático, sem soar robótico nem culpar terceiros.",
+    "checks": ["<=100 palavras", "pede desculpa com empatia", "explica sem jargão e sem culpar terceiros", "oferece o cupom de 15%", "diz o que está sendo feito"]
+  },
+  {
+    "id": "ex06-email-decisao",
+    "category": "escrita-exec",
+    "prompt": "Escreva um e-mail executivo curto (máx 130 palavras) para um diretor pedindo aprovação para antecipar a liquidação da coleção de verão em 2 semanas. Inclua: o motivo (estoque 20% acima do plano), o trade-off (proteger fluxo de caixa vs. preservar margem/marca), sua recomendação e o prazo para a decisão. Deixe o 'ask' explícito no início.",
+    "checks": ["<=130 palavras", "ask explícito no início", "cobre motivo + trade-off + recomendação", "tem prazo para decisão"]
+  },
+  {
+    "id": "ex07-onepager-estrutura",
+    "category": "escrita-exec",
+    "prompt": "Monte a estrutura de um one-pager de proposta de projeto para implantar análise de devoluções via IAzzas. Dê o título e as seções com 1 linha de conteúdo-guia em cada (não escreva o projeto inteiro). Máximo de 7 seções, na ordem que um executivo leria.",
+    "checks": ["título + seções", "<=7 seções", "ordem lógica executiva (problema->solução->impacto->próximos passos)", "1 linha-guia por seção"]
+  },
+  {
+    "id": "ex08-reescrever-crispar",
+    "category": "escrita-exec",
+    "prompt": "Reescreva o texto a seguir para ficar executivo, direto e escaneável, cortando redundância e enchimento, sem perder informação essencial (máx 70 palavras): 'Eu gostaria de aproveitar a oportunidade para informar a todos os membros da equipe que, após diversas reuniões e muitas discussões que tivemos ao longo das últimas semanas, chegamos finalmente à conclusão de que talvez seja interessante considerarmos a possibilidade de, quem sabe, começarmos a testar uma nova abordagem para a gestão do nosso estoque nas lojas físicas.'",
+    "checks": ["<=70 palavras", "remove o enchimento", "mantém a mensagem (testar nova gestão de estoque nas lojas)", "tom decidido, não hesitante"]
+  }
+]
