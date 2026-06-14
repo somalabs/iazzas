@@ -1,0 +1,14 @@
+[
+  { "prod": "FARM001", "cor": "01", "texto": "Vestido Chita Floral", "linha": "Vestidos", "coluna": "Verão 25", "postit": "TOP" },
+  { "prod": "FARM002", "cor": "02", "texto": "Vestido Longo Onça", "linha": "Vestidos", "coluna": "Verão 25", "postit": "" },
+  { "prod": "FARM003", "cor": "03", "texto": "Vestido Curto Praia", "linha": "Vestidos", "coluna": "Verão 25", "postit": "" },
+  { "prod": "FARM010", "cor": "01", "texto": "Vestido Tricot", "linha": "Vestidos", "coluna": "Inverno 25", "postit": "" },
+  { "prod": "FARM011", "cor": "05", "texto": "Vestido Veludo", "linha": "Vestidos", "coluna": "Inverno 25", "postit": "NOVO" },
+  { "prod": "FARM020", "cor": "01", "texto": "Blusa Cropped Estampada", "linha": "Blusas", "coluna": "Verão 25", "postit": "" },
+  { "prod": "FARM021", "cor": "04", "texto": "Blusa Alça Lisa", "linha": "Blusas", "coluna": "Verão 25", "postit": "" },
+  { "prod": "FARM030", "cor": "02", "texto": "Tricot Gola Alta", "linha": "Blusas", "coluna": "Inverno 25", "postit": "" },
+  { "prod": "FARM031", "cor": "03", "texto": "Moletom Frutas", "linha": "Blusas", "coluna": "Inverno 25", "postit": "TOP" },
+  { "prod": "FARM032", "cor": "06", "texto": "Camisa Manga Longa", "linha": "Blusas", "coluna": "Inverno 25", "postit": "" },
+  { "prod": "FARM040", "cor": "01", "texto": "Short Alfaiataria", "linha": "Shorts e Saias", "coluna": "Verão 25", "postit": "" },
+  { "prod": "FARM041", "cor": "02", "texto": "Saia Longa Fluida", "linha": "Shorts e Saias", "coluna": "Verão 25", "postit": "" }
+]
