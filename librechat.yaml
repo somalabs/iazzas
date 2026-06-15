@@ -6,10 +6,10 @@ interface:
   bookmarks: false
   multiConvo: false
   temporaryChat: false
-  peoplePicker: { users: false, groups: false, roles: false }
+  peoplePicker: { users: true, groups: false, roles: false }
   marketplace: { use: true }
   remoteAgents: { use: false }
-  agents: { public: true }
+  agents: { public: true, share: true }
 
 registration:
   socialLogins: ['openid']
