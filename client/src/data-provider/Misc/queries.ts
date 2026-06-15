@@ -18,6 +18,35 @@ export const useGetBannerQuery = (
   });
 };
 
+export const useGetBannersQuery = (
+  config?: UseQueryOptions<t.TBannersResponse>,
+): QueryObserverResult<t.TBannersResponse> => {
+  const queriesEnabled = useRecoilValue<boolean>(store.queriesEnabled);
+  return useQuery<t.TBannersResponse>([QueryKeys.banners], () => dataService.getBanners(), {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    ...config,
+    enabled: (config?.enabled ?? true) === true && queriesEnabled,
+  });
+};
+
+export const useGetAdminBannersQuery = (
+  config?: UseQueryOptions<t.TBannersResponse>,
+): QueryObserverResult<t.TBannersResponse> => {
+  const queriesEnabled = useRecoilValue<boolean>(store.queriesEnabled);
+  return useQuery<t.TBannersResponse>(
+    [QueryKeys.banners, 'admin'],
+    () => dataService.getAdminBanners(),
+    {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      ...config,
+      enabled: (config?.enabled ?? true) === true && queriesEnabled,
+    },
+  );
+};
+
 export const useGetUserBalance = (
   config?: UseQueryOptions<t.TBalanceResponse>,
 ): QueryObserverResult<t.TBalanceResponse> => {

@@ -1,14 +1,17 @@
 /* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { memo, lazy, Suspense, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
 import { SystemRoles } from 'librechat-data-provider';
 import { PanelLeft } from 'lucide-react';
 import { Skeleton, Button, TooltipAnchor } from '@librechat/client';
 import type { NavLink } from '~/common';
 import { CLOSE_SIDEBAR_ID } from '~/components/Chat/Menus/OpenSidebar';
+import { useRecados } from '~/components/Recados';
 import { useGoToNewChat, useLocalize } from '~/hooks';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { cn } from '~/utils';
+import store from '~/store';
 
 const BalanceWidget = lazy(() => import('~/components/Nav/BalanceWidget'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
@@ -27,10 +30,12 @@ const NavRouteButton = memo(function NavRouteButton({
   link,
   expanded,
   onClickOverride,
+  badge = 0,
 }: {
   link: NavLink;
   expanded: boolean;
   onClickOverride?: () => void;
+  badge?: number;
 }) {
   const localize = useLocalize();
   const navigate = useNavigate();
@@ -47,11 +52,12 @@ const NavRouteButton = memo(function NavRouteButton({
   }, [onClickOverride, navigate, link.href]);
 
   const IconComponent = isNavActive && link.iconFilled ? link.iconFilled : link.icon;
+  const badgeLabel = badge > 99 ? '99+' : `${badge}`;
 
   const element = (
     <Button
       variant="ghost"
-      aria-label={label}
+      aria-label={badge > 0 ? `${label} (${badge})` : label}
       aria-current={isNavActive ? 'page' : undefined}
       data-testid={link.id}
       className={cn(
@@ -62,8 +68,13 @@ const NavRouteButton = memo(function NavRouteButton({
       )}
       onClick={handleClick}
     >
-      <span className={cn(ICON_SLOT, expanded && ICON_HIGHLIGHT_EXPANDED)}>
+      <span className={cn(ICON_SLOT, expanded && ICON_HIGHLIGHT_EXPANDED, 'relative')}>
         {IconComponent && <IconComponent className="h-5 w-5" aria-hidden="true" />}
+        {badge > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-ember px-1 text-[10px] font-semibold leading-none text-white">
+            {badgeLabel}
+          </span>
+        )}
       </span>
       {expanded && (
         <span className="min-w-0 truncate text-sm font-medium text-text-primary">{label}</span>
@@ -90,6 +101,9 @@ function ExpandedPanel({
   const { user } = useAuthContext();
   const isAdmin = user?.role === SystemRoles.ADMIN;
   const onNavChats = useGoToNewChat();
+  const setRecadosOpen = useSetRecoilState(store.recadosInboxOpen);
+  const { unreadCount } = useRecados();
+  const openRecados = useCallback(() => setRecadosOpen(true), [setRecadosOpen]);
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
 
@@ -151,12 +165,18 @@ function ExpandedPanel({
               />
             );
           }
+          const overrides: Record<string, () => void> = {
+            'nav-chats': onNavChats,
+            'nav-recados': openRecados,
+          };
+          const onClickOverride = overrides[link.id];
           return (
             <NavRouteButton
               key={link.id}
               link={link}
               expanded={expanded}
-              onClickOverride={link.id === 'nav-chats' ? onNavChats : undefined}
+              onClickOverride={onClickOverride}
+              badge={link.id === 'nav-recados' ? unreadCount : 0}
             />
           );
         })}

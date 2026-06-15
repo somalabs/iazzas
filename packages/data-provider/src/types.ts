@@ -657,6 +657,21 @@ export type TAcceptTermsResponse = {
 
 export type TBannerResponse = TBanner | null;
 
+export type TBannersResponse = TBanner[];
+
+export type TCreateBannerRequest = {
+  message: string;
+  type?: 'banner' | 'popup';
+  displayFrom?: string | null;
+  displayTo?: string | null;
+  isPublic?: boolean;
+  persistable?: boolean;
+};
+
+export type TDeleteBannerResponse = {
+  deletedCount: number;
+};
+
 export type TUpdateFeedbackRequest = {
   feedback?: TMinimalFeedback;
 };

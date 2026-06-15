@@ -5,6 +5,13 @@ import { BadgeItem } from '~/common';
 
 const hideBannerHint = atomWithLocalStorage('hideBannerHint', [] as string[]);
 
+const recadosSeen = atomWithLocalStorage('recadosSeen', [] as string[]);
+
+const recadosInboxOpen = atom<boolean>({
+  key: 'recadosInboxOpen',
+  default: false,
+});
+
 const messageAttachmentsMap = atom<Record<string, TAttachment[] | undefined>>({
   key: 'messageAttachmentsMap',
   default: {},
@@ -66,6 +73,8 @@ const chatBadges = atomWithLocalStorage<Pick<BadgeItem, 'id'>[]>('chatBadges', [
 
 export default {
   hideBannerHint,
+  recadosSeen,
+  recadosInboxOpen,
   messageAttachmentsMap,
   conversationAttachmentsSelector,
   queriesEnabled,

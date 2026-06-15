@@ -8,6 +8,7 @@ const adminGroups = require('./admin/groups');
 const adminRoles = require('./admin/roles');
 const adminUsers = require('./admin/users');
 const adminAnalytics = require('./admin/analytics');
+const adminBanner = require('./admin/banner');
 const endpoints = require('./endpoints');
 const staticRoute = require('./static');
 const messages = require('./messages');
@@ -21,6 +22,7 @@ const balance = require('./balance');
 const actions = require('./actions');
 const apiKeys = require('./apiKeys');
 const banner = require('./banner');
+const banners = banner.banners;
 const feedbacks = require('./feedbacks');
 const search = require('./search');
 const models = require('./models');
@@ -47,6 +49,7 @@ module.exports = {
   adminRoles,
   adminUsers,
   adminAnalytics,
+  adminBanner,
   keys,
   apiKeys,
   user,
@@ -56,6 +59,7 @@ module.exports = {
   files,
   share,
   banner,
+  banners,
   feedbacks,
   agents,
   convos,

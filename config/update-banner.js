@@ -1,6 +1,6 @@
 const path = require('path');
+const crypto = require('crypto');
 const mongoose = require('mongoose');
-const { v5: uuidv5 } = require('uuid');
 const { Banner } = require('@librechat/data-schemas').createModels(mongoose);
 require('module-alias')({ base: path.resolve(__dirname, '..', 'api') });
 const { askQuestion, askMultiLineQuestion, silentExit } = require('./helpers');
@@ -88,40 +88,20 @@ const connect = require('./connect');
     persistable = persistableInput.toLowerCase() === 'y' ? true : false;
   }
 
-  // Generate the same bannerId for the same message
-  // This allows us to display only messages that haven't been shown yet
-  const NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'; // Use an arbitrary namespace UUID
-  const bannerId = uuidv5(message, NAMESPACE);
+  // Each recado is its own document with a unique bannerId, so the same
+  // message can be broadcast more than once without colliding.
+  const bannerId = crypto.randomUUID();
 
   let result;
   try {
-    // There is always only one Banner record in the DB.
-    // If a Banner exists in the DB, it will be updated.
-    // If it doesn't exist, a new one will be added.
-    const existingBanner = await Banner.findOne();
-    if (existingBanner) {
-      result = await Banner.findByIdAndUpdate(
-        existingBanner._id,
-        {
-          displayFrom,
-          displayTo,
-          message,
-          bannerId,
-          isPublic,
-          persistable,
-        },
-        { new: true },
-      );
-    } else {
-      result = await Banner.create({
-        displayFrom,
-        displayTo,
-        message,
-        bannerId,
-        isPublic,
-        persistable,
-      });
-    }
+    result = await Banner.create({
+      displayFrom,
+      displayTo,
+      message,
+      bannerId,
+      isPublic,
+      persistable,
+    });
   } catch (error) {
     console.red('Error: ' + error.message);
     console.error(error);

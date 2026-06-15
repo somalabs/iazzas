@@ -1,13 +1,5 @@
 import { useMemo } from 'react';
-import {
-  CalendarClock,
-  ShieldCheck,
-  MessageSquare,
-  Sparkles,
-  Bot,
-  GitBranch,
-  Zap,
-} from 'lucide-react';
+import { ShieldCheck, MessageSquare, Sparkles, Bot, GitBranch, Zap, Megaphone } from 'lucide-react';
 import type { NavLink } from '~/common';
 
 /**
@@ -52,6 +44,12 @@ export default function useUnifiedSidebarLinks() {
         icon: Zap,
         id: 'nav-automacoes',
         href: '/d/automacoes',
+      },
+      {
+        title: 'com_recados_nav',
+        description: 'com_recados_nav_desc',
+        icon: Megaphone,
+        id: 'nav-recados',
       },
       { id: 'sep-1', separator: true, adminOnly: true },
       {

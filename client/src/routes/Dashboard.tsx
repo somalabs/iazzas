@@ -14,6 +14,7 @@ import {
   ConfigsView,
   AnalyticsView,
   FeedbacksView,
+  RecadosView,
 } from '~/components/Admin';
 import StudioScreen from '~/components/Studio/StudioScreen';
 import { AgentStudioView, FlowsHome } from '~/components/AgentStudio';
@@ -136,6 +137,7 @@ const dashboardRoutes = {
         { path: 'configs', element: <ConfigsView /> },
         { path: 'analytics', element: <AnalyticsView /> },
         { path: 'feedbacks', element: <FeedbacksView /> },
+        { path: 'recados', element: <RecadosView /> },
       ],
     },
     {

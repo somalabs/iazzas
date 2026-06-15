@@ -166,6 +166,7 @@ const startServer = async () => {
   app.use('/api/admin/roles', routes.adminRoles);
   app.use('/api/admin/users', routes.adminUsers);
   app.use('/api/admin/analytics', routes.adminAnalytics);
+  app.use('/api/admin/banner', routes.adminBanner);
   app.use('/api/actions', routes.actions);
   app.use('/api/keys', routes.keys);
   app.use('/api/api-keys', routes.apiKeys);
@@ -187,6 +188,7 @@ const startServer = async () => {
   app.use('/api/roles', routes.roles);
   app.use('/api/agents', routes.agents);
   app.use('/api/banner', routes.banner);
+  app.use('/api/banners', routes.banners);
   app.use('/api/feedbacks', routes.feedbacks);
   app.use('/api/admin/feedbacks', routes.feedbacks);
   app.use('/api/memories', routes.memories);

@@ -1,6 +1,16 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useMediaQuery } from '@librechat/client';
-import { Users, Shield, UsersRound, KeyRound, Settings, BarChart3, MessageSquareWarning, ArrowLeft } from 'lucide-react';
+import {
+  Users,
+  Shield,
+  UsersRound,
+  KeyRound,
+  Settings,
+  BarChart3,
+  MessageSquareWarning,
+  Megaphone,
+  ArrowLeft,
+} from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -11,7 +21,12 @@ const navItems = [
   { path: '/d/admin/grants', icon: KeyRound, labelKey: 'com_admin_nav_grants' as const },
   { path: '/d/admin/configs', icon: Settings, labelKey: 'com_admin_nav_configs' as const },
   { path: '/d/admin/analytics', icon: BarChart3, labelKey: 'com_admin_nav_analytics' as const },
-  { path: '/d/admin/feedbacks', icon: MessageSquareWarning, labelKey: 'com_admin_nav_feedbacks' as const },
+  {
+    path: '/d/admin/feedbacks',
+    icon: MessageSquareWarning,
+    labelKey: 'com_admin_nav_feedbacks' as const,
+  },
+  { path: '/d/admin/recados', icon: Megaphone, labelKey: 'com_admin_nav_recados' as const },
 ];
 
 export default function AdminSidebar() {
