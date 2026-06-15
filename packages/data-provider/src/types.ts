@@ -661,7 +661,7 @@ export type TBannersResponse = TBanner[];
 
 export type TCreateBannerRequest = {
   message: string;
-  type?: 'banner' | 'popup';
+  type?: 'banner' | 'popup' | 'inbox';
   displayFrom?: string | null;
   displayTo?: string | null;
   isPublic?: boolean;

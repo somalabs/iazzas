@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { OGDialog, OGDialogContent, OGDialogTitle } from '@librechat/client';
-import MarkdownLite from '~/components/Chat/Messages/Content/MarkdownLite';
+import RecadoMarkdown from './RecadoMarkdown';
 import { useLocalize } from '~/hooks';
 import useRecados from './useRecados';
 
@@ -30,9 +30,7 @@ export default function RecadosPopup() {
     <OGDialog open={open} onOpenChange={handleOpenChange}>
       <OGDialogContent className="max-h-[80vh] w-full max-w-lg overflow-y-auto">
         <OGDialogTitle>{localize('com_recados_title')}</OGDialogTitle>
-        <div className="mt-2 break-words text-sm text-text-primary [&_a]:text-blue-700 [&_a]:underline dark:[&_a]:text-blue-400">
-          <MarkdownLite content={pendingPopup.message} codeExecution={false} />
-        </div>
+        <RecadoMarkdown content={pendingPopup.message} className="mt-2" />
       </OGDialogContent>
     </OGDialog>
   );

@@ -1241,7 +1241,7 @@ export const tBannerSchema = z.object({
   message: z.string(),
   displayFrom: z.string(),
   displayTo: z.string().optional(),
-  type: z.enum(['banner', 'popup']).default('banner'),
+  type: z.enum(['banner', 'popup', 'inbox']).default('banner'),
   createdAt: z.string(),
   updatedAt: z.string(),
   isPublic: z.boolean(),

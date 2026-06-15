@@ -3,7 +3,7 @@ import { ChevronLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { OGDialog, OGDialogContent, OGDialogTitle, Button } from '@librechat/client';
 import type { TBanner } from 'librechat-data-provider';
-import MarkdownLite from '~/components/Chat/Messages/Content/MarkdownLite';
+import RecadoMarkdown from './RecadoMarkdown';
 import { useLocalize } from '~/hooks';
 import useRecados from './useRecados';
 import { cn } from '~/utils';
@@ -62,9 +62,7 @@ export default function RecadosInbox({
             <p className="mb-2 text-xs text-text-tertiary">
               {formatDistanceToNow(new Date(selected.createdAt), { addSuffix: true })}
             </p>
-            <div className="break-words text-sm text-text-primary [&_a]:text-blue-700 [&_a]:underline dark:[&_a]:text-blue-400">
-              <MarkdownLite content={selected.message} codeExecution={false} />
-            </div>
+            <RecadoMarkdown content={selected.message} />
           </div>
         ) : (
           <div className="mt-2 flex flex-col overflow-y-auto">

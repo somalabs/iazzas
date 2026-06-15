@@ -5,7 +5,7 @@ import type { IBanner, IUser } from '~/types';
 
 export type CreateBannerData = {
   message: string;
-  type?: 'banner' | 'popup';
+  type?: 'banner' | 'popup' | 'inbox';
   displayFrom?: Date | string | null;
   displayTo?: Date | string | null;
   isPublic?: boolean;

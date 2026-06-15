@@ -10,7 +10,7 @@ import { cn } from '~/utils';
 const typeLabelKey = (type: TBanner['type']) =>
   type === 'popup'
     ? ('com_admin_recados_type_popup' as const)
-    : ('com_admin_recados_type_faixa' as const);
+    : ('com_admin_recados_type_inbox' as const);
 
 export default function RecadosView() {
   const localize = useLocalize();

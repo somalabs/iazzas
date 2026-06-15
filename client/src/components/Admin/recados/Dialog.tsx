@@ -9,12 +9,11 @@ import {
   TextareaAutosize,
 } from '@librechat/client';
 import type { TCreateBannerRequest } from 'librechat-data-provider';
-import MarkdownLite from '~/components/Chat/Messages/Content/MarkdownLite';
+import RecadoMarkdown from '~/components/Recados/RecadoMarkdown';
 import { useCreateBannerMutation } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
-type RecadoMode = 'popup' | 'banner';
 type EditorTab = 'write' | 'preview';
 
 interface RecadoDialogProps {
@@ -25,11 +24,8 @@ interface RecadoDialogProps {
 export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) {
   const localize = useLocalize();
   const [message, setMessage] = useState('');
-  const [mode, setMode] = useState<RecadoMode>('popup');
+  const [popup, setPopup] = useState(true);
   const [tab, setTab] = useState<EditorTab>('write');
-  const [displayFrom, setDisplayFrom] = useState('');
-  const [displayTo, setDisplayTo] = useState('');
-  const [persistable, setPersistable] = useState(false);
   const [error, setError] = useState('');
 
   const mutation = useCreateBannerMutation({
@@ -40,11 +36,8 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
   useEffect(() => {
     if (open) {
       setMessage('');
-      setMode('popup');
+      setPopup(true);
       setTab('write');
-      setDisplayFrom('');
-      setDisplayTo('');
-      setPersistable(false);
       setError('');
     }
   }, [open]);
@@ -58,11 +51,8 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
     }
     const payload: TCreateBannerRequest = {
       message: trimmed,
-      type: mode,
+      type: popup ? 'popup' : 'inbox',
       isPublic: true,
-      persistable: mode === 'banner' ? persistable : false,
-      displayFrom: mode === 'banner' && displayFrom ? displayFrom : null,
-      displayTo: mode === 'banner' && displayTo ? displayTo : null,
     };
     mutation.mutate(payload);
   };
@@ -73,42 +63,12 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
       active ? 'bg-surface-submit text-white' : 'text-text-secondary hover:bg-surface-hover',
     );
 
-  const modeClasses = (active: boolean) =>
-    cn(
-      'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
-      active
-        ? 'border-surface-submit bg-surface-submit text-white'
-        : 'border-border-medium text-text-secondary hover:bg-surface-hover',
-    );
-
   return (
     <OGDialog open={open} onOpenChange={onOpenChange}>
-      <OGDialogContent className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-y-auto">
+      <OGDialogContent className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-y-auto">
         <OGDialogTitle>{localize('com_admin_recados_new')}</OGDialogTitle>
 
         <div className="mt-4 space-y-4">
-          <div>
-            <Label className="mb-2 block text-sm font-medium text-text-secondary">
-              {localize('com_admin_recados_mode')}
-            </Label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setMode('popup')}
-                className={modeClasses(mode === 'popup')}
-              >
-                {localize('com_admin_recados_type_popup')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode('banner')}
-                className={modeClasses(mode === 'banner')}
-              >
-                {localize('com_admin_recados_type_faixa')}
-              </button>
-            </div>
-          </div>
-
           <div>
             <div className="mb-2 flex items-center gap-1">
               <button
@@ -130,62 +90,34 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
               <TextareaAutosize
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                minRows={6}
-                maxRows={16}
+                minRows={10}
+                maxRows={22}
                 className="w-full resize-none rounded-lg border border-border-medium bg-surface-primary p-3 font-mono text-sm text-text-primary placeholder:text-text-tertiary focus:border-surface-submit focus:outline-none"
                 placeholder={localize('com_admin_recados_placeholder')}
                 aria-label={localize('com_admin_recados_write')}
               />
             ) : (
-              <div className="min-h-[10rem] rounded-lg border border-border-medium bg-surface-primary p-3 text-sm text-text-primary [&_a]:text-blue-700 [&_a]:underline dark:[&_a]:text-blue-400">
+              <div className="min-h-[16rem] rounded-lg border border-border-medium bg-surface-primary p-3">
                 {trimmed === '' ? (
-                  <p className="italic text-text-tertiary">
+                  <p className="text-sm italic text-text-tertiary">
                     {localize('com_admin_recados_empty_preview')}
                   </p>
                 ) : (
-                  <MarkdownLite content={message} codeExecution={false} />
+                  <RecadoMarkdown content={message} />
                 )}
               </div>
             )}
           </div>
 
-          {mode === 'banner' && (
-            <div className="space-y-3 rounded-lg border border-border-light p-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="mb-1 block text-sm font-medium text-text-secondary">
-                    {localize('com_admin_recados_display_from')}
-                  </Label>
-                  <input
-                    type="datetime-local"
-                    value={displayFrom}
-                    onChange={(e) => setDisplayFrom(e.target.value)}
-                    className="w-full rounded-lg border border-border-medium bg-surface-primary px-3 py-2 text-sm text-text-primary focus:border-surface-submit focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <Label className="mb-1 block text-sm font-medium text-text-secondary">
-                    {localize('com_admin_recados_display_to')}
-                  </Label>
-                  <input
-                    type="datetime-local"
-                    value={displayTo}
-                    onChange={(e) => setDisplayTo(e.target.value)}
-                    className="w-full rounded-lg border border-border-medium bg-surface-primary px-3 py-2 text-sm text-text-primary focus:border-surface-submit focus:outline-none"
-                  />
-                </div>
-              </div>
-              <label className="flex items-center gap-2 text-sm text-text-secondary">
-                <input
-                  type="checkbox"
-                  checked={!persistable}
-                  onChange={(e) => setPersistable(!e.target.checked)}
-                  className="h-4 w-4"
-                />
-                {localize('com_admin_recados_dismissible')}
-              </label>
-            </div>
-          )}
+          <label className="flex items-center gap-2 text-sm text-text-secondary">
+            <input
+              type="checkbox"
+              checked={popup}
+              onChange={(e) => setPopup(e.target.checked)}
+              className="h-4 w-4"
+            />
+            {localize('com_admin_recados_popup_option')}
+          </label>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
