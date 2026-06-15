@@ -115,6 +115,7 @@ const googleModels = {
   'gemini-3-pro-image': 1000000,
   'gemini-3.1': 1000000,
   'gemini-3.1-flash-lite': 1000000,
+  'gemini-3.5-flash': 1000000,
 };
 
 const anthropicModels = {

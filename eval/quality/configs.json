@@ -1,0 +1,92 @@
+[
+  {
+    "id": "flash-current",
+    "label": "Flash + prompt atual + params default (= o que os usuários recebem hoje)",
+    "model": "gemini-2.5-flash",
+    "prompt": "iazzas-current",
+    "temperature": 1,
+    "maxOutputTokens": 8192,
+    "thinkingBudget": -1
+  },
+  {
+    "id": "flash-plus-tuned",
+    "label": "Flash + prompt melhorado + temp 0.4 + maxOut 32k (upgrade mais barato)",
+    "model": "gemini-2.5-flash",
+    "prompt": "iazzas-plus",
+    "temperature": 0.4,
+    "maxOutputTokens": 32000,
+    "thinkingBudget": -1
+  },
+  {
+    "id": "pro-current",
+    "label": "Pro + prompt atual + params default (só troca de modelo)",
+    "model": "gemini-2.5-pro",
+    "prompt": "iazzas-current",
+    "temperature": 1,
+    "maxOutputTokens": 8192,
+    "thinkingBudget": -1
+  },
+  {
+    "id": "pro-plus",
+    "label": "Pro + prompt melhorado + params default (modelo + prompt)",
+    "model": "gemini-2.5-pro",
+    "prompt": "iazzas-plus",
+    "temperature": 1,
+    "maxOutputTokens": 8192,
+    "thinkingBudget": -1
+  },
+  {
+    "id": "pro-plus-tuned",
+    "label": "Pro + prompt melhorado + temp 0.4 + maxOut 32k (tudo)",
+    "model": "gemini-2.5-pro",
+    "prompt": "iazzas-plus",
+    "temperature": 0.4,
+    "maxOutputTokens": 32000,
+    "thinkingBudget": -1
+  },
+  {
+    "id": "pro-v2",
+    "label": "Pro + prompt v2 (capacidade + guardrails de BI) + params default",
+    "model": "gemini-2.5-pro",
+    "prompt": "iazzas-v2",
+    "temperature": 1,
+    "maxOutputTokens": 8192,
+    "thinkingBudget": -1
+  },
+  {
+    "id": "g31pro-v2",
+    "label": "Gemini 3.1 Pro + v2 + thinkingLevel high",
+    "model": "gemini-3.1-pro-preview",
+    "prompt": "iazzas-v2-prod",
+    "temperature": 1,
+    "maxOutputTokens": 8192,
+    "thinkingLevel": "high"
+  },
+  {
+    "id": "g31pro-v3",
+    "label": "Gemini 3.1 Pro + v3 (refinado) + thinkingLevel high",
+    "model": "gemini-3.1-pro-preview",
+    "prompt": "iazzas-v3",
+    "temperature": 1,
+    "maxOutputTokens": 8192,
+    "thinkingLevel": "high"
+  },
+  {
+    "id": "g35flash-v3",
+    "label": "Gemini 3.5 Flash + v3 + thinkingLevel high (opção barata)",
+    "model": "gemini-3.5-flash",
+    "prompt": "iazzas-v3",
+    "temperature": 1,
+    "maxOutputTokens": 8192,
+    "thinkingLevel": "high"
+  },
+  {
+    "id": "g31pro-v4",
+    "label": "Gemini 3.1 Pro + v4 (decompor drivers + fator decisivo) + thinkingLevel high",
+    "model": "gemini-3.1-pro-preview",
+    "prompt": "iazzas-v4",
+    "temperature": 1,
+    "maxOutputTokens": 8192,
+    "thinkingLevel": "high"
+  }
+]

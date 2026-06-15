@@ -1,0 +1,185 @@
+[
+  {
+    "id": "mt01-fluxo-processo",
+    "family": "flowchart",
+    "prompt": "Monta no Miro um fluxograma do processo de aprovação de uma campanha de marketing, do briefing até a veiculação.",
+    "gabarito": {
+      "tool": "diagram_create",
+      "min_nodes": 6,
+      "expects_connectors": true,
+      "min_connectors": 5,
+      "labeled_edges": false,
+      "grouping": false
+    },
+    "checks": [
+      "Chamou diagram_create (ou layout_create com shapes+connectors), NÃO despejou texto solto nem só respondeu em markdown.",
+      "Há >= 6 nós representando etapas do processo (briefing, criação, aprovação, produção, veiculação...).",
+      "As etapas estão ligadas por connectors numa sequência clara (>= 5 arestas), sem nós órfãos.",
+      "Tem título/frame identificando o fluxo."
+    ]
+  },
+  {
+    "id": "mt02-fluxo-decisao",
+    "family": "decision-flowchart",
+    "prompt": "Cria um fluxograma de decisão pro time de atendimento decidir se uma devolução é aprovada ou não.",
+    "gabarito": {
+      "tool": "diagram_create",
+      "min_nodes": 5,
+      "expects_connectors": true,
+      "min_connectors": 5,
+      "labeled_edges": true,
+      "grouping": false
+    },
+    "checks": [
+      "Chamou diagram_create com nós e connectors (não texto solto).",
+      "Há pelo menos um nó de decisão (losango) com ramificação.",
+      "As arestas que saem da decisão estão rotuladas (ex.: sim/não, aprovado/recusado).",
+      "Os caminhos chegam a estados terminais distintos (aprovar / recusar)."
+    ]
+  },
+  {
+    "id": "mt03-org-chart",
+    "family": "org-chart",
+    "prompt": "Desenha o organograma de uma diretoria de e-commerce: 1 diretor, 3 gerências (aquisição, CRM, operações) e 2 analistas em cada gerência.",
+    "gabarito": {
+      "tool": "diagram_create",
+      "min_nodes": 10,
+      "expects_connectors": true,
+      "min_connectors": 9,
+      "labeled_edges": false,
+      "grouping": false
+    },
+    "checks": [
+      "Estrutura hierárquica em árvore (diretor no topo, gerências abaixo, analistas nas folhas).",
+      "Há 10 nós (1 + 3 + 6) e ~9 connectors hierárquicos.",
+      "Cada analista está ligado à gerência certa; nenhuma gerência sem analistas.",
+      "Layout top-down legível, sem cruzamentos desnecessários."
+    ]
+  },
+  {
+    "id": "mt04-mapa-mental",
+    "family": "mind-map",
+    "prompt": "Faz um mapa mental dos pilares da estratégia de sustentabilidade do grupo (ex.: matéria-prima, cadeia produtiva, embalagem, logística reversa).",
+    "gabarito": {
+      "tool": "diagram_create",
+      "min_nodes": 9,
+      "expects_connectors": true,
+      "min_connectors": 8,
+      "labeled_edges": false,
+      "grouping": false
+    },
+    "checks": [
+      "Nó central 'sustentabilidade' com ramos para cada pilar.",
+      "Cada pilar tem pelo menos um sub-item ligado a ele.",
+      "Estrutura radial/em árvore com connectors do centro para os ramos (não lista de texto)."
+    ]
+  },
+  {
+    "id": "mt05-customer-journey",
+    "family": "journey",
+    "prompt": "Monta o customer journey de uma cliente da Farm comprando online, da descoberta ao pós-venda, com as fases no topo e os pontos de contato embaixo de cada fase.",
+    "gabarito": {
+      "tool": "layout_create",
+      "min_nodes": 8,
+      "expects_connectors": false,
+      "min_connectors": 0,
+      "labeled_edges": false,
+      "grouping": true
+    },
+    "checks": [
+      "Fases no topo (descoberta, consideração, compra, entrega, pós-venda) como colunas/frames.",
+      "Pontos de contato posicionados sob a fase correspondente (agrupamento por coluna).",
+      "Usou layout em grade (layout_create), não texto corrido."
+    ]
+  },
+  {
+    "id": "mt06-brainstorm-stickies",
+    "family": "sticky-brainstorm",
+    "prompt": "Joga num board do Miro 8 ideias de ações pra reduzir a taxa de devolução, cada uma em um sticky note.",
+    "gabarito": {
+      "tool": "layout_create",
+      "min_nodes": 8,
+      "expects_connectors": false,
+      "min_connectors": 0,
+      "labeled_edges": false,
+      "grouping": false
+    },
+    "checks": [
+      "Criou >= 8 sticky notes de verdade (layout_create com type sticky), não um texto com bullets.",
+      "Cada sticky tem uma ideia distinta e acionável.",
+      "Stickies dispostos numa grade legível, sem sobreposição."
+    ]
+  },
+  {
+    "id": "mt07-afinidade",
+    "family": "affinity",
+    "prompt": "Organiza num board os principais motivos de devolução agrupados por categoria (tamanho, qualidade, expectativa), em sticky notes.",
+    "gabarito": {
+      "tool": "layout_create",
+      "min_nodes": 9,
+      "expects_connectors": false,
+      "min_connectors": 0,
+      "labeled_edges": false,
+      "grouping": true
+    },
+    "checks": [
+      "Três clusters rotulados (tamanho, qualidade, expectativa), cada um num frame/coluna.",
+      "Os motivos (stickies) estão sob a categoria certa.",
+      "Agrupamento visual claro, não uma lista única."
+    ]
+  },
+  {
+    "id": "mt08-kanban",
+    "family": "kanban",
+    "prompt": "Cria um kanban no Miro com as colunas A Fazer / Fazendo / Feito e 5 cartões de exemplo de um projeto de lançamento de coleção.",
+    "gabarito": {
+      "tool": "layout_create",
+      "min_nodes": 5,
+      "expects_connectors": false,
+      "min_connectors": 0,
+      "labeled_edges": false,
+      "grouping": true
+    },
+    "checks": [
+      "Três colunas (frames) rotuladas A Fazer / Fazendo / Feito.",
+      "5 cartões distribuídos nas colunas, cada um uma tarefa real de lançamento.",
+      "Cartões dentro das colunas certas (parent/child ou posição), não soltos."
+    ]
+  },
+  {
+    "id": "mt09-matriz-2x2",
+    "family": "matrix-2x2",
+    "prompt": "Monta uma matriz 2x2 de esforço x impacto pra priorizar 6 iniciativas de CRM.",
+    "gabarito": {
+      "tool": "layout_create",
+      "min_nodes": 6,
+      "expects_connectors": false,
+      "min_connectors": 0,
+      "labeled_edges": false,
+      "grouping": true
+    },
+    "checks": [
+      "Eixos rotulados (esforço x impacto) com os 4 quadrantes definidos.",
+      "As 6 iniciativas posicionadas em quadrantes (não enfileiradas numa lista).",
+      "Quem é alto impacto/baixo esforço deve cair no quadrante de prioridade."
+    ]
+  },
+  {
+    "id": "mt10-arquitetura-dados",
+    "family": "architecture-flow",
+    "prompt": "Desenha no Miro um diagrama da arquitetura de dados: fontes (Linx, e-commerce, ERP) -> ETL -> BigQuery -> dashboards de BI.",
+    "gabarito": {
+      "tool": "diagram_create",
+      "min_nodes": 6,
+      "expects_connectors": true,
+      "min_connectors": 5,
+      "labeled_edges": false,
+      "grouping": false
+    },
+    "checks": [
+      "Nós para fontes, camada de ETL, BigQuery e consumo (dashboards).",
+      "Fluxo direcional com connectors (setas) da esquerda/origem para o destino.",
+      "Múltiplas fontes convergindo para o ETL/BigQuery (fan-in), não uma linha única."
+    ]
+  }
+]

@@ -1,0 +1,5 @@
+# Generated eval data (reproducible from the scripts + prompts). Conclusions live in FINDINGS.md.
+results/
+results-*/
+judge/
+judge-*/

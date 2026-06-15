@@ -1,0 +1,62 @@
+[
+  {
+    "id": "t01-diagnose-ticket",
+    "category": "raciocinio",
+    "prompt": "Uma das nossas marcas de moda teve, no último trimestre, queda de 12% no ticket médio e alta de 8% no volume de transações. A receita ficou quase estável. Sem inventar números, me diga as hipóteses mais prováveis para isso e o que você investigaria, em ordem de prioridade.",
+    "checks": ["lista hipóteses causais", "ordena por prioridade", "propõe o que investigar", "não inventa números"]
+  },
+  {
+    "id": "t02-margem-contrib",
+    "category": "explicacao-profunda",
+    "prompt": "Explique a diferença entre margem bruta e margem de contribuição numa operação de varejo de moda, e por que confundir as duas leva a decisões erradas de precificação. Use um exemplo numérico simples para ilustrar.",
+    "checks": ["distingue os dois conceitos corretamente", "exemplo numérico coerente", "liga a decisão de precificação"]
+  },
+  {
+    "id": "t03-kpis-tabela",
+    "category": "instrucao-formato",
+    "prompt": "Liste 5 KPIs essenciais de e-commerce de moda. Para cada um: nome, fórmula e um intervalo de benchmark de mercado. Responda APENAS como tabela markdown, em português, sem nenhum texto de introdução ou conclusão.",
+    "checks": ["exatamente 5 linhas", "colunas nome/formula/benchmark", "só tabela, sem intro/conclusão", "em portugues"]
+  },
+  {
+    "id": "t04-premissa-falha",
+    "category": "pensamento-critico",
+    "prompt": "Como nossa taxa de conversão online caiu por causa do aumento de preço, qual desconto linear de 15% em todo o site devo dar para recuperar a conversão de imediato?",
+    "checks": ["questiona a premissa de causalidade", "aponta riscos do desconto linear (margem, marca)", "oferece alternativa melhor"]
+  },
+  {
+    "id": "t05-plano-30-60-90",
+    "category": "estrutura-plano",
+    "prompt": "Monte um plano de 30/60/90 dias para reduzir a taxa de devolução de calçados no e-commerce de uma marca premium. Seja específico e priorize ações de maior impacto e menor esforço primeiro.",
+    "checks": ["3 horizontes claros", "acoes especificas e acionaveis", "prioriza impacto/esforço", "ligado a calçado/devolução"]
+  },
+  {
+    "id": "t06-sql-sss",
+    "category": "codigo-precisao",
+    "prompt": "Escreva uma query BigQuery (Standard SQL) que calcula o SSS (same-store sales) comparable mês a mês: variação % de venda líquida apenas das lojas que existiam nos dois períodos comparados. Assuma uma tabela `vendas(loja_id, data_venda DATE, venda_liquida NUMERIC)`. Comente o racional nos pontos não óbvios.",
+    "checks": ["filtra lojas presentes nos dois periodos (comparable)", "agrega por mes corretamente", "calcula variação %", "SQL valido BigQuery"]
+  },
+  {
+    "id": "t07-comparar-precos",
+    "category": "analise-comparativa",
+    "prompt": "Compare prós e contras de três estratégias para liquidar fim de coleção numa marca premium: (a) markdown progressivo, (b) outlet físico, (c) bundle/combo. Conclua com uma recomendação condicionada ao objetivo (proteger marca vs. maximizar fluxo de caixa).",
+    "checks": ["cobre as 3 estrategias", "pros e contras de cada", "recomendação condicionada ao objetivo"]
+  },
+  {
+    "id": "t08-resumo-restrito",
+    "category": "instrucao-formato",
+    "prompt": "Resuma o seguinte em no máximo 3 bullets, cada bullet com no máximo 12 palavras, sem usar a palavra 'moda': 'A Azzas 2154 nasceu da fusão entre Arezzo&Co e Grupo Soma em 2024, reunindo mais de 28 marcas de moda, 22 mil colaboradores e mais de 2 mil lojas, com a missão de levar a criatividade da moda brasileira ao mundo.'",
+    "checks": ["no maximo 3 bullets", "cada bullet <=12 palavras", "não usa a palavra 'moda'", "preserva os fatos chave"]
+  },
+  {
+    "id": "t09-fermi",
+    "category": "estimativa-raciocinio",
+    "prompt": "Estime, raciocinando em voz alta passo a passo e deixando claras as premissas, quantos pares de tênis uma rede com 300 lojas físicas de calçado pode vender em um mês típico no Brasil. Marque cada número como premissa ou estimativa.",
+    "checks": ["decompoe o calculo (lojas x fluxo x conversão x...)", "premissas explicitas", "rotula estimativas", "chega a um numero final coerente"]
+  },
+  {
+    "id": "t10-decisao-tradeoff",
+    "category": "raciocinio-negocio",
+    "prompt": "Uma marca do grupo quer crescer em nova praça: lojas próprias ou franquias? Dê um enquadramento de decisão (não uma resposta única): quais 4 a 6 fatores decidem, e em que cenário cada modelo vence. Termine com a pergunta-chave que destrava a decisão.",
+    "checks": ["enquadramento, não resposta unica", "4-6 fatores relevantes", "cenarios onde cada modelo vence", "pergunta-chave final"]
+  }
+]

@@ -1,0 +1,4 @@
+# Generated artifacts (reproducible from gen.mjs + the *-products.json)
+*.png
+*.svg
+*-ops.json
