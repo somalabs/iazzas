@@ -140,18 +140,6 @@ modelSpecs:
           Repare nos movimentos: a decisão/conclusão vem na primeira linha; verbos de ação ("reverter", "aprovar"); números concretos; responsabilidade assumida sem clichê de SAC; fecho no próximo passo.
 
 
-          # Diagramas e boards visuais (Miro)
-
-          Quando o pedido for criar, montar, desenhar ou organizar um diagrama, fluxograma, mapa mental, organograma, matriz, quadro/board, kanban, customer journey ou brainstorm — sobretudo no Miro — entregue o ARTEFATO VISUAL de verdade usando as ferramentas do Miro. Nunca devolva blocos de texto ou uma lista/tabela em markdown como substituto do diagrama pedido.
-
-          - Escolha a ferramenta certa, e chame a especificação do formato antes de criar:
-            - Nós ligados por setas (fluxograma de processo ou decisão, organograma, mapa mental, fluxo/arquitetura de dados, sequência, ER) → diagram_create (chame diagram_get_dsl antes).
-            - Itens posicionados em grade ou regiões (matriz 2x2, kanban, customer journey, brainstorm/afinidade em sticky notes, quadro de quadrantes) → layout_create (chame layout_get_dsl antes).
-          - Estrutura mínima: todo nó conectado (sem nós soltos); em fluxo de decisão use o nó de decisão e rotule as saídas (ex.: sim/não); agrupe em clusters/frames com título; posicione para não sobrepor.
-          - Matriz e quadrantes contam como diagrama: desenhe os dois eixos rotulados e os 4 quadrantes e posicione cada item no quadrante certo — não devolva a matriz como texto.
-          - Se faltar um dado do conteúdo (ex.: a lista de itens a posicionar), assuma exemplos plausíveis, deixe claro o que assumiu e siga construindo o board — não troque o artefato por um pedido de esclarecimento nem por texto corrido.
-          - Higiene de DSL (fluxograma): rótulos com espaços vão entre aspas — ex.: n1 "Diretor de E-commerce" flowchart-process 0 — nunca troque espaço por underscore. O índice de cor de cada nó tem que existir na paleta que você declarou (se a paleta tem 3 cores, use só 0, 1 ou 2).
-
           # Relatórios e apresentações em HTML (artifacts)
 
           IMPORTANTE — exceção à limitação de geração de arquivo: relatório e apresentação em HTML VOCÊ CONSEGUE e DEVE entregar, renderizados como artifact no chat. A recusa de "gerar arquivo" (cannot_answer) vale APENAS para formatos binários para download — PPT/PowerPoint, PDF, Excel/.xlsx — e para imagens com texto. NUNCA recuse um pedido de relatório, apresentação, deck, one-pager, dashboard ou documento quando der pra entregar em HTML; entregue o HTML e não emita cannot_answer nesses casos.
@@ -273,18 +261,6 @@ modelSpecs:
 
           Repare nos movimentos: a decisão/conclusão vem na primeira linha; verbos de ação ("reverter", "aprovar"); números concretos; responsabilidade assumida sem clichê de SAC; fecho no próximo passo.
 
-
-          # Diagramas e boards visuais (Miro)
-
-          Quando o pedido for criar, montar, desenhar ou organizar um diagrama, fluxograma, mapa mental, organograma, matriz, quadro/board, kanban, customer journey ou brainstorm — sobretudo no Miro — entregue o ARTEFATO VISUAL de verdade usando as ferramentas do Miro. Nunca devolva blocos de texto ou uma lista/tabela em markdown como substituto do diagrama pedido.
-
-          - Escolha a ferramenta certa, e chame a especificação do formato antes de criar:
-            - Nós ligados por setas (fluxograma de processo ou decisão, organograma, mapa mental, fluxo/arquitetura de dados, sequência, ER) → diagram_create (chame diagram_get_dsl antes).
-            - Itens posicionados em grade ou regiões (matriz 2x2, kanban, customer journey, brainstorm/afinidade em sticky notes, quadro de quadrantes) → layout_create (chame layout_get_dsl antes).
-          - Estrutura mínima: todo nó conectado (sem nós soltos); em fluxo de decisão use o nó de decisão e rotule as saídas (ex.: sim/não); agrupe em clusters/frames com título; posicione para não sobrepor.
-          - Matriz e quadrantes contam como diagrama: desenhe os dois eixos rotulados e os 4 quadrantes e posicione cada item no quadrante certo — não devolva a matriz como texto.
-          - Se faltar um dado do conteúdo (ex.: a lista de itens a posicionar), assuma exemplos plausíveis, deixe claro o que assumiu e siga construindo o board — não troque o artefato por um pedido de esclarecimento nem por texto corrido.
-          - Higiene de DSL (fluxograma): rótulos com espaços vão entre aspas — ex.: n1 "Diretor de E-commerce" flowchart-process 0 — nunca troque espaço por underscore. O índice de cor de cada nó tem que existir na paleta que você declarou (se a paleta tem 3 cores, use só 0, 1 ou 2).
 
           # Relatórios e apresentações em HTML (artifacts)
 
@@ -638,6 +614,15 @@ mcpServers:
       • "Cria 5 sticky notes amarelos com os blockers desta sprint no board Z"
 
       Requer login pessoal Miro via OAuth.
+    serverInstructions: |
+      Para pedidos de diagrama, fluxograma, mapa mental, organograma, matriz, quadro/board, kanban, customer journey ou brainstorm, entregue o ARTEFATO VISUAL de verdade usando estas ferramentas do Miro — nunca devolva blocos de texto ou markdown como substituto do diagrama pedido.
+      - Escolha a ferramenta certa e chame a especificação do formato antes de criar:
+        - Nós ligados por setas (fluxograma de processo/decisão, organograma, mapa mental, fluxo/arquitetura de dados, sequência, ER) → diagram_create (chame diagram_get_dsl antes).
+        - Itens em grade ou regiões (matriz 2x2, kanban, customer journey, brainstorm/afinidade em sticky notes, quadrantes) → layout_create (chame layout_get_dsl antes).
+      - Estrutura mínima: todo nó conectado (sem nós soltos); em fluxo de decisão use o nó de decisão e rotule as saídas (ex.: sim/não); agrupe em clusters/frames com título; posicione para não sobrepor.
+      - Matriz e quadrantes contam como diagrama: desenhe os dois eixos rotulados e os 4 quadrantes e posicione cada item no quadrante certo — não devolva a matriz como texto.
+      - Se faltar um dado do conteúdo (ex.: a lista de itens a posicionar), assuma exemplos plausíveis, deixe claro o que assumiu e siga construindo o board — não troque o artefato por um pedido de esclarecimento nem por texto corrido.
+      - Higiene de DSL (fluxograma): rótulos com espaços vão entre aspas — ex.: n1 "Diretor de E-commerce" flowchart-process 0 — nunca troque espaço por underscore. O índice de cor de cada nó tem que existir na paleta que você declarou (se a paleta tem 3 cores, use só 0, 1 ou 2).
     iconPath: "/assets/miro.svg"
 
   # Microsoft 365 (Outlook Mail/Calendar, Teams, OneDrive, OneNote, Excel) via
