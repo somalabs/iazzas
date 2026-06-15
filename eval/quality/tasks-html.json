@@ -1,0 +1,58 @@
+[
+  {
+    "id": "hr01-relatorio-vendas-animale",
+    "type": "report",
+    "kind": "dados",
+    "prompt": "Monte um RELATÓRIO em HTML (artifact, documento autocontido) do desempenho de vendas da Animale no 1º trimestre de 2026. Use estes dados: venda líquida R$ 142,8M (+8,3% vs 1T25); ticket médio R$ 612 (−4,1%); PA 1,9; markup 2,61; participação de fase OFF subiu de 18% para 27% do volume; top lojas — Iguatemi SP R$ 6,1M, JK Iguatemi R$ 5,4M, Shopping Leblon R$ 4,9M; canal: Físico 71%, Online 22%, Omni 7%. Conclua com o principal risco e a recomendação.",
+    "checks": ["HTML autocontido renderizável (não recusa)", "Executive summary/BLUF no topo", "Usa exatamente os números dados, sem inventar", "Dados em tabelas/cards legíveis, hierarquia visual", "Conclusão com risco (dependência de OFF corroendo ticket) + recomendação", "Design coeso (tipografia, cores, espaçamento)"]
+  },
+  {
+    "id": "hr02-relatorio-tendencias",
+    "type": "report",
+    "kind": "tema",
+    "prompt": "Monte um RELATÓRIO em HTML (artifact) sobre as principais tendências do varejo de moda para 2026 e o que elas significam para um grupo como a Azzas 2154 (Farm, Animale, Arezzo, Hering, etc.). Cubra 4 a 6 tendências, cada uma com implicação prática para o grupo.",
+    "checks": ["HTML autocontido renderizável", "4-6 tendências bem estruturadas", "Cada tendência com implicação prática pro grupo", "Síntese executiva no topo", "Design coeso e escaneável", "Sem encher linguiça / sem alucinar dado específico como se fosse fato"]
+  },
+  {
+    "id": "hr03-relatorio-devolucoes",
+    "type": "report",
+    "kind": "dados",
+    "prompt": "Monte um RELATÓRIO HTML (artifact) de análise de devoluções. Dados: taxa de devolução geral 12,4% (online 18,1%, físico 6,2%); motivos — tamanho/modelagem 41%, expectativa vs produto 23%, defeito 14%, desistência 12%, outros 10%; marcas com maior taxa — marca A 16,8%, marca B 14,1%, marca C 9,7%. Traga diagnóstico e 3 ações priorizadas.",
+    "checks": ["HTML autocontido renderizável", "Usa os números exatos", "Quebra por canal e por motivo clara (tabela/visual)", "Diagnóstico do principal driver (tamanho/modelagem + online)", "3 ações priorizadas e acionáveis", "Design coeso"]
+  },
+  {
+    "id": "hr04-onepager-expansao",
+    "type": "report",
+    "kind": "misto",
+    "prompt": "Monte um ONE-PAGER em HTML (artifact) propondo um plano de expansão de 12 lojas da Farm em 2026, com racional, fases e investimento estimado (use faixas plausíveis e rotule como estimativa). Inclua riscos e o pedido de decisão.",
+    "checks": ["HTML autocontido renderizável", "One-pager focado (não prolixo)", "Racional + fases + investimento (faixas rotuladas como estimativa)", "Riscos explícitos", "Pedido de decisão claro no fim", "Design de one-pager (denso mas legível)"]
+  },
+  {
+    "id": "hp01-deck-azzas",
+    "type": "presentation",
+    "kind": "tema",
+    "prompt": "Monte uma APRESENTAÇÃO em HTML (artifact, deck de slides navegável) sobre a Azzas 2154: quem é o grupo, principais marcas, escala e missão. 6 a 8 slides, capa + conteúdo + encerramento.",
+    "checks": ["HTML autocontido renderizável como deck (slides em tela cheia, navegável)", "Capa + 6-8 slides + encerramento", "Uma ideia por slide, sem parede de texto", "Hierarquia visual e tema consistente", "Conteúdo correto sobre o grupo (marcas, escala, missão)", "Navegação (teclado/scroll) funcional"]
+  },
+  {
+    "id": "hp02-deck-resultados",
+    "type": "presentation",
+    "kind": "dados",
+    "prompt": "Monte uma APRESENTAÇÃO HTML (artifact, deck) dos resultados trimestrais da Animale (1T26) para a diretoria. Dados: venda líquida R$ 142,8M (+8,3%); ticket R$ 612 (−4,1%); markup 2,61; OFF 18%→27%; melhor loja Iguatemi SP R$ 6,1M; canal Físico 71% / Online 22% / Omni 7%. 6-7 slides com a leitura executiva e a recomendação.",
+    "checks": ["HTML autocontido renderizável como deck", "Capa + slides de KPIs + conclusão/recomendação", "Números exatos, sem inventar", "Um KPI/ideia por slide, visual (números grandes, destaque)", "Leitura executiva (não só despejar números): o que muda a decisão", "Tema consistente e profissional"]
+  },
+  {
+    "id": "hp03-deck-sustentabilidade",
+    "type": "presentation",
+    "kind": "tema",
+    "prompt": "Monte uma APRESENTAÇÃO HTML (artifact, deck) sobre sustentabilidade na moda: por que importa, pilares (matéria-prima, cadeia produtiva, embalagem, logística reversa) e como uma empresa de moda pode agir. 6-8 slides.",
+    "checks": ["HTML autocontido renderizável como deck", "Capa + pilares (1 por slide) + ação + encerramento", "Uma ideia por slide, sem parede de texto", "Conteúdo coerente e útil (não genérico/vazio)", "Tema visual consistente", "Navegação funcional"]
+  },
+  {
+    "id": "hp04-deck-colecao",
+    "type": "presentation",
+    "kind": "dados",
+    "prompt": "Monte uma APRESENTAÇÃO HTML (artifact, deck) de lançamento da coleção Verão 26 da Farm para o time comercial. Destaques: 3 famílias (Vestidos, Bolsas 'Me Leva', Lifestyle 'Glub'); top produtos — Vestido Midi Bosque Chic (5.190 un), Bolsinha Me Leva Palermo (6.033 un), Caneca Glub Orquidário (7.740 un); preço médio vestidos R$ 280, acessórios R$ 90. 6-8 slides animados o suficiente pra um kickoff.",
+    "checks": ["HTML autocontido renderizável como deck", "Capa + famílias + top produtos + números", "Visual de kickoff (energia, destaque, não árido)", "Números exatos dos produtos", "Uma ideia/família por slide", "Tema consistente e vendedor"]
+  }
+]
