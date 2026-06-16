@@ -22,6 +22,10 @@ COPY deps/package.json /opt/user-deps/package.json
 RUN cd /opt/user-deps && npm install --omit=dev --no-audit --no-fund
 ENV NODE_PATH=/opt/user-deps/node_modules
 
+# Waldemiro: engine de moodboard de produtos chamado pelo code interpreter (import waldemiro).
+COPY waldemiro.py /opt/user-deps/waldemiro.py
+ENV PYTHONPATH=/opt/user-deps
+
 COPY package*.json ./
 RUN npm ci --omit=dev
 
