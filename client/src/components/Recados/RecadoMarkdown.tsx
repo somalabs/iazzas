@@ -14,6 +14,7 @@ const proseClasses = cn(
   '[&_blockquote]:my-2 [&_blockquote]:border-l-4 [&_blockquote]:border-border-medium [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-text-secondary',
   '[&_a]:text-blue-700 [&_a]:underline dark:[&_a]:text-blue-400',
   '[&_code]:rounded [&_code]:bg-surface-tertiary [&_code]:px-1 [&_code]:py-0.5',
+  '[&_img]:my-3 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-lg [&_img]:border [&_img]:border-border-medium',
 );
 
 export default function RecadoMarkdown({

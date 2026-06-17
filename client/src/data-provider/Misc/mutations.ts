@@ -23,6 +23,18 @@ export const useCreateBannerMutation = (
   });
 };
 
+export const useUploadBannerImageMutation = (
+  options?: t.UploadAvatarOptions,
+): UseMutationResult<t.AvatarUploadResponse, unknown, FormData> => {
+  const { onSuccess, onError, onMutate } = options || {};
+  return useMutation<t.AvatarUploadResponse, unknown, FormData>({
+    mutationFn: (data: FormData) => dataService.uploadBannerImage(data),
+    onSuccess,
+    onError,
+    onMutate,
+  });
+};
+
 export const useDeleteBannerMutation = (
   options?: t.MutationOptions<t.TDeleteBannerResponse, string>,
 ): UseMutationResult<t.TDeleteBannerResponse, unknown, string> => {

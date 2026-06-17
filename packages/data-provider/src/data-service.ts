@@ -1258,6 +1258,10 @@ export function deleteBanner(bannerId: string): Promise<t.TDeleteBannerResponse>
   return request.delete(endpoints.adminBannerById(bannerId));
 }
 
+export function uploadBannerImage(data: FormData): Promise<f.AvatarUploadResponse> {
+  return request.postMultiPart(endpoints.adminBannerImage(), data);
+}
+
 export function updateFeedback(
   conversationId: string,
   messageId: string,

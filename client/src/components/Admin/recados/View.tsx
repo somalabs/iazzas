@@ -3,6 +3,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Spinner } from '@librechat/client';
 import type { TBanner } from 'librechat-data-provider';
 import { useGetAdminBannersQuery, useDeleteBannerMutation } from '~/data-provider';
+import { recadoSnippet } from '~/components/Recados/snippet';
 import { useLocalize } from '~/hooks';
 import RecadoDialog from './Dialog';
 import { cn } from '~/utils';
@@ -74,7 +75,9 @@ export default function RecadosView() {
                   className="border-b border-border-light last:border-0 hover:bg-surface-hover"
                 >
                   <td className="max-w-md px-4 py-3 text-text-primary">
-                    <span className="line-clamp-2 break-words">{recado.message}</span>
+                    <span className="line-clamp-2 break-words">
+                      {recadoSnippet(recado.message, localize('com_recados_image_attachment'))}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <span

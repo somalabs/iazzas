@@ -1,7 +1,6 @@
 /* eslint-disable i18next/no-literal-string -- intentional hardcoded pt-BR/brand/demo copy in IAzzas fork */
 import { memo, lazy, Suspense, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import { SystemRoles } from 'librechat-data-provider';
 import { PanelLeft } from 'lucide-react';
 import { Skeleton, Button, TooltipAnchor } from '@librechat/client';
@@ -11,7 +10,6 @@ import { useRecados } from '~/components/Recados';
 import { useGoToNewChat, useLocalize } from '~/hooks';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { cn } from '~/utils';
-import store from '~/store';
 
 const BalanceWidget = lazy(() => import('~/components/Nav/BalanceWidget'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
@@ -101,9 +99,7 @@ function ExpandedPanel({
   const { user } = useAuthContext();
   const isAdmin = user?.role === SystemRoles.ADMIN;
   const onNavChats = useGoToNewChat();
-  const setRecadosOpen = useSetRecoilState(store.recadosInboxOpen);
   const { unreadCount } = useRecados();
-  const openRecados = useCallback(() => setRecadosOpen(true), [setRecadosOpen]);
 
   const toggleLabel = expanded ? 'com_nav_close_sidebar' : 'com_nav_open_sidebar';
 
@@ -167,7 +163,6 @@ function ExpandedPanel({
           }
           const overrides: Record<string, () => void> = {
             'nav-chats': onNavChats,
-            'nav-recados': openRecados,
           };
           const onClickOverride = overrides[link.id];
           return (

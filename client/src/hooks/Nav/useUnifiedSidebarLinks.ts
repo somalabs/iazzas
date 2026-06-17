@@ -50,6 +50,7 @@ export default function useUnifiedSidebarLinks() {
         description: 'com_recados_nav_desc',
         icon: Megaphone,
         id: 'nav-recados',
+        href: '/d/recados',
       },
       { id: 'sep-1', separator: true, adminOnly: true },
       {

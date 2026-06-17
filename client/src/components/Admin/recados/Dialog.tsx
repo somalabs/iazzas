@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Image as ImageIcon } from 'lucide-react';
 import {
   Label,
   OGDialog,
@@ -10,7 +11,7 @@ import {
 } from '@librechat/client';
 import type { TCreateBannerRequest } from 'librechat-data-provider';
 import RecadoMarkdown from '~/components/Recados/RecadoMarkdown';
-import { useCreateBannerMutation } from '~/data-provider';
+import { useCreateBannerMutation, useUploadBannerImageMutation } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -27,11 +28,15 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
   const [popup, setPopup] = useState(true);
   const [tab, setTab] = useState<EditorTab>('write');
   const [error, setError] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const mutation = useCreateBannerMutation({
     onSuccess: () => onOpenChange(false),
     onError: () => setError(localize('com_admin_recados_error')),
   });
+
+  const imageMutation = useUploadBannerImageMutation();
 
   useEffect(() => {
     if (open) {
@@ -43,6 +48,41 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
   }, [open]);
 
   const trimmed = message.trim();
+
+  const insertAtCursor = (snippet: string) => {
+    setMessage((prev) => {
+      const el = textareaRef.current;
+      const start = el?.selectionStart ?? prev.length;
+      const end = el?.selectionEnd ?? prev.length;
+      const next = prev.slice(0, start) + snippet + prev.slice(end);
+      requestAnimationFrame(() => {
+        if (!el) {
+          return;
+        }
+        const caret = start + snippet.length;
+        el.focus();
+        el.setSelectionRange(caret, caret);
+      });
+      return next;
+    });
+  };
+
+  const handleImageSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) {
+      return;
+    }
+    setError('');
+    setTab('write');
+    const alt = file.name.replace(/\.[^./]+$/, '');
+    const formData = new FormData();
+    formData.append('file', file);
+    imageMutation.mutate(formData, {
+      onSuccess: ({ url }) => insertAtCursor(`\n![${alt}](${url})\n`),
+      onError: () => setError(localize('com_admin_recados_image_error')),
+    });
+  };
 
   const handleConfirm = () => {
     if (trimmed === '') {
@@ -85,9 +125,30 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
               >
                 {localize('com_admin_recados_preview')}
               </button>
+              <div className="ml-auto">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelected}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={imageMutation.isLoading}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover disabled:opacity-50"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  {imageMutation.isLoading
+                    ? localize('com_admin_recados_image_uploading')
+                    : localize('com_admin_recados_image')}
+                </button>
+              </div>
             </div>
             {tab === 'write' ? (
               <TextareaAutosize
+                ref={textareaRef}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 minRows={10}

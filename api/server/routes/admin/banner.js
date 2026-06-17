@@ -1,14 +1,35 @@
+const fs = require('fs').promises;
+const path = require('path');
+const crypto = require('crypto');
 const express = require('express');
 const { logger, SystemCapabilities } = require('@librechat/data-schemas');
 const { requireCapability } = require('~/server/middleware/roles/capabilities');
-const { requireJwtAuth } = require('~/server/middleware');
+const { requireJwtAuth, configMiddleware } = require('~/server/middleware');
+const { getStrategyFunctions } = require('~/server/services/Files/strategies');
+const { resizeImageBuffer } = require('~/server/services/Files/images/resize');
+const { getFileStrategy } = require('~/server/utils/getFileStrategy');
+const { createMulterInstance } = require('~/server/routes/files/multer');
 const { createBanner, listBanners, deleteBanner } = require('~/models');
 
 const router = express.Router();
 
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+
 const requireAdminAccess = requireCapability(SystemCapabilities.ACCESS_ADMIN);
 
 router.use(requireJwtAuth, requireAdminAccess);
+
+let multerInstance;
+const uploadSingleImage = async (req, res, next) => {
+  try {
+    if (!multerInstance) {
+      multerInstance = await createMulterInstance();
+    }
+    multerInstance.single('file')(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+};
 
 router.post('/', async (req, res) => {
   try {
@@ -28,6 +49,46 @@ router.post('/', async (req, res) => {
   } catch (error) {
     logger.error('[createBanner] Error creating banner', error);
     res.status(500).json({ message: 'Error creating banner' });
+  }
+});
+
+router.post('/image', configMiddleware, uploadSingleImage, async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file || file.size === 0) {
+      return res.status(400).json({ message: 'No image provided' });
+    }
+    if (!file.mimetype?.startsWith('image/')) {
+      return res.status(400).json({ message: 'Unsupported file type' });
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      return res.status(400).json({ message: 'Image too large (max 10 MB)' });
+    }
+
+    const appConfig = req.config;
+    const userId = req.user.id;
+    const input = await fs.readFile(file.path);
+
+    const { buffer } = await resizeImageBuffer(input, { px: 1280 });
+    const fileStrategy = getFileStrategy(appConfig, { isImage: true });
+    const { saveBuffer } = getStrategyFunctions(fileStrategy);
+
+    const extension = path.extname(file.originalname).toLowerCase() || '.png';
+    const fileName = `recado-${crypto.randomUUID()}${extension}`;
+    const url = await saveBuffer({ userId, buffer, fileName });
+
+    res.status(201).json({ url });
+  } catch (error) {
+    logger.error('[createBannerImage] Error uploading banner image', error);
+    res.status(500).json({ message: 'Error uploading image' });
+  } finally {
+    if (req.file?.path) {
+      try {
+        await fs.unlink(req.file.path);
+      } catch {
+        logger.debug('[createBannerImage] Temp. image upload file already deleted');
+      }
+    }
   }
 });
 

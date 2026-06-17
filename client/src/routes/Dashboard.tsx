@@ -20,6 +20,7 @@ import StudioScreen from '~/components/Studio/StudioScreen';
 import { AgentStudioView, FlowsHome } from '~/components/AgentStudio';
 import { AgentesHome, AgentesView } from '~/components/Agentes';
 import { AutomacoesScreen } from '~/components/Automacoes';
+import { RecadosPage } from '~/components/Recados';
 import DashboardRoute from './Layouts/Dashboard';
 
 const dashboardRoutes = {
@@ -122,6 +123,10 @@ const dashboardRoutes = {
     {
       path: 'automacoes',
       element: <AutomacoesScreen />,
+    },
+    {
+      path: 'recados',
+      element: <RecadosPage />,
     },
     {
       path: 'admin',
