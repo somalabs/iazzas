@@ -152,6 +152,9 @@ modelSpecs:
           - Rigor: use exatamente os números fornecidos; nunca invente dado. Estimativa rotulada como estimativa.
           - Tom adequado ao público (diretoria ≠ time ≠ cliente), em português, sem clichê corporativo.
           - Entregue o artifact direto, sem pedir confirmação nem anunciar que "vai gerar".
+
+          # Foto de produto
+          Para mostrar a foto de um produto no chat, resolva pela API de fotos no code interpreter: import waldemiro; r = waldemiro.foto_produto(marca="<marca>", produto="<PRODUTO>", cor="<COR>"). Se r["ok"], renderize r["markdown"]; se não, a marca não tem catálogo de fotos — diga isso ao usuário sem montar URL na mão. O waldemiro resolve o brand_id pela marca. PRODUTO e COR saem dos MCPs de dados; se faltar a cor, pergunte ou pegue do dado.
     - name: "iazzas-pro"
       label: "IAzzas (Pro)"
       description: "Assistente oficial da Azzas 2154 - poderoso"
@@ -274,6 +277,9 @@ modelSpecs:
           - Rigor: use exatamente os números fornecidos; nunca invente dado. Estimativa rotulada como estimativa.
           - Tom adequado ao público (diretoria ≠ time ≠ cliente), em português, sem clichê corporativo.
           - Entregue o artifact direto, sem pedir confirmação nem anunciar que "vai gerar".
+
+          # Foto de produto
+          Para mostrar a foto de um produto no chat, resolva pela API de fotos no code interpreter: import waldemiro; r = waldemiro.foto_produto(marca="<marca>", produto="<PRODUTO>", cor="<COR>"). Se r["ok"], renderize r["markdown"]; se não, a marca não tem catálogo de fotos — diga isso ao usuário sem montar URL na mão. O waldemiro resolve o brand_id pela marca. PRODUTO e COR saem dos MCPs de dados; se faltar a cor, pergunte ou pegue do dado.
     # =========================================================
     # Rollback: specs antigos com endpoint "google" (grounding nativo).
     # Restauram o Google Search nativo, mas perdem geração de imagem.
@@ -623,6 +629,13 @@ mcpServers:
       - Matriz e quadrantes contam como diagrama: desenhe os dois eixos rotulados e os 4 quadrantes e posicione cada item no quadrante certo — não devolva a matriz como texto.
       - Se faltar um dado do conteúdo (ex.: a lista de itens a posicionar), assuma exemplos plausíveis, deixe claro o que assumiu e siga construindo o board — não troque o artefato por um pedido de esclarecimento nem por texto corrido.
       - Higiene de DSL (fluxograma): rótulos com espaços vão entre aspas — ex.: n1 "Diretor de E-commerce" flowchart-process 0 — nunca troque espaço por underscore. O índice de cor de cada nó tem que existir na paleta que você declarou (se a paleta tem 3 cores, use só 0, 1 ou 2).
+
+      MOODBOARD / board de produtos (grade de fotos de produto com indicadores — diferente de tabela e de diagrama). Aqui você NÃO presume a estrutura nem inventa produtos — a regra de "assumir exemplos plausíveis" acima vale só para diagrama/fluxograma/matriz, NUNCA para moodboard.
+      - Pré-requisito: o usuário precisa ter o Miro conectado (as ferramentas layout_create/image_create do Miro disponíveis nesta conversa). Se não estiverem, peça pra conectar o Miro — não despeje DSL nem JSON de ops no chat.
+      - Primeiro extraia do pedido tudo que o usuário JÁ definiu; se ele já direcionou no pedido inicial, entenda e não pergunte de novo. Eixos necessários: (1) marca; (2) recorte dos produtos (quais/quantos) e a FONTE deles (sem fonte definida, pergunte); (3) campo que separa as LINHAS (ex.: categoria/grupo/faixa de preço; pode ser linha única); (4) campo que separa as COLUNAS (ex.: coleção/fase ON·SALE·OFF/mês/canal; pode ser coluna única); (5) ordenação; (6) legenda (métricas sob cada foto) + título.
+      - Só faça UMA pergunta objetiva sobre os eixos que faltarem; se não faltar nenhum, monte direto. Nunca invente agrupamento, ordenação ou métricas.
+      - Dados (nunca invente produtos): planilha que o usuário subiu, lista que ele colou no chat, ou MCPs de dados quando ele pedir/autorizar.
+      - Montagem: no code interpreter rode import json, waldemiro; ops = waldemiro.montar_moodboard(produtos, titulo=..., legenda=..., marca=...); print(json.dumps(ops)) — cada produto é {prod, cor, texto, linha, coluna, indicadores, postit?}. Se ops trouxer "erro" ou validacao.ok=False, NÃO monte: explique o problema ao usuário sem colar traceback. Caso ok, execute no board: layout_create(dsl=ops["layout_create_dsl"]) e um image_create por item de ops["image_create_calls"] (image_url, x, y, width). A marca resolve o brand_id da foto pelo waldemiro — nunca escolha brand_id na mão; se o code interpreter falhar, ajuste e tente de novo em silêncio.
     iconPath: "/assets/miro.svg"
 
   # Microsoft 365 (Outlook Mail/Calendar, Teams, OneDrive, OneNote, Excel) via

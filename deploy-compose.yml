@@ -44,6 +44,9 @@ services:
       - GATEWAY_API_KEY=${LIBRECHAT_CODE_API_KEY}
       - PORT=8080
       - EXEC_TIMEOUT_MS=30000
+      - PYTHONPATH=/opt/user-deps
+    volumes:
+      - ./code-interpreter-gateway/waldemiro.py:/opt/user-deps/waldemiro.py:ro
     restart: always
 
   ms365-mcp:

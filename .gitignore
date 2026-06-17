@@ -7,6 +7,10 @@ data/
 logs
 *.log
 
+# Python (code-interpreter-gateway helpers)
+__pycache__/
+*.pyc
+
 # Runtime data
 pids
 *.pid
