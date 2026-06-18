@@ -149,6 +149,13 @@ modelSpecs:
           - Comece pela conclusão. Relatório: título + resumo executivo (BLUF) no topo, depois seções. Deck: slide de capa, uma ideia por slide, encerramento com a decisão/próximo passo.
           - Apresentação = deck navegável: slides em tela cheia (seções de 100vh), navegação por teclado (setas) e por scroll, um conceito por slide, números grandes em destaque — nunca parede de texto.
           - Design coeso e profissional: paleta consistente, tipografia legível, espaçamento generoso, hierarquia visual clara. Tabelas e cards para dados; gráficos (CSS/SVG ou Chart.js) quando ajudarem a ler o número.
+          - Identidade visual Azzas (base de todo report/deck/dashboard, salvo se o usuário pedir explicitamente outro estilo):
+            · Paleta restrita — preto, branco, azuis e neutros quentes; nada vibrante (sem verde/roxo/laranja). Tokens: --ink #000 · --ink-soft #595959 · --ink-faint #999 · --surface #fff · --surface-warm #E8E8E4 · --surface-cream #F9F6EA · --navy #274566 (acento principal) · --steel #3D5A73 · --blue-soft #A1C6ED · --blue-light #C5D9ED.
+            · Fontes: Red Hat Display (300/400/600, principal) + Playfair Display (editorial, itálico), por um único <link> do Google Fonts; fallback Arial/Georgia se o CDN falhar.
+            · Hierarquia por PESO, não por cor (Light 300 / Regular 400 / SemiBold 600). ALL CAPS só em label/eyebrow, nunca no corpo. No máximo 2 fontes.
+            · Navy é o acento; powder blue (#A1C6ED) para fundos suaves/gradientes. Texto sobre foto sempre com overlay escuro (~35%). Foto de alta qualidade como protagonista; muito respiro (minimalismo).
+            · Gráficos herdam a paleta: navy/steel/azuis como séries de dados — nunca use cor fora da paleta.
+            · Fundos de slide — capa: foto + overlay (texto branco) · conteúdo claro: bege/creme (texto preto) · destaque: navy (texto branco) · métricas/dados: preto (texto branco).
           - Rigor: use exatamente os números fornecidos; nunca invente dado. Estimativa rotulada como estimativa.
           - Tom adequado ao público (diretoria ≠ time ≠ cliente), em português, sem clichê corporativo.
           - Entregue o artifact direto, sem pedir confirmação nem anunciar que "vai gerar".
@@ -274,6 +281,13 @@ modelSpecs:
           - Comece pela conclusão. Relatório: título + resumo executivo (BLUF) no topo, depois seções. Deck: slide de capa, uma ideia por slide, encerramento com a decisão/próximo passo.
           - Apresentação = deck navegável: slides em tela cheia (seções de 100vh), navegação por teclado (setas) e por scroll, um conceito por slide, números grandes em destaque — nunca parede de texto.
           - Design coeso e profissional: paleta consistente, tipografia legível, espaçamento generoso, hierarquia visual clara. Tabelas e cards para dados; gráficos (CSS/SVG ou Chart.js) quando ajudarem a ler o número.
+          - Identidade visual Azzas (base de todo report/deck/dashboard, salvo se o usuário pedir explicitamente outro estilo):
+            · Paleta restrita — preto, branco, azuis e neutros quentes; nada vibrante (sem verde/roxo/laranja). Tokens: --ink #000 · --ink-soft #595959 · --ink-faint #999 · --surface #fff · --surface-warm #E8E8E4 · --surface-cream #F9F6EA · --navy #274566 (acento principal) · --steel #3D5A73 · --blue-soft #A1C6ED · --blue-light #C5D9ED.
+            · Fontes: Red Hat Display (300/400/600, principal) + Playfair Display (editorial, itálico), por um único <link> do Google Fonts; fallback Arial/Georgia se o CDN falhar.
+            · Hierarquia por PESO, não por cor (Light 300 / Regular 400 / SemiBold 600). ALL CAPS só em label/eyebrow, nunca no corpo. No máximo 2 fontes.
+            · Navy é o acento; powder blue (#A1C6ED) para fundos suaves/gradientes. Texto sobre foto sempre com overlay escuro (~35%). Foto de alta qualidade como protagonista; muito respiro (minimalismo).
+            · Gráficos herdam a paleta: navy/steel/azuis como séries de dados — nunca use cor fora da paleta.
+            · Fundos de slide — capa: foto + overlay (texto branco) · conteúdo claro: bege/creme (texto preto) · destaque: navy (texto branco) · métricas/dados: preto (texto branco).
           - Rigor: use exatamente os números fornecidos; nunca invente dado. Estimativa rotulada como estimativa.
           - Tom adequado ao público (diretoria ≠ time ≠ cliente), em português, sem clichê corporativo.
           - Entregue o artifact direto, sem pedir confirmação nem anunciar que "vai gerar".
@@ -629,6 +643,7 @@ mcpServers:
       - Matriz e quadrantes contam como diagrama: desenhe os dois eixos rotulados e os 4 quadrantes e posicione cada item no quadrante certo — não devolva a matriz como texto.
       - Se faltar um dado do conteúdo (ex.: a lista de itens a posicionar), assuma exemplos plausíveis, deixe claro o que assumiu e siga construindo o board — não troque o artefato por um pedido de esclarecimento nem por texto corrido.
       - Higiene de DSL (fluxograma): rótulos com espaços vão entre aspas — ex.: n1 "Diretor de E-commerce" flowchart-process 0 — nunca troque espaço por underscore. O índice de cor de cada nó tem que existir na paleta que você declarou (se a paleta tem 3 cores, use só 0, 1 ou 2).
+      - Identidade visual: em diagrama/fluxo/matriz institucional, declare por padrão a paleta Azzas — navy #274566, steel #3D5A73 e neutros (cinza/branco) — mantendo-a restrita (sem cores vibrantes). Não se aplica a moodboard, que segue as fotos de produto.
 
       MOODBOARD / board de produtos (grade de fotos de produto com indicadores — diferente de tabela e de diagrama). Aqui você NÃO presume a estrutura nem inventa produtos — a regra de "assumir exemplos plausíveis" acima vale só para diagrama/fluxograma/matriz, NUNCA para moodboard.
       - Pré-requisito: o usuário precisa ter o Miro conectado (as ferramentas layout_create/image_create do Miro disponíveis nesta conversa). Se não estiverem, peça pra conectar o Miro — não despeje DSL nem JSON de ops no chat.

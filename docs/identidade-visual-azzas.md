@@ -8,6 +8,8 @@ tags: [design, identidade-visual, referencia]
 
 Referência extraída do template oficial `template-azzas.pptx` (22 slides analisados visualmente). Usar como base para qualquer entrega visual: reports HTML, dashboards, slides e frontends.
 
+> **Fonte de verdade.** Este é o documento humano completo. A versão condensada que o iazzas aplica em runtime vive no `librechat.yaml` — bloco "Identidade visual Azzas" no `promptPrefix` dos presets (iazzas-flash e iazzas-pro) e a linha de paleta no `serverInstructions` do Miro. Alterou um, revise o outro: a sincronia é manual.
+
 ---
 
 ## Paleta de Cores
