@@ -14,11 +14,13 @@ import {
   ConfigsView,
   AnalyticsView,
   FeedbacksView,
+  RecadosView,
 } from '~/components/Admin';
 import StudioScreen from '~/components/Studio/StudioScreen';
 import { AgentStudioView, FlowsHome } from '~/components/AgentStudio';
 import { AgentesHome, AgentesView } from '~/components/Agentes';
 import { AutomacoesScreen } from '~/components/Automacoes';
+import { RecadosPage } from '~/components/Recados';
 import DashboardRoute from './Layouts/Dashboard';
 
 const dashboardRoutes = {
@@ -123,6 +125,10 @@ const dashboardRoutes = {
       element: <AutomacoesScreen />,
     },
     {
+      path: 'recados',
+      element: <RecadosPage />,
+    },
+    {
       path: 'admin',
       element: <AdminLayout />,
       children: [
@@ -136,6 +142,7 @@ const dashboardRoutes = {
         { path: 'configs', element: <ConfigsView /> },
         { path: 'analytics', element: <AnalyticsView /> },
         { path: 'feedbacks', element: <FeedbacksView /> },
+        { path: 'recados', element: <RecadosView /> },
       ],
     },
     {

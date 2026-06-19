@@ -5,10 +5,12 @@ export interface IBanner extends Document {
   message: string;
   displayFrom: Date;
   displayTo?: Date;
-  type: 'banner' | 'popup';
+  type: 'banner' | 'popup' | 'inbox';
   isPublic: boolean;
   persistable: boolean;
   tenantId?: string;
+  createdBy?: string;
+  createdByName?: string;
 }
 
 const bannerSchema = new Schema<IBanner>(
@@ -31,7 +33,7 @@ const bannerSchema = new Schema<IBanner>(
     },
     type: {
       type: String,
-      enum: ['banner', 'popup'],
+      enum: ['banner', 'popup', 'inbox'],
       default: 'banner',
     },
     isPublic: {
@@ -45,6 +47,12 @@ const bannerSchema = new Schema<IBanner>(
     tenantId: {
       type: String,
       index: true,
+    },
+    createdBy: {
+      type: String,
+    },
+    createdByName: {
+      type: String,
     },
   },
   { timestamps: true },

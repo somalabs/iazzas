@@ -2,6 +2,7 @@ import { useCallback, useEffect, memo, startTransition } from 'react';
 import { useRecoilState } from 'recoil';
 import { useMediaQuery } from '@librechat/client';
 import useUnifiedSidebarLinks from '~/hooks/Nav/useUnifiedSidebarLinks';
+import { RecadosContainer } from '~/components/Recados';
 import { useLocalize } from '~/hooks';
 import ExpandedPanel from './ExpandedPanel';
 import Sidebar from './Sidebar';
@@ -46,6 +47,7 @@ function UnifiedSidebar() {
   if (isSmallScreen) {
     return (
       <>
+        <RecadosContainer />
         <div
           className={cn(
             'sidebar-drawer-anim fixed left-0 top-0 z-[110] flex h-full bg-surface-primary-alt',
@@ -75,16 +77,19 @@ function UnifiedSidebar() {
   }
 
   return (
-    <aside
-      className="sidebar-collapse-anim relative flex h-full flex-shrink-0 overflow-hidden"
-      style={{
-        width: EXPANDED_WIDTH,
-        maxWidth: expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH,
-      }}
-      aria-label={localize('com_nav_control_panel')}
-    >
-      <Sidebar links={links} expanded={expanded} onToggle={handleToggle} />
-    </aside>
+    <>
+      <RecadosContainer />
+      <aside
+        className="sidebar-collapse-anim relative flex h-full flex-shrink-0 overflow-hidden"
+        style={{
+          width: EXPANDED_WIDTH,
+          maxWidth: expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH,
+        }}
+        aria-label={localize('com_nav_control_panel')}
+      >
+        <Sidebar links={links} expanded={expanded} onToggle={handleToggle} />
+      </aside>
+    </>
   );
 }
 

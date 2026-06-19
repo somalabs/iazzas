@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { XIcon } from 'lucide-react';
 import { useRecoilState } from 'recoil';
 import { Button, cn } from '@librechat/client';
+import MarkdownLite from '~/components/Chat/Messages/Content/MarkdownLite';
 import { useGetBannerQuery } from '~/data-provider';
 import store from '~/store';
 
@@ -42,11 +43,12 @@ export const Banner = ({ onHeightChange }: { onHeightChange?: (height: number) =
     >
       <div
         className={cn(
-          'text-md w-full truncate text-center [&_a]:text-blue-700 [&_a]:underline dark:[&_a]:text-blue-400',
+          'text-md w-full break-words text-center [&_a]:text-blue-700 [&_a]:underline dark:[&_a]:text-blue-400 [&_p]:my-0',
           !banner.persistable && 'px-4',
         )}
-        dangerouslySetInnerHTML={{ __html: banner.message }}
-      ></div>
+      >
+        <MarkdownLite content={banner.message} codeExecution={false} />
+      </div>
       {!banner.persistable && (
         <Button
           size="icon"

@@ -369,10 +369,8 @@ export const adminRoles = () => `${BASE_URL}/api/admin/roles`;
 /* Admin */
 export const adminUsers = () => `${BASE_URL}/api/admin/users`;
 export const adminUsersSearch = () => `${BASE_URL}/api/admin/users/search`;
-export const adminUserUsage = (id: string) =>
-  `${adminUsers()}/${encodeURIComponent(id)}/usage`;
-export const adminUserBalance = (id: string) =>
-  `${adminUsers()}/${encodeURIComponent(id)}/balance`;
+export const adminUserUsage = (id: string) => `${adminUsers()}/${encodeURIComponent(id)}/usage`;
+export const adminUserBalance = (id: string) => `${adminUsers()}/${encodeURIComponent(id)}/balance`;
 export const adminGroups = () => `${BASE_URL}/api/admin/groups`;
 export const adminGrants = () => `${BASE_URL}/api/admin/grants`;
 export const adminConfigs = () => `${BASE_URL}/api/admin/config`;
@@ -419,6 +417,11 @@ export const addTagToConversation = (conversationId: string) =>
 export const userTerms = () => `${BASE_URL}/api/user/terms`;
 export const acceptUserTerms = () => `${BASE_URL}/api/user/terms/accept`;
 export const banner = () => `${BASE_URL}/api/banner`;
+export const banners = () => `${BASE_URL}/api/banners`;
+export const adminBanner = () => `${BASE_URL}/api/admin/banner`;
+export const adminBannerImage = () => `${BASE_URL}/api/admin/banner/image`;
+export const adminBannerById = (bannerId: string) =>
+  `${BASE_URL}/api/admin/banner/${encodeURIComponent(bannerId)}`;
 
 // Message Feedback
 export const feedback = (conversationId: string, messageId: string) =>

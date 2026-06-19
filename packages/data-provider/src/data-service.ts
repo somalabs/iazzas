@@ -917,9 +917,7 @@ export function adjustAdminUserBalance(
   return request.post(endpoints.adminUserBalance(id), body);
 }
 
-export function getAdminEffectiveBalance(
-  userId: string,
-): Promise<q.AdminEffectiveBalanceResponse> {
+export function getAdminEffectiveBalance(userId: string): Promise<q.AdminEffectiveBalanceResponse> {
   return request.get(endpoints.adminEffectiveBalanceConfig(userId));
 }
 
@@ -975,17 +973,11 @@ export function listAdminRoleMembers(
   return request.get(`${endpoints.adminRoleMembers(name)}${query}`);
 }
 
-export function addAdminRoleMember(
-  name: string,
-  userId: string,
-): Promise<{ success: boolean }> {
+export function addAdminRoleMember(name: string, userId: string): Promise<{ success: boolean }> {
   return request.post(endpoints.adminRoleMembers(name), { userId });
 }
 
-export function removeAdminRoleMember(
-  name: string,
-  userId: string,
-): Promise<{ success: boolean }> {
+export function removeAdminRoleMember(name: string, userId: string): Promise<{ success: boolean }> {
   return request.delete(`${endpoints.adminRoleMembers(name)}/${encodeURIComponent(userId)}`);
 }
 
@@ -1043,17 +1035,11 @@ export function listAdminGroupMembers(
   return request.get(`${endpoints.adminGroupMembers(id)}${query}`);
 }
 
-export function addAdminGroupMember(
-  id: string,
-  userId: string,
-): Promise<q.AdminGroupResponse> {
+export function addAdminGroupMember(id: string, userId: string): Promise<q.AdminGroupResponse> {
   return request.post(endpoints.adminGroupMembers(id), { userId });
 }
 
-export function removeAdminGroupMember(
-  id: string,
-  userId: string,
-): Promise<{ success: boolean }> {
+export function removeAdminGroupMember(id: string, userId: string): Promise<{ success: boolean }> {
   return request.delete(`${endpoints.adminGroupMembers(id)}/${encodeURIComponent(userId)}`);
 }
 
@@ -1147,10 +1133,9 @@ export function toggleAdminPrincipalConfig(
   principalId: string,
   isActive: boolean,
 ): Promise<q.AdminConfigResponse> {
-  return request.patch(
-    `${endpoints.adminConfigByPrincipal(principalType, principalId)}/active`,
-    { isActive },
-  );
+  return request.patch(`${endpoints.adminConfigByPrincipal(principalType, principalId)}/active`, {
+    isActive,
+  });
 }
 
 /* Roles */
@@ -1255,6 +1240,26 @@ export function acceptTerms(): Promise<t.TAcceptTermsResponse> {
 
 export function getBanner(): Promise<t.TBannerResponse> {
   return request.get(endpoints.banner());
+}
+
+export function getBanners(): Promise<t.TBannersResponse> {
+  return request.get(endpoints.banners());
+}
+
+export function getAdminBanners(): Promise<t.TBannersResponse> {
+  return request.get(endpoints.adminBanner());
+}
+
+export function createBanner(payload: t.TCreateBannerRequest): Promise<t.TBanner> {
+  return request.post(endpoints.adminBanner(), payload);
+}
+
+export function deleteBanner(bannerId: string): Promise<t.TDeleteBannerResponse> {
+  return request.delete(endpoints.adminBannerById(bannerId));
+}
+
+export function uploadBannerImage(data: FormData): Promise<f.AvatarUploadResponse> {
+  return request.postMultiPart(endpoints.adminBannerImage(), data);
 }
 
 export function updateFeedback(
@@ -1431,9 +1436,7 @@ const buildFeedbackQuery = (params: TListFeedbackEntriesParams = {}): string => 
   return parts.join('&');
 };
 
-export function createFeedbackEntry(
-  payload: TCreateFeedbackEntry,
-): Promise<TFeedbackEntry> {
+export function createFeedbackEntry(payload: TCreateFeedbackEntry): Promise<TFeedbackEntry> {
   return request.post(endpoints.feedbackEntries(), payload);
 }
 
@@ -1489,17 +1492,11 @@ export const deleteFlow = (id: string): Promise<{ deleted: boolean }> => {
   return request.delete(endpoints.flow(id));
 };
 
-export const runFlow = (
-  id: string,
-  data: fl.TRunFlowRequest,
-): Promise<fl.TRunFlowResponse> => {
+export const runFlow = (id: string, data: fl.TRunFlowRequest): Promise<fl.TRunFlowResponse> => {
   return request.post(endpoints.runFlow(id), data);
 };
 
-export const getFlowRuns = (
-  id: string,
-  cursor?: string,
-): Promise<fl.TFlowRunsResponse> => {
+export const getFlowRuns = (id: string, cursor?: string): Promise<fl.TFlowRunsResponse> => {
   const url = cursor
     ? `${endpoints.flowRuns(id)}?cursor=${encodeURIComponent(cursor)}`
     : endpoints.flowRuns(id);

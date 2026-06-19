@@ -51,6 +51,7 @@ export enum QueryKeys {
   health = 'health',
   userTerms = 'userTerms',
   banner = 'banner',
+  banners = 'banners',
   /* Memories */
   memories = 'memories',
   /* Agent Studio flows */

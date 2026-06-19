@@ -1240,11 +1240,14 @@ export const tBannerSchema = z.object({
   bannerId: z.string(),
   message: z.string(),
   displayFrom: z.string(),
-  displayTo: z.string(),
+  displayTo: z.string().optional(),
+  type: z.enum(['banner', 'popup', 'inbox']).default('banner'),
   createdAt: z.string(),
   updatedAt: z.string(),
   isPublic: z.boolean(),
   persistable: z.boolean().default(false),
+  createdBy: z.string().optional(),
+  createdByName: z.string().optional(),
 });
 export type TBanner = z.infer<typeof tBannerSchema>;
 

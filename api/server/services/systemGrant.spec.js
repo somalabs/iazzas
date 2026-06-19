@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const { createModels, createMethods } = require('@librechat/data-schemas');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { SystemRoles, PrincipalType } = require('librechat-data-provider');
-const { SystemCapabilities } = require('@librechat/data-schemas');
+const { SystemCapabilities, ADMIN_SEED_EXCLUDED_CAPABILITIES } = require('@librechat/data-schemas');
+
+const seededCapabilities = () =>
+  Object.values(SystemCapabilities).filter((cap) => !ADMIN_SEED_EXCLUDED_CAPABILITIES.has(cap));
 
 jest.mock('@librechat/data-schemas', () => ({
   ...jest.requireActual('@librechat/data-schemas'),
@@ -57,7 +60,7 @@ beforeEach(async () => {
 
 describe('SystemGrant methods', () => {
   describe('seedSystemGrants', () => {
-    it('seeds all capabilities for the ADMIN role', async () => {
+    it('seeds all non-excluded capabilities for the ADMIN role', async () => {
       await methods.seedSystemGrants();
 
       const grants = await SystemGrant.find({
@@ -65,11 +68,11 @@ describe('SystemGrant methods', () => {
         principalId: SystemRoles.ADMIN,
       }).lean();
 
-      const expectedCount = Object.values(SystemCapabilities).length;
+      const expectedCount = seededCapabilities().length;
       expect(grants).toHaveLength(expectedCount);
 
       const capabilities = grants.map((g) => g.capability).sort();
-      const expected = Object.values(SystemCapabilities).sort();
+      const expected = seededCapabilities().sort();
       expect(capabilities).toEqual(expected);
     });
 
@@ -82,7 +85,7 @@ describe('SystemGrant methods', () => {
         principalId: SystemRoles.ADMIN,
       });
 
-      expect(count).toBe(Object.values(SystemCapabilities).length);
+      expect(count).toBe(seededCapabilities().length);
     });
 
     it('seeds grants with no tenantId', async () => {

@@ -1,7 +1,7 @@
 const express = require('express');
 const { logger } = require('@librechat/data-schemas');
 const optionalJwtAuth = require('~/server/middleware/optionalJwtAuth');
-const { getBanner } = require('~/models');
+const { getBanner, listBanners } = require('~/models');
 
 const router = express.Router();
 
@@ -14,4 +14,16 @@ router.get('/', optionalJwtAuth, async (req, res) => {
   }
 });
 
+const bannersRouter = express.Router();
+
+bannersRouter.get('/', optionalJwtAuth, async (req, res) => {
+  try {
+    res.status(200).send(await listBanners({ user: req.user, limit: 30 }));
+  } catch (error) {
+    logger.error('[listBanners] Error listing banners', error);
+    res.status(500).json({ message: 'Error listing banners' });
+  }
+});
+
 module.exports = router;
+module.exports.banners = bannersRouter;
