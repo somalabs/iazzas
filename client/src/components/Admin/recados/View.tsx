@@ -61,6 +61,9 @@ export default function RecadosView() {
                   {localize('com_admin_recados_col_type')}
                 </th>
                 <th className="px-4 py-3 font-medium text-text-secondary">
+                  {localize('com_admin_recados_col_author')}
+                </th>
+                <th className="px-4 py-3 font-medium text-text-secondary">
                   {localize('com_admin_recados_col_date')}
                 </th>
                 <th className="px-4 py-3 font-medium text-text-secondary">
@@ -91,6 +94,7 @@ export default function RecadosView() {
                       {localize(typeLabelKey(recado.type))}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-text-secondary">{recado.createdByName ?? '—'}</td>
                   <td className="px-4 py-3 text-text-secondary">
                     {formatDistanceToNow(new Date(recado.createdAt), { addSuffix: true })}
                   </td>
@@ -107,7 +111,7 @@ export default function RecadosView() {
               ))}
               {recados.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-text-tertiary">
+                  <td colSpan={5} className="px-4 py-8 text-center text-text-tertiary">
                     {localize('com_admin_recados_empty')}
                   </td>
                 </tr>

@@ -1246,6 +1246,8 @@ export const tBannerSchema = z.object({
   updatedAt: z.string(),
   isPublic: z.boolean(),
   persistable: z.boolean().default(false),
+  createdBy: z.string().optional(),
+  createdByName: z.string().optional(),
 });
 export type TBanner = z.infer<typeof tBannerSchema>;
 

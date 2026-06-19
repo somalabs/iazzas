@@ -38,7 +38,19 @@ export const SystemCapabilities = {
   /** Reserved — not yet enforced by any middleware. */
   READ_ASSISTANTS: 'read:assistants',
   MANAGE_ASSISTANTS: 'manage:assistants',
+  /** Post/manage broadcast announcements (recados). Decoupled from ACCESS_ADMIN — not every admin holds it. */
+  MANAGE_BANNERS: 'manage:banners',
 } as const;
+
+/**
+ * Capabilities intentionally NOT auto-granted to the ADMIN role at startup.
+ * Decoupled from `ACCESS_ADMIN` and granted explicitly to a group/user (e.g.
+ * `MANAGE_BANNERS` → a "Recados" group), so holding the admin role does not by
+ * itself confer the capability — not every admin can post recados.
+ */
+export const ADMIN_SEED_EXCLUDED_CAPABILITIES = new Set<string>([
+  SystemCapabilities.MANAGE_BANNERS,
+]);
 
 /**
  * Capabilities that are implied by holding a broader capability.
@@ -212,6 +224,10 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     key: 'system',
     labelKey: 'com_cap_cat_system',
-    capabilities: [SystemCapabilities.ACCESS_ADMIN, SystemCapabilities.READ_USAGE],
+    capabilities: [
+      SystemCapabilities.ACCESS_ADMIN,
+      SystemCapabilities.READ_USAGE,
+      SystemCapabilities.MANAGE_BANNERS,
+    ],
   },
 ];

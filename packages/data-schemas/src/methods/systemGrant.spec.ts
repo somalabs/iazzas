@@ -3,8 +3,15 @@ import { PrincipalType, SystemRoles } from 'librechat-data-provider';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import type * as t from '~/types';
 import type { SystemCapability } from '~/types/admin';
-import { SystemCapabilities, CapabilityImplications } from '~/admin/capabilities';
+import {
+  SystemCapabilities,
+  CapabilityImplications,
+  ADMIN_SEED_EXCLUDED_CAPABILITIES,
+} from '~/admin/capabilities';
 import { createSystemGrantMethods } from './systemGrant';
+
+const seededCapabilities = (): string[] =>
+  Object.values(SystemCapabilities).filter((cap) => !ADMIN_SEED_EXCLUDED_CAPABILITIES.has(cap));
 import systemGrantSchema from '~/schema/systemGrant';
 import logger from '~/config/winston';
 
@@ -38,7 +45,7 @@ beforeEach(async () => {
 
 describe('systemGrant methods', () => {
   describe('seedSystemGrants', () => {
-    it('seeds every SystemCapabilities value for the ADMIN role', async () => {
+    it('seeds every non-excluded SystemCapabilities value for the ADMIN role', async () => {
       await methods.seedSystemGrants();
 
       const grants = await SystemGrant.find({
@@ -46,9 +53,23 @@ describe('systemGrant methods', () => {
         principalId: SystemRoles.ADMIN,
       }).lean();
 
-      const expected = Object.values(SystemCapabilities).sort();
+      const expected = seededCapabilities().sort();
       const actual = grants.map((g) => g.capability).sort();
       expect(actual).toEqual(expected);
+    });
+
+    it('does not auto-grant excluded capabilities to the ADMIN role', async () => {
+      await methods.seedSystemGrants();
+
+      const grants = await SystemGrant.find({
+        principalType: PrincipalType.ROLE,
+        principalId: SystemRoles.ADMIN,
+      }).lean();
+
+      const granted = new Set<string>(grants.map((g) => g.capability));
+      for (const excluded of ADMIN_SEED_EXCLUDED_CAPABILITIES) {
+        expect(granted.has(excluded)).toBe(false);
+      }
     });
 
     it('is idempotent — duplicate calls produce no extra documents', async () => {
@@ -60,7 +81,7 @@ describe('systemGrant methods', () => {
         principalType: PrincipalType.ROLE,
         principalId: SystemRoles.ADMIN,
       });
-      expect(count).toBe(Object.values(SystemCapabilities).length);
+      expect(count).toBe(seededCapabilities().length);
     });
 
     it('seeds platform-level grants (no tenantId field)', async () => {

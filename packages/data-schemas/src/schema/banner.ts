@@ -9,6 +9,8 @@ export interface IBanner extends Document {
   isPublic: boolean;
   persistable: boolean;
   tenantId?: string;
+  createdBy?: string;
+  createdByName?: string;
 }
 
 const bannerSchema = new Schema<IBanner>(
@@ -45,6 +47,12 @@ const bannerSchema = new Schema<IBanner>(
     tenantId: {
       type: String,
       index: true,
+    },
+    createdBy: {
+      type: String,
+    },
+    createdByName: {
+      type: String,
     },
   },
   { timestamps: true },

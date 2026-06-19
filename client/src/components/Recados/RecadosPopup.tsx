@@ -6,7 +6,8 @@ import useRecados from './useRecados';
 
 export default function RecadosPopup() {
   const localize = useLocalize();
-  const { pendingPopup, markSeen } = useRecados();
+  const [visitStart] = useState(() => Date.now());
+  const { pendingPopup, markSeen } = useRecados(visitStart);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

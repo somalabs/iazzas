@@ -16,6 +16,7 @@ const router = express.Router();
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 const requireAdminAccess = requireCapability(SystemCapabilities.ACCESS_ADMIN);
+const requireBannerManage = requireCapability(SystemCapabilities.MANAGE_BANNERS);
 
 router.use(requireJwtAuth, requireAdminAccess);
 
@@ -31,7 +32,7 @@ const uploadSingleImage = async (req, res, next) => {
   }
 };
 
-router.post('/', async (req, res) => {
+router.post('/', requireBannerManage, async (req, res) => {
   try {
     const { message, type, displayFrom, displayTo, isPublic, persistable } = req.body;
     if (!message || typeof message !== 'string' || message.trim() === '') {
@@ -44,6 +45,8 @@ router.post('/', async (req, res) => {
       displayTo,
       isPublic,
       persistable,
+      createdBy: req.user.id,
+      createdByName: req.user.name || req.user.username || req.user.email,
     });
     res.status(201).json(banner);
   } catch (error) {
@@ -52,45 +55,51 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.post('/image', configMiddleware, uploadSingleImage, async (req, res) => {
-  try {
-    const file = req.file;
-    if (!file || file.size === 0) {
-      return res.status(400).json({ message: 'No image provided' });
-    }
-    if (!file.mimetype?.startsWith('image/')) {
-      return res.status(400).json({ message: 'Unsupported file type' });
-    }
-    if (file.size > MAX_IMAGE_BYTES) {
-      return res.status(400).json({ message: 'Image too large (max 10 MB)' });
-    }
+router.post(
+  '/image',
+  requireBannerManage,
+  configMiddleware,
+  uploadSingleImage,
+  async (req, res) => {
+    try {
+      const file = req.file;
+      if (!file || file.size === 0) {
+        return res.status(400).json({ message: 'No image provided' });
+      }
+      if (!file.mimetype?.startsWith('image/')) {
+        return res.status(400).json({ message: 'Unsupported file type' });
+      }
+      if (file.size > MAX_IMAGE_BYTES) {
+        return res.status(400).json({ message: 'Image too large (max 10 MB)' });
+      }
 
-    const appConfig = req.config;
-    const userId = req.user.id;
-    const input = await fs.readFile(file.path);
+      const appConfig = req.config;
+      const userId = req.user.id;
+      const input = await fs.readFile(file.path);
 
-    const { buffer } = await resizeImageBuffer(input, { px: 1280 });
-    const fileStrategy = getFileStrategy(appConfig, { isImage: true });
-    const { saveBuffer } = getStrategyFunctions(fileStrategy);
+      const { buffer } = await resizeImageBuffer(input, { px: 1280 });
+      const fileStrategy = getFileStrategy(appConfig, { isImage: true });
+      const { saveBuffer } = getStrategyFunctions(fileStrategy);
 
-    const extension = path.extname(file.originalname).toLowerCase() || '.png';
-    const fileName = `recado-${crypto.randomUUID()}${extension}`;
-    const url = await saveBuffer({ userId, buffer, fileName });
+      const extension = path.extname(file.originalname).toLowerCase() || '.png';
+      const fileName = `recado-${crypto.randomUUID()}${extension}`;
+      const url = await saveBuffer({ userId, buffer, fileName });
 
-    res.status(201).json({ url });
-  } catch (error) {
-    logger.error('[createBannerImage] Error uploading banner image', error);
-    res.status(500).json({ message: 'Error uploading image' });
-  } finally {
-    if (req.file?.path) {
-      try {
-        await fs.unlink(req.file.path);
-      } catch {
-        logger.debug('[createBannerImage] Temp. image upload file already deleted');
+      res.status(201).json({ url });
+    } catch (error) {
+      logger.error('[createBannerImage] Error uploading banner image', error);
+      res.status(500).json({ message: 'Error uploading image' });
+    } finally {
+      if (req.file?.path) {
+        try {
+          await fs.unlink(req.file.path);
+        } catch {
+          logger.debug('[createBannerImage] Temp. image upload file already deleted');
+        }
       }
     }
-  }
-});
+  },
+);
 
 router.get('/', async (req, res) => {
   try {
@@ -101,7 +110,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.delete('/:bannerId', async (req, res) => {
+router.delete('/:bannerId', requireBannerManage, async (req, res) => {
   try {
     const result = await deleteBanner(req.params.bannerId);
     res.status(200).json(result);

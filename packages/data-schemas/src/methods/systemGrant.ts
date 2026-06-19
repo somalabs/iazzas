@@ -2,7 +2,11 @@ import { PrincipalType, SystemRoles } from 'librechat-data-provider';
 import type { Types, Model, ClientSession, FilterQuery } from 'mongoose';
 import type { SystemCapability } from '~/types/admin';
 import type { ISystemGrant } from '~/types';
-import { SystemCapabilities, CapabilityImplications } from '~/admin/capabilities';
+import {
+  SystemCapabilities,
+  CapabilityImplications,
+  ADMIN_SEED_EXCLUDED_CAPABILITIES,
+} from '~/admin/capabilities';
 import { tenantSafeBulkWrite } from '~/utils/tenantBulkWrite';
 import { normalizePrincipalId } from '~/utils/principal';
 import logger from '~/config/winston';
@@ -363,25 +367,27 @@ export function createSystemGrantMethods(mongoose: typeof import('mongoose')) {
       try {
         const SystemGrant = mongoose.models.SystemGrant as Model<ISystemGrant>;
         const now = new Date();
-        const ops = Object.values(SystemCapabilities).map((capability) => ({
-          updateOne: {
-            filter: {
-              principalType: PrincipalType.ROLE,
-              principalId: SystemRoles.ADMIN,
-              capability,
-              tenantId: { $exists: false },
-            },
-            update: {
-              $setOnInsert: {
+        const ops = Object.values(SystemCapabilities)
+          .filter((capability) => !ADMIN_SEED_EXCLUDED_CAPABILITIES.has(capability))
+          .map((capability) => ({
+            updateOne: {
+              filter: {
                 principalType: PrincipalType.ROLE,
                 principalId: SystemRoles.ADMIN,
                 capability,
-                grantedAt: now,
+                tenantId: { $exists: false },
               },
+              update: {
+                $setOnInsert: {
+                  principalType: PrincipalType.ROLE,
+                  principalId: SystemRoles.ADMIN,
+                  capability,
+                  grantedAt: now,
+                },
+              },
+              upsert: true,
             },
-            upsert: true,
-          },
-        }));
+          }));
         await tenantSafeBulkWrite(SystemGrant, ops, { ordered: false });
         return;
       } catch (err) {

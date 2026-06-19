@@ -11,6 +11,8 @@ export type CreateBannerData = {
   isPublic?: boolean;
   persistable?: boolean;
   tenantId?: string;
+  createdBy?: string;
+  createdByName?: string;
 };
 
 export function createBannerMethods(mongoose: typeof import('mongoose')) {
@@ -60,6 +62,8 @@ export function createBannerMethods(mongoose: typeof import('mongoose')) {
         isPublic: data.isPublic ?? false,
         persistable: data.persistable ?? false,
         tenantId: data.tenantId,
+        createdBy: data.createdBy,
+        createdByName: data.createdByName,
       });
 
       return created.toObject() as IBanner;

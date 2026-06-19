@@ -33,7 +33,12 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
 
   const mutation = useCreateBannerMutation({
     onSuccess: () => onOpenChange(false),
-    onError: () => setError(localize('com_admin_recados_error')),
+    onError: (error) => {
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      setError(
+        localize(status === 403 ? 'com_admin_recados_no_permission' : 'com_admin_recados_error'),
+      );
+    },
   });
 
   const imageMutation = useUploadBannerImageMutation();
@@ -80,7 +85,14 @@ export default function RecadoDialog({ open, onOpenChange }: RecadoDialogProps) 
     formData.append('file', file);
     imageMutation.mutate(formData, {
       onSuccess: ({ url }) => insertAtCursor(`\n![${alt}](${url})\n`),
-      onError: () => setError(localize('com_admin_recados_image_error')),
+      onError: (error) => {
+        const status = (error as { response?: { status?: number } })?.response?.status;
+        setError(
+          localize(
+            status === 403 ? 'com_admin_recados_no_permission' : 'com_admin_recados_image_error',
+          ),
+        );
+      },
     });
   };
 

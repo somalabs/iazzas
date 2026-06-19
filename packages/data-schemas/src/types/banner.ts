@@ -5,8 +5,10 @@ export interface IBanner extends Document {
   message: string;
   displayFrom: Date;
   displayTo?: Date;
-  type: 'banner' | 'popup';
+  type: 'banner' | 'popup' | 'inbox';
   isPublic: boolean;
   persistable: boolean;
   tenantId?: string;
+  createdBy?: string;
+  createdByName?: string;
 }
