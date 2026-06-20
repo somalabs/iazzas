@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, readdirSync, statSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { mapLanguage } from '../utils/languages';
 import { getOrCreateSession, getSessionFiles, getFile, addFile } from './session';
@@ -71,6 +71,10 @@ function executeLocal(req: ExecRequest): ExecResponse {
     }
   }
 
+  /** Snapshot the work dir after writing every input; files created or modified by
+   *  the user code after this point are treated as generated, downloadable outputs. */
+  const inputMtimes = snapshotMtimes(tmpDir);
+
   const commands: Record<string, string> = {
     py: `python3 ${filename}`,
     js: `node ${filename}`,
@@ -102,8 +106,9 @@ function executeLocal(req: ExecRequest): ExecResponse {
     stderr = execErr.stderr ?? execErr.message ?? 'Execution failed';
   }
 
-  const outputFiles = parseFileOutputs(stdout, session.id);
-  return { session_id: session.id, stdout, stderr, files: outputFiles };
+  const markerFiles = parseFileOutputs(stdout, session.id);
+  const scannedFiles = collectOutputFiles(tmpDir, session.id, filename, inputMtimes, markerFiles);
+  return { session_id: session.id, stdout, stderr, files: [...markerFiles, ...scannedFiles] };
 }
 
 async function executePiston(req: ExecRequest): Promise<ExecResponse> {
@@ -214,4 +219,67 @@ function parseFileOutputs(
   }
 
   return fileRefs;
+}
+
+function snapshotMtimes(dir: string): Map<string, number> {
+  const mtimes = new Map<string, number>();
+  for (const name of readdirSync(dir)) {
+    try {
+      const stat = statSync(join(dir, name));
+      if (stat.isFile()) {
+        mtimes.set(name, stat.mtimeMs);
+      }
+    } catch {
+      // ignore unreadable entries
+    }
+  }
+  return mtimes;
+}
+
+const MAX_OUTPUT_FILE_BYTES = 105 * 1024 * 1024;
+
+/**
+ * Scans the work dir for files created or modified during execution and registers
+ * them as session files so the client can download them. Complements the
+ * [FILE_OUTPUT] stdout marker: user code that simply writes a file (e.g.
+ * `df.to_excel("out.xlsx")`) still surfaces a downloadable artifact, without the
+ * model needing to base64-print it.
+ */
+function collectOutputFiles(
+  dir: string,
+  sessionId: string,
+  scriptName: string,
+  inputMtimes: Map<string, number>,
+  alreadyEmitted: Array<{ id: string; name: string }>,
+): Array<{ id: string; name: string }> {
+  const emittedNames = new Set(alreadyEmitted.map((f) => f.name));
+  const outputs: Array<{ id: string; name: string }> = [];
+  for (const name of readdirSync(dir)) {
+    if (name === scriptName || emittedNames.has(name)) {
+      continue;
+    }
+    const fullPath = join(dir, name);
+    let stat;
+    try {
+      stat = statSync(fullPath);
+    } catch {
+      continue;
+    }
+    if (!stat.isFile() || stat.size > MAX_OUTPUT_FILE_BYTES) {
+      continue;
+    }
+    const previousMtime = inputMtimes.get(name);
+    const isGenerated = previousMtime === undefined || stat.mtimeMs > previousMtime;
+    if (!isGenerated) {
+      continue;
+    }
+    try {
+      const content = readFileSync(fullPath);
+      const file = addFile(sessionId, name, content);
+      outputs.push({ id: file.id, name: file.name });
+    } catch {
+      // ignore files that cannot be read
+    }
+  }
+  return outputs;
 }

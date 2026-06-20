@@ -3,7 +3,7 @@ import multer from 'multer';
 import { getOrCreateSession, addFile } from '../services/session';
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 105 * 1024 * 1024 } });
 
 router.post('/upload', upload.single('file'), (req: Request, res: Response) => {
   try {

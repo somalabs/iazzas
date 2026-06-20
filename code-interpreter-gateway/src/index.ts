@@ -8,7 +8,7 @@ import downloadRouter from './routes/download';
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '8080', 10);
 
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '150mb' }));
 app.use(auth);
 
 app.use('/v1', execRouter);
