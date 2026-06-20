@@ -251,7 +251,12 @@ export function applyModelSpecEphemeralAgent({
       }
     }
 
-    const mcpRaw = localStorage.getItem(`${LocalStorageKeys.LAST_MCP_}${key}`);
+    /** Per-conversation MCP override; fall back to the new-conversation selection so a
+     *  manual MCP pick survives the new→realId transition (the realId key stays empty
+     *  until the conversation has been used, otherwise the spec defaults would clobber it). */
+    const mcpRaw =
+      localStorage.getItem(`${LocalStorageKeys.LAST_MCP_}${key}`) ??
+      localStorage.getItem(`${LocalStorageKeys.LAST_MCP_}${Constants.NEW_CONVO}`);
     if (mcpRaw !== null) {
       try {
         const parsed = JSON.parse(mcpRaw);
