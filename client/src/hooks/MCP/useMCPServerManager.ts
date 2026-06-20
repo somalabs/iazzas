@@ -79,6 +79,12 @@ export function useMCPServerManager({
         });
       }
     }
+    /** Group ordering: external/SaaS tools first, internal Azzas (bq-analista) connectors
+     *  last and grouped together. Stable sort preserves each group's relative order. */
+    definitions.sort(
+      (a, b) =>
+        (a.serverName.startsWith('azzas_') ? 1 : 0) - (b.serverName.startsWith('azzas_') ? 1 : 0),
+    );
     return definitions;
   }, [loadedServers, permissionsMap]);
 

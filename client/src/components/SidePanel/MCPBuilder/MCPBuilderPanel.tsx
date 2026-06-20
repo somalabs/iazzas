@@ -81,11 +81,13 @@ export default function MCPBuilderPanel() {
             <Spinner className="size-6" aria-label={localize('com_ui_loading')} />
           </div>
         ) : (
-          <MCPServerList
-            servers={filteredServers}
-            getServerStatusIconProps={getServerStatusIconProps}
-            isFiltered={searchQuery.trim().length > 0}
-          />
+          <div className="max-h-96 overflow-y-auto pr-1">
+            <MCPServerList
+              servers={filteredServers}
+              getServerStatusIconProps={getServerStatusIconProps}
+              isFiltered={searchQuery.trim().length > 0}
+            />
+          </div>
         )}
 
         {/* Config Dialog for custom user vars */}
