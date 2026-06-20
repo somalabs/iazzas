@@ -867,6 +867,9 @@ mcpSettings:
     - agent-clientes-production.up.railway.app
     - agent-midia-e-crm-production.up.railway.app
     - agent-people-rh-production.up.railway.app
+    - agent-farm-global-production.up.railway.app
+    - agent-farm-global-atacado-production.up.railway.app
+    - agent-farm-global-devolucao-production.up.railway.app
     - mcp.notion.com
     - mcp.atlassian.com
     - mcp.miro.com
