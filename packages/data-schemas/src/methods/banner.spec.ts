@@ -100,6 +100,50 @@ describe('listBanners', () => {
     expect(banners).toHaveLength(1);
     expect(banners[0].message).toBe('public');
   });
+
+  it('marks recados unseen by default and never leaks seenBy', async () => {
+    await methods.createBanner({ message: 'fresh' });
+
+    const banners = await methods.listBanners({ user });
+    expect(banners[0].seen).toBe(false);
+    expect(banners[0]).not.toHaveProperty('seenBy');
+  });
+});
+
+describe('markBannerSeen', () => {
+  const userA = { id: 'user-a' } as unknown as IUser;
+  const userB = { id: 'user-b' } as unknown as IUser;
+
+  it('marks a recado seen for that user only', async () => {
+    const created = await methods.createBanner({ message: 'popup', type: 'popup' });
+    await methods.markBannerSeen(created.bannerId, 'user-a');
+
+    const forA = await methods.listBanners({ user: userA });
+    const forB = await methods.listBanners({ user: userB });
+
+    expect(forA[0].seen).toBe(true);
+    expect(forB[0].seen).toBe(false);
+  });
+
+  it('is idempotent (no duplicate entries in seenBy)', async () => {
+    const created = await methods.createBanner({ message: 'popup', type: 'popup' });
+    await methods.markBannerSeen(created.bannerId, 'user-a');
+    await methods.markBannerSeen(created.bannerId, 'user-a');
+
+    const doc = await mongoose.models.Banner.findOne({ bannerId: created.bannerId }).lean();
+    expect((doc as unknown as IBanner).seenBy).toEqual(['user-a']);
+
+    const forA = await methods.listBanners({ user: userA });
+    expect(forA[0].seen).toBe(true);
+  });
+
+  it('does nothing without a userId', async () => {
+    const created = await methods.createBanner({ message: 'popup', type: 'popup' });
+    await methods.markBannerSeen(created.bannerId, '');
+
+    const doc = await mongoose.models.Banner.findOne({ bannerId: created.bannerId }).lean();
+    expect((doc as unknown as IBanner).seenBy ?? []).toEqual([]);
+  });
 });
 
 describe('deleteBanner', () => {

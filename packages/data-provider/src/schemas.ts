@@ -1248,6 +1248,8 @@ export const tBannerSchema = z.object({
   persistable: z.boolean().default(false),
   createdBy: z.string().optional(),
   createdByName: z.string().optional(),
+  /** Per-user flag (computed server-side): whether the requesting user has seen this recado. */
+  seen: z.boolean().optional(),
 });
 export type TBanner = z.infer<typeof tBannerSchema>;
 

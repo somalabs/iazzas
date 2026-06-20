@@ -23,6 +23,37 @@ export const useCreateBannerMutation = (
   });
 };
 
+export const useMarkBannerSeenMutation = (): UseMutationResult<
+  { success: boolean },
+  unknown,
+  string,
+  { previous?: t.TBannersResponse }
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ success: boolean }, unknown, string, { previous?: t.TBannersResponse }>({
+    mutationFn: (bannerId: string) => dataService.markBannerSeen(bannerId),
+    onMutate: async (bannerId) => {
+      await queryClient.cancelQueries([QueryKeys.banners]);
+      const previous = queryClient.getQueryData<t.TBannersResponse>([QueryKeys.banners]);
+      queryClient.setQueryData<t.TBannersResponse>([QueryKeys.banners], (old) =>
+        (old ?? []).map((banner) =>
+          banner.bannerId === bannerId ? { ...banner, seen: true } : banner,
+        ),
+      );
+      return { previous };
+    },
+    onError: (_err, _bannerId, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData([QueryKeys.banners], context.previous);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries([QueryKeys.banners]);
+    },
+  });
+};
+
 export const useUploadBannerImageMutation = (
   options?: t.UploadAvatarOptions,
 ): UseMutationResult<t.AvatarUploadResponse, unknown, FormData> => {

@@ -15,6 +15,17 @@ export type CreateBannerData = {
   createdByName?: string;
 };
 
+/** A banner as exposed to a user: per-user `seen` flag, without the raw `seenBy` list. */
+export type BannerView = Omit<IBanner, 'seenBy'> & { seen: boolean };
+
+function resolveUserId(user?: IUser | null): string | null {
+  if (!user) {
+    return null;
+  }
+  const id = (user as { id?: unknown; _id?: unknown }).id ?? (user as { _id?: unknown })._id;
+  return id != null ? String(id) : null;
+}
+
 export function createBannerMethods(mongoose: typeof import('mongoose')) {
   /**
    * Retrieves the current active top banner (faixa).
@@ -80,19 +91,41 @@ export function createBannerMethods(mongoose: typeof import('mongoose')) {
   async function listBanners({
     user,
     limit = 10,
-  }: { user?: IUser | null; limit?: number } = {}): Promise<IBanner[]> {
+  }: { user?: IUser | null; limit?: number } = {}): Promise<BannerView[]> {
     try {
       const Banner = mongoose.models.Banner as Model<IBanner>;
       const query = user != null ? {} : { isPublic: true };
       const banners = (await Banner.find(query)
         .sort({ createdAt: -1 })
         .limit(limit)
-        .lean()) as IBanner[];
+        .lean()) as Array<IBanner & { seenBy?: string[] }>;
 
-      return banners;
+      const userId = resolveUserId(user);
+      return banners.map(({ seenBy, ...banner }) => ({
+        ...banner,
+        seen: userId != null && Array.isArray(seenBy) ? seenBy.includes(userId) : false,
+      })) as BannerView[];
     } catch (error) {
       logger.error('[listBanners] Error listing banners', error);
       throw new Error('Error listing banners');
+    }
+  }
+
+  /**
+   * Marks a recado as seen by a specific user (server-side, per-user). Idempotent via
+   * `$addToSet`. This replaces the previous per-browser localStorage tracking so the
+   * pop-up appears at most once per user, regardless of device or browser.
+   */
+  async function markBannerSeen(bannerId: string, userId: string): Promise<void> {
+    try {
+      if (!userId) {
+        return;
+      }
+      const Banner = mongoose.models.Banner as Model<IBanner>;
+      await Banner.updateOne({ bannerId }, { $addToSet: { seenBy: String(userId) } });
+    } catch (error) {
+      logger.error('[markBannerSeen] Error marking banner seen', error);
+      throw new Error('Error marking banner seen');
     }
   }
 
@@ -110,7 +143,7 @@ export function createBannerMethods(mongoose: typeof import('mongoose')) {
     }
   }
 
-  return { getBanner, createBanner, listBanners, deleteBanner };
+  return { getBanner, createBanner, listBanners, markBannerSeen, deleteBanner };
 }
 
 export type BannerMethods = ReturnType<typeof createBannerMethods>;

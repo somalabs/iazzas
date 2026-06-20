@@ -418,6 +418,8 @@ export const userTerms = () => `${BASE_URL}/api/user/terms`;
 export const acceptUserTerms = () => `${BASE_URL}/api/user/terms/accept`;
 export const banner = () => `${BASE_URL}/api/banner`;
 export const banners = () => `${BASE_URL}/api/banners`;
+export const bannerSeen = (bannerId: string) =>
+  `${BASE_URL}/api/banners/${encodeURIComponent(bannerId)}/seen`;
 export const adminBanner = () => `${BASE_URL}/api/admin/banner`;
 export const adminBannerImage = () => `${BASE_URL}/api/admin/banner/image`;
 export const adminBannerById = (bannerId: string) =>

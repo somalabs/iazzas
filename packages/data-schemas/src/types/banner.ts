@@ -11,4 +11,5 @@ export interface IBanner extends Document {
   tenantId?: string;
   createdBy?: string;
   createdByName?: string;
+  seenBy?: string[];
 }

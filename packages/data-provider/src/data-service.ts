@@ -1246,6 +1246,10 @@ export function getBanners(): Promise<t.TBannersResponse> {
   return request.get(endpoints.banners());
 }
 
+export function markBannerSeen(bannerId: string): Promise<{ success: boolean }> {
+  return request.post(endpoints.bannerSeen(bannerId), {});
+}
+
 export function getAdminBanners(): Promise<t.TBannersResponse> {
   return request.get(endpoints.adminBanner());
 }

@@ -11,6 +11,7 @@ export interface IBanner extends Document {
   tenantId?: string;
   createdBy?: string;
   createdByName?: string;
+  seenBy?: string[];
 }
 
 const bannerSchema = new Schema<IBanner>(
@@ -53,6 +54,10 @@ const bannerSchema = new Schema<IBanner>(
     },
     createdByName: {
       type: String,
+    },
+    seenBy: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true },

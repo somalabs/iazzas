@@ -1,7 +1,8 @@
 const express = require('express');
 const { logger } = require('@librechat/data-schemas');
 const optionalJwtAuth = require('~/server/middleware/optionalJwtAuth');
-const { getBanner, listBanners } = require('~/models');
+const { requireJwtAuth } = require('~/server/middleware');
+const { getBanner, listBanners, markBannerSeen } = require('~/models');
 
 const router = express.Router();
 
@@ -22,6 +23,16 @@ bannersRouter.get('/', optionalJwtAuth, async (req, res) => {
   } catch (error) {
     logger.error('[listBanners] Error listing banners', error);
     res.status(500).json({ message: 'Error listing banners' });
+  }
+});
+
+bannersRouter.post('/:bannerId/seen', requireJwtAuth, async (req, res) => {
+  try {
+    await markBannerSeen(req.params.bannerId, req.user.id);
+    res.status(200).json({ success: true });
+  } catch (error) {
+    logger.error('[markBannerSeen] Error marking banner seen', error);
+    res.status(500).json({ message: 'Error marking banner seen' });
   }
 });
 
