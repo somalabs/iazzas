@@ -43,6 +43,7 @@ modelSpecs:
         - "azzas_clientes"
         - "azzas_midia_crm"
         - "azzas_people_rh"
+        - "azzas_farm_global"
       tools:
         - "web_search"
         - "gemini_image_gen"
@@ -67,7 +68,7 @@ modelSpecs:
 
           Quando gerar imagens com `gemini_image_gen`, faça-o diretamente sem anunciar que vai gerar — apenas entregue o resultado.
 
-          Você tem conectores de dados internos sempre ativos: Vendas (Linx), Devoluções, Ciclo de Venda Atacado, Clientes, Mídia & CRM e People/RH. O People/RH responde, a partir da matrícula do colaborador, sobre BP, gestor, diretoria, lotação, data de admissão, tempo de casa e elegibilidade de férias (direito adquirido 12 meses após a admissão). Antes de dizer que não tem acesso a um dado interno — vendas, devoluções, atacado, clientes, mídia/CRM ou RH/cadastro/férias —, verifique se algum desses conectores cobre o assunto e acione a ferramenta. Se a ferramenta precisar de uma informação que o usuário ainda não deu (por exemplo, a matrícula no People/RH), peça essa informação em vez de recusar.
+          Você tem conectores de dados internos sempre ativos: Vendas (Linx), Devoluções, Ciclo de Venda Atacado, Clientes, Mídia & CRM, People/RH e Farm Global (e-commerce internacional da FARM — sites US/EU/UK, separado do varejo doméstico). O People/RH responde, a partir da matrícula do colaborador, sobre BP, gestor, diretoria, lotação, data de admissão, tempo de casa e elegibilidade de férias (direito adquirido 12 meses após a admissão). Antes de dizer que não tem acesso a um dado interno — vendas, devoluções, atacado, clientes, mídia/CRM, RH/cadastro/férias ou e-commerce internacional da Farm Global (US/EU/UK) —, verifique se algum desses conectores cobre o assunto e acione a ferramenta. Se a ferramenta precisar de uma informação que o usuário ainda não deu (por exemplo, a matrícula no People/RH), peça essa informação em vez de recusar.
 
           Ao usar um conector de dados, busque o caminho mais enxuto E confiável. Nos conectores que consultam por SQL (Vendas, Devoluções, Atacado, Clientes, Mídia & CRM): confirme a tabela e as colunas necessárias com `get_context` / `describe_table` (e `get_business_rules` para definição de cálculo) ANTES de consultar — nunca adivinhe nomes de tabela/coluna nem fique tentando e corrigindo no escuro. Depois faça UMA consulta objetiva, com LIMIT pequeno (ex.: 50). No People/RH use `consultar_cadastro` direto. Não chame `ping`. Use apenas ferramentas que existem e sempre com o nome completo `<tool>_mcp_<server>` (nunca a forma curta sem o sufixo do servidor). Ferramentas de dashboard, de catálogo de análises ou de outros agentes só quando o usuário pedir explicitamente para publicar/salvar ou cruzar domínios. Análise profunda ou de muitos passos → entregue um resumo pontual e ofereça aprofundar.
 
@@ -178,6 +179,7 @@ modelSpecs:
         - "azzas_clientes"
         - "azzas_midia_crm"
         - "azzas_people_rh"
+        - "azzas_farm_global"
       tools:
         - "web_search"
         - "gemini_image_gen"
@@ -202,7 +204,7 @@ modelSpecs:
 
           Quando gerar imagens com `gemini_image_gen`, faça-o diretamente sem anunciar que vai gerar — apenas entregue o resultado.
 
-          Você tem conectores de dados internos sempre ativos: Vendas (Linx), Devoluções, Ciclo de Venda Atacado, Clientes, Mídia & CRM e People/RH. O People/RH responde, a partir da matrícula do colaborador, sobre BP, gestor, diretoria, lotação, data de admissão, tempo de casa e elegibilidade de férias (direito adquirido 12 meses após a admissão). Antes de dizer que não tem acesso a um dado interno — vendas, devoluções, atacado, clientes, mídia/CRM ou RH/cadastro/férias —, verifique se algum desses conectores cobre o assunto e acione a ferramenta. Se a ferramenta precisar de uma informação que o usuário ainda não deu (por exemplo, a matrícula no People/RH), peça essa informação em vez de recusar.
+          Você tem conectores de dados internos sempre ativos: Vendas (Linx), Devoluções, Ciclo de Venda Atacado, Clientes, Mídia & CRM, People/RH e Farm Global (e-commerce internacional da FARM — sites US/EU/UK, separado do varejo doméstico). O People/RH responde, a partir da matrícula do colaborador, sobre BP, gestor, diretoria, lotação, data de admissão, tempo de casa e elegibilidade de férias (direito adquirido 12 meses após a admissão). Antes de dizer que não tem acesso a um dado interno — vendas, devoluções, atacado, clientes, mídia/CRM, RH/cadastro/férias ou e-commerce internacional da Farm Global (US/EU/UK) —, verifique se algum desses conectores cobre o assunto e acione a ferramenta. Se a ferramenta precisar de uma informação que o usuário ainda não deu (por exemplo, a matrícula no People/RH), peça essa informação em vez de recusar.
 
           Ao usar um conector de dados, busque o caminho mais enxuto E confiável. Nos conectores que consultam por SQL (Vendas, Devoluções, Atacado, Clientes, Mídia & CRM): confirme a tabela e as colunas necessárias com `get_context` / `describe_table` (e `get_business_rules` para definição de cálculo) ANTES de consultar — nunca adivinhe nomes de tabela/coluna nem fique tentando e corrigindo no escuro. Depois faça UMA consulta objetiva, com LIMIT pequeno (ex.: 50). No People/RH use `consultar_cadastro` direto. Não chame `ping`. Use apenas ferramentas que existem e sempre com o nome completo `<tool>_mcp_<server>` (nunca a forma curta sem o sufixo do servidor). Ferramentas de dashboard, de catálogo de análises ou de outros agentes só quando o usuário pedir explicitamente para publicar/salvar ou cruzar domínios. Análise profunda ou de muitos passos → entregue um resumo pontual e ofereça aprofundar.
 
@@ -550,6 +552,31 @@ mcpServers:
       • "Já tenho direito a férias?"
 
       ⚠ Saldo de dias e férias já gozadas não estão nesta base — para isso, procure a sua BP.
+    iconPath: "/assets/a2154.png"
+  azzas_farm_global:
+    type: streamable-http
+    url: https://agent-farm-global-production.up.railway.app/mcp
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
+    timeout: 60000
+    title: "Farm Global"
+    description: |
+      Analisa a operação de e-commerce internacional da Farm Global (sites US, EU e UK) no BigQuery (soma-dl-refined-online.farm_global_views) — separada das marcas domésticas do varejo.
+
+      O que entrega:
+      • Receita por moeda (USD/EUR/GBP) e consolidada, ticket médio, preço médio, CMV, markup e demarcação (por produto e por cupom)
+      • Devoluções e cancelamentos (métricas separadas) e motivos de devolução
+      • Estoque e sell-through do e-commerce
+      • Mídia paga: investimento, CPC, CPM, CPS, ROAS e CAC por campanha e veículo
+      • CRM e tráfego/conversão (Google Analytics): sessões, engajamento e transações
+
+      Dimensões: região/site (US / EU / UK), marca (FARM Global EU/UK/US), campanha, veículo de mídia, período.
+
+      Exemplos:
+      • "Receita da Farm Global US em dólar no último trimestre"
+      • "ROAS de mídia da Farm Global UK por campanha no mês"
+      • "Ticket médio e markup das 3 regiões consolidados na coleção atual"
+      • "Taxa de devolução do e-commerce Farm Global EU por motivo"
     iconPath: "/assets/a2154.png"
 
   # MCPs externos SaaS — OAuth per-user com Dynamic Client Registration (RFC 7591).
