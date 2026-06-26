@@ -408,6 +408,25 @@ mcpServers:
   # JWT passthrough: o id_token do user logado (Authentik em prod, Azure em dev)
   # vai no header Authorization. O bq-analista valida assinatura, extrai email
   # e checa allowlist por agent. Allowlist de cada deploy é independente.
+  aquarius:
+    type: streamable-http
+    url: https://aquarius-mcp-401395942750.us-central1.run.app/mcp
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_MCP_PROXY_JWT}}"
+    timeout: 60000
+    title: "Aquarius — Permissões GCP"
+    description: |
+      Gerencia permissões IAM e BigQuery na organização Somalabs/Azzas 2154.
+      Use para conceder ou revogar acessos, auditar permissões e aplicar least-privilege.
+
+      Ferramentas disponíveis:
+      • Liberar/remover roles IAM em projetos, pastas ou organização
+      • Conceder/remover acesso a datasets e tabelas no BigQuery
+      • Copiar perfil de permissões de um usuário para outro
+      • Listar e auditar permissões (diretas e herdadas)
+      • Verificar padrões de acesso pré-definidos (ex: 'datalake', 'engenharia')
+      • Gerar relatório de auditoria de concessões/revogações
+    iconPath: "/assets/a2154.png"
   azzas_vendas_linx:
     type: streamable-http
     url: https://bq-analista-production.up.railway.app/mcp
@@ -861,6 +880,7 @@ mcpServers:
 
 mcpSettings:
   allowedDomains:
+    - aquarius-mcp-401395942750.us-central1.run.app
     - bq-analista-production.up.railway.app
     - analista-devolucoes-production.up.railway.app
     - agent-atacado-production.up.railway.app
