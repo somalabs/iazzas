@@ -61,10 +61,25 @@ async function runAgent({ req, agentId, input, instructionsOverride, modelOverri
   const agentPromise = loadAgentFn(
     { req, agent_id: agentId, endpoint: EModelEndpoint.agents, model_parameters },
     { getAgent: db.getAgent, getMCPServerTools },
-  ).catch((error) => {
-    logger.error(`[Flows.runAgent] loadAgent failed for ${agentId}`, error);
-    return undefined;
-  });
+  )
+    .then((agent) => {
+      /**
+       * The agent runtime builds its system prompt from `agent.instructions`
+       * (+ `additional_instructions`) only — `endpointOption.instructions` is
+       * never read. To honor the flow node's instruction override we replace the
+       * loaded agent's instructions directly. `getAgent` returns a `.lean()`
+       * (fresh, non-shared) object, so this mutation is run-scoped and safe.
+       */
+      if (agent && instructionsOverride) {
+        agent.instructions = instructionsOverride;
+        agent.additional_instructions = undefined;
+      }
+      return agent;
+    })
+    .catch((error) => {
+      logger.error(`[Flows.runAgent] loadAgent failed for ${agentId}`, error);
+      return undefined;
+    });
 
   const endpointOption = {
     endpoint: EModelEndpoint.agents,
@@ -74,9 +89,6 @@ async function runAgent({ req, agentId, input, instructionsOverride, modelOverri
     /** Single-agent run: no edges => standard (non-handoff) graph. */
     edges: [],
   };
-  if (instructionsOverride) {
-    endpointOption.instructions = instructionsOverride;
-  }
 
   const syntheticReq = {
     ...req,
